@@ -89,7 +89,7 @@ export default function PostWant() {
 
     try {
       const response = await supabase.functions.invoke('generate-want-images', {
-        body: { title },
+        body: { title, description: formData.description.trim() || undefined },
       });
 
       if (response.error) {
