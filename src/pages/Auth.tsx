@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,10 +91,10 @@ export default function Auth() {
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
+          <Link to="/" className="inline-flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
             <ShoppingBag className="h-8 w-8 text-primary" />
             <span className="font-display text-2xl font-bold">ThriftMatch</span>
-          </div>
+          </Link>
           <p className="text-muted-foreground">
             {isLogin ? 'Welcome back!' : 'Join the reverse thrift marketplace'}
           </p>
