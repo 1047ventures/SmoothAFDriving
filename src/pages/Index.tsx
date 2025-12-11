@@ -107,12 +107,12 @@ export default function Index() {
                   </Link>
                 </Button>
               ) : (
-                <Button asChild size="lg" className="text-base">
-                  <Link to="/auth">
-                    Get Started
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
+              <Button asChild size="lg" className="text-base">
+                <Link to="/auth?signup=true">
+                  Get Started
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
               )}
               <Button variant="outline" size="lg" className="text-base" asChild>
                 <a href="#browse">Browse Wants</a>
