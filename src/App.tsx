@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PostWant from "./pages/PostWant";
+import EditWant from "./pages/EditWant";
 import WantDetail from "./pages/WantDetail";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/post-want" element={<PostWant />} />
+            <Route path="/edit-want/:id" element={<EditWant />} />
             <Route path="/want/:id" element={<WantDetail />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
