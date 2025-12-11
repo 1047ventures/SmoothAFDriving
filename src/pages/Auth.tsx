@@ -79,7 +79,7 @@ export default function Auth() {
             variant: 'destructive',
           });
         } else {
-          toast({ title: 'Account created!', description: 'Welcome to ThriftMatch!' });
+          toast({ title: 'Account created!', description: 'Welcome to ReverseThrift!' });
           navigate(redirectTo);
         }
       }
@@ -94,7 +94,7 @@ export default function Auth() {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
             <ShoppingBag className="h-8 w-8 text-primary" />
-            <span className="font-display text-2xl font-bold">ThriftMatch</span>
+            <span className="font-display text-2xl font-bold">ReverseThrift</span>
           </Link>
           <p className="text-muted-foreground">
             {isLogin ? 'Welcome back!' : 'Join the reverse thrift marketplace'}
