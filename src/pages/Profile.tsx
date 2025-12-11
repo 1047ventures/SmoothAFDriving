@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
@@ -9,6 +10,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, User } from 'lucide-react';
+
+const profileSchema = z.object({
+  fullName: z.string().max(100, 'Name must be less than 100 characters').optional().or(z.literal('')),
+  username: z.string().max(30, 'Username must be less than 30 characters')
+    .regex(/^[a-zA-Z0-9_]*$/, 'Username can only contain letters, numbers, and underscores').optional().or(z.literal('')),
+  location: z.string().max(100, 'Location must be less than 100 characters').optional().or(z.literal('')),
+});
 
 interface Profile {
   id: string;
@@ -26,6 +34,7 @@ export default function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -68,6 +77,20 @@ export default function Profile() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Validate inputs
+    const validation = profileSchema.safeParse(formData);
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+    setErrors({});
 
     setSaving(true);
     try {
@@ -138,7 +161,9 @@ export default function Profile() {
                     value={formData.fullName}
                     onChange={(e) => setFormData((p) => ({ ...p, fullName: e.target.value }))}
                     placeholder="Jane Doe"
+                    maxLength={100}
                   />
+                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -148,7 +173,9 @@ export default function Profile() {
                     value={formData.username}
                     onChange={(e) => setFormData((p) => ({ ...p, username: e.target.value }))}
                     placeholder="janethrifts"
+                    maxLength={30}
                   />
+                  {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -158,7 +185,9 @@ export default function Profile() {
                     value={formData.location}
                     onChange={(e) => setFormData((p) => ({ ...p, location: e.target.value }))}
                     placeholder="Brooklyn, NY"
+                    maxLength={100}
                   />
+                  {errors.location && <p className="text-sm text-destructive">{errors.location}</p>}
                 </div>
 
                 <Button type="submit" disabled={saving}>
