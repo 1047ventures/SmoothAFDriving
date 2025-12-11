@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { title } = await req.json();
+    const { title, description } = await req.json();
     
     if (!title || title.length < 3) {
       return new Response(
@@ -33,7 +33,8 @@ serve(async (req) => {
 
     // Generate 3 images in parallel
     const imagePromises = Array(3).fill(null).map(async (_, index) => {
-      const prompt = `Professional product photo of a ${title}. Clean white background, studio lighting, fashion e-commerce style, high quality, detailed. Variation ${index + 1}.`;
+      const detailsText = description ? ` Additional details: ${description}.` : '';
+      const prompt = `Professional product photo of a ${title}.${detailsText} Clean white background, studio lighting, fashion e-commerce style, high quality, detailed. Variation ${index + 1}.`;
       
       console.log(`Generating image ${index + 1} with prompt:`, prompt);
       
