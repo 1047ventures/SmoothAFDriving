@@ -28,7 +28,7 @@ export default function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link to="/browse" className="text-sm font-medium hover:text-primary transition-colors">
             Browse Wants
           </Link>
           {user && (
@@ -61,7 +61,7 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 md:hidden">
                   <DropdownMenuItem asChild>
-                    <Link to="/">Browse Wants</Link>
+                    <Link to="/browse">Browse Wants</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/post-want">Post a Want</Link>

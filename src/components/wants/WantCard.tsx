@@ -16,6 +16,7 @@ interface WantCardProps {
   createdAt: string;
   offerCount?: number;
   imageUrl?: string | null;
+  disableLink?: boolean;
 }
 
 const fulfillmentLabels: Record<string, string> = {
@@ -45,11 +46,11 @@ export default function WantCard({
   createdAt,
   offerCount = 0,
   imageUrl,
+  disableLink = false,
 }: WantCardProps) {
   const timeAgo = getTimeAgo(new Date(createdAt));
 
-  return (
-    <Link to={`/want/${id}`}>
+  const cardContent = (
       <Card className="h-full hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 cursor-pointer border-0 shadow-card overflow-hidden">
         {/* Image Section */}
         <div className="aspect-square bg-muted relative">
@@ -120,8 +121,13 @@ export default function WantCard({
           )}
         </CardFooter>
       </Card>
-    </Link>
   );
+
+  if (disableLink) {
+    return cardContent;
+  }
+
+  return <Link to={`/want/${id}`}>{cardContent}</Link>;
 }
 
 function getTimeAgo(date: Date): string {
