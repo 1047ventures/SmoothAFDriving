@@ -1,0 +1,94 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { title } = await req.json();
+    
+    if (!title || title.length < 3) {
+      return new Response(
+        JSON.stringify({ error: "Title must be at least 3 characters" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(
+        JSON.stringify({ error: "AI service not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Generating images for:", title);
+
+    // Generate 3 images in parallel
+    const imagePromises = Array(3).fill(null).map(async (_, index) => {
+      const prompt = `Professional product photo of a ${title}. Clean white background, studio lighting, fashion e-commerce style, high quality, detailed. Variation ${index + 1}.`;
+      
+      console.log(`Generating image ${index + 1} with prompt:`, prompt);
+      
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image-preview",
+          messages: [{ role: "user", content: prompt }],
+          modalities: ["image", "text"],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Image generation ${index + 1} failed:`, response.status, errorText);
+        
+        if (response.status === 429) {
+          throw new Error("Rate limit exceeded. Please try again in a moment.");
+        }
+        if (response.status === 402) {
+          throw new Error("AI credits exhausted. Please add credits to continue.");
+        }
+        throw new Error(`Image generation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      
+      if (!imageUrl) {
+        console.error(`No image URL in response ${index + 1}:`, JSON.stringify(data));
+        return null;
+      }
+      
+      console.log(`Image ${index + 1} generated successfully`);
+      return imageUrl;
+    });
+
+    const images = await Promise.all(imagePromises);
+    const validImages = images.filter(Boolean);
+
+    console.log(`Generated ${validImages.length} valid images`);
+
+    return new Response(
+      JSON.stringify({ images: validImages }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error generating images:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Failed to generate images" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});

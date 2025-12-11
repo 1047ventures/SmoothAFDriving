@@ -21,6 +21,7 @@ interface Want {
   category: string | null;
   status: string;
   created_at: string;
+  image_url?: string | null;
 }
 
 interface Offer {
@@ -137,6 +138,7 @@ export default function Dashboard() {
                     location={want.location}
                     category={want.category}
                     createdAt={want.created_at}
+                    imageUrl={want.image_url}
                   />
                 ))}
               </div>
