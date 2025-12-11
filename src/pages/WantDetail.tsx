@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, MapPin, DollarSign, Package, Calendar, User } from 'lucide-react';
+import { ArrowLeft, MapPin, DollarSign, Package, Calendar, User, Pencil, ImageOff } from 'lucide-react';
 
 interface Want {
   id: string;
@@ -25,6 +25,7 @@ interface Want {
   location: string | null;
   status: string;
   created_at: string;
+  image_url: string | null;
   profiles: {
     full_name: string | null;
     username: string | null;
@@ -149,7 +150,26 @@ export default function WantDetail() {
         </Button>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Image Card */}
+            <Card className="shadow-elevated border-0 overflow-hidden">
+              <div className="aspect-video bg-muted relative">
+                {want.image_url ? (
+                  <img
+                    src={want.image_url}
+                    alt={want.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
+                    <ImageOff className="h-16 w-16 mb-2 opacity-30" />
+                    <p className="text-sm">No image</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Details Card */}
             <Card className="shadow-elevated border-0">
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
@@ -163,9 +183,19 @@ export default function WantDetail() {
                       <span>{new Date(want.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <Badge variant={want.status === 'active' ? 'default' : 'secondary'}>
-                    {want.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {isOwner && (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/edit-want/${want.id}`}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
+                        </Link>
+                      </Button>
+                    )}
+                    <Badge variant={want.status === 'active' ? 'default' : 'secondary'}>
+                      {want.status}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
