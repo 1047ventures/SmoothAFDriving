@@ -1,11 +1,29 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, ArrowRight, Camera, DollarSign, Package, Users, Sparkles, CheckCircle } from 'lucide-react';
+import WantCard from '@/components/wants/WantCard';
+import { ShoppingBag, ArrowRight, Camera, CheckCircle, Sparkles, Zap, Target, TrendingUp } from 'lucide-react';
 
 export default function Index() {
   const { user } = useAuth();
+
+  const { data: previewWants = [] } = useQuery({
+    queryKey: ['preview-wants'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('wants')
+        .select('*, profiles(username, avatar_url)')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(6);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,107 +111,131 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Value Props Section */}
-      <section className="bg-muted/50 border-y py-20">
+      {/* Modern Value Props Section */}
+      <section className="bg-muted/30 border-y py-20">
         <div className="container">
-          <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
-                Why buyers love ThriftMatch
-              </h2>
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Set Your Price</h4>
-                    <p className="text-muted-foreground">You decide your max budget. Only get offers within your range.</p>
-                  </div>
+          <div className="text-center mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Built for Everyone</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Whether you're hunting for hidden gems or making money from your thrift expertise.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+                  <Target className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Users className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Nationwide Network</h4>
-                    <p className="text-muted-foreground">Access thrifters searching stores across the entire country.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Package className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Flexible Fulfillment</h4>
-                    <p className="text-muted-foreground">Choose local pickup, shipping, or arrange payment your way.</p>
-                  </div>
-                </div>
+                <h3 className="font-semibold mb-2">Precision Matching</h3>
+                <p className="text-sm text-muted-foreground">Set your exact specs—brand, size, condition, budget. Only see what you actually want.</p>
               </div>
             </div>
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
-                Why thrifters love ThriftMatch
-              </h2>
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Earn While You Thrift</h4>
-                    <p className="text-muted-foreground">Turn your thrift store trips into income. Find items, make offers, get paid.</p>
-                  </div>
+
+            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Know What's Wanted</h4>
-                    <p className="text-muted-foreground">Browse real wants before you hit the store. No guessing what might sell.</p>
-                  </div>
+                <h3 className="font-semibold mb-2">Zero Effort</h3>
+                <p className="text-sm text-muted-foreground">Post once, sit back. Thrifters do the hunting while you wait for offers to roll in.</p>
+              </div>
+            </div>
+
+            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Camera className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">Quick & Easy</h4>
-                    <p className="text-muted-foreground">Snap a photo, set your price, submit. Takes seconds.</p>
-                  </div>
+                <h3 className="font-semibold mb-2">Earn While You Shop</h3>
+                <p className="text-sm text-muted-foreground">Already hitting thrift stores? Get paid for finds you spot that match buyer wants.</p>
+              </div>
+            </div>
+
+            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+                  <Sparkles className="h-6 w-6 text-primary" />
                 </div>
+                <h3 className="font-semibold mb-2">AI-Powered</h3>
+                <p className="text-sm text-muted-foreground">Visual want previews generated instantly so thrifters know exactly what to look for.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Preview Wants Section */}
+      {previewWants.length > 0 && (
+        <section className="container py-20">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Live Wants</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Real people looking for real items right now. Can you find what they need?
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
+            {previewWants.map((want) => (
+              <WantCard
+                key={want.id}
+                id={want.id}
+                title={want.title}
+                brand={want.brand}
+                size={want.size}
+                condition={want.condition}
+                maxPrice={want.max_price}
+                fulfillment={want.fulfillment}
+                location={want.location}
+                category={want.category}
+                createdAt={want.created_at}
+                imageUrl={want.image_url}
+              />
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Button asChild size="lg" variant="outline" className="text-lg px-8">
+              <Link to="/browse">
+                Browse All Wants
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
+
       {/* CTA Section */}
-      <section className="container py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
-            Ready to find your perfect thrift?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Join ThriftMatch today and let our community of thrifters do the hunting for you.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
-              <Button asChild size="lg" className="text-lg px-8 py-6">
-                <Link to="/browse">
-                  Browse Wants
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild size="lg" className="text-lg px-8 py-6">
-                <Link to="/auth?signup=true">
-                  Create Your Free Account
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            )}
+      <section className="bg-primary/5 border-t py-20">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
+              Ready to find your perfect thrift?
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Join ThriftMatch today and let our community of thrifters do the hunting for you.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {user ? (
+                <Button asChild size="lg" className="text-lg px-8 py-6">
+                  <Link to="/browse">
+                    Browse Wants
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild size="lg" className="text-lg px-8 py-6">
+                  <Link to="/auth?signup=true">
+                    Create Your Free Account
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </section>
