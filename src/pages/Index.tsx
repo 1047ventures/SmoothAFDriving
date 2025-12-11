@@ -72,7 +72,7 @@ export default function Index() {
       {/* How It Works Section */}
       <section id="how-it-works" className="container py-20">
         <div className="text-center mb-16">
-          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">How ThriftMatch Works</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">How ReverseThrift Works</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             We flip thrifting on its head. Instead of sellers posting items hoping someone buys, buyers post what they want and thrifters find it.
           </p>
@@ -217,7 +217,7 @@ export default function Index() {
               Ready to find your perfect thrift?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join ThriftMatch today and let our community of thrifters do the hunting for you.
+              Join ReverseThrift today and let our community of thrifters do the hunting for you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {user ? (
