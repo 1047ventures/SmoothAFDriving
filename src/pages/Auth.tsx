@@ -18,6 +18,7 @@ const authSchema = z.object({
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const isSignupMode = searchParams.get('signup') === 'true';
+  const redirectTo = searchParams.get('redirect') || '/browse';
   const [isLogin, setIsLogin] = useState(!isSignupMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,9 +32,9 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate(redirectTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +66,7 @@ export default function Auth() {
           });
         } else {
           toast({ title: 'Welcome back!' });
-          navigate('/');
+          navigate(redirectTo);
         }
       } else {
         const { error } = await signUp(email, password, fullName);
@@ -79,7 +80,7 @@ export default function Auth() {
           });
         } else {
           toast({ title: 'Account created!', description: 'Welcome to ThriftMatch!' });
-          navigate('/');
+          navigate(redirectTo);
         }
       }
     } finally {
