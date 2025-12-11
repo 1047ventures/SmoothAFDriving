@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, DollarSign, Package } from 'lucide-react';
+import { MapPin, DollarSign, Package, ImageOff } from 'lucide-react';
 
 interface WantCardProps {
   id: string;
@@ -15,6 +15,7 @@ interface WantCardProps {
   category?: string | null;
   createdAt: string;
   offerCount?: number;
+  imageUrl?: string | null;
 }
 
 const fulfillmentLabels: Record<string, string> = {
@@ -43,39 +44,56 @@ export default function WantCard({
   category,
   createdAt,
   offerCount = 0,
+  imageUrl,
 }: WantCardProps) {
   const timeAgo = getTimeAgo(new Date(createdAt));
 
   return (
     <Link to={`/want/${id}`}>
-      <Card className="h-full hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 cursor-pointer border-0 shadow-card">
-        <CardContent className="pt-5">
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <h3 className="font-display font-semibold text-lg line-clamp-2">{title}</h3>
-            <Badge variant="secondary" className={conditionColors[condition]}>
-              {condition}
-            </Badge>
-          </div>
+      <Card className="h-full hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 cursor-pointer border-0 shadow-card overflow-hidden">
+        {/* Image Section */}
+        <div className="aspect-square bg-muted relative">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageOff className="h-12 w-12 text-muted-foreground/30" />
+            </div>
+          )}
+          <Badge 
+            variant="secondary" 
+            className={`absolute top-2 right-2 ${conditionColors[condition]}`}
+          >
+            {condition}
+          </Badge>
+        </div>
 
-          <div className="flex flex-wrap gap-2 mb-4">
+        <CardContent className="pt-4">
+          <h3 className="font-display font-semibold text-lg line-clamp-2 mb-2">{title}</h3>
+
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {brand && (
-              <Badge variant="outline" className="font-normal">
+              <Badge variant="outline" className="font-normal text-xs">
                 {brand}
               </Badge>
             )}
             {size && (
-              <Badge variant="outline" className="font-normal">
+              <Badge variant="outline" className="font-normal text-xs">
                 Size: {size}
               </Badge>
             )}
             {category && (
-              <Badge variant="outline" className="font-normal">
+              <Badge variant="outline" className="font-normal text-xs">
                 {category}
               </Badge>
             )}
           </div>
 
-          <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-1.5 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-primary" />
               <span className="font-semibold text-foreground">Up to ${maxPrice.toFixed(0)}</span>
@@ -87,7 +105,7 @@ export default function WantCard({
             {location && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>{location}</span>
+                <span className="truncate">{location}</span>
               </div>
             )}
           </div>

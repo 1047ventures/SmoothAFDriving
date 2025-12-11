@@ -21,6 +21,7 @@ interface Want {
   category: string | null;
   created_at: string;
   offer_count?: number;
+  image_url?: string | null;
 }
 
 const categories = [
@@ -177,6 +178,7 @@ export default function Index() {
                 category={want.category}
                 createdAt={want.created_at}
                 offerCount={want.offer_count}
+                imageUrl={want.image_url}
               />
             ))}
           </div>

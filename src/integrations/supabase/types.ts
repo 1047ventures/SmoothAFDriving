@@ -171,6 +171,7 @@ export type Database = {
           description: string | null
           fulfillment: Database["public"]["Enums"]["fulfillment_type"]
           id: string
+          image_url: string | null
           location: string | null
           max_price: number
           size: string | null
@@ -187,6 +188,7 @@ export type Database = {
           description?: string | null
           fulfillment?: Database["public"]["Enums"]["fulfillment_type"]
           id?: string
+          image_url?: string | null
           location?: string | null
           max_price: number
           size?: string | null
@@ -203,6 +205,7 @@ export type Database = {
           description?: string | null
           fulfillment?: Database["public"]["Enums"]["fulfillment_type"]
           id?: string
+          image_url?: string | null
           location?: string | null
           max_price?: number
           size?: string | null
