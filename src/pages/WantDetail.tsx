@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, DollarSign, Package, Calendar, User, Pencil, ImageOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Want {
   id: string;
@@ -55,16 +56,25 @@ const fulfillmentLabels: Record<string, string> = {
 
 export default function WantDetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const [want, setWant] = useState<Want | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOfferDialog, setShowOfferDialog] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const isOwner = user?.id === want?.user_id;
   const hasUserOffered = offers.some((o) => o.thrifter_id === user?.id);
+
+  // Show toast if payment was cancelled
+  useEffect(() => {
+    if (searchParams.get('payment') === 'cancelled') {
+      toast.info('Payment cancelled. You can try again anytime.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (id) fetchWant();
@@ -107,13 +117,36 @@ export default function WantDetail() {
     fetchWant();
   };
 
-  const handleAcceptOffer = async (offerId: string) => {
-    try {
-      await supabase.from('offers').update({ status: 'accepted' }).eq('id', offerId);
-      await supabase.from('wants').update({ status: 'fulfilled' }).eq('id', id);
-      fetchWant();
-    } catch (error) {
-      console.error('Error accepting offer:', error);
+  const handleAcceptOffer = async (offerId: string, paymentPreference: string | null) => {
+    // If payment preference is in-app, trigger Stripe checkout
+    if (paymentPreference === 'in_app') {
+      setProcessingPayment(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('create-escrow-payment', {
+          body: { offerId, wantId: id },
+        });
+
+        if (error) throw error;
+        if (data?.url) {
+          // Redirect to Stripe Checkout
+          window.location.href = data.url;
+        }
+      } catch (error) {
+        console.error('Error creating payment:', error);
+        toast.error('Failed to initiate payment. Please try again.');
+        setProcessingPayment(false);
+      }
+    } else {
+      // For non-in-app payments, just mark as accepted directly
+      try {
+        await supabase.from('offers').update({ status: 'accepted' }).eq('id', offerId);
+        await supabase.from('wants').update({ status: 'fulfilled' }).eq('id', id);
+        toast.success('Offer accepted! Arrange payment with the thrifter.');
+        fetchWant();
+      } catch (error) {
+        console.error('Error accepting offer:', error);
+        toast.error('Failed to accept offer. Please try again.');
+      }
     }
   };
 
@@ -261,7 +294,7 @@ export default function WantDetail() {
                         key={offer.id}
                         offer={offer}
                         isOwner={isOwner}
-                        onAccept={() => handleAcceptOffer(offer.id)}
+                        onAccept={() => handleAcceptOffer(offer.id, offer.payment_preference)}
                         onDecline={() => handleDeclineOffer(offer.id)}
                       />
                     ))}
