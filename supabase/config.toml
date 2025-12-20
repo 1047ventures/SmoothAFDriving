@@ -2,3 +2,6 @@ project_id = "xcjlnavjamcwmujifdpw"
 
 [functions.generate-want-images]
 verify_jwt = false
+
+[functions.create-escrow-payment]
+verify_jwt = false
