@@ -1,10 +1,22 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema matching client-side constraints
+const requestSchema = z.object({
+  title: z.string()
+    .min(3, 'Title must be at least 3 characters')
+    .max(100, 'Title must not exceed 100 characters'),
+  description: z.string()
+    .max(500, 'Description must not exceed 500 characters')
+    .optional()
+    .nullable(),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -37,14 +49,19 @@ serve(async (req) => {
 
     console.log("Authenticated user:", user.id);
 
-    const { title, description } = await req.json();
+    // Parse and validate input with Zod
+    const rawBody = await req.json();
+    const parseResult = requestSchema.safeParse(rawBody);
     
-    if (!title || title.length < 3) {
+    if (!parseResult.success) {
+      const errorMessage = parseResult.error.errors[0]?.message || "Invalid input";
       return new Response(
-        JSON.stringify({ error: "Title must be at least 3 characters" }),
+        JSON.stringify({ error: errorMessage }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const { title, description } = parseResult.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

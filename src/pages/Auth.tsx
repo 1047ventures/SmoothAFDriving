@@ -15,10 +15,25 @@ const authSchema = z.object({
   fullName: z.string().optional(),
 });
 
+// Validate redirect parameter to prevent open redirects
+const isValidRedirect = (path: string): boolean => {
+  if (!path || typeof path !== 'string') return false;
+  // Must start with / (relative path)
+  if (!path.startsWith('/')) return false;
+  // Must not be a protocol-relative URL
+  if (path.startsWith('//')) return false;
+  // Must not contain protocol
+  if (path.includes('://')) return false;
+  // Must not contain javascript: or other dangerous protocols
+  if (path.toLowerCase().includes('javascript:')) return false;
+  return true;
+};
+
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const isSignupMode = searchParams.get('signup') === 'true';
-  const redirectTo = searchParams.get('redirect') || '/browse';
+  const rawRedirect = searchParams.get('redirect');
+  const redirectTo = (rawRedirect && isValidRedirect(rawRedirect)) ? rawRedirect : '/browse';
   const [isLogin, setIsLogin] = useState(!isSignupMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
