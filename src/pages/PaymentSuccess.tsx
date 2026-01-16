@@ -1,54 +1,48 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowRight, Loader2, XCircle } from 'lucide-react';
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [verified, setVerified] = useState(false);
 
   const sessionId = searchParams.get('session_id');
   const offerId = searchParams.get('offer_id');
 
   useEffect(() => {
-    if (offerId) {
-      updateOfferAndWantStatus();
+    if (sessionId && offerId) {
+      verifyPaymentServerSide();
     } else {
+      setError('Missing payment information');
       setLoading(false);
     }
-  }, [offerId]);
+  }, [sessionId, offerId]);
 
-  const updateOfferAndWantStatus = async () => {
+  const verifyPaymentServerSide = async () => {
     try {
-      // Get offer to find the want_id
-      const { data: offer, error: offerError } = await supabase
-        .from('offers')
-        .select('want_id')
-        .eq('id', offerId)
-        .single();
+      // Call server-side verification endpoint
+      const { data, error: verifyError } = await supabase.functions.invoke('verify-payment', {
+        body: { sessionId, offerId }
+      });
 
-      if (offerError) throw offerError;
+      if (verifyError) {
+        throw new Error(verifyError.message || 'Payment verification failed');
+      }
 
-      // Update offer status to accepted
-      await supabase
-        .from('offers')
-        .update({ status: 'accepted' })
-        .eq('id', offerId);
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
-      // Update want status to fulfilled
-      await supabase
-        .from('wants')
-        .update({ status: 'fulfilled' })
-        .eq('id', offer.want_id);
-
+      setVerified(true);
     } catch (err) {
-      console.error('Error updating status:', err);
-      setError('Payment successful but there was an issue updating the order status.');
+      console.error('Payment verification error:', err);
+      setError(err instanceof Error ? err.message : 'Payment verification failed. Please contact support.');
     } finally {
       setLoading(false);
     }
@@ -63,11 +57,13 @@ export default function PaymentSuccess() {
           <CardHeader className="pb-4">
             {loading ? (
               <Loader2 className="h-16 w-16 mx-auto text-primary animate-spin" />
+            ) : error ? (
+              <XCircle className="h-16 w-16 mx-auto text-destructive" />
             ) : (
               <CheckCircle className="h-16 w-16 mx-auto text-primary" />
             )}
             <CardTitle className="font-display text-2xl mt-4">
-              {loading ? 'Processing...' : 'Payment Successful!'}
+              {loading ? 'Verifying Payment...' : error ? 'Verification Failed' : 'Payment Successful!'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -75,9 +71,9 @@ export default function PaymentSuccess() {
               <p className="text-destructive">{error}</p>
             ) : loading ? (
               <p className="text-muted-foreground">
-                Confirming your payment and updating your order...
+                Securely verifying your payment with our payment provider...
               </p>
-            ) : (
+            ) : verified ? (
               <>
                 <p className="text-muted-foreground">
                   Your payment is being held securely. The funds will be released to the thrifter
@@ -92,7 +88,7 @@ export default function PaymentSuccess() {
                   </ul>
                 </div>
               </>
-            )}
+            ) : null}
 
             <div className="flex flex-col gap-3 pt-4">
               <Button asChild>
