@@ -169,8 +169,8 @@ export default function Profile() {
     setSelectedCartoon(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-cartoon-avatar', {
-        body: { imageBase64: uploadedPhoto, mimeType: uploadedMimeType },
+      const { data, error } = await supabase.functions.invoke('generate-want-images', {
+        body: { mode: 'cartoon_avatar', imageBase64: uploadedPhoto, mimeType: uploadedMimeType },
       });
 
       if (error) throw error;
