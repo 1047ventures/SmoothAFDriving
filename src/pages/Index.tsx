@@ -1,244 +1,192 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import Header from '@/components/layout/Header';
-import { Button } from '@/components/ui/button';
-import WantCard from '@/components/wants/WantCard';
-import { ShoppingBag, ArrowRight, Camera, CheckCircle, Sparkles, Zap, Target, TrendingUp } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { ChevronRight, Camera, Cpu, Navigation, Mic, Star, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const tiers = [
+  {
+    name: "Cam Kit",
+    price: "$149",
+    highlight: false,
+    tag: null,
+    description: "Standalone value. Most dash cams don't have a HUD.",
+    features: [
+      "1440p front dash cam",
+      "1080p rear cam",
+      "AR HUD windshield projector",
+      "SmoothDrive app — trip scoring",
+      "Cloud trip storage",
+    ],
+  },
+  {
+    name: "Pro",
+    price: "$199",
+    highlight: true,
+    tag: "Most Popular",
+    description: "Add full vehicle intelligence.",
+    features: [
+      "Everything in Cam Kit",
+      "OBD-II Bluetooth dongle",
+      "Real-time PIDs (speed, RPM, temp, fuel)",
+      "DTC fault code scanner + AI diagnosis",
+      "Repair cost estimates",
+    ],
+  },
+  {
+    name: "Elite",
+    price: "$249 + $9.99/mo",
+    highlight: false,
+    tag: "Founder Rate",
+    description: "Your full vehicle concierge.",
+    features: [
+      "Everything in Pro",
+      "AI Voice Concierge (24/7)",
+      "Proactive maintenance alerts",
+      "Live traffic smooth-line routing",
+      "Priority support",
+    ],
+  },
+];
 
 export default function Index() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const { data: previewWants = [] } = useQuery({
-    queryKey: ['preview-wants'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('wants')
-        .select('*, profiles(username, avatar_url)')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(6);
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    if (user) navigate("/dashboard");
+  }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      {/* Hero Section */}
-      <section className="bg-gradient-hero border-b">
-        <div className="container py-20 md:py-32">
-          <div className="max-w-4xl mx-auto text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Sparkles className="h-4 w-4" />
-              The Reverse Thrift Marketplace
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Nav */}
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-4 bg-background/80 backdrop-blur border-b border-border">
+        <span className="font-bold tracking-tight text-lg">
+          <span className="text-smooth">SMOOTH</span>DRIVE
+        </span>
+        <Button size="sm" variant="outline" onClick={() => navigate("/auth")}>
+          Sign in
+        </Button>
+      </header>
+
+      {/* Hero */}
+      <section className="pt-28 pb-16 px-5 text-center">
+        <div className="inline-flex items-center gap-2 bg-smooth/10 text-smooth text-xs rounded-full px-3 py-1 mb-6 border border-smooth/30">
+          <Zap className="h-3 w-3" />
+          Now in early access
+        </div>
+        <h1 className="text-4xl font-bold leading-tight mb-4">
+          Drive like it
+          <br />
+          <span className="text-smooth">matters.</span>
+        </h1>
+        <p className="text-muted-foreground text-base leading-relaxed max-w-sm mx-auto mb-8">
+          Real-time AR guidance projected onto your windshield. OBD-II diagnostics. AI vehicle concierge.
+          Everything you need to be a smoother driver and own your car better.
+        </p>
+        <Button
+          className="bg-smooth text-background font-bold rounded-full px-8 py-3 text-base glow-smooth"
+          onClick={() => navigate("/auth")}
+        >
+          Get early access <ChevronRight className="ml-1 h-4 w-4" />
+        </Button>
+      </section>
+
+      {/* Feature pills */}
+      <section className="px-5 pb-12">
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { icon: Navigation, label: "AR HUD", sub: "Smoothest line, live" },
+            { icon: Camera, label: "Dual Cam", sub: "Front + rear 1440p" },
+            { icon: Cpu, label: "OBD-II", sub: "Full diagnostics" },
+            { icon: Mic, label: "AI Concierge", sub: "Ask anything" },
+          ].map(({ icon: Icon, label, sub }) => (
+            <div key={label} className="bg-card rounded-xl p-4 border border-border">
+              <Icon className="h-6 w-6 text-smooth mb-2" />
+              <div className="font-semibold text-sm">{label}</div>
+              <div className="text-xs text-muted-foreground">{sub}</div>
             </div>
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-              Stop searching.
-              <br />
-              <span className="text-gradient-primary">Start finding.</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Tell us exactly what you want, and let thrifters across the country hunt it down for you. No more endless scrolling—just post and wait for offers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {user ? (
-                <Button asChild size="lg" className="text-lg px-8 py-6">
-                  <Link to="/post-want">
-                    Post What You Want
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild size="lg" className="text-lg px-8 py-6">
-                  <Link to="/auth?signup=true">
-                    Get Started Free
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              )}
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-                <Link to="/browse">Browse Wants</Link>
+          ))}
+        </div>
+      </section>
+
+      {/* HUD explanation */}
+      <section className="px-5 pb-12">
+        <h2 className="text-xl font-bold mb-3">The line that changes how you drive</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+          The AR HUD reads live camera feed + GPS and projects color-coded path guidance directly onto your windshield.
+          Green means you're threading traffic perfectly. Yellow: tighten up. Red: you're creating friction for everyone.
+        </p>
+        <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+          {[
+            { color: "bg-smooth", label: "Green", desc: "Flow state — optimal line" },
+            { color: "bg-caution", label: "Yellow", desc: "Adjust — smoother path available" },
+            { color: "bg-alert", label: "Red", desc: "Friction zone — back off" },
+          ].map(({ color, label, desc }) => (
+            <div key={label} className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${color} flex-shrink-0`} />
+              <span className="text-sm font-medium w-14">{label}</span>
+              <span className="text-xs text-muted-foreground">{desc}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Tiers */}
+      <section className="px-5 pb-16">
+        <h2 className="text-xl font-bold mb-6 text-center">Pick your kit</h2>
+        <div className="space-y-4">
+          {tiers.map((tier) => (
+            <div
+              key={tier.name}
+              className={`rounded-2xl border p-5 ${
+                tier.highlight
+                  ? "border-smooth bg-smooth/5 glow-smooth"
+                  : "border-border bg-card"
+              }`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  {tier.tag && (
+                    <span className={`text-xs rounded-full px-2 py-0.5 mb-1.5 inline-block ${
+                      tier.highlight ? "bg-smooth text-background" : "bg-secondary text-muted-foreground"
+                    }`}>
+                      {tier.tag}
+                    </span>
+                  )}
+                  <div className="font-bold text-lg">{tier.name}</div>
+                  <div className="text-sm text-muted-foreground">{tier.description}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-lg">{tier.price}</div>
+                </div>
+              </div>
+              <ul className="space-y-1.5">
+                {tier.features.map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    <Star className="h-3 w-3 text-smooth flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                className={`w-full mt-4 rounded-full font-bold ${
+                  tier.highlight
+                    ? "bg-smooth text-background hover:bg-smooth/90"
+                    : "bg-secondary text-foreground hover:bg-secondary/80"
+                }`}
+                onClick={() => navigate("/auth")}
+              >
+                Get started
               </Button>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="container py-20">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">How ReverseThrift Works</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            We flip thrifting on its head. Instead of sellers posting items hoping someone buys, buyers post what they want and thrifters find it.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="bg-card border rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <ShoppingBag className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="font-display text-xl font-semibold mb-3">1. Post Your Want</h3>
-            <p className="text-muted-foreground">
-              Describe exactly what you're looking for—brand, size, condition, and your max budget. AI generates images to help thrifters visualize it.
-            </p>
-          </div>
-
-          <div className="bg-card border rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Camera className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="font-display text-xl font-semibold mb-3">2. Thrifters Hunt</h3>
-            <p className="text-muted-foreground">
-              Our community of thrifters browses stores with your wants in mind. When they spot a match, they snap photos and make you an offer.
-            </p>
-          </div>
-
-          <div className="bg-card border rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="font-display text-xl font-semibold mb-3">3. Accept & Receive</h3>
-            <p className="text-muted-foreground">
-              Review offers, accept the one you love, and arrange payment and delivery—whether local meetup or shipping. Simple as that.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Modern Value Props Section */}
-      <section className="bg-muted/30 border-y py-20">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Built for Everyone</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Whether you're hunting for hidden gems or making money from your thrift expertise.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2">Precision Matching</h3>
-                <p className="text-sm text-muted-foreground">Set your exact specs—brand, size, condition, budget. Only see what you actually want.</p>
-              </div>
-            </div>
-
-            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2">Zero Effort</h3>
-                <p className="text-sm text-muted-foreground">Post once, sit back. Thrifters do the hunting while you wait for offers to roll in.</p>
-              </div>
-            </div>
-
-            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2">Earn While You Shop</h3>
-                <p className="text-sm text-muted-foreground">Already hitting thrift stores? Get paid for finds you spot that match buyer wants.</p>
-              </div>
-            </div>
-
-            <div className="group relative bg-card border rounded-2xl p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2">AI-Powered</h3>
-                <p className="text-sm text-muted-foreground">Visual want previews generated instantly so thrifters know exactly what to look for.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Preview Wants Section */}
-      {previewWants.length > 0 && (
-        <section className="container py-20">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Live Wants</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Real people looking for real items right now. Can you find what they need?
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
-            {previewWants.map((want) => (
-              <WantCard
-                key={want.id}
-                id={want.id}
-                title={want.title}
-                brand={want.brand}
-                size={want.size}
-                condition={want.condition}
-                maxPrice={want.max_price}
-                fulfillment={want.fulfillment}
-                location={want.location}
-                category={want.category}
-                createdAt={want.created_at}
-                imageUrl={want.image_url}
-              />
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button asChild size="lg" variant="outline" className="text-lg px-8">
-              <Link to="/browse">
-                Browse All Wants
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-        </section>
-      )}
-
-      {/* CTA Section */}
-      <section className="bg-primary/5 border-t py-20">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
-              Ready to find your perfect thrift?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Join ReverseThrift today and let our community of thrifters do the hunting for you.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {user ? (
-                <Button asChild size="lg" className="text-lg px-8 py-6">
-                  <Link to="/browse">
-                    Browse Wants
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild size="lg" className="text-lg px-8 py-6">
-                  <Link to="/auth?signup=true">
-                    Create Your Free Account
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      <footer className="px-5 pb-10 text-center text-xs text-muted-foreground">
+        SmoothDrive — Drive like it matters
+      </footer>
     </div>
   );
 }

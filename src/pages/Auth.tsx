@@ -4,9 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingBag, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { z } from 'zod';
 
 const authSchema = z.object({
@@ -15,16 +14,11 @@ const authSchema = z.object({
   fullName: z.string().optional(),
 });
 
-// Validate redirect parameter to prevent open redirects
 const isValidRedirect = (path: string): boolean => {
   if (!path || typeof path !== 'string') return false;
-  // Must start with / (relative path)
   if (!path.startsWith('/')) return false;
-  // Must not be a protocol-relative URL
   if (path.startsWith('//')) return false;
-  // Must not contain protocol
   if (path.includes('://')) return false;
-  // Must not contain javascript: or other dangerous protocols
   if (path.toLowerCase().includes('javascript:')) return false;
   return true;
 };
@@ -33,28 +27,26 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const isSignupMode = searchParams.get('signup') === 'true';
   const rawRedirect = searchParams.get('redirect');
-  const redirectTo = (rawRedirect && isValidRedirect(rawRedirect)) ? rawRedirect : '/browse';
+  const redirectTo = (rawRedirect && isValidRedirect(rawRedirect)) ? rawRedirect : '/dashboard';
   const [isLogin, setIsLogin] = useState(!isSignupMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      navigate(redirectTo);
-    }
+    if (user) navigate(redirectTo);
   }, [user, navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
+
     const validation = authSchema.safeParse({ email, password, fullName });
     if (!validation.success) {
       const fieldErrors: { email?: string; password?: string } = {};
@@ -67,15 +59,14 @@ export default function Auth() {
     }
 
     setIsSubmitting(true);
-
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
             title: 'Sign in failed',
-            description: error.message === 'Invalid login credentials' 
-              ? 'Invalid email or password. Please try again.'
+            description: error.message === 'Invalid login credentials'
+              ? 'Invalid email or password.'
               : error.message,
             variant: 'destructive',
           });
@@ -89,12 +80,12 @@ export default function Auth() {
           toast({
             title: 'Sign up failed',
             description: error.message.includes('already registered')
-              ? 'This email is already registered. Please sign in instead.'
+              ? 'This email is already registered. Sign in instead.'
               : error.message,
             variant: 'destructive',
           });
         } else {
-          toast({ title: 'Account created!', description: 'Welcome to ReverseThrift!' });
+          toast({ title: 'Account created!', description: 'Welcome to SmoothDrive.' });
           navigate(redirectTo);
         }
       }
@@ -104,93 +95,78 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-            <ShoppingBag className="h-8 w-8 text-primary" />
-            <span className="font-display text-2xl font-bold">ReverseThrift</span>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm animate-fade-in">
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-block mb-3">
+            <span className="font-bold text-2xl tracking-tight">
+              <span className="text-smooth">SMOOTH</span>DRIVE
+            </span>
           </Link>
-          <p className="text-muted-foreground">
-            {isLogin ? 'Welcome back!' : 'Join the reverse thrift marketplace'}
+          <p className="text-sm text-muted-foreground">
+            {isLogin ? 'Welcome back, driver' : 'Create your account'}
           </p>
         </div>
 
-        <Card className="shadow-elevated border-0">
-          <CardHeader>
-            <CardTitle className="font-display">{isLogin ? 'Sign In' : 'Create Account'}</CardTitle>
-            <CardDescription>
-              {isLogin 
-                ? 'Enter your credentials to access your account'
-                : 'Fill in your details to get started'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Jane Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+        {/* Form */}
+        <div className="bg-card rounded-2xl p-6 border border-border">
+          <h2 className="font-bold text-lg mb-5">{isLogin ? 'Sign in' : 'Get started'}</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Name</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={errors.email ? 'border-destructive' : ''}
+                  type="text"
+                  placeholder="Your name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="bg-secondary border-0"
                 />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
-                )}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={errors.password ? 'border-destructive' : ''}
-                />
-                {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password}</p>
-                )}
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                {isLogin 
-                  ? "Don't have an account? Sign up"
-                  : 'Already have an account? Sign in'
-                }
-              </button>
+            )}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1 block">Email</Label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`bg-secondary border-0 ${errors.email ? 'ring-1 ring-destructive' : ''}`}
+              />
+              {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1 block">Password</Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`bg-secondary border-0 ${errors.password ? 'ring-1 ring-destructive' : ''}`}
+              />
+              {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-smooth text-background font-bold rounded-xl py-5"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Please wait…' : (isLogin ? 'Sign in' : 'Create account')}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </form>
+
+          <div className="mt-5 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-muted-foreground hover:text-smooth transition-colors"
+            >
+              {isLogin ? "No account? Sign up" : "Have an account? Sign in"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

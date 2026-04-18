@@ -1,200 +1,175 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import Header from '@/components/layout/Header';
-import WantCard from '@/components/wants/WantCard';
-import OfferCard from '@/components/offers/OfferCard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Plus, ShoppingBag, Tag } from 'lucide-react';
-
-interface Want {
-  id: string;
-  title: string;
-  brand: string | null;
-  size: string | null;
-  condition: string;
-  max_price: number;
-  fulfillment: string;
-  location: string | null;
-  category: string | null;
-  status: string;
-  created_at: string;
-  image_url?: string | null;
-}
-
-interface Offer {
-  id: string;
-  asking_price: number;
-  notes: string | null;
-  image_urls: string[];
-  payment_preference: string | null;
-  status: string;
-  created_at: string;
-  want_id: string;
-  wants: {
-    title: string;
-    max_price: number;
-  } | null;
-  profiles: {
-    full_name: string | null;
-    username: string | null;
-  } | null;
-}
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ScoreRing } from "@/components/dashboard/ScoreRing";
+import { TripCard, TripSummary } from "@/components/dashboard/TripCard";
+import { MetricCard } from "@/components/dashboard/MetricCard";
+import { Button } from "@/components/ui/button";
+import { Navigation, Route, Wrench, Settings, LogOut, ChevronRight, Activity } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Dashboard() {
-  const [myWants, setMyWants] = useState<Want[]>([]);
-  const [myOffers, setMyOffers] = useState<Offer[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const { user, loading: authLoading } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
+    if (!user) navigate("/auth");
+  }, [user, navigate]);
 
-  useEffect(() => {
-    if (user) fetchData();
-  }, [user]);
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user!.id)
+        .single();
+      return data;
+    },
+  });
 
-  const fetchData = async () => {
-    try {
-      // Fetch user's wants
-      const { data: wantsData, error: wantsError } = await supabase
-        .from('wants')
-        .select('*')
-        .eq('user_id', user!.id)
-        .order('created_at', { ascending: false });
+  const { data: trips = [] } = useQuery<TripSummary[]>({
+    queryKey: ["trips-recent", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("trips")
+        .select("id, started_at, distance_miles, smooth_score, hard_brakes, hard_accels, avg_speed_mph")
+        .eq("user_id", user!.id)
+        .order("started_at", { ascending: false })
+        .limit(5);
+      return (data ?? []) as TripSummary[];
+    },
+  });
 
-      if (!wantsError) setMyWants(wantsData || []);
+  const { data: latestDiag } = useQuery({
+    queryKey: ["diag-latest", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("diagnostics")
+        .select("dtc_codes, scanned_at")
+        .eq("user_id", user!.id)
+        .order("scanned_at", { ascending: false })
+        .limit(1)
+        .single();
+      return data;
+    },
+  });
 
-      // Fetch user's offers
-      const { data: offersData, error: offersError } = await supabase
-        .from('offers')
-        .select('*, wants(title, max_price), profiles(full_name, username)')
-        .eq('thrifter_id', user!.id)
-        .order('created_at', { ascending: false });
+  const avgScore = profile?.avg_score ?? (trips.length > 0
+    ? trips.reduce((s, t) => s + t.smooth_score, 0) / trips.length
+    : 0);
 
-      if (!offersError) setMyOffers(offersData || []);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (authLoading || !user) return null;
+  const dtcCount = latestDiag?.dtc_codes
+    ? (latestDiag.dtc_codes as any[]).length
+    : 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <div className="container py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-display text-3xl font-bold">Dashboard</h1>
-          <Button asChild>
-            <Link to="/post-want">
-              <Plus className="mr-2 h-4 w-4" />
-              Post Want
-            </Link>
-          </Button>
+    <AppLayout>
+      <div className="px-4 pt-6 pb-4 animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="font-bold text-xl">
+              <span className="text-smooth">SMOOTH</span>DRIVE
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {profile?.full_name ?? user?.email?.split("@")[0] ?? "Driver"}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button size="icon" variant="ghost" onClick={() => navigate("/settings")}>
+              <Settings className="h-5 w-5" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={signOut}>
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
-        <Tabs defaultValue="wants" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="wants" className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              My Wants
-            </TabsTrigger>
-            <TabsTrigger value="offers" className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              My Offers
-            </TabsTrigger>
-          </TabsList>
+        {/* Score ring */}
+        <div className="flex flex-col items-center py-4 mb-6">
+          <ScoreRing score={avgScore} size={180} />
+          <p className="text-xs text-muted-foreground mt-3">Overall smooth score</p>
+        </div>
 
-          <TabsContent value="wants" className="animate-fade-in">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-64 bg-muted rounded-lg animate-pulse" />
-                ))}
-              </div>
-            ) : myWants.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myWants.map((want) => (
-                  <WantCard
-                    key={want.id}
-                    id={want.id}
-                    title={want.title}
-                    brand={want.brand}
-                    size={want.size}
-                    condition={want.condition}
-                    maxPrice={want.max_price}
-                    fulfillment={want.fulfillment}
-                    location={want.location}
-                    category={want.category}
-                    createdAt={want.created_at}
-                    imageUrl={want.image_url}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <ShoppingBag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-display text-xl font-semibold mb-2">No wants yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Post what you're looking for and let thrifters find it!
-                </p>
-                <Button asChild>
-                  <Link to="/post-want">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Post Your First Want
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </TabsContent>
+        {/* Quick stats */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <MetricCard
+            icon={Route}
+            label="Trips"
+            value={profile?.total_trips ?? trips.length}
+            color="default"
+          />
+          <MetricCard
+            icon={Activity}
+            label="Miles"
+            value={profile?.total_miles?.toFixed(0) ?? "0"}
+            color="default"
+          />
+          <MetricCard
+            icon={Wrench}
+            label="Fault codes"
+            value={dtcCount}
+            color={dtcCount > 0 ? "alert" : "smooth"}
+          />
+        </div>
 
-          <TabsContent value="offers" className="animate-fade-in">
-            {loading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-32 bg-muted rounded-lg animate-pulse" />
-                ))}
+        {/* Drive CTA */}
+        <Button
+          className="w-full bg-smooth text-background font-bold rounded-xl py-6 text-base mb-6 glow-smooth"
+          onClick={() => navigate("/drive")}
+        >
+          <Navigation className="mr-2 h-5 w-5" />
+          Start driving
+        </Button>
+
+        {/* Vehicle health quick view */}
+        {dtcCount > 0 && (
+          <button
+            onClick={() => navigate("/diagnostics")}
+            className="w-full bg-alert/10 border border-alert/30 rounded-xl p-4 flex items-center justify-between mb-6"
+          >
+            <div className="flex items-center gap-3">
+              <Wrench className="h-5 w-5 text-alert" />
+              <div className="text-left">
+                <div className="text-sm font-medium text-alert">{dtcCount} fault code{dtcCount > 1 ? "s" : ""} detected</div>
+                <div className="text-xs text-muted-foreground">Tap to view diagnostics</div>
               </div>
-            ) : myOffers.length > 0 ? (
-              <div className="space-y-4">
-                {myOffers.map((offer) => (
-                  <div key={offer.id}>
-                    <Link 
-                      to={`/want/${offer.want_id}`}
-                      className="text-sm text-muted-foreground hover:text-primary mb-2 block"
-                    >
-                      Re: {offer.wants?.title}
-                    </Link>
-                    <OfferCard offer={offer} isOwner={false} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-display text-xl font-semibold mb-2">No offers yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Browse wants and make offers when you find something!
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/">Browse Wants</Link>
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
+        )}
+
+        {/* Recent trips */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-sm">Recent trips</h2>
+            <button
+              onClick={() => navigate("/trips")}
+              className="text-xs text-smooth flex items-center gap-0.5"
+            >
+              View all <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+          {trips.length === 0 ? (
+            <div className="bg-card rounded-xl p-8 border border-border text-center">
+              <Navigation className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No trips yet. Hit the road!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {trips.map(trip => (
+                <TripCard key={trip.id} trip={trip} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
