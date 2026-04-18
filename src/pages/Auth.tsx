@@ -85,7 +85,7 @@ export default function Auth() {
             variant: 'destructive',
           });
         } else {
-          toast({ title: 'Account created!', description: 'Welcome to SmoothDrive.' });
+          toast({ title: 'Account created!', description: 'Welcome to Smooth AF Driving.' });
           navigate(redirectTo);
         }
       }
@@ -101,7 +101,7 @@ export default function Auth() {
         <div className="text-center mb-10">
           <Link to="/" className="inline-block mb-3">
             <span className="font-bold text-2xl tracking-tight">
-              <span className="text-smooth">SMOOTH</span>DRIVE
+              <span className="text-smooth">SMOOTH AF</span>DRIVING
             </span>
           </Link>
           <p className="text-sm text-muted-foreground">

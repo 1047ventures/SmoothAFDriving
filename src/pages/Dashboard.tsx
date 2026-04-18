@@ -75,7 +75,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-bold text-xl">
-              <span className="text-smooth">SMOOTH</span>DRIVE
+              <span className="text-smooth">SMOOTH AF</span>DRIVING
             </h1>
             <p className="text-xs text-muted-foreground">
               {profile?.full_name ?? user?.email?.split("@")[0] ?? "Driver"}

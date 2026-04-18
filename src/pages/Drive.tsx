@@ -155,7 +155,7 @@ export default function Drive() {
         {status !== "active" && (
           <div className="bg-card rounded-xl p-4 border border-border mb-6 text-sm text-muted-foreground">
             <p className="text-xs leading-relaxed">
-              <span className="text-foreground font-medium">HUD mode:</span> Mount your SmoothDrive cam unit on the windshield.
+              <span className="text-foreground font-medium">HUD mode:</span> Mount your Smooth AF Driving cam unit on the windshield.
               The projector will automatically overlay the smooth-line guidance once a trip starts.
               App scoring runs independently on your phone.
             </p>

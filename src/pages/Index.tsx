@@ -15,7 +15,7 @@ const tiers = [
       "1440p front dash cam",
       "1080p rear cam",
       "AR HUD windshield projector",
-      "SmoothDrive app — trip scoring",
+      "Smooth AF Driving app — trip scoring",
       "Cloud trip storage",
     ],
   },
@@ -62,7 +62,7 @@ export default function Index() {
       {/* Nav */}
       <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-4 bg-background/80 backdrop-blur border-b border-border">
         <span className="font-bold tracking-tight text-lg">
-          <span className="text-smooth">SMOOTH</span>DRIVE
+          <span className="text-smooth">SMOOTH AF</span>DRIVING
         </span>
         <Button size="sm" variant="outline" onClick={() => navigate("/auth")}>
           Sign in
@@ -185,7 +185,7 @@ export default function Index() {
       </section>
 
       <footer className="px-5 pb-10 text-center text-xs text-muted-foreground">
-        SmoothDrive — Drive like it matters
+        smoothafdriving.com — Drive like it matters
       </footer>
     </div>
   );

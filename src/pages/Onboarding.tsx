@@ -13,7 +13,7 @@ const steps = [
     color: "text-smooth",
     instructions: [
       "Clean your windshield — top-center position, driver's side of rearview mirror",
-      "Mount the SmoothDrive unit using the suction bracket or adhesive pad",
+      "Mount the Smooth AF Driving unit using the suction bracket or adhesive pad",
       "Connect the USB-C power cable to your car's USB port or 12V adapter",
       "Angle the camera downward ~10° to capture road + hood line",
       "The HUD projector faces toward the windshield — aim for the lower third of driver's view",
@@ -44,9 +44,9 @@ const steps = [
     instructions: [
       "Locate your OBD-II port — typically under the dash, left of steering column",
       "Most ports have a plastic cover; press the tab to remove",
-      "Plug in the SmoothDrive OBD-II Bluetooth dongle firmly until it clicks",
+      "Plug in the Smooth AF Driving OBD-II Bluetooth dongle firmly until it clicks",
       "The LED will flash blue — it's now pairing",
-      "In the app → Garage → tap 'Connect' → select 'SmoothDrive OBD'",
+      "In the app → Garage → tap 'Connect' → select 'Smooth AF Driving OBD'",
     ],
     note: "Requires Bluetooth 4.0+. Works on all OBD-II compliant vehicles (US market 1996+).",
   },
@@ -57,8 +57,8 @@ const steps = [
     subtitle: "AR windshield overlay",
     color: "text-smooth",
     instructions: [
-      "Power on the car — the HUD projector will boot (SmoothDrive logo appears)",
-      "Open the SmoothDrive app and go to Drive mode",
+      "Power on the car — the HUD projector will boot (Smooth AF Driving logo appears)",
+      "Open the Smooth AF Driving app and go to Drive mode",
       "Tap 'Calibrate HUD' — the app shows a calibration grid",
       "Use the physical adjustment dial on the unit to align the grid with the road",
       "Once calibrated, the smooth-line overlay activates automatically when driving",
