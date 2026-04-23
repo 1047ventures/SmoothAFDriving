@@ -22,27 +22,27 @@ export interface ScoreState {
   windowSamples: MotionSample[];
 }
 
-// Calibrated for real-world driving. Normal city driving = 80–93.
-// Exceptional (track / pro) = 95+. Score of 100 requires near-zero inputs.
+// Strict thresholds — triggers on real inputs, not just emergencies.
+// These intentionally fire on normal driving to create meaningful scoring separation.
 const THRESHOLDS = {
-  hard_brake: 0.20,   // firm braking at a light
-  hard_accel: 0.15,   // brisk pull from stop
-  hard_corner: 0.18,  // noticeable lane change or sharp turn
-  rough_road: 0.28,   // pothole / large bump
+  hard_brake:  0.18,  // firm braking, not panic-stop
+  hard_accel:  0.12,  // spirited pull from a stop
+  hard_corner: 0.15,  // definite lane change or turn-in
+  rough_road:  0.25,  // significant bump / pothole
 };
 
 const PENALTIES = {
-  hard_brake: 4,
-  hard_accel: 3,
-  hard_corner: 3,
-  rough_road: 1,
+  hard_brake:  5,
+  hard_accel:  4,
+  hard_corner: 4,
+  rough_road:  1,
 };
 
-const MAX_HARSH_PENALTY = 20;
-const MAX_SMOOTH_PENALTY = 15;
-const WINDOW_MS = 60_000;
-const SMOOTH_WINDOW_MS = 30_000;
-const DEBOUNCE_MS = 2_000;
+const MAX_HARSH_PENALTY  = 22;
+const MAX_SMOOTH_PENALTY = 20;
+const WINDOW_MS          = 60_000;
+const SMOOTH_WINDOW_MS   = 30_000;
+const DEBOUNCE_MS        = 2_000;
 
 export function createScoreState(): ScoreState {
   return { score: 100, events: [], hardBrakes: 0, hardAccels: 0, hardCorners: 0, windowSamples: [] };
@@ -62,34 +62,35 @@ export function processSample(state: ScoreState, sample: MotionSample): ScoreSta
     const lastOfType = events.filter(e => e.type === type).at(-1);
     if (lastOfType && now - lastOfType.timestamp < DEBOUNCE_MS) return;
     events.push({ type, magnitude, timestamp: now, penalty: PENALTIES[type] });
-    if (type === "hard_brake") hardBrakes++;
-    if (type === "hard_accel") hardAccels++;
+    if (type === "hard_brake")  hardBrakes++;
+    if (type === "hard_accel")  hardAccels++;
     if (type === "hard_corner") hardCorners++;
   };
 
-  // ay < 0 = braking (deceleration), ay > 0 = acceleration
-  if (sample.ay < -THRESHOLDS.hard_brake) addEvent("hard_brake", Math.abs(sample.ay));
-  if (sample.ay > THRESHOLDS.hard_accel)  addEvent("hard_accel", sample.ay);
-  if (Math.abs(sample.ax) > THRESHOLDS.hard_corner) addEvent("hard_corner", Math.abs(sample.ax));
-  if (Math.abs(sample.az) > THRESHOLDS.rough_road)  addEvent("rough_road", Math.abs(sample.az));
+  if (sample.ay < -THRESHOLDS.hard_brake)             addEvent("hard_brake",  Math.abs(sample.ay));
+  if (sample.ay >  THRESHOLDS.hard_accel)              addEvent("hard_accel",  sample.ay);
+  if (Math.abs(sample.ax) > THRESHOLDS.hard_corner)   addEvent("hard_corner", Math.abs(sample.ax));
+  if (Math.abs(sample.az) > THRESHOLDS.rough_road)    addEvent("rough_road",  Math.abs(sample.az));
 
-  // Harsh event penalty (capped so a rough stretch can't crater the score to 0)
+  // Harsh event penalty: each event hits immediately, capped so a rough mile
+  // doesn't zero out the score entirely.
   const windowEvents = events.filter(e => now - e.timestamp < WINDOW_MS);
   const harshPenalty = Math.min(
     MAX_HARSH_PENALTY,
     windowEvents.reduce((sum, e) => sum + e.penalty, 0)
   );
 
-  // Continuous smoothness penalty: RMS of horizontal composite g over last 30s.
-  // This ensures a perfect 100 is impossible during normal driving.
-  // Smooth highway ≈ 0.04 g → ~3 pts. City driving ≈ 0.09 g → ~8 pts.
+  // Continuous smoothness penalty: RMS of horizontal composite over 30s.
+  // No floor — any non-zero motion costs points. This makes highway "choppiness"
+  // visible even without hard events triggering.
+  // Tight pro driving ~0.02g → ~3.6 pts. Normal city ~0.08g → ~14 pts.
   const recentSamples = windowSamples.filter(s => now - s.timestamp < SMOOTH_WINDOW_MS);
   let smoothnessPenalty = 0;
   if (recentSamples.length >= 10) {
     const rmsG = Math.sqrt(
       recentSamples.reduce((sum, s) => sum + s.ax * s.ax + s.ay * s.ay, 0) / recentSamples.length
     );
-    smoothnessPenalty = Math.min(MAX_SMOOTH_PENALTY, Math.max(0, (rmsG - 0.01) * 100));
+    smoothnessPenalty = Math.min(MAX_SMOOTH_PENALTY, rmsG * 180);
   }
 
   const score = Math.max(0, Math.min(100, 100 - harshPenalty - smoothnessPenalty));
@@ -98,8 +99,8 @@ export function processSample(state: ScoreState, sample: MotionSample): ScoreSta
 }
 
 export function scoreColor(score: number): string {
-  if (score >= 90) return "hsl(142 69% 58%)";
-  if (score >= 75) return "hsl(43 96% 56%)";
+  if (score >= 88) return "hsl(142 69% 58%)";
+  if (score >= 72) return "hsl(43 96% 56%)";
   return "hsl(0 91% 71%)";
 }
 

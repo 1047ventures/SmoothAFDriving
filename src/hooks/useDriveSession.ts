@@ -23,7 +23,9 @@ export type DriveStatus = "idle" | "active" | "paused" | "ended";
 export function useDriveSession() {
   const [status, setStatus] = useState<DriveStatus>("idle");
   const [session, setSession] = useState<DriveSession | null>(null);
-  const [currentScore, setCurrentScore] = useState(100);
+  const [currentScore, setCurrentScore] = useState<number | null>(null);
+  const [motionActive, setMotionActive] = useState(false);
+  const [currentG, setCurrentG] = useState(0);
 
   const scoreStateRef = useRef<ScoreState>(createScoreState());
   const watchIdRef = useRef<number | null>(null);
@@ -43,7 +45,9 @@ export function useDriveSession() {
     sessionRef.current = newSession;
     setSession(newSession);
     setStatus("active");
-    setCurrentScore(100);
+    setCurrentScore(null);
+    setMotionActive(false);
+    setCurrentG(0);
 
     // GPS tracking
     if ("geolocation" in navigator) {
@@ -72,7 +76,7 @@ export function useDriveSession() {
 
     // High-pass filter state for gravity removal fallback
     let gravX = 0, gravY = 0, gravZ = 0;
-    const HP_ALPHA = 0.9; // ~0.9s time constant at ~10Hz GPS cadence
+    const HP_ALPHA = 0.9;
 
     // Motion / accelerometer
     const handler = (e: DeviceMotionEvent) => {
@@ -99,7 +103,10 @@ export function useDriveSession() {
 
       const sample: MotionSample = { timestamp: Date.now(), ax, ay, az, speed: 0 };
       scoreStateRef.current = processSample(scoreStateRef.current, sample);
-      setCurrentScore(scoreStateRef.current.score);
+      const sampleCount = scoreStateRef.current.windowSamples.length;
+      setCurrentScore(sampleCount >= 10 ? scoreStateRef.current.score : null);
+      setMotionActive(true);
+      setCurrentG(Math.sqrt(ax * ax + ay * ay));
       setSession(s => s ? { ...s, scoreState: scoreStateRef.current } : s);
     };
 
@@ -131,7 +138,7 @@ export function useDriveSession() {
     };
   }, []);
 
-  return { status, session, currentScore, start, stop };
+  return { status, session, currentScore, motionActive, currentG, start, stop };
 }
 
 function calcDistance(route: GeoPoint[], next: GeoPoint): number {

@@ -8,16 +8,17 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ScoreRing } from "@/components/dashboard/ScoreRing";
 import { LiveMetrics } from "@/components/drive/LiveMetrics";
 import { Button } from "@/components/ui/button";
-import { Bluetooth, Square, ChevronLeft } from "lucide-react";
+import { Bluetooth, Square, ChevronLeft, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Drive() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { status, session, currentScore, start, stop } = useDriveSession();
+  const { status, session, currentScore, motionActive, currentG, start, stop } = useDriveSession();
   const { obdStatus, obdData, connect: connectOBD } = useOBD();
   const [elapsed, setElapsed] = useState(0);
+  const [motionWarning, setMotionWarning] = useState(false);
 
   useEffect(() => {
     if (!user) navigate("/auth");
@@ -32,16 +33,24 @@ export default function Drive() {
     return () => clearInterval(interval);
   }, [status, session]);
 
+  // Warn if motion data hasn't arrived within 5s of starting
+  useEffect(() => {
+    if (status !== "active") { setMotionWarning(false); return; }
+    if (motionActive) { setMotionWarning(false); return; }
+    const t = setTimeout(() => setMotionWarning(true), 5000);
+    return () => clearTimeout(t);
+  }, [status, motionActive]);
+
   const handleStart = async () => {
     if (typeof DeviceMotionEvent !== "undefined" &&
       typeof (DeviceMotionEvent as any).requestPermission === "function") {
       try {
         const perm = await (DeviceMotionEvent as any).requestPermission();
         if (perm !== "granted") {
-          toast({ title: "Motion access needed", description: "Enable motion in Settings → Safari → Motion & Orientation Access", variant: "destructive" });
+          toast({ title: "Motion access needed", description: "Settings → Privacy → Motion & Fitness → enable for this browser", variant: "destructive" });
           return;
         }
-      } catch { /* non-iOS, ignore */ }
+      } catch { /* non-iOS */ }
     }
     setElapsed(0);
     await start();
@@ -52,18 +61,28 @@ export default function Drive() {
     const ended = stop();
     if (!ended || !user) return;
 
+    const finalScore = ended.scoreState.windowSamples.length >= 10
+      ? ended.scoreState.score
+      : null;
+
+    if (finalScore == null) {
+      toast({ title: "Trip ended", description: "No motion data — check sensor permissions.", variant: "destructive" });
+      navigate("/dashboard");
+      return;
+    }
+
     const distMiles = ended.distanceKm * 0.621371;
     const avgSpeedMph = ended.route.length > 0
       ? (ended.route.reduce((s, p) => s + p.speed, 0) / ended.route.length) * 0.621
       : 0;
-    const maxG = Math.max(...(ended.scoreState.windowSamples.map(s => Math.abs(s.ay))), 0);
+    const maxG = Math.max(...ended.scoreState.windowSamples.map(s => Math.abs(s.ay)), 0);
 
     await supabase.from("trips").insert({
       user_id: user.id,
       started_at: new Date(ended.startedAt).toISOString(),
       ended_at: new Date(ended.endedAt!).toISOString(),
       distance_miles: distMiles,
-      smooth_score: ended.scoreState.score,
+      smooth_score: finalScore,
       max_g_force: maxG,
       avg_speed_mph: avgSpeedMph,
       hard_brakes: ended.scoreState.hardBrakes,
@@ -72,7 +91,7 @@ export default function Drive() {
       route: ended.route,
     });
 
-    toast({ title: "Trip saved!", description: `Score: ${Math.round(ended.scoreState.score)}` });
+    toast({ title: "Trip saved!", description: `Score: ${Math.round(finalScore)}` });
     navigate("/dashboard");
   };
 
@@ -94,12 +113,7 @@ export default function Drive() {
             {status === "active" ? "Driving" : "Ready to drive"}
           </h1>
           {status !== "active" && obdStatus !== "connected" && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="ml-auto"
-              onClick={connectOBD}
-            >
+            <Button size="sm" variant="outline" className="ml-auto" onClick={connectOBD}>
               <Bluetooth className="h-4 w-4 mr-1.5" />
               OBD-II
             </Button>
@@ -112,23 +126,42 @@ export default function Drive() {
           )}
         </div>
 
+        {/* Motion sensor status (active trips only) */}
+        {status === "active" && (
+          <div className={`flex items-center justify-between rounded-lg px-3 py-1.5 mb-4 text-xs ${
+            motionActive ? "bg-smooth/10 text-smooth" : "bg-secondary text-muted-foreground"
+          }`}>
+            <span className="flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${motionActive ? "bg-smooth animate-dot-ping" : "bg-muted-foreground"}`} />
+              {motionActive ? "Motion sensor active" : "Waiting for sensor…"}
+            </span>
+            {motionActive && (
+              <span className="tabular-nums font-mono">{currentG.toFixed(3)} g</span>
+            )}
+          </div>
+        )}
+
+        {/* Motion warning */}
+        {motionWarning && (
+          <div className="flex items-start gap-2 bg-caution/10 border border-caution/30 rounded-xl p-3 mb-4 text-xs text-caution">
+            <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <span>No motion data received. Go to <strong>Settings → Privacy → Motion &amp; Fitness</strong> and enable access for this browser.</span>
+          </div>
+        )}
+
         {/* Score ring */}
         <div className="flex justify-center mb-6">
-          <ScoreRing
-            score={currentScore}
-            size={200}
-            animated={status === "active"}
-          />
+          <ScoreRing score={currentScore} size={200} animated={status === "active"} />
         </div>
 
         {/* Live OBD data strip */}
         {obdStatus === "connected" && (
           <div className="grid grid-cols-4 gap-2 mb-4">
             {[
-              { label: "mph", value: Number(displaySpeed) },
-              { label: "rpm", value: Math.round(obdData.rpm ?? 0) },
+              { label: "mph",     value: Number(displaySpeed) },
+              { label: "rpm",     value: Math.round(obdData.rpm ?? 0) },
               { label: "°F cool", value: obdData.coolantTemp ? Math.round(obdData.coolantTemp * 9/5 + 32) : "--" },
-              { label: "% fuel", value: obdData.fuelLevel ? Math.round(obdData.fuelLevel) : "--" },
+              { label: "% fuel",  value: obdData.fuelLevel ? Math.round(obdData.fuelLevel) : "--" },
             ].map(({ label, value }) => (
               <div key={label} className="bg-card rounded-lg p-2 text-center border border-border">
                 <div className="text-base font-bold tabular-nums">{value}</div>
@@ -139,7 +172,7 @@ export default function Drive() {
         )}
 
         {/* Live metrics */}
-        {status === "active" && session && (
+        {status === "active" && session && currentScore != null && (
           <div className="mb-6">
             <LiveMetrics
               score={currentScore}
@@ -153,8 +186,8 @@ export default function Drive() {
 
         {/* HUD note */}
         {status !== "active" && (
-          <div className="bg-card rounded-xl p-4 border border-border mb-6 text-sm text-muted-foreground">
-            <p className="text-xs leading-relaxed">
+          <div className="bg-card rounded-xl p-4 border border-border mb-6">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               <span className="text-foreground font-medium">HUD mode:</span> Mount your Smooth AF Driving cam unit on the windshield.
               The projector will automatically overlay the smooth-line guidance once a trip starts.
               App scoring runs independently on your phone.

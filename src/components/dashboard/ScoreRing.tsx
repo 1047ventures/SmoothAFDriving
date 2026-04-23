@@ -1,7 +1,7 @@
 import { scoreColor, scoreLabel } from "@/lib/smoothScore";
 
 interface ScoreRingProps {
-  score: number;
+  score: number | null;
   size?: number;
   animated?: boolean;
 }
@@ -9,9 +9,9 @@ interface ScoreRingProps {
 export function ScoreRing({ score, size = 160, animated = false }: ScoreRingProps) {
   const radius = (size / 2) - 12;
   const circumference = 2 * Math.PI * radius;
-  const progress = (score / 100) * circumference;
-  const color = scoreColor(score);
-  const label = scoreLabel(score);
+  const color = score != null ? scoreColor(score) : "hsl(0 0% 30%)";
+  const progress = score != null ? (score / 100) * circumference : 0;
+  const label = score != null ? scoreLabel(score) : "Calibrating…";
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
@@ -36,16 +36,16 @@ export function ScoreRing({ score, size = 160, animated = false }: ScoreRingProp
           strokeDashoffset={circumference - progress}
           style={{
             transition: "stroke-dashoffset 0.5s ease, stroke 0.5s ease",
-            filter: `drop-shadow(0 0 6px ${color})`,
+            filter: score != null ? `drop-shadow(0 0 6px ${color})` : "none",
           }}
         />
       </svg>
       <div className="absolute flex flex-col items-center">
         <span
-          className={`text-4xl font-bold tabular-nums ${animated ? "animate-score-pulse" : ""}`}
-          style={{ color }}
+          className={`font-bold tabular-nums ${animated ? "animate-score-pulse" : ""} ${score != null ? "text-4xl" : "text-2xl text-muted-foreground"}`}
+          style={{ color: score != null ? color : undefined }}
         >
-          {Math.round(score)}
+          {score != null ? Math.round(score) : "--"}
         </span>
         <span className="text-xs text-muted-foreground mt-0.5">{label}</span>
       </div>
