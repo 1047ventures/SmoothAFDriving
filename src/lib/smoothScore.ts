@@ -1,8 +1,8 @@
 export interface MotionSample {
   timestamp: number;
-  ax: number; // lateral g-force (cornering)
-  ay: number; // longitudinal g-force (accel/brake)
-  az: number; // vertical g-force (road surface)
+  ax: number; // lateral g-force (cornering) — gravity-free
+  ay: number; // longitudinal g-force (accel/brake) — gravity-free
+  az: number; // vertical g-force (road surface) — gravity-free
   speed: number; // km/h
 }
 
@@ -14,7 +14,7 @@ export interface ScoreEvent {
 }
 
 export interface ScoreState {
-  score: number;          // 0-100
+  score: number;
   events: ScoreEvent[];
   hardBrakes: number;
   hardAccels: number;
@@ -22,22 +22,27 @@ export interface ScoreState {
   windowSamples: MotionSample[];
 }
 
+// Calibrated for real-world driving. Normal city driving = 80–93.
+// Exceptional (track / pro) = 95+. Score of 100 requires near-zero inputs.
 const THRESHOLDS = {
-  hard_brake: 0.35,    // g-force longitudinal (deceleration)
-  hard_accel: 0.28,    // g-force longitudinal (acceleration)
-  hard_corner: 0.32,   // g-force lateral
-  rough_road: 0.45,    // g-force vertical
+  hard_brake: 0.20,   // firm braking at a light
+  hard_accel: 0.15,   // brisk pull from stop
+  hard_corner: 0.18,  // noticeable lane change or sharp turn
+  rough_road: 0.28,   // pothole / large bump
 };
 
 const PENALTIES = {
-  hard_brake: 3,
-  hard_accel: 2,
-  hard_corner: 2,
+  hard_brake: 4,
+  hard_accel: 3,
+  hard_corner: 3,
   rough_road: 1,
 };
 
-const WINDOW_MS = 60_000; // rolling 60-second window
-const DEBOUNCE_MS = 2_000; // min time between same-type events
+const MAX_HARSH_PENALTY = 20;
+const MAX_SMOOTH_PENALTY = 15;
+const WINDOW_MS = 60_000;
+const SMOOTH_WINDOW_MS = 30_000;
+const DEBOUNCE_MS = 2_000;
 
 export function createScoreState(): ScoreState {
   return { score: 100, events: [], hardBrakes: 0, hardAccels: 0, hardCorners: 0, windowSamples: [] };
@@ -46,7 +51,6 @@ export function createScoreState(): ScoreState {
 export function processSample(state: ScoreState, sample: MotionSample): ScoreState {
   const now = sample.timestamp;
 
-  // Trim window
   const windowSamples = [...state.windowSamples, sample].filter(
     s => now - s.timestamp < WINDOW_MS
   );
@@ -63,29 +67,47 @@ export function processSample(state: ScoreState, sample: MotionSample): ScoreSta
     if (type === "hard_corner") hardCorners++;
   };
 
+  // ay < 0 = braking (deceleration), ay > 0 = acceleration
   if (sample.ay < -THRESHOLDS.hard_brake) addEvent("hard_brake", Math.abs(sample.ay));
-  if (sample.ay > THRESHOLDS.hard_accel) addEvent("hard_accel", sample.ay);
+  if (sample.ay > THRESHOLDS.hard_accel)  addEvent("hard_accel", sample.ay);
   if (Math.abs(sample.ax) > THRESHOLDS.hard_corner) addEvent("hard_corner", Math.abs(sample.ax));
-  if (Math.abs(sample.az - 1) > THRESHOLDS.rough_road) addEvent("rough_road", Math.abs(sample.az - 1));
+  if (Math.abs(sample.az) > THRESHOLDS.rough_road)  addEvent("rough_road", Math.abs(sample.az));
 
-  // Score = 100 minus total penalties from events in window
+  // Harsh event penalty (capped so a rough stretch can't crater the score to 0)
   const windowEvents = events.filter(e => now - e.timestamp < WINDOW_MS);
-  const totalPenalty = windowEvents.reduce((sum, e) => sum + e.penalty, 0);
-  const score = Math.max(0, Math.min(100, 100 - totalPenalty));
+  const harshPenalty = Math.min(
+    MAX_HARSH_PENALTY,
+    windowEvents.reduce((sum, e) => sum + e.penalty, 0)
+  );
+
+  // Continuous smoothness penalty: RMS of horizontal composite g over last 30s.
+  // This ensures a perfect 100 is impossible during normal driving.
+  // Smooth highway ≈ 0.04 g → ~3 pts. City driving ≈ 0.09 g → ~8 pts.
+  const recentSamples = windowSamples.filter(s => now - s.timestamp < SMOOTH_WINDOW_MS);
+  let smoothnessPenalty = 0;
+  if (recentSamples.length >= 10) {
+    const rmsG = Math.sqrt(
+      recentSamples.reduce((sum, s) => sum + s.ax * s.ax + s.ay * s.ay, 0) / recentSamples.length
+    );
+    smoothnessPenalty = Math.min(MAX_SMOOTH_PENALTY, Math.max(0, (rmsG - 0.01) * 100));
+  }
+
+  const score = Math.max(0, Math.min(100, 100 - harshPenalty - smoothnessPenalty));
 
   return { score, events, hardBrakes, hardCorners, hardAccels, windowSamples };
 }
 
 export function scoreColor(score: number): string {
-  if (score >= 80) return "hsl(142 69% 58%)";
-  if (score >= 60) return "hsl(43 96% 56%)";
+  if (score >= 90) return "hsl(142 69% 58%)";
+  if (score >= 75) return "hsl(43 96% 56%)";
   return "hsl(0 91% 71%)";
 }
 
 export function scoreLabel(score: number): string {
-  if (score >= 90) return "Smooth AF";
+  if (score >= 95) return "Smooth AF";
+  if (score >= 88) return "Very Smooth";
   if (score >= 80) return "Smooth";
-  if (score >= 65) return "Getting There";
-  if (score >= 50) return "Choppy";
+  if (score >= 70) return "Getting There";
+  if (score >= 55) return "Choppy";
   return "Aggressive";
 }

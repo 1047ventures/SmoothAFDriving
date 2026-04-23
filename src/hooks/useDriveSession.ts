@@ -70,22 +70,37 @@ export function useDriveSession() {
       );
     }
 
+    // High-pass filter state for gravity removal fallback
+    let gravX = 0, gravY = 0, gravZ = 0;
+    const HP_ALPHA = 0.9; // ~0.9s time constant at ~10Hz GPS cadence
+
     // Motion / accelerometer
     const handler = (e: DeviceMotionEvent) => {
-      const acc = e.accelerationIncludingGravity;
-      if (!acc) return;
-      const sample: MotionSample = {
-        timestamp: Date.now(),
-        ax: (acc.x ?? 0) / 9.81,
-        ay: (acc.y ?? 0) / 9.81,
-        az: (acc.z ?? 0) / 9.81,
-        speed: 0,
-      };
+      let ax: number, ay: number, az: number;
+
+      // Prefer acceleration (gravity-free). Fall back to high-pass filtered
+      // accelerationIncludingGravity if the gravity-subtracted value is unavailable.
+      const clean = e.acceleration;
+      if (clean && clean.x != null) {
+        ax = (clean.x ?? 0) / 9.81;
+        ay = (clean.y ?? 0) / 9.81;
+        az = (clean.z ?? 0) / 9.81;
+      } else {
+        const raw = e.accelerationIncludingGravity;
+        if (!raw) return;
+        const rx = raw.x ?? 0, ry = raw.y ?? 0, rz = raw.z ?? 0;
+        gravX = HP_ALPHA * gravX + (1 - HP_ALPHA) * rx;
+        gravY = HP_ALPHA * gravY + (1 - HP_ALPHA) * ry;
+        gravZ = HP_ALPHA * gravZ + (1 - HP_ALPHA) * rz;
+        ax = (rx - gravX) / 9.81;
+        ay = (ry - gravY) / 9.81;
+        az = (rz - gravZ) / 9.81;
+      }
+
+      const sample: MotionSample = { timestamp: Date.now(), ax, ay, az, speed: 0 };
       scoreStateRef.current = processSample(scoreStateRef.current, sample);
       setCurrentScore(scoreStateRef.current.score);
-      setSession(s =>
-        s ? { ...s, scoreState: scoreStateRef.current } : s
-      );
+      setSession(s => s ? { ...s, scoreState: scoreStateRef.current } : s);
     };
 
     motionHandlerRef.current = handler;
@@ -129,7 +144,7 @@ function calcDistance(route: GeoPoint[], next: GeoPoint): number {
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(deg2rad(prev.lat)) * Math.cos(deg2rad(next.lat)) *
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  return Math.sqrt(a / (1 - a)) * 2 * R / 1000; // approximate, good enough for incremental
+  return Math.sqrt(a / (1 - a)) * 2 * R / 1000;
 }
 
 function deg2rad(deg: number) { return deg * (Math.PI / 180); }
