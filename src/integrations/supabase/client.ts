@@ -2,10 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Fallback to placeholder values so the app renders even without env vars configured.
-// All Supabase calls will fail gracefully (network error) rather than crashing on load.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder-anon-key';
+
+// True only when real credentials are present
+export const supabaseConfigured = !!(
+  import.meta.env.VITE_SUPABASE_URL &&
+  !import.meta.env.VITE_SUPABASE_URL.includes('placeholder')
+);
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
