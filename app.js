@@ -22,7 +22,6 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 // Globals
 // -------------------------------------------------------------------------
 const STORAGE_KEY  = 'smoothaf.drives.v1';
-const SETTINGS_KEY = 'smoothaf.settings.v1';
 const DEVICE_KEY   = 'smoothaf.device_id';
 const SYNCED_KEY   = 'smoothaf.synced_ids';
 const MAX_STORED_DRIVES = 20;
@@ -104,20 +103,7 @@ const DEFAULTS = {
   // These are constants — not exposed as sliders yet.
 };
 
-// Live settings — always call loadSettings() before using
-let CFG = { ...DEFAULTS };
-
-function loadSettings(){
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    CFG = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
-  } catch { CFG = { ...DEFAULTS }; }
-  return CFG;
-}
-function saveSettings(cfg){
-  CFG = { ...DEFAULTS, ...cfg };
-  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(CFG)); } catch {}
-}
+const CFG = { ...DEFAULTS };
 
 const state = {
   screen: 'home',
@@ -457,43 +443,6 @@ function scoreColor(n){
 }
 
 // -------------------------------------------------------------------------
-// Settings screen
-// -------------------------------------------------------------------------
-function renderSettings(){
-  loadSettings();
-
-  // Slider definitions: [id, label, min, max, step, unit, cfgKey]
-  const sliders = [
-    ['hardBrake',    'Hard Brake',    2.0, 6.0, 0.1, 'm/s²', 'hardBrake'],
-    ['hardAccel',    'Hard Accel',    1.5, 5.0, 0.1, 'm/s²', 'hardAccel'],
-    ['sharpTurn',    'Sharp Turn',    2.0, 7.0, 0.1, 'm/s²', 'sharpTurn'],
-    ['emaAlpha',     'EMA Smoothing', 0.1, 0.9, 0.05,'',     'emaAlpha'],
-    ['penaltyBrake', 'Brake Penalty', 1,   15,  1,   'pts',  'penaltyBrake'],
-    ['penaltyAccel', 'Accel Penalty', 1,   15,  1,   'pts',  'penaltyAccel'],
-    ['penaltyTurn',  'Turn Penalty',  1,   15,  1,   'pts',  'penaltyTurn'],
-  ];
-
-  sliders.forEach(([id, , , , ,, key]) => {
-    const sl  = $(`#sl-${id}`);
-    const val = $(`#val-${id}`);
-    if (!sl || !val) return;
-    sl.value = CFG[key];
-    val.textContent = CFG[key];
-    sl.oninput = () => { val.textContent = sl.value; };
-  });
-}
-
-function collectSettings(){
-  const keys = ['hardBrake','hardAccel','sharpTurn','emaAlpha','penaltyBrake','penaltyAccel','penaltyTurn'];
-  const out = {};
-  keys.forEach(k => {
-    const el = $(`#sl-${k}`);
-    if (el) out[k] = parseFloat(el.value);
-  });
-  return out;
-}
-
-// -------------------------------------------------------------------------
 // Recording — real devices
 // -------------------------------------------------------------------------
 async function requestMotionPermissionIfNeeded(){
@@ -508,7 +457,6 @@ async function requestMotionPermissionIfNeeded(){
 }
 
 function startRecording(){
-  loadSettings();
   resetState();
   state.recording = true;
   state.simulated = false;
@@ -827,7 +775,6 @@ function resetState(){
 // Simulated drive
 // -------------------------------------------------------------------------
 function startSimulatedDrive(){
-  loadSettings();
   resetState();
   state.recording = true;
   state.simulated = true;
@@ -957,7 +904,6 @@ let mapLayers = [];
 
 function renderReview(drive){
   showScreen('review');
-  loadSettings();
 
   const when = new Date(drive.startTime);
   $('#review-when').textContent =
@@ -1123,7 +1069,6 @@ function initCarSelector(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadSettings();
   renderDriveList();
   syncPendingDrives();
   initCarSelector();
@@ -1147,35 +1092,4 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.textContent = opening ? 'Hide drives' : 'Past drives';
   });
 
-  // Settings
-  $('#btn-settings').addEventListener('click', () => {
-    renderSettings();
-    showScreen('settings');
-  });
-  $('#btn-settings-back').addEventListener('click', () => {
-    showScreen('home');
-    renderDriveList();
-  });
-  $('#btn-rescore').addEventListener('click', () => {
-    const newCfg = collectSettings();
-    saveSettings(newCfg);
-    const rescored = rescoreAllDrives();
-    const count = rescored.length;
-    renderDriveList();
-    // Flash confirmation
-    const btn = $('#btn-rescore');
-    btn.textContent = `✓ Rescored ${count} drive${count !== 1 ? 's' : ''}`;
-    btn.style.background = 'var(--good)';
-    setTimeout(() => {
-      btn.textContent = 'Save & Re-score All Drives';
-      btn.style.background = '';
-    }, 2500);
-  });
-  $('#btn-reset-settings').addEventListener('click', () => {
-    saveSettings({ ...DEFAULTS });
-    renderSettings();
-    const btn = $('#btn-reset-settings');
-    btn.textContent = '✓ Reset';
-    setTimeout(() => { btn.textContent = 'Reset to Defaults'; }, 1500);
-  });
 });

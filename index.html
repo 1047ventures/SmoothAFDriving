@@ -81,19 +81,6 @@
     font-size:28px;letter-spacing:-.02em;color:var(--cream);
   }
   .wordmark-sm .af{color:var(--tang)}
-  .topbar-actions{display:flex;gap:10px}
-  .icon-btn{
-    appearance:none;border:0;cursor:pointer;
-    background:rgba(10,8,8,.6);
-    backdrop-filter:blur(16px) saturate(1.2);
-    -webkit-backdrop-filter:blur(16px) saturate(1.2);
-    color:var(--cream-dim);
-    width:40px;height:40px;border-radius:50%;font-size:17px;
-    display:flex;align-items:center;justify-content:center;
-    border:1px solid rgba(244,235,217,.15);
-    text-decoration:none;
-  }
-  .icon-btn:active{background:rgba(244,235,217,.18)}
 
   /* Floating side nav arrows */
   .car-arrow{
@@ -187,8 +174,6 @@
   .drive-chev{color:var(--muted);font-size:22px}
   .empty-drives{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:18px 4px}
 
-  /* ── Settings gear (kept for compatibility) ── */
-  .settings-gear{display:none}
 
   /* ============ PRESTART ============ */
   #screen-prestart{
@@ -327,58 +312,6 @@
   .new-drive-btn{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;letter-spacing:-.01em;padding:20px 24px;border-radius:16px;margin-top:8px;box-shadow:0 12px 36px rgba(232,93,58,.3);transition:transform .1s ease}
   .new-drive-btn:active{transform:scale(.985)}
 
-  /* ============ SETTINGS ============ */
-  #screen-settings{overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0)}
-  .settings-head{
-    display:flex;align-items:center;gap:14px;
-    padding:calc(env(safe-area-inset-top,0) + 18px) 20px 14px;
-    border-bottom:1px solid rgba(244,235,217,.08);
-    position:sticky;top:0;background:var(--bg);z-index:10;
-  }
-  .settings-title{font-family:var(--serif);font-style:italic;font-size:26px;font-weight:700;margin:0;letter-spacing:-.01em}
-  .settings-body{padding:20px 20px 40px}
-  .settings-intro{font-size:13px;color:var(--cream-dim);line-height:1.5;margin:0 0 24px}
-
-  .tune-section{margin-bottom:28px}
-  .tune-section-head{
-    font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;
-    margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid rgba(244,235,217,.07);
-  }
-  .tune-row{margin-bottom:20px}
-  .tune-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:14px;color:var(--cream-dim)}
-  .tune-label-name{font-weight:500}
-  .tune-val-wrap{display:flex;align-items:baseline;gap:4px}
-  .tune-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream)}
-  .tune-unit{font-size:11px;color:var(--muted)}
-  .tune-hints{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-top:4px}
-
-  input[type=range]{
-    width:100%;height:4px;border-radius:2px;
-    -webkit-appearance:none;appearance:none;
-    background:rgba(244,235,217,.15);outline:none;cursor:pointer;
-  }
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
-    background:var(--tang);border:3px solid var(--bg);
-    box-shadow:0 2px 8px rgba(232,93,58,.4);
-  }
-
-  .settings-actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-  .btn-rescore{
-    appearance:none;border:0;cursor:pointer;width:100%;
-    background:var(--tang);color:var(--bg);
-    font-family:var(--serif);font-style:italic;font-weight:700;
-    font-size:20px;padding:20px;border-radius:16px;
-    box-shadow:0 12px 36px rgba(232,93,58,.25);transition:background .2s;
-  }
-  .btn-rescore:active{transform:scale(.985)}
-  .btn-reset{
-    appearance:none;border:1px solid rgba(244,235,217,.18);cursor:pointer;width:100%;
-    background:transparent;color:var(--cream-dim);
-    font-family:var(--sans);font-size:14px;font-weight:500;
-    padding:16px;border-radius:14px;
-  }
-  .btn-reset:active{background:rgba(244,235,217,.06)}
 
   /* ============ UTIL ============ */
   .hidden{display:none!important}
@@ -893,9 +826,6 @@
     <!-- Floating glass top bar -->
     <div class="home-topbar">
       <span class="wordmark-sm">Smooth <span class="af">AF</span></span>
-      <div class="topbar-actions">
-        <button id="btn-settings" class="icon-btn" aria-label="Settings">⚙</button>
-      </div>
     </div>
 
     <!-- Side nav arrows -->
@@ -1012,92 +942,6 @@
 
   </section>
 
-  <!-- ═══════════════════════════ SETTINGS / TUNE ═══════════════════════════ -->
-  <section id="screen-settings" class="screen">
-    <div class="settings-head">
-      <button id="btn-settings-back" class="back-btn" aria-label="Back">×</button>
-      <h2 class="settings-title">Tune Algorithm</h2>
-    </div>
-    <div class="settings-body">
-      <p class="settings-intro">Adjust thresholds and penalties, then tap "Save & Re-score" to apply to all stored drives. Lower threshold = more sensitive (fires more events). Higher = more lenient.</p>
-
-      <div class="tune-section">
-        <p class="tune-section-head">Detection Thresholds (m/s²)</p>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Hard Brake</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-hardBrake">3.5</span><span class="tune-unit">m/s²</span></div>
-          </div>
-          <input type="range" id="sl-hardBrake" min="2.0" max="6.0" step="0.1" value="3.5">
-          <div class="tune-hints"><span>More sensitive</span><span>More lenient</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Hard Accel</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-hardAccel">2.8</span><span class="tune-unit">m/s²</span></div>
-          </div>
-          <input type="range" id="sl-hardAccel" min="1.5" max="5.0" step="0.1" value="2.8">
-          <div class="tune-hints"><span>More sensitive</span><span>More lenient</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Sharp Turn</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-sharpTurn">3.6</span><span class="tune-unit">m/s²</span></div>
-          </div>
-          <input type="range" id="sl-sharpTurn" min="2.0" max="7.0" step="0.1" value="3.6">
-          <div class="tune-hints"><span>More sensitive</span><span>More lenient</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">EMA Smoothing</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-emaAlpha">0.45</span></div>
-          </div>
-          <input type="range" id="sl-emaAlpha" min="0.1" max="0.9" step="0.05" value="0.45">
-          <div class="tune-hints"><span>Smoother (lag)</span><span>Raw (responsive)</span></div>
-        </div>
-      </div>
-
-      <div class="tune-section">
-        <p class="tune-section-head">Score Penalties (pts per event)</p>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Brake Penalty</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-penaltyBrake">6</span><span class="tune-unit">pts</span></div>
-          </div>
-          <input type="range" id="sl-penaltyBrake" min="1" max="15" step="1" value="6">
-          <div class="tune-hints"><span>Less impact</span><span>More impact</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Accel Penalty</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-penaltyAccel">4</span><span class="tune-unit">pts</span></div>
-          </div>
-          <input type="range" id="sl-penaltyAccel" min="1" max="15" step="1" value="4">
-          <div class="tune-hints"><span>Less impact</span><span>More impact</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Turn Penalty</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-penaltyTurn">5</span><span class="tune-unit">pts</span></div>
-          </div>
-          <input type="range" id="sl-penaltyTurn" min="1" max="15" step="1" value="5">
-          <div class="tune-hints"><span>Less impact</span><span>More impact</span></div>
-        </div>
-      </div>
-
-      <div class="settings-actions">
-        <button id="btn-rescore" class="btn-rescore">Save &amp; Re-score All Drives</button>
-        <button id="btn-reset-settings" class="btn-reset">Reset to Defaults</button>
-      </div>
-    </div>
-  </section>
 
   <!-- PERMISSION MODAL (iOS 13+) -->
   <div id="perm-modal" class="permission-hint hidden">
