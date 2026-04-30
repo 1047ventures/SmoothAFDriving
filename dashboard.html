@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Smooth AF — Drive Dashboard</title>
+  <style>
+    :root {
+      --bg:     #0d0d0d;
+      --card:   #1a1a1a;
+      --border: #2a2a2a;
+      --text:   #f0f0f0;
+      --muted:  #888;
+      --green:  #22c55e;
+      --yellow: #eab308;
+      --red:    #ef4444;
+      --blue:   #3b82f6;
+      --accent: #a78bfa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px; min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      background: #111;
+    }
+    header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    header h1 span { color: var(--accent); }
+    header a {
+      color: var(--muted); text-decoration: none; font-size: 13px;
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
+    }
+    header a:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Stats row ── */
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; padding: 20px 24px;
+    }
+    .stat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+    }
+    .stat-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-val   { font-size: 28px; font-weight: 700; margin-top: 4px; line-height: 1; }
+    .stat-sub   { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+    /* ── Insights box ── */
+    #insights-box {
+      margin: 0 24px 16px;
+      background: #1c1a2e; border: 1px solid #3b2e6a;
+      border-radius: 12px; padding: 14px 18px; display: none;
+    }
+    #insights-box h3 { font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    #insights-content { font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #ccc; }
+
+    /* ── Table ── */
+    .table-wrap {
+      padding: 0 24px 40px;
+    }
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .table-header h2 { font-size: 15px; font-weight: 600; }
+    .filter-row { display: flex; gap: 8px; }
+    .filter-btn {
+      padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+      background: none; color: var(--muted); cursor: pointer; font-size: 12px;
+    }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; padding: 10px 12px;
+      color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none;
+    }
+    thead th:hover { color: var(--text); }
+    thead th.sorted { color: var(--accent); }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .15s;
+    }
+    tbody tr:hover { background: var(--card); }
+    tbody td { padding: 12px; vertical-align: middle; }
+
+    .score-pill {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-weight: 700; font-size: 13px;
+    }
+    .score-hi  { background: #14532d; color: var(--green); }
+    .score-mid { background: #422006; color: var(--yellow); }
+    .score-lo  { background: #450a0a; color: var(--red); }
+
+    .event-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 12px;
+      background: #1e1b4b; color: var(--accent); font-size: 12px;
+    }
+    .event-badge.zero { background: #14532d; color: var(--green); }
+
+    /* ── Expanded row ── */
+    .expand-row td { padding: 0; }
+    .expand-inner {
+      padding: 16px 16px 20px;
+      background: #111; border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+    }
+    .expand-section h4 {
+      font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .expand-kv { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+    .expand-kv span:last-child { color: var(--text); font-weight: 600; }
+    .events-list { list-style: none; }
+    .events-list li {
+      padding: 4px 0; font-size: 12px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between;
+    }
+    .ev-brake { color: var(--red); }
+    .ev-accel { color: var(--yellow); }
+    .ev-turn  { color: var(--blue); }
+
+    /* ── Loading / empty ── */
+    #status {
+      text-align: center; padding: 60px 20px; color: var(--muted); font-size: 15px;
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .stats { padding: 12px; }
+      .table-wrap { padding: 0 12px 40px; }
+      .expand-inner { grid-template-columns: 1fr; }
+      td.hide-sm, th.hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Smooth <span>AF</span> · Drives</h1>
+  <a href="index.html">← App</a>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Total Drives</div>
+    <div class="stat-val" id="s-total">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Avg Score</div>
+    <div class="stat-val" id="s-avg">—</div>
+    <div class="stat-sub">all time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Best Score</div>
+    <div class="stat-val" id="s-best" style="color:var(--green)">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Total Miles</div>
+    <div class="stat-val" id="s-miles">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Total Events</div>
+    <div class="stat-val" id="s-events" style="color:var(--red)">—</div>
+    <div class="stat-sub">hard brakes / accel / turns</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Last Drive</div>
+    <div class="stat-val" id="s-last" style="font-size:18px">—</div>
+  </div>
+</div>
+
+<div id="insights-box">
+  <h3>🤖 AI Insights</h3>
+  <div id="insights-content"></div>
+</div>
+
+<div class="table-wrap">
+  <div class="table-header">
+    <h2>All Drives</h2>
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="real">Real</button>
+      <button class="filter-btn" data-filter="sim">Simulated</button>
+    </div>
+  </div>
+
+  <div id="status">
+    <div class="spinner"></div>
+    Loading drives…
+  </div>
+
+  <table id="drive-table" style="display:none">
+    <thead>
+      <tr>
+        <th data-col="created_at" class="sorted">Date ↓</th>
+        <th data-col="score">Score</th>
+        <th data-col="duration_ms" class="hide-sm">Duration</th>
+        <th data-col="distance_meters">Distance</th>
+        <th data-col="event_count">Events</th>
+        <th data-col="top_speed_mps" class="hide-sm">Top Speed</th>
+        <th class="hide-sm">Device</th>
+      </tr>
+    </thead>
+    <tbody id="drive-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+const SB_URL  = 'https://dbreetxubxdxogmektxc.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicmVldHh1YnhkeG9nbWVrdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjY5ODgsImV4cCI6MjA5MjkwMjk4OH0.hMeEhYpNNgZ67Nh9GnjwJvtSBbdQVhbdjiBBNNG5qe4';
+
+const HEADERS = { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` };
+
+let allDrives = [];
+let sortCol = 'created_at';
+let sortAsc = false;
+let filterMode = 'all';
+let expandedId = null;
+
+async function load() {
+  try {
+    // Load drives
+    const r = await fetch(
+      `${SB_URL}/rest/v1/drives?select=id,created_at,device_id,start_time,duration_ms,distance_meters,top_speed_mps,score,event_count,simulated,events,settings&order=created_at.desc&limit=200`,
+      { headers: HEADERS }
+    );
+    allDrives = await r.json();
+
+    // Load latest insight
+    try {
+      const ir = await fetch(
+        `${SB_URL}/rest/v1/drive_insights?select=summary,created_at&order=created_at.desc&limit=1`,
+        { headers: HEADERS }
+      );
+      const insights = await ir.json();
+      if (insights && insights.length && insights[0].summary) {
+        document.getElementById('insights-box').style.display = 'block';
+        document.getElementById('insights-content').textContent = insights[0].summary;
+      }
+    } catch {}
+
+    renderStats();
+    renderTable();
+  } catch(e) {
+    document.getElementById('status').innerHTML = `<p>Error loading data: ${e.message}</p>`;
+  }
+}
+
+function renderStats() {
+  const real = allDrives.filter(d => !d.simulated);
+  const drives = real.length ? real : allDrives;
+
+  document.getElementById('s-total').textContent = drives.length;
+
+  const scores = drives.map(d => d.score).filter(s => s != null);
+  if (scores.length) {
+    document.getElementById('s-avg').textContent = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+    document.getElementById('s-best').textContent = Math.round(Math.max(...scores));
+  }
+
+  const miles = drives.reduce((a,d) => a + (d.distance_meters||0), 0) / 1609.34;
+  document.getElementById('s-miles').textContent = miles.toFixed(1);
+
+  const events = drives.reduce((a,d) => a + (d.event_count||0), 0);
+  document.getElementById('s-events').textContent = events;
+
+  if (drives.length) {
+    const last = new Date(drives[0].created_at);
+    const diff = Date.now() - last.getTime();
+    const h = Math.floor(diff / 36e5);
+    document.getElementById('s-last').textContent =
+      h < 1 ? 'Just now' : h < 24 ? `${h}h ago` : `${Math.floor(h/24)}d ago`;
+  }
+}
+
+function filtered() {
+  if (filterMode === 'real') return allDrives.filter(d => !d.simulated);
+  if (filterMode === 'sim')  return allDrives.filter(d => d.simulated);
+  return allDrives;
+}
+
+function sorted(drives) {
+  return [...drives].sort((a, b) => {
+    let av = a[sortCol] ?? 0, bv = b[sortCol] ?? 0;
+    if (typeof av === 'string') av = av.toLowerCase(), bv = (bv||'').toLowerCase();
+    return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+  });
+}
+
+function scorePill(score) {
+  if (score == null) return '<span class="score-pill score-mid">—</span>';
+  const s = Math.round(score);
+  const cls = s >= 85 ? 'score-hi' : s >= 65 ? 'score-mid' : 'score-lo';
+  return `<span class="score-pill ${cls}">${s}</span>`;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) +
+    ' ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+function fmtDuration(ms) {
+  if (!ms) return '—';
+  const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+  return m ? `${m}m ${s}s` : `${s}s`;
+}
+function fmtMiles(m) { return m ? (m/1609.34).toFixed(1) + ' mi' : '—'; }
+function fmtMph(mps) { return mps ? Math.round(mps * 2.237) + ' mph' : '—'; }
+function shortId(id) { return id ? id.substring(0,8) : '—'; }
+
+function expandRow(drive) {
+  const events = drive.events || [];
+  const evCounts = { brake:0, accel:0, turn:0 };
+  events.forEach(e => { if (evCounts[e.type] !== undefined) evCounts[e.type]++; });
+
+  const evHTML = events.length
+    ? events.slice(0,10).map(e => `
+        <li>
+          <span class="ev-${e.type}">${e.type === 'brake' ? '🛑 Hard Brake' : e.type === 'accel' ? '🚀 Hard Accel' : '↩️ Sharp Turn'}</span>
+          <span>${fmtMph(e.speedMph ? e.speedMph / 2.237 : null)}</span>
+        </li>`).join('')
+    : '<li>No events — clean drive! 🎉</li>';
+
+  const settings = drive.settings || {};
+
+  return `<tr class="expand-row"><td colspan="7">
+    <div class="expand-inner">
+      <div class="expand-section">
+        <h4>Drive Stats</h4>
+        <div class="expand-kv"><span>Date</span><span>${fmtDate(drive.created_at)}</span></div>
+        <div class="expand-kv"><span>Duration</span><span>${fmtDuration(drive.duration_ms)}</span></div>
+        <div class="expand-kv"><span>Distance</span><span>${fmtMiles(drive.distance_meters)}</span></div>
+        <div class="expand-kv"><span>Top Speed</span><span>${fmtMph(drive.top_speed_mps)}</span></div>
+        <div class="expand-kv"><span>Score</span><span>${Math.round(drive.score ?? 0)}</span></div>
+        <div class="expand-kv"><span>Simulated</span><span>${drive.simulated ? 'Yes' : 'No'}</span></div>
+      </div>
+      <div class="expand-section">
+        <h4>Events (${events.length})</h4>
+        <ul class="events-list">${evHTML}</ul>
+      </div>
+      <div class="expand-section">
+        <h4>Thresholds Used</h4>
+        <div class="expand-kv"><span>Hard Brake</span><span>${settings.hardBrake ?? '3.5'} m/s²</span></div>
+        <div class="expand-kv"><span>Hard Accel</span><span>${settings.hardAccel ?? '2.8'} m/s²</span></div>
+        <div class="expand-kv"><span>Sharp Turn</span><span>${settings.sharpTurn ?? '3.6'} m/s²</span></div>
+        <div class="expand-kv"><span>EMA Alpha</span><span>${settings.emaAlpha ?? '0.45'}</span></div>
+        <div class="expand-kv"><span>Device</span><span>${shortId(drive.device_id)}</span></div>
+      </div>
+    </div>
+  </td></tr>`;
+}
+
+function renderTable() {
+  const drives = sorted(filtered());
+  const status = document.getElementById('status');
+  const table  = document.getElementById('drive-table');
+  const tbody  = document.getElementById('drive-tbody');
+
+  if (!drives.length) {
+    status.innerHTML = '<p>No drives yet — go take one! 🚗</p>';
+    table.style.display = 'none';
+    return;
+  }
+
+  status.style.display = 'none';
+  table.style.display = 'table';
+
+  tbody.innerHTML = drives.map(d => {
+    const evCls = (d.event_count || 0) === 0 ? 'zero' : '';
+    return `<tr data-id="${d.id}">
+      <td>${fmtDate(d.created_at)}</td>
+      <td>${scorePill(d.score)}</td>
+      <td class="hide-sm">${fmtDuration(d.duration_ms)}</td>
+      <td>${fmtMiles(d.distance_meters)}</td>
+      <td><span class="event-badge ${evCls}">${d.event_count ?? 0}</span></td>
+      <td class="hide-sm">${fmtMph(d.top_speed_mps)}</td>
+      <td class="hide-sm" style="color:var(--muted);font-size:12px">${d.simulated ? '🎮 sim' : shortId(d.device_id)}</td>
+    </tr>`;
+  }).join('');
+
+  // Row click → expand
+  tbody.querySelectorAll('tr[data-id]').forEach(row => {
+    row.addEventListener('click', () => {
+      const id = row.dataset.id;
+      const next = row.nextElementSibling;
+      if (next && next.classList.contains('expand-row')) {
+        next.remove();
+        expandedId = null;
+      } else {
+        document.querySelectorAll('.expand-row').forEach(r => r.remove());
+        const drive = allDrives.find(d => d.id === id);
+        row.insertAdjacentHTML('afterend', expandRow(drive));
+        expandedId = id;
+      }
+    });
+  });
+}
+
+// Sort
+document.querySelectorAll('thead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = false; }
+    document.querySelectorAll('thead th').forEach(t => t.classList.remove('sorted'));
+    th.classList.add('sorted');
+    th.textContent = th.textContent.replace(/ [↑↓]$/, '') + (sortAsc ? ' ↑' : ' ↓');
+    renderTable();
+  });
+});
+
+// Filter
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterMode = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable();
+  });
+});
+
+load();
+</script>
+</body>
+</html>
