@@ -1138,6 +1138,15 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDriveList();
   });
 
+  // Past drives toggle
+  document.getElementById('btn-view-drives')?.addEventListener('click', () => {
+    const panel = document.getElementById('drives-list-panel');
+    const btn = document.getElementById('btn-view-drives');
+    const opening = !panel.classList.contains('open');
+    panel.classList.toggle('open', opening);
+    btn.textContent = opening ? 'Hide drives' : 'Past drives';
+  });
+
   // Settings
   $('#btn-settings').addEventListener('click', () => {
     renderSettings();
