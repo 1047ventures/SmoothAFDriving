@@ -726,8 +726,10 @@ function updateLiveUI(){
   $('#live-g').textContent = state.lastMotionG ? state.lastMotionG.toFixed(2) :
     (last ? Math.min(2.5, (last.harshness||0)/9.81).toFixed(2) : '0.00');
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
-  state.liveScore = scoreFromEvents(state.events, CFG, state.samples.length);
-  $('#live-score').textContent = state.liveScore;
+  const avgMph = state.samples.length
+    ? Math.round(state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length * 2.23694)
+    : 0;
+  $('#live-avg-speed').textContent = avgMph;
   updateRoadUI();
 }
 
