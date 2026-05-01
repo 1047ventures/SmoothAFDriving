@@ -304,7 +304,7 @@
   /* ── Cartoon avatar filter ── */
   .car-avatar{
     width:100%;height:100%;object-fit:cover;border-radius:50%;
-    filter:url(#f-cartoon) contrast(1.25) saturate(1.5) brightness(1.05);
+    filter:contrast(1.08) saturate(1.15);
     display:block;
   }
   .avatar-circle{
@@ -349,19 +349,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v15</div>
-<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <filter id="f-cartoon" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
-      <feComponentTransfer>
-        <feFuncR type="discrete" tableValues="0 .18 .36 .54 .72 .9 1"/>
-        <feFuncG type="discrete" tableValues="0 .18 .36 .54 .72 .9 1"/>
-        <feFuncB type="discrete" tableValues="0 .18 .36 .54 .72 .9 1"/>
-      </feComponentTransfer>
-      <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 9 -1 -1 -1 -1" preserveAlpha="true"/>
-    </filter>
-  </defs>
-</svg>
+<div id="app-version">v16</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
