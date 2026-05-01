@@ -1,0 +1,15 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches:
+      - claude-pwa
+      - claude/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        run: npx netlify-cli deploy --dir=. --prod --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
