@@ -47,26 +47,33 @@
     overflow:hidden;
   }
 
-  /* Full-screen swipeable car viewport */
-  #car-viewport{
+  /* Car photo display */
+  #car-display{
     position:absolute;
-    inset:0;
-    overflow:hidden;
+    top:calc(env(safe-area-inset-top,0) + 68px);
+    left:0;right:0;
+    bottom:calc(env(safe-area-inset-bottom,0) + 168px);
+    display:flex;align-items:center;justify-content:center;
+    padding:0 24px;
+    z-index:10;
   }
-  .car-track{
-    display:flex;
-    width:100%;height:100%;
-    transition:transform .42s cubic-bezier(.4,0,.2,1);
-    will-change:transform;
+  .car-upload-prompt{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;width:100%;aspect-ratio:4/3;border-radius:22px;cursor:pointer;
+    border:1.5px dashed rgba(232,93,58,.35);
+    background:rgba(232,93,58,.04);
   }
-  .car-slide{
-    min-width:100%;height:100%;
-    flex-shrink:0;overflow:hidden;
-    position:relative;
-  }
-  .car-slide > svg{
-    position:absolute;inset:0;
-    width:100%;height:100%;
+  .car-upload-icon{font-size:38px}
+  .car-upload-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream)}
+  .car-upload-sub{font-size:12px;color:var(--muted);letter-spacing:.1em;text-align:center}
+  .car-photo-wrap{position:relative;width:100%;border-radius:22px;overflow:hidden;box-shadow:0 20px 56px rgba(232,93,58,.22),0 6px 20px rgba(0,0,0,.7)}
+  .car-photo{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+  .car-change-lbl{
+    position:absolute;bottom:10px;right:12px;
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(244,235,217,.55);background:rgba(10,8,8,.55);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    padding:5px 11px;border-radius:8px;cursor:pointer;
   }
 
   /* Floating glass gradient top bar */
@@ -81,55 +88,7 @@
     font-size:28px;letter-spacing:-.02em;color:var(--cream);
   }
   .wordmark-sm .af{color:var(--tang)}
-  .topbar-actions{display:flex;gap:10px}
-  .icon-btn{
-    appearance:none;border:0;cursor:pointer;
-    background:rgba(10,8,8,.6);
-    backdrop-filter:blur(16px) saturate(1.2);
-    -webkit-backdrop-filter:blur(16px) saturate(1.2);
-    color:var(--cream-dim);
-    width:40px;height:40px;border-radius:50%;font-size:17px;
-    display:flex;align-items:center;justify-content:center;
-    border:1px solid rgba(244,235,217,.15);
-    text-decoration:none;
-  }
-  .icon-btn:active{background:rgba(244,235,217,.18)}
 
-  /* Floating side nav arrows */
-  .car-arrow{
-    position:absolute;top:50%;transform:translateY(-95%);z-index:25;
-    appearance:none;border:0;cursor:pointer;
-    background:rgba(10,8,8,.52);
-    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    color:rgba(244,235,217,.75);
-    width:42px;height:42px;border-radius:50%;font-size:24px;line-height:1;
-    display:flex;align-items:center;justify-content:center;
-    border:1px solid rgba(244,235,217,.14);
-  }
-  .car-arrow:active{background:rgba(232,93,58,.22);color:var(--cream)}
-  #car-prev{left:16px}
-  #car-next{right:16px}
-
-  /* Car name + dots floating above bottom sheet */
-  .car-label-area{
-    position:absolute;
-    bottom:calc(env(safe-area-inset-bottom,0) + 196px);
-    left:0;right:0;z-index:20;
-    text-align:center;pointer-events:none;
-  }
-  .car-name{
-    font-family:var(--serif);font-style:italic;font-weight:700;
-    font-size:21px;letter-spacing:.07em;
-    color:rgba(244,235,217,.9);
-    text-shadow:0 2px 20px rgba(0,0,0,1),0 0 60px rgba(0,0,0,.9);
-  }
-  .car-dots{display:flex;gap:9px;justify-content:center;margin-top:13px}
-  .car-dot{
-    width:7px;height:7px;border-radius:50%;
-    background:rgba(244,235,217,.25);
-    transition:background .22s,transform .22s;
-  }
-  .car-dot.active{background:var(--tang);transform:scale(1.45)}
 
   /* Glass frosted bottom sheet */
   .home-bottom-sheet{
@@ -142,6 +101,15 @@
     border-radius:26px 26px 0 0;
     max-height:72vh;overflow-y:auto;
   }
+  .view-drives-link{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    display:block;width:100%;text-align:center;
+    font-size:12px;letter-spacing:.15em;color:var(--muted);
+    text-transform:uppercase;padding:14px 0 2px;
+  }
+  .view-drives-link:active{color:var(--cream-dim)}
+  .drives-list{display:none;margin-top:8px}
+  .drives-list.open{display:block}
   .sheet-handle{
     width:38px;height:4px;border-radius:2px;
     background:rgba(244,235,217,.18);
@@ -163,7 +131,6 @@
   .primary-btn .arrow{font-family:var(--sans);font-style:normal;font-weight:500}
 
   /* ── Recent drives ── */
-  .drives-list{margin-top:18px}
   .drives-head{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 10px;padding:0 4px}
   .drive-row{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -179,8 +146,6 @@
   .drive-chev{color:var(--muted);font-size:22px}
   .empty-drives{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:18px 4px}
 
-  /* ── Settings gear (kept for compatibility) ── */
-  .settings-gear{display:none}
 
   /* ============ PRESTART ============ */
   #screen-prestart{
@@ -319,58 +284,6 @@
   .new-drive-btn{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;letter-spacing:-.01em;padding:20px 24px;border-radius:16px;margin-top:8px;box-shadow:0 12px 36px rgba(232,93,58,.3);transition:transform .1s ease}
   .new-drive-btn:active{transform:scale(.985)}
 
-  /* ============ SETTINGS ============ */
-  #screen-settings{overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0)}
-  .settings-head{
-    display:flex;align-items:center;gap:14px;
-    padding:calc(env(safe-area-inset-top,0) + 18px) 20px 14px;
-    border-bottom:1px solid rgba(244,235,217,.08);
-    position:sticky;top:0;background:var(--bg);z-index:10;
-  }
-  .settings-title{font-family:var(--serif);font-style:italic;font-size:26px;font-weight:700;margin:0;letter-spacing:-.01em}
-  .settings-body{padding:20px 20px 40px}
-  .settings-intro{font-size:13px;color:var(--cream-dim);line-height:1.5;margin:0 0 24px}
-
-  .tune-section{margin-bottom:28px}
-  .tune-section-head{
-    font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;
-    margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid rgba(244,235,217,.07);
-  }
-  .tune-row{margin-bottom:20px}
-  .tune-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:14px;color:var(--cream-dim)}
-  .tune-label-name{font-weight:500}
-  .tune-val-wrap{display:flex;align-items:baseline;gap:4px}
-  .tune-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream)}
-  .tune-unit{font-size:11px;color:var(--muted)}
-  .tune-hints{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-top:4px}
-
-  input[type=range]{
-    width:100%;height:4px;border-radius:2px;
-    -webkit-appearance:none;appearance:none;
-    background:rgba(244,235,217,.15);outline:none;cursor:pointer;
-  }
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
-    background:var(--tang);border:3px solid var(--bg);
-    box-shadow:0 2px 8px rgba(232,93,58,.4);
-  }
-
-  .settings-actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-  .btn-rescore{
-    appearance:none;border:0;cursor:pointer;width:100%;
-    background:var(--tang);color:var(--bg);
-    font-family:var(--serif);font-style:italic;font-weight:700;
-    font-size:20px;padding:20px;border-radius:16px;
-    box-shadow:0 12px 36px rgba(232,93,58,.25);transition:background .2s;
-  }
-  .btn-rescore:active{transform:scale(.985)}
-  .btn-reset{
-    appearance:none;border:1px solid rgba(244,235,217,.18);cursor:pointer;width:100%;
-    background:transparent;color:var(--cream-dim);
-    font-family:var(--sans);font-size:14px;font-weight:500;
-    padding:16px;border-radius:14px;
-  }
-  .btn-reset:active{background:rgba(244,235,217,.06)}
 
   /* ============ UTIL ============ */
   .hidden{display:none!important}
@@ -390,530 +303,17 @@
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
   <section id="screen-home" class="screen active">
 
-    <!-- Full-screen car canvas (swipeable) -->
-    <div id="car-viewport">
-      <div class="car-track" id="car-track">
+    <!-- Car photo display -->
+    <div id="car-display"></div>
 
-        <!-- ━━━ 0: Sports Coupe ━━━ -->
-        <div class="car-slide active" data-car="0">
-          <svg viewBox="0 0 500 820" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <!-- Studio key light: warm orange from upper-right -->
-              <radialGradient id="c0-key" cx="78%" cy="10%" r="72%">
-                <stop offset="0%" stop-color="rgba(232,93,58,.28)"/>
-                <stop offset="100%" stop-color="rgba(232,93,58,0)"/>
-              </radialGradient>
-              <!-- Cool fill light from lower-left -->
-              <radialGradient id="c0-fill" cx="0%" cy="90%" r="60%">
-                <stop offset="0%" stop-color="rgba(74,30,47,.4)"/>
-                <stop offset="100%" stop-color="rgba(74,30,47,0)"/>
-              </radialGradient>
-              <!-- Ground -->
-              <linearGradient id="c0-floor" x1="0" y1="580" x2="0" y2="820" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#1A1010"/>
-                <stop offset="100%" stop-color="#0A0808"/>
-              </linearGradient>
-              <!-- Floor reflection under car -->
-              <linearGradient id="c0-refl" x1="0" y1="583" x2="0" y2="660" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="rgba(232,93,58,.1)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-              </linearGradient>
-              <!-- Vignette -->
-              <radialGradient id="c0-vign" cx="50%" cy="50%" r="72%">
-                <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,.7)"/>
-              </radialGradient>
-              <!-- Body paint -->
-              <linearGradient id="c0-paint" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#2A1E1B"/>
-                <stop offset="40%" stop-color="#1C1412"/>
-                <stop offset="100%" stop-color="#100D0C"/>
-              </linearGradient>
-              <!-- Roof highlight -->
-              <linearGradient id="c0-roof-hl" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="rgba(244,235,217,0)"/>
-                <stop offset="35%" stop-color="rgba(244,235,217,.3)"/>
-                <stop offset="65%" stop-color="rgba(244,235,217,.18)"/>
-                <stop offset="100%" stop-color="rgba(244,235,217,0)"/>
-              </linearGradient>
-              <!-- Wheel rim -->
-              <radialGradient id="c0-rim" cx="38%" cy="32%" r="65%">
-                <stop offset="0%" stop-color="#3A2E2A"/>
-                <stop offset="100%" stop-color="#181210"/>
-              </radialGradient>
-            </defs>
-
-            <!-- Background -->
-            <rect width="500" height="820" fill="#0A0808"/>
-            <rect width="500" height="820" fill="url(#c0-key)"/>
-            <rect width="500" height="820" fill="url(#c0-fill)"/>
-
-            <!-- Ground plane -->
-            <rect x="0" y="580" width="500" height="240" fill="url(#c0-floor)"/>
-            <!-- Ground horizon line -->
-            <rect x="0" y="580" width="500" height="1.5" fill="rgba(232,93,58,.18)"/>
-            <!-- Car shadow -->
-            <ellipse cx="250" cy="590" rx="196" ry="11" fill="rgba(0,0,0,.78)"/>
-            <!-- Floor reflection glow -->
-            <rect x="0" y="581" width="500" height="80" fill="url(#c0-refl)"/>
-
-            <!-- ── Car body (scaled to fill lower portion) ── -->
-            <!-- Original viewBox 500×160, car y≈20-148, scaled to y≈460-580 in this 820-tall canvas -->
-            <g transform="scale(1, 0.9375) translate(0, 471)">
-              <!-- Body base -->
-              <path d="M52,118 C52,118 68,72 148,52 C182,44 218,36 258,34 C298,32 338,38 372,54 C402,68 428,90 438,112 L438,128 C438,136 432,140 424,140 L68,140 C60,140 52,135 52,128 Z" fill="url(#c0-paint)"/>
-              <!-- Body accent highlight -->
-              <path d="M52,118 C52,118 68,72 148,52 C182,44 218,36 258,34 C298,32 338,38 372,54 C402,68 428,90 438,112 L438,128 C438,136 432,140 424,140 L68,140 C60,140 52,135 52,128 Z" fill="rgba(232,93,58,.08)"/>
-              <!-- Roof specular highlight -->
-              <path d="M148,52 C182,44 218,36 258,34 C298,32 338,38 372,54" stroke="url(#c0-roof-hl)" stroke-width="2.8" fill="none"/>
-              <!-- Cabin glass -->
-              <path d="M148,52 C165,38 198,24 245,20 C282,17 320,22 355,36 C375,44 395,58 400,68 L280,66 L225,66 L170,68 Z" fill="rgba(70,130,200,.11)" stroke="rgba(232,93,58,.6)" stroke-width="1.8"/>
-              <!-- Glass sheen -->
-              <path d="M175,65 C200,42 230,26 268,22" stroke="rgba(200,220,255,.18)" stroke-width="1" fill="none"/>
-              <!-- B-pillar -->
-              <line x1="280" y1="66" x2="278" y2="52" stroke="rgba(232,93,58,.55)" stroke-width="2"/>
-              <!-- Door line -->
-              <path d="M225,68 C225,95 227,140 228,140" stroke="rgba(244,235,217,.1)" stroke-width="1.2"/>
-              <!-- Hood crease -->
-              <path d="M148,52 C138,55 100,72 78,92" stroke="rgba(232,93,58,.28)" stroke-width="1.5" fill="none"/>
-              <!-- Rocker bottom edge -->
-              <path d="M68,138 L424,138" stroke="rgba(244,235,217,.07)" stroke-width="1"/>
-              <!-- Front splitter -->
-              <path d="M52,128 L35,133 L39,140 L68,140" fill="rgba(232,93,58,.28)"/>
-              <!-- Rear diffuser -->
-              <path d="M438,128 L455,132 L453,140 L424,140" fill="rgba(232,93,58,.2)"/>
-              <!-- Side mirror -->
-              <ellipse cx="396" cy="68" rx="9" ry="5.5" fill="rgba(232,93,58,.55)"/>
-              <rect x="389" y="66" width="3" height="7" fill="rgba(16,12,12,.85)" rx="1"/>
-              <!-- Wheel arches -->
-              <path d="M72,140 Q105,104 138,140 Z" fill="#0a0808"/>
-              <path d="M342,140 Q375,104 408,140 Z" fill="#0a0808"/>
-              <!-- ── Rear wheel ── -->
-              <circle cx="105" cy="140" r="30" fill="#0D0A0A" stroke="rgba(232,93,58,.72)" stroke-width="2.5"/>
-              <circle cx="105" cy="140" r="18" fill="url(#c0-rim)" stroke="rgba(244,235,217,.15)" stroke-width="1.2"/>
-              <!-- 8-spoke rim -->
-              <line x1="105" y1="122" x2="105" y2="112" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="105" y1="158" x2="105" y2="168" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="87" y1="140" x2="77" y2="140" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="123" y1="140" x2="133" y2="140" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="92" y1="127" x2="85" y2="120" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="118" y1="127" x2="125" y2="120" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="92" y1="153" x2="85" y2="160" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="118" y1="153" x2="125" y2="160" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <circle cx="105" cy="140" r="5.5" fill="rgba(232,93,58,.92)"/>
-              <!-- ── Front wheel ── -->
-              <circle cx="375" cy="140" r="30" fill="#0D0A0A" stroke="rgba(232,93,58,.72)" stroke-width="2.5"/>
-              <circle cx="375" cy="140" r="18" fill="url(#c0-rim)" stroke="rgba(244,235,217,.15)" stroke-width="1.2"/>
-              <line x1="375" y1="122" x2="375" y2="112" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="375" y1="158" x2="375" y2="168" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="357" y1="140" x2="347" y2="140" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="393" y1="140" x2="403" y2="140" stroke="rgba(244,235,217,.32)" stroke-width="2"/>
-              <line x1="362" y1="127" x2="355" y2="120" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="388" y1="127" x2="395" y2="120" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="362" y1="153" x2="355" y2="160" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="388" y1="153" x2="395" y2="160" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <circle cx="375" cy="140" r="5.5" fill="rgba(232,93,58,.92)"/>
-              <!-- Headlight -->
-              <path d="M427,94 L452,100 L452,114 L430,116 Z" fill="rgba(255,245,195,.65)"/>
-              <line x1="432" y1="97" x2="450" y2="102" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
-              <!-- Taillight -->
-              <path d="M55,108 L47,113 L45,130 L56,132 Z" fill="rgba(220,40,30,.65)"/>
-              <path d="M54,112 L49,116 L48,126 L54,128 Z" fill="rgba(255,90,70,.35)"/>
-            </g>
-
-            <!-- Vignette overlay -->
-            <rect width="500" height="820" fill="url(#c0-vign)"/>
-          </svg>
-        </div>
-
-        <!-- ━━━ 1: Sports Sedan ━━━ -->
-        <div class="car-slide" data-car="1">
-          <svg viewBox="0 0 500 820" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <!-- Cool executive blue key light from upper center -->
-              <radialGradient id="c1-key" cx="55%" cy="8%" r="68%">
-                <stop offset="0%" stop-color="rgba(130,170,230,.2)"/>
-                <stop offset="100%" stop-color="rgba(130,170,230,0)"/>
-              </radialGradient>
-              <!-- Warm orange accent from right -->
-              <radialGradient id="c1-acc" cx="95%" cy="40%" r="50%">
-                <stop offset="0%" stop-color="rgba(232,93,58,.14)"/>
-                <stop offset="100%" stop-color="rgba(232,93,58,0)"/>
-              </radialGradient>
-              <linearGradient id="c1-floor" x1="0" y1="580" x2="0" y2="820" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#141418"/>
-                <stop offset="100%" stop-color="#0A0808"/>
-              </linearGradient>
-              <linearGradient id="c1-refl" x1="0" y1="583" x2="0" y2="660" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="rgba(130,170,230,.08)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-              </linearGradient>
-              <radialGradient id="c1-vign" cx="50%" cy="50%" r="72%">
-                <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,.65)"/>
-              </radialGradient>
-              <linearGradient id="c1-paint" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#22201E"/>
-                <stop offset="40%" stop-color="#181618"/>
-                <stop offset="100%" stop-color="#0E0C0E"/>
-              </linearGradient>
-              <linearGradient id="c1-roof-hl" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="rgba(244,235,217,0)"/>
-                <stop offset="40%" stop-color="rgba(200,220,255,.28)"/>
-                <stop offset="70%" stop-color="rgba(200,220,255,.15)"/>
-                <stop offset="100%" stop-color="rgba(244,235,217,0)"/>
-              </linearGradient>
-              <radialGradient id="c1-rim" cx="38%" cy="32%" r="65%">
-                <stop offset="0%" stop-color="#303035"/>
-                <stop offset="100%" stop-color="#141418"/>
-              </radialGradient>
-            </defs>
-
-            <!-- Background -->
-            <rect width="500" height="820" fill="#0A0808"/>
-            <rect width="500" height="820" fill="url(#c1-key)"/>
-            <rect width="500" height="820" fill="url(#c1-acc)"/>
-
-            <!-- Ground -->
-            <rect x="0" y="580" width="500" height="240" fill="url(#c1-floor)"/>
-            <rect x="0" y="580" width="500" height="1.5" fill="rgba(130,170,230,.15)"/>
-            <ellipse cx="250" cy="590" rx="196" ry="11" fill="rgba(0,0,0,.75)"/>
-            <rect x="0" y="581" width="500" height="80" fill="url(#c1-refl)"/>
-
-            <!-- Sedan — defined trunk, taller roofline -->
-            <g transform="scale(1, 0.9375) translate(0, 471)">
-              <!-- Body -->
-              <path d="M55,115 C55,115 75,78 155,58 C188,50 225,42 258,40 C295,38 332,42 368,56 C395,67 420,88 435,112 L435,128 C435,136 428,140 420,140 L72,140 C63,140 55,135 55,128 Z" fill="url(#c1-paint)"/>
-              <path d="M55,115 C55,115 75,78 155,58 C188,50 225,42 258,40 C295,38 332,42 368,56 C395,67 420,88 435,112 L435,128 C435,136 428,140 420,140 L72,140 C63,140 55,135 55,128 Z" fill="rgba(130,170,230,.06)"/>
-              <!-- Roof specular -->
-              <path d="M155,58 C188,50 225,42 258,40 C295,38 332,42 368,56" stroke="url(#c1-roof-hl)" stroke-width="2.5" fill="none"/>
-              <!-- Trunk lid crease -->
-              <path d="M368,56 C378,62 405,78 420,100 L420,112" stroke="rgba(244,235,217,.08)" stroke-width="1.2" fill="none"/>
-              <!-- Cabin -->
-              <path d="M155,58 C172,44 205,30 248,26 C282,23 315,27 348,40 C364,47 380,58 382,66 L272,64 L230,64 L178,66 Z" fill="rgba(70,120,200,.1)" stroke="rgba(130,170,230,.55)" stroke-width="1.8"/>
-              <!-- Glass sheen -->
-              <path d="M183,64 C208,42 238,28 274,24" stroke="rgba(200,220,255,.18)" stroke-width="1" fill="none"/>
-              <!-- B-pillar -->
-              <line x1="272" y1="64" x2="270" y2="58" stroke="rgba(130,170,230,.5)" stroke-width="2"/>
-              <!-- Door line -->
-              <path d="M230,66 L232,140" stroke="rgba(244,235,217,.09)" stroke-width="1.2"/>
-              <!-- Mirror -->
-              <ellipse cx="378" cy="66" rx="9" ry="5.5" fill="rgba(130,170,230,.45)"/>
-              <rect x="371" y="64" width="3" height="7" fill="rgba(14,12,14,.85)" rx="1"/>
-              <!-- Rocker -->
-              <path d="M72,138 L420,138" stroke="rgba(244,235,217,.07)" stroke-width="1"/>
-              <!-- Wheel arches -->
-              <path d="M75,140 Q108,108 141,140 Z" fill="#0a0808"/>
-              <path d="M345,140 Q378,108 411,140 Z" fill="#0a0808"/>
-              <!-- Rear wheel -->
-              <circle cx="108" cy="140" r="29" fill="#0D0A0A" stroke="rgba(130,170,230,.65)" stroke-width="2.5"/>
-              <circle cx="108" cy="140" r="17" fill="url(#c1-rim)" stroke="rgba(244,235,217,.14)" stroke-width="1.2"/>
-              <line x1="108" y1="123" x2="108" y2="113" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="108" y1="157" x2="108" y2="167" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="91" y1="140" x2="81" y2="140" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="125" y1="140" x2="135" y2="140" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="95" y1="128" x2="88" y2="121" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="121" y1="128" x2="128" y2="121" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="95" y1="152" x2="88" y2="159" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="121" y1="152" x2="128" y2="159" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <circle cx="108" cy="140" r="5" fill="rgba(130,170,230,.85)"/>
-              <!-- Front wheel -->
-              <circle cx="378" cy="140" r="29" fill="#0D0A0A" stroke="rgba(130,170,230,.65)" stroke-width="2.5"/>
-              <circle cx="378" cy="140" r="17" fill="url(#c1-rim)" stroke="rgba(244,235,217,.14)" stroke-width="1.2"/>
-              <line x1="378" y1="123" x2="378" y2="113" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="378" y1="157" x2="378" y2="167" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="361" y1="140" x2="351" y2="140" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="395" y1="140" x2="405" y2="140" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="365" y1="128" x2="358" y2="121" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="391" y1="128" x2="398" y2="121" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="365" y1="152" x2="358" y2="159" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="391" y1="152" x2="398" y2="159" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <circle cx="378" cy="140" r="5" fill="rgba(130,170,230,.85)"/>
-              <!-- Headlight -->
-              <path d="M425,94 L446,100 L446,114 L427,116 Z" fill="rgba(255,248,210,.6)"/>
-              <line x1="430" y1="97" x2="444" y2="102" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
-              <!-- Taillight -->
-              <path d="M59,108 L51,113 L49,130 L60,132 Z" fill="rgba(220,40,30,.6)"/>
-            </g>
-
-            <rect width="500" height="820" fill="url(#c1-vign)"/>
-          </svg>
-        </div>
-
-        <!-- ━━━ 2: SUV ━━━ -->
-        <div class="car-slide" data-car="2">
-          <svg viewBox="0 0 500 820" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <!-- Warm amber key light from upper-right, outdoorsy -->
-              <radialGradient id="c2-key" cx="80%" cy="12%" r="65%">
-                <stop offset="0%" stop-color="rgba(196,160,80,.22)"/>
-                <stop offset="100%" stop-color="rgba(196,160,80,0)"/>
-              </radialGradient>
-              <!-- Sage green ambient from left -->
-              <radialGradient id="c2-amb" cx="5%" cy="55%" r="55%">
-                <stop offset="0%" stop-color="rgba(125,143,111,.18)"/>
-                <stop offset="100%" stop-color="rgba(125,143,111,0)"/>
-              </radialGradient>
-              <linearGradient id="c2-floor" x1="0" y1="574" x2="0" y2="820" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#181612"/>
-                <stop offset="100%" stop-color="#0A0808"/>
-              </linearGradient>
-              <linearGradient id="c2-refl" x1="0" y1="577" x2="0" y2="655" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="rgba(196,160,80,.09)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-              </linearGradient>
-              <radialGradient id="c2-vign" cx="50%" cy="50%" r="72%">
-                <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,.68)"/>
-              </radialGradient>
-              <linearGradient id="c2-paint" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#201E18"/>
-                <stop offset="40%" stop-color="#161410"/>
-                <stop offset="100%" stop-color="#0E0C0A"/>
-              </linearGradient>
-              <linearGradient id="c2-roof-hl" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="rgba(244,235,217,0)"/>
-                <stop offset="35%" stop-color="rgba(220,200,150,.25)"/>
-                <stop offset="65%" stop-color="rgba(220,200,150,.14)"/>
-                <stop offset="100%" stop-color="rgba(244,235,217,0)"/>
-              </linearGradient>
-              <radialGradient id="c2-rim" cx="38%" cy="32%" r="65%">
-                <stop offset="0%" stop-color="#30302A"/>
-                <stop offset="100%" stop-color="#141410"/>
-              </radialGradient>
-            </defs>
-
-            <rect width="500" height="820" fill="#0A0808"/>
-            <rect width="500" height="820" fill="url(#c2-key)"/>
-            <rect width="500" height="820" fill="url(#c2-amb)"/>
-
-            <!-- Ground — SUV sits a bit higher, wheels bigger -->
-            <rect x="0" y="574" width="500" height="246" fill="url(#c2-floor)"/>
-            <rect x="0" y="574" width="500" height="1.5" fill="rgba(196,160,80,.14)"/>
-            <ellipse cx="250" cy="585" rx="200" ry="12" fill="rgba(0,0,0,.77)"/>
-            <rect x="0" y="575" width="500" height="80" fill="url(#c2-refl)"/>
-
-            <!-- SUV: taller, boxier, bigger wheels, roof rack -->
-            <!-- Original viewBox 500×170, car y=35-158 (123 tall) → y=460-580 -->
-            <g transform="scale(1, 0.9756) translate(0, 437)">
-              <!-- Body -->
-              <path d="M50,118 C50,118 58,60 140,46 C172,40 215,35 258,35 C300,35 342,38 378,52 C408,64 440,88 448,118 L448,140 C448,148 442,152 434,152 L66,152 C58,152 50,147 50,140 Z" fill="url(#c2-paint)"/>
-              <path d="M50,118 C50,118 58,60 140,46 C172,40 215,35 258,35 C300,35 342,38 378,52 C408,64 440,88 448,118 L448,140 C448,148 442,152 434,152 L66,152 C58,152 50,147 50,140 Z" fill="rgba(196,160,80,.06)"/>
-              <!-- Roof line highlight -->
-              <path d="M140,46 C172,40 215,35 258,35 C300,35 342,38 378,52" stroke="url(#c2-roof-hl)" stroke-width="2.5" fill="none"/>
-              <!-- Roof rack -->
-              <line x1="165" y1="35" x2="345" y2="35" stroke="rgba(244,235,217,.14)" stroke-width="2"/>
-              <line x1="200" y1="32" x2="200" y2="38" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="260" y1="32" x2="260" y2="38" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <line x1="315" y1="32" x2="315" y2="38" stroke="rgba(244,235,217,.2)" stroke-width="1.5"/>
-              <!-- Large cabin -->
-              <path d="M140,46 C150,35 180,24 230,20 C265,17 300,20 335,32 C355,39 375,52 378,62 L252,60 L215,60 L158,62 Z" fill="rgba(70,120,180,.1)" stroke="rgba(196,160,80,.52)" stroke-width="1.8"/>
-              <!-- Glass sheen -->
-              <path d="M163,60 C190,38 222,24 260,19" stroke="rgba(220,200,150,.16)" stroke-width="1" fill="none"/>
-              <!-- Thick B-pillar -->
-              <rect x="250" y="56" width="5" height="8" rx="1" fill="rgba(10,10,8,.85)"/>
-              <!-- Rear window separate -->
-              <path d="M335,32 C348,38 368,52 375,62 L340,60 L300,60" fill="rgba(70,120,180,.08)" stroke="rgba(196,160,80,.38)" stroke-width="1"/>
-              <!-- Door line -->
-              <line x1="215" y1="62" x2="218" y2="152" stroke="rgba(244,235,217,.09)" stroke-width="1.2"/>
-              <!-- Mirror -->
-              <path d="M370,58 L388,54 L390,67 L373,69 Z" fill="rgba(196,160,80,.42)"/>
-              <!-- Side cladding -->
-              <path d="M66,140 L434,140 L440,152 L60,152 Z" fill="rgba(255,255,255,.04)"/>
-              <!-- Rocker -->
-              <path d="M66,150 L434,150" stroke="rgba(244,235,217,.07)" stroke-width="1"/>
-              <!-- Wheel arches (bigger) -->
-              <path d="M72,152 Q110,116 148,152 Z" fill="#0a0808"/>
-              <path d="M348,152 Q386,116 424,152 Z" fill="#0a0808"/>
-              <!-- Rear wheel (larger) -->
-              <circle cx="110" cy="152" r="32" fill="#0D0A0A" stroke="rgba(196,160,80,.68)" stroke-width="2.5"/>
-              <circle cx="110" cy="152" r="19" fill="url(#c2-rim)" stroke="rgba(244,235,217,.14)" stroke-width="1.2"/>
-              <line x1="110" y1="133" x2="110" y2="121" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="110" y1="171" x2="110" y2="183" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="91" y1="152" x2="79" y2="152" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="129" y1="152" x2="141" y2="152" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="97" y1="139" x2="89" y2="131" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="123" y1="139" x2="131" y2="131" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="97" y1="165" x2="89" y2="173" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="123" y1="165" x2="131" y2="173" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <circle cx="110" cy="152" r="5.5" fill="rgba(196,160,80,.88)"/>
-              <!-- Front wheel -->
-              <circle cx="386" cy="152" r="32" fill="#0D0A0A" stroke="rgba(196,160,80,.68)" stroke-width="2.5"/>
-              <circle cx="386" cy="152" r="19" fill="url(#c2-rim)" stroke="rgba(244,235,217,.14)" stroke-width="1.2"/>
-              <line x1="386" y1="133" x2="386" y2="121" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="386" y1="171" x2="386" y2="183" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="367" y1="152" x2="355" y2="152" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="405" y1="152" x2="417" y2="152" stroke="rgba(244,235,217,.3)" stroke-width="2"/>
-              <line x1="373" y1="139" x2="365" y2="131" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="399" y1="139" x2="407" y2="131" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="373" y1="165" x2="365" y2="173" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="399" y1="165" x2="407" y2="173" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <circle cx="386" cy="152" r="5.5" fill="rgba(196,160,80,.88)"/>
-              <!-- Headlight bar -->
-              <path d="M436,92 L457,98 L457,116 L438,118 Z" fill="rgba(255,248,210,.58)"/>
-              <!-- Taillight -->
-              <path d="M54,106 L46,112 L44,132 L56,134 Z" fill="rgba(220,40,30,.6)"/>
-            </g>
-
-            <rect width="500" height="820" fill="url(#c2-vign)"/>
-          </svg>
-        </div>
-
-        <!-- ━━━ 3: Muscle Car ━━━ -->
-        <div class="car-slide" data-car="3">
-          <svg viewBox="0 0 500 820" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <!-- Aggressive deep-red key light from upper-left (dramatic side-lit) -->
-              <radialGradient id="c3-key" cx="20%" cy="8%" r="75%">
-                <stop offset="0%" stop-color="rgba(220,40,30,.3)"/>
-                <stop offset="100%" stop-color="rgba(220,40,30,0)"/>
-              </radialGradient>
-              <!-- Warm orange accent from right -->
-              <radialGradient id="c3-acc" cx="95%" cy="35%" r="45%">
-                <stop offset="0%" stop-color="rgba(232,93,58,.18)"/>
-                <stop offset="100%" stop-color="rgba(232,93,58,0)"/>
-              </radialGradient>
-              <linearGradient id="c3-floor" x1="0" y1="580" x2="0" y2="820" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#1A0E0A"/>
-                <stop offset="100%" stop-color="#0A0808"/>
-              </linearGradient>
-              <linearGradient id="c3-refl" x1="0" y1="583" x2="0" y2="660" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="rgba(220,40,30,.12)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-              </linearGradient>
-              <radialGradient id="c3-vign" cx="50%" cy="50%" r="72%">
-                <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
-                <stop offset="100%" stop-color="rgba(0,0,0,.75)"/>
-              </radialGradient>
-              <linearGradient id="c3-paint" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#241612"/>
-                <stop offset="35%" stop-color="#180E0C"/>
-                <stop offset="100%" stop-color="#0E0808"/>
-              </linearGradient>
-              <linearGradient id="c3-roof-hl" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="rgba(244,235,217,0)"/>
-                <stop offset="35%" stop-color="rgba(255,180,120,.25)"/>
-                <stop offset="60%" stop-color="rgba(255,180,120,.12)"/>
-                <stop offset="100%" stop-color="rgba(244,235,217,0)"/>
-              </linearGradient>
-              <radialGradient id="c3-rim" cx="38%" cy="32%" r="65%">
-                <stop offset="0%" stop-color="#3A2820"/>
-                <stop offset="100%" stop-color="#161010"/>
-              </radialGradient>
-            </defs>
-
-            <rect width="500" height="820" fill="#0A0808"/>
-            <rect width="500" height="820" fill="url(#c3-key)"/>
-            <rect width="500" height="820" fill="url(#c3-acc)"/>
-
-            <rect x="0" y="580" width="500" height="240" fill="url(#c3-floor)"/>
-            <rect x="0" y="580" width="500" height="1.5" fill="rgba(220,40,30,.2)"/>
-            <ellipse cx="250" cy="590" rx="202" ry="12" fill="rgba(0,0,0,.8)"/>
-            <rect x="0" y="581" width="500" height="80" fill="url(#c3-refl)"/>
-
-            <!-- Muscle: long hood, fat tires, short roof, hood scoop -->
-            <!-- Original viewBox 500×155, car y≈23-144 (121 tall) → y=460-580 -->
-            <g transform="scale(1, 0.9917) translate(0, 441)">
-              <!-- Body -->
-              <path d="M38,112 C38,112 45,90 80,76 C110,65 170,56 215,46 C238,41 255,36 280,34 C310,31 340,36 368,50 C392,62 420,86 432,112 L432,128 C432,136 425,140 416,140 L58,140 C48,140 38,135 38,128 Z" fill="url(#c3-paint)"/>
-              <path d="M38,112 C38,112 45,90 80,76 C110,65 170,56 215,46 C238,41 255,36 280,34 C310,31 340,36 368,50 C392,62 420,86 432,112 L432,128 C432,136 425,140 416,140 L58,140 C48,140 38,135 38,128 Z" fill="rgba(220,40,30,.07)"/>
-              <!-- Roof specular -->
-              <path d="M215,46 C238,41 255,36 280,34 C310,31 340,36 368,50" stroke="url(#c3-roof-hl)" stroke-width="2.8" fill="none"/>
-              <!-- Hood scoop (muscle signature) -->
-              <path d="M215,46 L228,38 L272,38 L280,46" fill="rgba(220,40,30,.18)" stroke="rgba(232,93,58,.45)" stroke-width="1.8"/>
-              <rect x="232" y="37" width="36" height="4" rx="2" fill="rgba(10,8,8,.6)"/>
-              <!-- Short cabin roof -->
-              <path d="M240,46 C252,34 270,26 298,23 C320,21 342,25 358,36 C368,43 378,52 380,60 L298,58 L265,58 L245,60 Z" fill="rgba(70,120,180,.1)" stroke="rgba(220,40,30,.55)" stroke-width="1.8"/>
-              <!-- Glass sheen -->
-              <path d="M250,58 C265,38 285,26 310,22" stroke="rgba(255,180,120,.18)" stroke-width="1" fill="none"/>
-              <!-- Long hood crease line -->
-              <path d="M80,76 C100,70 165,61 215,52" stroke="rgba(220,40,30,.25)" stroke-width="1.8" fill="none"/>
-              <!-- Door line -->
-              <path d="M265,60 L267,140" stroke="rgba(244,235,217,.1)" stroke-width="1.2"/>
-              <!-- Mirror -->
-              <ellipse cx="375" cy="60" rx="9" ry="5.5" fill="rgba(220,40,30,.55)"/>
-              <rect x="368" y="58" width="3" height="7" fill="rgba(14,8,8,.85)" rx="1"/>
-              <!-- Side exhaust -->
-              <path d="M58,128 L46,131 L43,138 L60,140" fill="rgba(220,40,30,.3)"/>
-              <!-- Exhaust pipes -->
-              <rect x="44" y="130" width="6" height="4" rx="1" fill="rgba(244,235,217,.12)"/>
-              <rect x="44" y="136" width="6" height="4" rx="1" fill="rgba(244,235,217,.12)"/>
-              <!-- Rocker -->
-              <path d="M58,138 L416,138" stroke="rgba(244,235,217,.06)" stroke-width="1"/>
-              <!-- Wheel arches (wide, aggressive) -->
-              <path d="M60,140 Q98,104 136,140 Z" fill="#0a0808"/>
-              <path d="M342,140 Q380,104 418,140 Z" fill="#0a0808"/>
-              <!-- Rear wheel (fat, large) -->
-              <circle cx="98" cy="140" r="32" fill="#0D0808" stroke="rgba(232,93,58,.78)" stroke-width="3"/>
-              <circle cx="98" cy="140" r="19" fill="url(#c3-rim)" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="98" y1="121" x2="98" y2="109" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="98" y1="159" x2="98" y2="171" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="79" y1="140" x2="67" y2="140" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="117" y1="140" x2="129" y2="140" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="85" y1="127" x2="77" y2="119" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <line x1="111" y1="127" x2="119" y2="119" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <line x1="85" y1="153" x2="77" y2="161" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <line x1="111" y1="153" x2="119" y2="161" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <circle cx="98" cy="140" r="6.5" fill="rgba(220,40,30,.95)"/>
-              <!-- Front wheel -->
-              <circle cx="380" cy="140" r="32" fill="#0D0808" stroke="rgba(232,93,58,.78)" stroke-width="3"/>
-              <circle cx="380" cy="140" r="19" fill="url(#c3-rim)" stroke="rgba(244,235,217,.18)" stroke-width="1.5"/>
-              <line x1="380" y1="121" x2="380" y2="109" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="380" y1="159" x2="380" y2="171" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="361" y1="140" x2="349" y2="140" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="399" y1="140" x2="411" y2="140" stroke="rgba(244,235,217,.35)" stroke-width="2.5"/>
-              <line x1="367" y1="127" x2="359" y2="119" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <line x1="393" y1="127" x2="401" y2="119" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <line x1="367" y1="153" x2="359" y2="161" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <line x1="393" y1="153" x2="401" y2="161" stroke="rgba(244,235,217,.22)" stroke-width="2"/>
-              <circle cx="380" cy="140" r="6.5" fill="rgba(220,40,30,.95)"/>
-              <!-- Headlight -->
-              <path d="M422,90 L444,96 L444,112 L424,114 Z" fill="rgba(255,245,195,.65)"/>
-              <line x1="427" y1="93" x2="442" y2="98" stroke="rgba(255,255,255,.32)" stroke-width="1"/>
-              <!-- Taillight -->
-              <path d="M42,104 L34,110 L32,130 L43,132 Z" fill="rgba(220,40,30,.7)"/>
-              <path d="M40,108 L35,112 L34,126 L40,128 Z" fill="rgba(255,90,70,.35)"/>
-            </g>
-
-            <rect width="500" height="820" fill="url(#c3-vign)"/>
-          </svg>
-        </div>
-
-      </div><!-- /car-track -->
-    </div><!-- /car-viewport -->
-
-    <!-- Floating glass top bar -->
-    <div class="home-topbar">
-      <span class="wordmark-sm">Smooth <span class="af">AF</span></span>
-      <div class="topbar-actions">
-        <a href="dashboard.html" class="icon-btn" title="Dashboard">📊</a>
-        <button id="btn-settings" class="icon-btn" aria-label="Settings">⚙</button>
-      </div>
-    </div>
-
-    <!-- Side nav arrows -->
-    <button class="car-arrow" id="car-prev">‹</button>
-    <button class="car-arrow" id="car-next">›</button>
-
-    <!-- Car name + selector dots (floating above glass sheet) -->
-    <div class="car-label-area">
-      <div class="car-name" id="car-name">Sports Coupe</div>
-      <div class="car-dots" id="car-dots">
-        <div class="car-dot active"></div>
-        <div class="car-dot"></div>
-        <div class="car-dot"></div>
-        <div class="car-dot"></div>
-      </div>
-    </div>
-
-    <!-- Glass frosted bottom sheet -->
+        <!-- Glass frosted bottom sheet -->
     <div class="home-bottom-sheet">
       <div class="sheet-handle"></div>
       <button id="btn-start" class="primary-btn">
         <span>Start drive</span><span class="arrow">→</span>
       </button>
-      <div class="drives-list">
-        <p class="drives-head">Recent drives</p>
+      <button class="view-drives-link" id="btn-view-drives">Past drives</button>
+      <div class="drives-list" id="drives-list-panel">
         <div id="drives-container"></div>
       </div>
     </div>
@@ -930,7 +330,7 @@
     <div class="speed-unit">mph</div>
     <div class="gauge-row" style="margin-top:28px">
       <div class="gauge"><div class="gauge-val" id="live-time">0:00</div><div class="gauge-lbl">Duration</div></div>
-      <div class="gauge"><div class="gauge-val" id="live-score">100</div><div class="gauge-lbl">Score</div></div>
+      <div class="gauge"><div class="gauge-val" id="live-avg-speed">0</div><div class="gauge-lbl">Avg mph</div></div>
     </div>
     <span id="live-g" style="display:none" aria-hidden="true">0.00</span>
     <div id="calib-status" style="display:none;font-size:12px;text-align:center;margin-top:8px;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.4)"></div>
@@ -1005,92 +405,6 @@
 
   </section>
 
-  <!-- ═══════════════════════════ SETTINGS / TUNE ═══════════════════════════ -->
-  <section id="screen-settings" class="screen">
-    <div class="settings-head">
-      <button id="btn-settings-back" class="back-btn" aria-label="Back">×</button>
-      <h2 class="settings-title">Tune Algorithm</h2>
-    </div>
-    <div class="settings-body">
-      <p class="settings-intro">Adjust thresholds and penalties, then tap "Save & Re-score" to apply to all stored drives. Lower threshold = more sensitive (fires more events). Higher = more lenient.</p>
-
-      <div class="tune-section">
-        <p class="tune-section-head">Detection Thresholds (m/s²)</p>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Hard Brake</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-hardBrake">3.5</span><span class="tune-unit">m/s²</span></div>
-          </div>
-          <input type="range" id="sl-hardBrake" min="2.0" max="6.0" step="0.1" value="3.5">
-          <div class="tune-hints"><span>More sensitive</span><span>More lenient</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Hard Accel</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-hardAccel">2.8</span><span class="tune-unit">m/s²</span></div>
-          </div>
-          <input type="range" id="sl-hardAccel" min="1.5" max="5.0" step="0.1" value="2.8">
-          <div class="tune-hints"><span>More sensitive</span><span>More lenient</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Sharp Turn</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-sharpTurn">3.6</span><span class="tune-unit">m/s²</span></div>
-          </div>
-          <input type="range" id="sl-sharpTurn" min="2.0" max="7.0" step="0.1" value="3.6">
-          <div class="tune-hints"><span>More sensitive</span><span>More lenient</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">EMA Smoothing</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-emaAlpha">0.45</span></div>
-          </div>
-          <input type="range" id="sl-emaAlpha" min="0.1" max="0.9" step="0.05" value="0.45">
-          <div class="tune-hints"><span>Smoother (lag)</span><span>Raw (responsive)</span></div>
-        </div>
-      </div>
-
-      <div class="tune-section">
-        <p class="tune-section-head">Score Penalties (pts per event)</p>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Brake Penalty</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-penaltyBrake">6</span><span class="tune-unit">pts</span></div>
-          </div>
-          <input type="range" id="sl-penaltyBrake" min="1" max="15" step="1" value="6">
-          <div class="tune-hints"><span>Less impact</span><span>More impact</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Accel Penalty</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-penaltyAccel">4</span><span class="tune-unit">pts</span></div>
-          </div>
-          <input type="range" id="sl-penaltyAccel" min="1" max="15" step="1" value="4">
-          <div class="tune-hints"><span>Less impact</span><span>More impact</span></div>
-        </div>
-
-        <div class="tune-row">
-          <div class="tune-label">
-            <span class="tune-label-name">Turn Penalty</span>
-            <div class="tune-val-wrap"><span class="tune-val" id="val-penaltyTurn">5</span><span class="tune-unit">pts</span></div>
-          </div>
-          <input type="range" id="sl-penaltyTurn" min="1" max="15" step="1" value="5">
-          <div class="tune-hints"><span>Less impact</span><span>More impact</span></div>
-        </div>
-      </div>
-
-      <div class="settings-actions">
-        <button id="btn-rescore" class="btn-rescore">Save &amp; Re-score All Drives</button>
-        <button id="btn-reset-settings" class="btn-reset">Reset to Defaults</button>
-      </div>
-    </div>
-  </section>
 
   <!-- PERMISSION MODAL (iOS 13+) -->
   <div id="perm-modal" class="permission-hint hidden">

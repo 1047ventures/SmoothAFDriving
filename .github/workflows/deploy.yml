@@ -1,0 +1,23 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches:
+      - claude-pwa
+      - claude/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "Skipping deploy — NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID not set in repo secrets."
+            exit 0
+          fi
+          npx netlify-cli deploy --dir=. --prod --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN

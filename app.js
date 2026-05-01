@@ -22,7 +22,6 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 // Globals
 // -------------------------------------------------------------------------
 const STORAGE_KEY  = 'smoothaf.drives.v1';
-const SETTINGS_KEY = 'smoothaf.settings.v1';
 const DEVICE_KEY   = 'smoothaf.device_id';
 const SYNCED_KEY   = 'smoothaf.synced_ids';
 const MAX_STORED_DRIVES = 20;
@@ -104,20 +103,7 @@ const DEFAULTS = {
   // These are constants — not exposed as sliders yet.
 };
 
-// Live settings — always call loadSettings() before using
-let CFG = { ...DEFAULTS };
-
-function loadSettings(){
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    CFG = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
-  } catch { CFG = { ...DEFAULTS }; }
-  return CFG;
-}
-function saveSettings(cfg){
-  CFG = { ...DEFAULTS, ...cfg };
-  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(CFG)); } catch {}
-}
+const CFG = { ...DEFAULTS };
 
 const state = {
   screen: 'home',
@@ -457,43 +443,6 @@ function scoreColor(n){
 }
 
 // -------------------------------------------------------------------------
-// Settings screen
-// -------------------------------------------------------------------------
-function renderSettings(){
-  loadSettings();
-
-  // Slider definitions: [id, label, min, max, step, unit, cfgKey]
-  const sliders = [
-    ['hardBrake',    'Hard Brake',    2.0, 6.0, 0.1, 'm/s²', 'hardBrake'],
-    ['hardAccel',    'Hard Accel',    1.5, 5.0, 0.1, 'm/s²', 'hardAccel'],
-    ['sharpTurn',    'Sharp Turn',    2.0, 7.0, 0.1, 'm/s²', 'sharpTurn'],
-    ['emaAlpha',     'EMA Smoothing', 0.1, 0.9, 0.05,'',     'emaAlpha'],
-    ['penaltyBrake', 'Brake Penalty', 1,   15,  1,   'pts',  'penaltyBrake'],
-    ['penaltyAccel', 'Accel Penalty', 1,   15,  1,   'pts',  'penaltyAccel'],
-    ['penaltyTurn',  'Turn Penalty',  1,   15,  1,   'pts',  'penaltyTurn'],
-  ];
-
-  sliders.forEach(([id, , , , ,, key]) => {
-    const sl  = $(`#sl-${id}`);
-    const val = $(`#val-${id}`);
-    if (!sl || !val) return;
-    sl.value = CFG[key];
-    val.textContent = CFG[key];
-    sl.oninput = () => { val.textContent = sl.value; };
-  });
-}
-
-function collectSettings(){
-  const keys = ['hardBrake','hardAccel','sharpTurn','emaAlpha','penaltyBrake','penaltyAccel','penaltyTurn'];
-  const out = {};
-  keys.forEach(k => {
-    const el = $(`#sl-${k}`);
-    if (el) out[k] = parseFloat(el.value);
-  });
-  return out;
-}
-
-// -------------------------------------------------------------------------
 // Recording — real devices
 // -------------------------------------------------------------------------
 async function requestMotionPermissionIfNeeded(){
@@ -508,7 +457,6 @@ async function requestMotionPermissionIfNeeded(){
 }
 
 function startRecording(){
-  loadSettings();
   resetState();
   state.recording = true;
   state.simulated = false;
@@ -726,8 +674,10 @@ function updateLiveUI(){
   $('#live-g').textContent = state.lastMotionG ? state.lastMotionG.toFixed(2) :
     (last ? Math.min(2.5, (last.harshness||0)/9.81).toFixed(2) : '0.00');
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
-  state.liveScore = scoreFromEvents(state.events, CFG, state.samples.length);
-  $('#live-score').textContent = state.liveScore;
+  const avgMph = state.samples.length
+    ? Math.round(state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length * 2.23694)
+    : 0;
+  $('#live-avg-speed').textContent = avgMph;
   updateRoadUI();
 }
 
@@ -825,7 +775,6 @@ function resetState(){
 // Simulated drive
 // -------------------------------------------------------------------------
 function startSimulatedDrive(){
-  loadSettings();
   resetState();
   state.recording = true;
   state.simulated = true;
@@ -955,7 +904,6 @@ let mapLayers = [];
 
 function renderReview(drive){
   showScreen('review');
-  loadSettings();
 
   const when = new Date(drive.startTime);
   $('#review-when').textContent =
@@ -1083,48 +1031,95 @@ function wireStartButton(btnId){
   });
 }
 
-// ── Car selector carousel ─────────────────────────────────────────────────────
-const CAR_NAMES = ['Sports Coupe', 'Sports Sedan', 'SUV', 'Muscle Car'];
-const CAR_KEY   = 'smoothaf.car';
-let carIndex = parseInt(localStorage.getItem(CAR_KEY) || '0', 10);
+// ── Car photo (duotone) ───────────────────────────────────────────────────────
+const CAR_PHOTO_KEY = 'smoothaf.car_photo';
 
-function initCarSelector(){
-  const track  = document.getElementById('car-track');
-  const dots   = document.querySelectorAll('.car-dot');
-  const nameEl = document.getElementById('car-name');
-  if (!track) return;
+function loadCarPhoto(){
+  try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; }
+}
 
-  function setCarIndex(i){
-    carIndex = ((i % CAR_NAMES.length) + CAR_NAMES.length) % CAR_NAMES.length;
-    track.style.transform = `translateX(-${carIndex * 100}%)`;
-    dots.forEach((d,j) => d.classList.toggle('active', j === carIndex));
-    document.querySelectorAll('.car-slide').forEach((s,j) => s.classList.toggle('active', j === carIndex));
-    if (nameEl) nameEl.textContent = CAR_NAMES[carIndex];
-    localStorage.setItem(CAR_KEY, carIndex);
+function applyDuotone(imgEl){
+  const canvas = document.createElement('canvas');
+  const MAX = 1200;
+  const scale = Math.min(1, MAX / Math.max(imgEl.naturalWidth, imgEl.naturalHeight));
+  canvas.width  = Math.round(imgEl.naturalWidth  * scale);
+  canvas.height = Math.round(imgEl.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+  const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d  = id.data;
+  // Shadow → #0A0808, Highlight → #E85D3A
+  const sr=10,sg=8,sb=8, hr=232,hg=93,hb=58;
+  for (let i = 0; i < d.length; i += 4){
+    let g = (0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]) / 255;
+    g = Math.min(1, Math.max(0, (g - 0.5) * 1.3 + 0.5)); // contrast boost
+    d[i]   = Math.round(sr + (hr-sr)*g);
+    d[i+1] = Math.round(sg + (hg-sg)*g);
+    d[i+2] = Math.round(sb + (hb-sb)*g);
   }
+  ctx.putImageData(id, 0, 0);
 
-  document.getElementById('car-prev')?.addEventListener('click', () => setCarIndex(carIndex - 1));
-  document.getElementById('car-next')?.addEventListener('click', () => setCarIndex(carIndex + 1));
+  // Vignette
+  const vig = ctx.createRadialGradient(
+    canvas.width*.5, canvas.height*.5, canvas.width*.28,
+    canvas.width*.5, canvas.height*.5, canvas.width*.78
+  );
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,.55)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Touch swipe
-  let tx0 = 0;
-  const vp = document.getElementById('car-viewport');
-  if (vp) {
-    vp.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive:true });
-    vp.addEventListener('touchend',   e => {
-      const dx = e.changedTouches[0].clientX - tx0;
-      if (Math.abs(dx) > 40) setCarIndex(carIndex + (dx < 0 ? 1 : -1));
-    }, { passive:true });
+  return canvas.toDataURL('image/jpeg', 0.88);
+}
+
+function processCarPhoto(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const dataUrl = applyDuotone(img);
+      try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
+      renderCarDisplay();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderCarDisplay(){
+  const container = document.getElementById('car-display');
+  if (!container) return;
+  const photo = loadCarPhoto();
+  if (photo){
+    container.innerHTML = `
+      <div class="car-photo-wrap">
+        <img src="${photo}" class="car-photo" alt="Your car">
+        <label class="car-change-lbl">Change photo
+          <input type="file" accept="image/*" style="display:none">
+        </label>
+      </div>`;
+    container.querySelector('input[type=file]').addEventListener('change', e => {
+      if (e.target.files[0]) processCarPhoto(e.target.files[0]);
+    });
+  } else {
+    container.innerHTML = `
+      <label class="car-upload-prompt">
+        <input type="file" accept="image/*" style="display:none">
+        <div class="car-upload-icon">🚗</div>
+        <div class="car-upload-title">Add your ride</div>
+        <div class="car-upload-sub">Tap to upload · we'll make it look good</div>
+      </label>`;
+    container.querySelector('input[type=file]').addEventListener('change', e => {
+      if (e.target.files[0]) processCarPhoto(e.target.files[0]);
+    });
   }
-
-  setCarIndex(carIndex);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadSettings();
   renderDriveList();
   syncPendingDrives();
-  initCarSelector();
+  renderCarDisplay();
 
   wireStartButton('#btn-start');
   wireStartButton('#btn-new-drive');
@@ -1136,35 +1131,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDriveList();
   });
 
-  // Settings
-  $('#btn-settings').addEventListener('click', () => {
-    renderSettings();
-    showScreen('settings');
+  // Past drives toggle
+  document.getElementById('btn-view-drives')?.addEventListener('click', () => {
+    const panel = document.getElementById('drives-list-panel');
+    const btn = document.getElementById('btn-view-drives');
+    const opening = !panel.classList.contains('open');
+    panel.classList.toggle('open', opening);
+    btn.textContent = opening ? 'Hide drives' : 'Past drives';
   });
-  $('#btn-settings-back').addEventListener('click', () => {
-    showScreen('home');
-    renderDriveList();
-  });
-  $('#btn-rescore').addEventListener('click', () => {
-    const newCfg = collectSettings();
-    saveSettings(newCfg);
-    const rescored = rescoreAllDrives();
-    const count = rescored.length;
-    renderDriveList();
-    // Flash confirmation
-    const btn = $('#btn-rescore');
-    btn.textContent = `✓ Rescored ${count} drive${count !== 1 ? 's' : ''}`;
-    btn.style.background = 'var(--good)';
-    setTimeout(() => {
-      btn.textContent = 'Save & Re-score All Drives';
-      btn.style.background = '';
-    }, 2500);
-  });
-  $('#btn-reset-settings').addEventListener('click', () => {
-    saveSettings({ ...DEFAULTS });
-    renderSettings();
-    const btn = $('#btn-reset-settings');
-    btn.textContent = '✓ Reset';
-    setTimeout(() => { btn.textContent = 'Reset to Defaults'; }, 1500);
-  });
+
 });
