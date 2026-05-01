@@ -1127,8 +1127,25 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#btn-stop').addEventListener('click', () => stopRecording());
 
   $('#btn-back').addEventListener('click', () => {
+    const mapBlock = document.querySelector('.review-map-block');
+    if (mapBlock && mapBlock.classList.contains('map-full')) {
+      mapBlock.classList.remove('map-full');
+      const expandBtn = document.getElementById('btn-map-expand');
+      if (expandBtn) { expandBtn.textContent = '⤢'; expandBtn.setAttribute('aria-label', 'Expand map'); }
+      setTimeout(() => mapInstance && mapInstance.invalidateSize(), 100);
+      return;
+    }
     showScreen('home');
     renderDriveList();
+  });
+
+  document.getElementById('btn-map-expand')?.addEventListener('click', () => {
+    const mapBlock = document.querySelector('.review-map-block');
+    const btn = document.getElementById('btn-map-expand');
+    const isFull = mapBlock.classList.toggle('map-full');
+    btn.textContent = isFull ? '×' : '⤢';
+    btn.setAttribute('aria-label', isFull ? 'Close map' : 'Expand map');
+    setTimeout(() => mapInstance && mapInstance.invalidateSize(), 100);
   });
 
   // Past drives toggle

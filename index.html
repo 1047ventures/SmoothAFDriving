@@ -208,6 +208,18 @@
   #screen-review{background:var(--bg);flex-direction:column;overflow:hidden}
   .review-map-block{position:relative;height:240px;flex-shrink:0;background:#0B0B0B}
   #map{position:absolute;inset:0;background:#0B0B0B}
+
+  /* Map fullscreen expand */
+  .review-map-block.map-full{position:fixed!important;inset:0!important;height:100dvh!important;z-index:800}
+  .map-expand-btn{
+    position:absolute;right:12px;bottom:44px;z-index:600;
+    width:34px;height:34px;appearance:none;border:0;cursor:pointer;
+    background:rgba(10,10,10,.82);border:1px solid rgba(244,235,217,.16);
+    border-radius:9px;color:var(--cream-dim);font-size:16px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  }
+  .map-expand-btn:active{background:rgba(244,235,217,.1)}
   .leaflet-container{background:#0B0B0B;font-family:var(--sans)}
   .leaflet-popup-content-wrapper{background:var(--ink);color:var(--cream);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
   .leaflet-popup-tip{background:var(--ink)}
@@ -244,10 +256,10 @@
   .event-chip .l{font-size:11px;letter-spacing:.12em;color:var(--cream-dim);text-transform:uppercase}
   .event-chip.brake .n{color:var(--danger)}.event-chip.accel .n{color:var(--warn)}.event-chip.turn .n{color:var(--gold)}
 
-  .stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;padding-top:14px;border-top:1px solid rgba(244,235,217,.1)}
+  .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;padding-top:14px;border-top:1px solid rgba(244,235,217,.1)}
   .stat-strip .cell{text-align:left}
-  .stat-strip .cell-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px}
-  .stat-strip .cell-l{font-size:10px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  .stat-strip .cell-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px}
+  .stat-strip .cell-l{font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:2px}
 
   .noticed-head,.analytics-head,.chart-head{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
   .noticed-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
@@ -265,9 +277,9 @@
   .gforce-chart{width:100%;height:80px;display:block;border-radius:10px;overflow:hidden;background:rgba(244,235,217,.03)}
 
   .analytics-section{margin-bottom:16px;padding-top:14px;border-top:1px solid rgba(244,235,217,.08)}
-  .analytics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-  .an-cell{background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.07);border-radius:10px;padding:10px 12px}
-  .an-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;line-height:1}
+  .analytics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .an-cell{background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.07);border-radius:10px;padding:10px 10px}
+  .an-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;line-height:1}
   .an-lbl{font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:3px;line-height:1.4}
   .an-sub{font-size:10px;color:var(--cream-dim);margin-top:3px}
   .stop-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:rgba(111,182,105,.14);border:1px solid rgba(111,182,105,.3);font-size:10px;letter-spacing:.2em;color:var(--good);text-transform:uppercase;margin-top:4px}
@@ -335,7 +347,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v13</div>
+<div id="app-version">v14</div>
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="f-cartoon" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
@@ -409,6 +421,7 @@
         <div class="lg-row"><div class="lg-sw" style="background:#E8A03A"></div><span>Jerky</span></div>
         <div class="lg-row"><div class="lg-sw" style="background:#E03B2F"></div><span>Harsh</span></div>
       </div>
+      <button class="map-expand-btn" id="btn-map-expand" aria-label="Expand map">⤢</button>
     </div>
 
     <!-- Scrollable results body -->
