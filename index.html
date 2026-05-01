@@ -50,30 +50,25 @@
   /* Car photo display */
   #car-display{
     position:absolute;
-    top:calc(env(safe-area-inset-top,0) + 68px);
+    top:calc(env(safe-area-inset-top,0) + 64px);
     left:0;right:0;
-    bottom:calc(env(safe-area-inset-bottom,0) + 168px);
+    bottom:calc(env(safe-area-inset-bottom,0) + 160px);
     display:flex;align-items:center;justify-content:center;
-    padding:0 24px;
     z-index:10;
   }
   .car-upload-prompt{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:10px;width:100%;aspect-ratio:4/3;border-radius:22px;cursor:pointer;
+    gap:10px;width:220px;height:220px;border-radius:50%;cursor:pointer;
     border:1.5px dashed rgba(232,93,58,.35);
     background:rgba(232,93,58,.04);
   }
   .car-upload-icon{font-size:38px}
-  .car-upload-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream)}
-  .car-upload-sub{font-size:12px;color:var(--muted);letter-spacing:.1em;text-align:center}
-  .car-photo-wrap{position:relative;width:100%;border-radius:22px;overflow:hidden;box-shadow:0 20px 56px rgba(232,93,58,.22),0 6px 20px rgba(0,0,0,.7)}
-  .car-photo{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+  .car-upload-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;color:var(--cream);text-align:center}
+  .car-upload-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;text-align:center;padding:0 16px}
   .car-change-lbl{
-    position:absolute;bottom:10px;right:12px;
-    font-size:10px;letter-spacing:.2em;text-transform:uppercase;
-    color:rgba(244,235,217,.55);background:rgba(10,8,8,.55);
-    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    padding:5px 11px;border-radius:8px;cursor:pointer;
+    position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
+    color:rgba(244,235,217,.4);cursor:pointer;
   }
 
   /* Floating glass gradient top bar */
@@ -285,6 +280,41 @@
   .new-drive-btn:active{transform:scale(.985)}
 
 
+  /* ── Cartoon avatar filter ── */
+  .car-avatar{
+    width:100%;height:100%;object-fit:cover;border-radius:50%;
+    filter:url(#f-cartoon) contrast(1.25) saturate(1.5) brightness(1.05);
+    display:block;
+  }
+  .avatar-circle{
+    border-radius:50%;overflow:hidden;
+    box-shadow:0 0 0 3px rgba(232,93,58,.4),0 8px 32px rgba(0,0,0,.7);
+    flex-shrink:0;
+  }
+  /* Home screen avatar (large) */
+  #car-display .avatar-circle{width:220px;height:220px}
+  /* Recording screen avatar */
+  .rec-avatar-wrap{
+    position:relative;width:160px;height:160px;
+    flex-shrink:0;margin:12px 0 4px;
+  }
+  .rec-avatar-wrap .avatar-circle{width:160px;height:160px}
+  /* Directional bursts */
+  .burst{position:absolute;pointer-events:none;opacity:0;border-radius:50%}
+  .burst.b-brake{bottom:-18px;left:50%;transform:translateX(-50%);width:80px;height:28px;background:radial-gradient(ellipse,rgba(239,68,68,.95) 0%,transparent 75%)}
+  .burst.b-accel{top:-18px;left:50%;transform:translateX(-50%);width:80px;height:28px;background:radial-gradient(ellipse,rgba(251,146,60,.95) 0%,transparent 75%)}
+  .burst.b-left{left:-18px;top:50%;transform:translateY(-50%);width:28px;height:80px;background:radial-gradient(ellipse,rgba(251,146,60,.9) 0%,transparent 75%)}
+  .burst.b-right{right:-18px;top:50%;transform:translateY(-50%);width:28px;height:80px;background:radial-gradient(ellipse,rgba(251,146,60,.9) 0%,transparent 75%)}
+  @keyframes burst-out{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
+  @keyframes burst-out-y{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
+  @keyframes burst-accel{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
+  @keyframes burst-side-l{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(1.8)}}
+  @keyframes burst-side-r{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(1.8)}}
+  .burst.b-brake.fire{animation:burst-out .7s ease-out forwards}
+  .burst.b-accel.fire{animation:burst-accel .7s ease-out forwards}
+  .burst.b-left.fire{animation:burst-side-l .7s ease-out forwards}
+  .burst.b-right.fire{animation:burst-side-r .7s ease-out forwards}
+
   /* ============ UTIL ============ */
   .hidden{display:none!important}
   .permission-hint{position:fixed;inset:0;z-index:1000;background:rgba(10,10,10,.92);display:flex;align-items:center;justify-content:center;padding:32px;backdrop-filter:blur(6px)}
@@ -298,6 +328,18 @@
 </style>
 </head>
 <body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="f-cartoon" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+      <feComponentTransfer>
+        <feFuncR type="discrete" tableValues="0 .18 .36 .54 .72 .9 1"/>
+        <feFuncG type="discrete" tableValues="0 .18 .36 .54 .72 .9 1"/>
+        <feFuncB type="discrete" tableValues="0 .18 .36 .54 .72 .9 1"/>
+      </feComponentTransfer>
+      <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 9 -1 -1 -1 -1" preserveAlpha="true"/>
+    </filter>
+  </defs>
+</svg>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -326,15 +368,20 @@
       <div class="rec-label"><span class="rec-dot"></span> Recording</div>
       <div class="rec-source" id="rec-source">GPS + Motion</div>
     </div>
+    <div class="rec-avatar-wrap" id="rec-avatar-wrap">
+      <div class="burst b-brake" id="burst-brake"></div>
+      <div class="burst b-accel" id="burst-accel"></div>
+      <div class="burst b-left"  id="burst-left"></div>
+      <div class="burst b-right" id="burst-right"></div>
+    </div>
     <div class="speed-big" id="live-speed">0</div>
     <div class="speed-unit">mph</div>
-    <div class="gauge-row" style="margin-top:28px">
+    <div class="gauge-row" style="margin-top:16px">
       <div class="gauge"><div class="gauge-val" id="live-time">0:00</div><div class="gauge-lbl">Duration</div></div>
       <div class="gauge"><div class="gauge-val" id="live-avg-speed">0</div><div class="gauge-lbl">Avg mph</div></div>
     </div>
     <span id="live-g" style="display:none" aria-hidden="true">0.00</span>
     <div id="calib-status" style="display:none;font-size:12px;text-align:center;margin-top:8px;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.4)"></div>
-    <div id="road-quality" style="font-size:11px;text-align:center;margin-top:4px;color:#888;min-height:16px"></div>
     <div class="event-ticker" id="event-ticker"></div>
     <button id="btn-stop" class="stop-btn">Stop drive</button>
   </section>
@@ -379,6 +426,7 @@
         <div class="cell"><div class="cell-v"><span id="r-distance">0.0</span></div><div class="cell-l">Miles</div></div>
         <div class="cell"><div class="cell-v"><span id="r-duration">0:00</span></div><div class="cell-l">Duration</div></div>
         <div class="cell"><div class="cell-v"><span id="r-topspeed">0</span></div><div class="cell-l">Top mph</div></div>
+        <div class="cell"><div class="cell-v"><span id="r-road-quality">—</span></div><div class="cell-l">Road quality</div></div>
       </div>
 
       <!-- Peak values (analytics grid style) -->

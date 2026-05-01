@@ -463,6 +463,7 @@ function startRecording(){
   state.startTime = Date.now();
   $('#rec-source').textContent = 'GPS + Motion';
   showScreen('record');
+  renderRecAvatar();
 
   // ── Phase 0: detect if already moving (skip stability wait if so) ────────
   if (navigator.geolocation){
@@ -594,7 +595,7 @@ function startRecording(){
             roadRoughness: state.currentRoughness,
           };
           state.events.push(full);
-          flashEvent(evt.type);
+          flashEvent(evt.type, state.peakLat);
           speakEvent(evt.type);
         }
       }
@@ -661,7 +662,7 @@ function onGpsUpdate(pos){
         roadRoughness: state.currentRoughness,
       };
       state.events.push(full);
-      flashEvent(evt.type);
+      flashEvent(evt.type, state.peakLat);
       speakEvent(evt.type);
     }
   }
@@ -682,35 +683,19 @@ function updateLiveUI(){
 }
 
 function setCalibUI(phase){
+  // Only show failure — success is silent
+  if (phase !== 'failed') return;
   const el = document.getElementById('calib-status');
   if (!el) return;
   el.style.display = 'block';
-  const msgs = {
-    calibrating: { icon:'⏳', text:'Detecting phone orientation…',        color:'#facc15' },
-    moving:      { icon:'🚗', text:'Already moving — fast-track active',  color:'#60a5fa' },
-    done:        { icon:'✅', text:'Motion calibrated · 60Hz active',     color:'#4ade80' },
-    failed:      { icon:'⚠️', text:'Calibration failed · GPS fallback',   color:'#f87171' },
-  };
-  const m = msgs[phase] || msgs.calibrating;
-  el.textContent = `${m.icon} ${m.text}`;
-  el.style.color = m.color;
-  if (phase === 'done' || phase === 'failed' || phase === 'moving')
-    setTimeout(() => { el.style.display = 'none'; }, phase === 'failed' ? 6000 : 4000);
+  el.textContent = '⚠️ Calibration failed · GPS fallback';
+  el.style.color = '#f87171';
+  setTimeout(() => { el.style.display = 'none'; }, 6000);
 }
 
-// Update road roughness indicator in live UI (called from updateLiveUI)
-function updateRoadUI(){
-  const el = document.getElementById('road-quality');
-  if (!el) return;
-  const r = state.currentRoughness;
-  if (r < 0.1){ el.textContent = '🛣️ Smooth road'; el.style.color = '#4ade80'; }
-  else if (r < 0.4){ el.textContent = '🛣️ Good road'; el.style.color = '#a3e635'; }
-  else if (r < 0.9){ el.textContent = '〰️ Moderate road'; el.style.color = '#facc15'; }
-  else if (r < 1.8){ el.textContent = '⚠️ Rough road'; el.style.color = '#fb923c'; }
-  else             { el.textContent = '🚧 Very rough road'; el.style.color = '#f87171'; }
-}
+function updateRoadUI(){ /* roughness tracked in state.currentRoughness; shown in review */ }
 
-function flashEvent(type){
+function flashEvent(type, latAccel){
   const el = document.createElement('div');
   el.className = 'event-flash' + (type === 'turn' ? ' warn' : '');
   el.textContent = type === 'brake' ? 'Hard brake' : type === 'accel' ? 'Hard accel' : 'Sharp turn';
@@ -718,6 +703,18 @@ function flashEvent(type){
   ticker.innerHTML = '';
   ticker.appendChild(el);
   setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
+
+  // Directional burst on avatar
+  const burstId = type === 'brake' ? 'burst-brake'
+                : type === 'accel' ? 'burst-accel'
+                : (latAccel >= 0 ? 'burst-right' : 'burst-left');
+  const burst = document.getElementById(burstId);
+  if (burst){
+    burst.classList.remove('fire');
+    void burst.offsetWidth; // reflow to restart animation
+    burst.classList.add('fire');
+    setTimeout(() => burst.classList.remove('fire'), 800);
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -800,7 +797,7 @@ function startSimulatedDrive(){
     const evt = detectEvent(s, s.t);
     if (evt){
       state.events.push({ ...evt, t: s.t, lat: s.lat, lon: s.lon, speedMph: mpsToMph(s.speed) });
-      flashEvent(evt.type);
+      flashEvent(evt.type, state.peakLat);
       speakEvent(evt.type);
     }
     state.lastMotionG = Math.min(2.5, s.harshness / 9.81);
@@ -922,6 +919,13 @@ function renderReview(drive){
   $('#r-duration').textContent = fmtDuration(drive.durationMs);
   $('#r-topspeed').textContent  = Math.round(mpsToMph(drive.topSpeedMps));
 
+  const roadEl = $('#r-road-quality');
+  if (roadEl && drive.samples.length){
+    const avgRough = drive.samples.reduce((s,x) => s + (x.roadRoughness || 0), 0) / drive.samples.length;
+    roadEl.textContent = avgRough < 0.15 ? 'Smooth' : avgRough < 0.5 ? 'Good' : avgRough < 1.0 ? 'Fair' : 'Rough';
+    roadEl.style.color = avgRough < 0.15 ? 'var(--good)' : avgRough < 0.5 ? 'var(--sage)' : avgRough < 1.0 ? 'var(--warn)' : 'var(--danger)';
+  }
+
   // ---- Peak values from samples ----
   let peakDecel = 0, peakAccel = 0, peakTurn = 0;
   for (const s of drive.samples){
@@ -1038,38 +1042,13 @@ function loadCarPhoto(){
   try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; }
 }
 
-function applyDuotone(imgEl){
+function compressPhoto(imgEl){
   const canvas = document.createElement('canvas');
-  const MAX = 1200;
+  const MAX = 900;
   const scale = Math.min(1, MAX / Math.max(imgEl.naturalWidth, imgEl.naturalHeight));
   canvas.width  = Math.round(imgEl.naturalWidth  * scale);
   canvas.height = Math.round(imgEl.naturalHeight * scale);
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-
-  const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const d  = id.data;
-  // Shadow → #0A0808, Highlight → #E85D3A
-  const sr=10,sg=8,sb=8, hr=232,hg=93,hb=58;
-  for (let i = 0; i < d.length; i += 4){
-    let g = (0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]) / 255;
-    g = Math.min(1, Math.max(0, (g - 0.5) * 1.3 + 0.5)); // contrast boost
-    d[i]   = Math.round(sr + (hr-sr)*g);
-    d[i+1] = Math.round(sg + (hg-sg)*g);
-    d[i+2] = Math.round(sb + (hb-sb)*g);
-  }
-  ctx.putImageData(id, 0, 0);
-
-  // Vignette
-  const vig = ctx.createRadialGradient(
-    canvas.width*.5, canvas.height*.5, canvas.width*.28,
-    canvas.width*.5, canvas.height*.5, canvas.width*.78
-  );
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,.55)');
-  ctx.fillStyle = vig;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+  canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL('image/jpeg', 0.88);
 }
 
@@ -1078,7 +1057,7 @@ function processCarPhoto(file){
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
-      const dataUrl = applyDuotone(img);
+      const dataUrl = compressPhoto(img);
       try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
       renderCarDisplay();
     };
@@ -1093,8 +1072,10 @@ function renderCarDisplay(){
   const photo = loadCarPhoto();
   if (photo){
     container.innerHTML = `
-      <div class="car-photo-wrap">
-        <img src="${photo}" class="car-photo" alt="Your car">
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center">
+        <div class="avatar-circle">
+          <img src="${photo}" class="car-avatar" alt="Your car">
+        </div>
         <label class="car-change-lbl">Change photo
           <input type="file" accept="image/*" style="display:none">
         </label>
@@ -1108,11 +1089,30 @@ function renderCarDisplay(){
         <input type="file" accept="image/*" style="display:none">
         <div class="car-upload-icon">🚗</div>
         <div class="car-upload-title">Add your ride</div>
-        <div class="car-upload-sub">Tap to upload · we'll make it look good</div>
+        <div class="car-upload-sub">Tap to upload</div>
       </label>`;
     container.querySelector('input[type=file]').addEventListener('change', e => {
       if (e.target.files[0]) processCarPhoto(e.target.files[0]);
     });
+  }
+  renderRecAvatar();
+}
+
+function renderRecAvatar(){
+  const wrap = document.getElementById('rec-avatar-wrap');
+  if (!wrap) return;
+  const photo = loadCarPhoto();
+  // Remove any existing avatar img (keep burst divs)
+  wrap.querySelectorAll('img,.avatar-circle').forEach(el => el.remove());
+  if (photo){
+    const circle = document.createElement('div');
+    circle.className = 'avatar-circle';
+    const img = document.createElement('img');
+    img.src = photo;
+    img.className = 'car-avatar';
+    img.alt = 'Your car';
+    circle.appendChild(img);
+    wrap.insertBefore(circle, wrap.firstChild);
   }
 }
 
