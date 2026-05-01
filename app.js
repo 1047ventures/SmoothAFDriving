@@ -1031,47 +1031,95 @@ function wireStartButton(btnId){
   });
 }
 
-// ── Car selector carousel ─────────────────────────────────────────────────────
-const CAR_NAMES = ['Sports Coupe', 'Sports Sedan', 'SUV', 'Muscle Car'];
-const CAR_KEY   = 'smoothaf.car';
-let carIndex = parseInt(localStorage.getItem(CAR_KEY) || '0', 10);
+// ── Car photo (duotone) ───────────────────────────────────────────────────────
+const CAR_PHOTO_KEY = 'smoothaf.car_photo';
 
-function initCarSelector(){
-  const track  = document.getElementById('car-track');
-  const dots   = document.querySelectorAll('.car-dot');
-  const nameEl = document.getElementById('car-name');
-  if (!track) return;
+function loadCarPhoto(){
+  try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; }
+}
 
-  function setCarIndex(i){
-    carIndex = ((i % CAR_NAMES.length) + CAR_NAMES.length) % CAR_NAMES.length;
-    track.style.transform = `translateX(-${carIndex * 100}%)`;
-    dots.forEach((d,j) => d.classList.toggle('active', j === carIndex));
-    document.querySelectorAll('.car-slide').forEach((s,j) => s.classList.toggle('active', j === carIndex));
-    if (nameEl) nameEl.textContent = CAR_NAMES[carIndex];
-    localStorage.setItem(CAR_KEY, carIndex);
+function applyDuotone(imgEl){
+  const canvas = document.createElement('canvas');
+  const MAX = 1200;
+  const scale = Math.min(1, MAX / Math.max(imgEl.naturalWidth, imgEl.naturalHeight));
+  canvas.width  = Math.round(imgEl.naturalWidth  * scale);
+  canvas.height = Math.round(imgEl.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+  const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d  = id.data;
+  // Shadow → #0A0808, Highlight → #E85D3A
+  const sr=10,sg=8,sb=8, hr=232,hg=93,hb=58;
+  for (let i = 0; i < d.length; i += 4){
+    let g = (0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]) / 255;
+    g = Math.min(1, Math.max(0, (g - 0.5) * 1.3 + 0.5)); // contrast boost
+    d[i]   = Math.round(sr + (hr-sr)*g);
+    d[i+1] = Math.round(sg + (hg-sg)*g);
+    d[i+2] = Math.round(sb + (hb-sb)*g);
   }
+  ctx.putImageData(id, 0, 0);
 
-  document.getElementById('car-prev')?.addEventListener('click', () => setCarIndex(carIndex - 1));
-  document.getElementById('car-next')?.addEventListener('click', () => setCarIndex(carIndex + 1));
+  // Vignette
+  const vig = ctx.createRadialGradient(
+    canvas.width*.5, canvas.height*.5, canvas.width*.28,
+    canvas.width*.5, canvas.height*.5, canvas.width*.78
+  );
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,.55)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Touch swipe
-  let tx0 = 0;
-  const vp = document.getElementById('car-viewport');
-  if (vp) {
-    vp.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive:true });
-    vp.addEventListener('touchend',   e => {
-      const dx = e.changedTouches[0].clientX - tx0;
-      if (Math.abs(dx) > 40) setCarIndex(carIndex + (dx < 0 ? 1 : -1));
-    }, { passive:true });
+  return canvas.toDataURL('image/jpeg', 0.88);
+}
+
+function processCarPhoto(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const dataUrl = applyDuotone(img);
+      try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
+      renderCarDisplay();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderCarDisplay(){
+  const container = document.getElementById('car-display');
+  if (!container) return;
+  const photo = loadCarPhoto();
+  if (photo){
+    container.innerHTML = `
+      <div class="car-photo-wrap">
+        <img src="${photo}" class="car-photo" alt="Your car">
+        <label class="car-change-lbl">Change photo
+          <input type="file" accept="image/*" style="display:none">
+        </label>
+      </div>`;
+    container.querySelector('input[type=file]').addEventListener('change', e => {
+      if (e.target.files[0]) processCarPhoto(e.target.files[0]);
+    });
+  } else {
+    container.innerHTML = `
+      <label class="car-upload-prompt">
+        <input type="file" accept="image/*" style="display:none">
+        <div class="car-upload-icon">🚗</div>
+        <div class="car-upload-title">Add your ride</div>
+        <div class="car-upload-sub">Tap to upload · we'll make it look good</div>
+      </label>`;
+    container.querySelector('input[type=file]').addEventListener('change', e => {
+      if (e.target.files[0]) processCarPhoto(e.target.files[0]);
+    });
   }
-
-  setCarIndex(carIndex);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   renderDriveList();
   syncPendingDrives();
-  initCarSelector();
+  renderCarDisplay();
 
   wireStartButton('#btn-start');
   wireStartButton('#btn-new-drive');
