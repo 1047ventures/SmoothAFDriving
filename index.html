@@ -346,10 +346,28 @@
   .perm-btn-row button{flex:1;padding:14px;border-radius:12px;border:0;font-size:14px;font-weight:600;cursor:pointer}
   .perm-allow{background:var(--tang);color:var(--bg)}
   .perm-skip{background:transparent;color:var(--cream-dim);border:1px solid rgba(244,235,217,.14)!important}
+
+  /* ── Car loading state ── */
+  .car-loading{
+    width:220px;height:220px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:1.5px dashed rgba(232,93,58,.35);background:rgba(232,93,58,.04);
+    font-family:var(--serif);font-style:italic;color:var(--muted);font-size:15px;
+    animation:rec-pulse 1.6s infinite;
+  }
+  /* ── remove.bg key modal ── */
+  .removebg-error{color:var(--danger);font-size:12px;min-height:16px;margin:0 0 10px;text-align:center}
+  .removebg-input{
+    width:100%;padding:12px 14px;border-radius:10px;margin-bottom:12px;
+    border:1px solid rgba(244,235,217,.18);background:rgba(244,235,217,.06);
+    color:var(--cream);font-size:14px;outline:none;font-family:var(--sans);
+  }
+  .removebg-input::placeholder{color:var(--muted)}
+  .removebg-link{font-size:12px;color:var(--cream-dim);text-align:center;display:block;margin-bottom:14px}
 </style>
 </head>
 <body>
-<div id="app-version">v16</div>
+<div id="app-version">v17</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -454,6 +472,21 @@
 
   </section>
 
+
+  <!-- REMOVE.BG API KEY MODAL -->
+  <div id="removebg-modal" class="permission-hint hidden">
+    <div class="permission-card">
+      <p class="permission-title">Add your API key</p>
+      <p class="permission-body">We use remove.bg to cut your car from its background, then apply a cartoon effect. Get a free key at remove.bg — 50 photos/month free.</p>
+      <a class="removebg-link" href="https://www.remove.bg/api" target="_blank" rel="noopener">remove.bg/api →</a>
+      <p class="removebg-error"></p>
+      <input id="removebg-key-input" class="removebg-input" type="text" placeholder="Paste API key here" autocomplete="off" spellcheck="false">
+      <div class="perm-btn-row">
+        <button class="perm-skip" id="removebg-skip">Skip</button>
+        <button class="perm-allow" id="removebg-save">Save & Process</button>
+      </div>
+    </div>
+  </div>
 
   <!-- PERMISSION MODAL (iOS 13+) -->
   <div id="perm-modal" class="permission-hint hidden">

@@ -1258,35 +1258,131 @@ function wireStartButton(btnId){
   });
 }
 
-// ── Car photo (duotone) ───────────────────────────────────────────────────────
-const CAR_PHOTO_KEY = 'smoothaf.car_photo';
+// ── Car photo — background removal + cartoon ─────────────────────────────────
+const CAR_PHOTO_KEY   = 'smoothaf.car_photo';
+const REMOVEBG_KEY    = 'smoothaf.removebg_key';
 
-function loadCarPhoto(){
-  try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; }
+function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
+function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || ''; }
+
+function loadImageFromSrc(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
 
-function compressPhoto(imgEl){
-  const canvas = document.createElement('canvas');
+async function removeBgAPI(file){
+  const key = getRemoveBgKey();
+  if (!key) throw Object.assign(new Error('No key'), { code: 'no-key' });
+  const fd = new FormData();
+  fd.append('image_file', file);
+  fd.append('size', 'auto');
+  const res = await fetch('https://api.remove.bg/v1.0/removebg', {
+    method: 'POST',
+    headers: { 'X-Api-Key': key },
+    body: fd,
+  });
+  if (res.status === 403) throw Object.assign(new Error('Invalid key'), { code: 'invalid-key' });
+  if (!res.ok) throw new Error(`remove.bg ${res.status}`);
+  return res.blob();
+}
+
+function cartoonizeImage(img){
   const MAX = 900;
-  const scale = Math.min(1, MAX / Math.max(imgEl.naturalWidth, imgEl.naturalHeight));
-  canvas.width  = Math.round(imgEl.naturalWidth  * scale);
-  canvas.height = Math.round(imgEl.naturalHeight * scale);
-  canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL('image/jpeg', 0.88);
+  const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.round(img.naturalWidth * scale);
+  const h = Math.round(img.naturalHeight * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  // Dark outline — draw offset copies to create comic-book edge
+  const OFFSETS = [-2, 0, 2];
+  ctx.globalAlpha = 0.9;
+  for (const dx of OFFSETS) for (const dy of OFFSETS){
+    if (!dx && !dy) continue;
+    ctx.filter = 'brightness(0)';
+    ctx.drawImage(img, dx, dy, w, h);
+  }
+  ctx.globalAlpha = 1; ctx.filter = 'none';
+
+  // Draw car on top
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // Posterize + saturation boost
+  const px = ctx.getImageData(0, 0, w, h), d = px.data;
+  const LEVELS = 5, step = 255 / LEVELS;
+  for (let i = 0; i < d.length; i += 4){
+    if (d[i+3] < 20) continue;
+    d[i]   = Math.round(Math.round(d[i]   / step) * step);
+    d[i+1] = Math.round(Math.round(d[i+1] / step) * step);
+    d[i+2] = Math.round(Math.round(d[i+2] / step) * step);
+    const avg = (d[i] + d[i+1] + d[i+2]) / 3;
+    const S = 1.45;
+    d[i]   = Math.max(0, Math.min(255, avg + (d[i]   - avg) * S));
+    d[i+1] = Math.max(0, Math.min(255, avg + (d[i+1] - avg) * S));
+    d[i+2] = Math.max(0, Math.min(255, avg + (d[i+2] - avg) * S));
+  }
+  ctx.putImageData(px, 0, 0);
+  return canvas.toDataURL('image/png', 0.92);
 }
 
-function processCarPhoto(file){
+function savePhotoPlain(file){
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
-      const dataUrl = compressPhoto(img);
+      const canvas = document.createElement('canvas');
+      const MAX = 900, scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
       try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
-      renderCarDisplay();
+      renderCarDisplay(); renderRecAvatar();
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+async function processCarPhoto(file){
+  // Show loading state immediately
+  const container = document.getElementById('car-display');
+  if (container) container.innerHTML = '<div class="car-loading"><span>Processing…</span></div>';
+
+  if (!getRemoveBgKey()){
+    showApiKeyPrompt(file);
+    return;
+  }
+  try {
+    const blob   = await removeBgAPI(file);
+    const objUrl = URL.createObjectURL(blob);
+    const img    = await loadImageFromSrc(objUrl);
+    URL.revokeObjectURL(objUrl);
+    const dataUrl = cartoonizeImage(img);
+    try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
+    renderCarDisplay(); renderRecAvatar();
+  } catch (err) {
+    if (err.code === 'invalid-key'){
+      localStorage.removeItem(REMOVEBG_KEY);
+      showApiKeyPrompt(file, 'That key didn\'t work — try again.');
+    } else {
+      console.warn('AI photo failed, using plain:', err);
+      savePhotoPlain(file);
+    }
+  }
+}
+
+function showApiKeyPrompt(pendingFile, errorMsg){
+  const modal = document.getElementById('removebg-modal');
+  modal.querySelector('.removebg-error').textContent = errorMsg || '';
+  modal.querySelector('#removebg-key-input').value = '';
+  modal._pendingFile = pendingFile;
+  modal.classList.remove('hidden');
 }
 
 function renderCarDisplay(){
@@ -1369,6 +1465,21 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.textContent = isFull ? '×' : '⤢';
     btn.setAttribute('aria-label', isFull ? 'Close map' : 'Expand map');
     setTimeout(() => mapInstance && mapInstance.invalidateSize(), 100);
+  });
+
+  // Remove.bg API key modal
+  document.getElementById('removebg-save')?.addEventListener('click', () => {
+    const key = document.getElementById('removebg-key-input').value.trim();
+    if (!key) return;
+    localStorage.setItem(REMOVEBG_KEY, key);
+    document.getElementById('removebg-modal').classList.add('hidden');
+    const f = document.getElementById('removebg-modal')._pendingFile;
+    if (f) processCarPhoto(f);
+  });
+  document.getElementById('removebg-skip')?.addEventListener('click', () => {
+    document.getElementById('removebg-modal').classList.add('hidden');
+    const f = document.getElementById('removebg-modal')._pendingFile;
+    if (f) savePhotoPlain(f);
   });
 
   // Past drives toggle
