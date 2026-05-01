@@ -2,3 +2,4 @@
 node_modules/
 .netlify/
 *.log
+.claude/settings.local.json
