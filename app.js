@@ -1263,7 +1263,7 @@ const CAR_PHOTO_KEY   = 'smoothaf.car_photo';
 const REMOVEBG_KEY    = 'smoothaf.removebg_key';
 
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
-function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || ''; }
+function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || '9BMp9XXKWRiqoXeqEPp1T63U'; }
 
 function loadImageFromSrc(src){
   return new Promise((resolve, reject) => {
