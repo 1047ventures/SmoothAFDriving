@@ -1,7 +1,7 @@
 // Smooth AF — tiny service worker.
 // App-shell cache so the PWA opens offline once installed.
 
-const CACHE = 'smoothaf-v14';
+const CACHE = 'smoothaf-v15';
 const SHELL = [
   './',
   './index.html',

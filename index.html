@@ -276,13 +276,15 @@
   .chart-section{margin-bottom:18px}
   .gforce-chart{width:100%;height:80px;display:block;border-radius:10px;overflow:hidden;background:rgba(244,235,217,.03)}
 
-  .analytics-section{margin-bottom:16px;padding-top:14px;border-top:1px solid rgba(244,235,217,.08)}
-  .analytics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .an-cell{background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.07);border-radius:10px;padding:10px 10px}
-  .an-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;line-height:1}
-  .an-lbl{font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:3px;line-height:1.4}
-  .an-sub{font-size:10px;color:var(--cream-dim);margin-top:3px}
-  .stop-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:rgba(111,182,105,.14);border:1px solid rgba(111,182,105,.3);font-size:10px;letter-spacing:.2em;color:var(--good);text-transform:uppercase;margin-top:4px}
+  /* ── Seven-dimension bars ── */
+  .dims-section{margin-bottom:18px;padding-top:14px;border-top:1px solid rgba(244,235,217,.08)}
+  .dims-head{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 12px}
+  .dims-list{display:flex;flex-direction:column;gap:9px}
+  .dim-row{display:grid;grid-template-columns:132px 1fr 30px;align-items:center;gap:10px}
+  .dim-label{font-size:11px;color:var(--cream-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dim-bar-wrap{height:6px;border-radius:3px;background:rgba(244,235,217,.08);overflow:hidden}
+  .dim-bar{height:100%;border-radius:3px;transition:width .5s ease}
+  .dim-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:13px;text-align:right}
 
   .ev-marker{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-family:var(--serif);font-weight:700;font-style:italic;font-size:14px;color:var(--cream);border:2px solid var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.5)}
   .ev-marker.brake{background:var(--danger)}.ev-marker.accel{background:var(--warn);color:var(--bg)}.ev-marker.turn{background:var(--gold);color:var(--bg)}
@@ -347,7 +349,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v14</div>
+<div id="app-version">v15</div>
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="f-cartoon" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
@@ -450,23 +452,13 @@
         <div class="cell"><div class="cell-v"><span id="r-road-quality">—</span></div><div class="cell-l">Road quality</div></div>
       </div>
 
-      <!-- Peak values (analytics grid style) -->
-      <div class="analytics-section">
-        <p class="analytics-head">Peak values this drive</p>
-        <div class="analytics-grid">
-          <div class="an-cell">
-            <div class="an-val" id="peak-decel">—</div>
-            <div class="an-lbl">Peak Brake<br><span style="font-size:9px;color:rgba(107,98,88,.7)" id="thresh-brake"></span></div>
-          </div>
-          <div class="an-cell">
-            <div class="an-val" id="peak-accel">—</div>
-            <div class="an-lbl">Peak Accel<br><span style="font-size:9px;color:rgba(107,98,88,.7)" id="thresh-accel"></span></div>
-          </div>
-          <div class="an-cell">
-            <div class="an-val" id="peak-turn">—</div>
-            <div class="an-lbl">Peak Turn<br><span style="font-size:9px;color:rgba(107,98,88,.7)" id="thresh-turn"></span></div>
-          </div>
-        </div>
+      <!-- Coaching cards -->
+      <div class="noticed-cards" id="coaching-cards"></div>
+
+      <!-- Seven dimension bars -->
+      <div class="dims-section">
+        <p class="dims-head">Drive dimensions</p>
+        <div class="dims-list" id="dims-list"></div>
       </div>
 
       <button id="btn-new-drive" class="new-drive-btn">New drive <span style="font-family:var(--sans);font-style:normal">→</span></button>

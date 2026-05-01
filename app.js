@@ -391,6 +391,226 @@ function rescoreAllDrives(){
   return rescored;
 }
 
+// =========================================================================
+// Seven-Dimension Continuous Scoring
+// =========================================================================
+
+const DIM_WEIGHTS = {
+  peakHarshness: 0.20,
+  throttle:      0.20,
+  steering:      0.10,
+  braking:       0.15,
+  cornering:     0.10,
+  transitions:   0.10,
+  momentum:      0.15,
+};
+
+const DIM_DISPLAY = [
+  { key: 'peakHarshness', label: 'Peak Harshness'       },
+  { key: 'throttle',      label: 'Throttle Steadiness'  },
+  { key: 'steering',      label: 'Steering Steadiness'  },
+  { key: 'braking',       label: 'Braking Anticipation' },
+  { key: 'cornering',     label: 'Corner Composure'     },
+  { key: 'transitions',   label: 'Transition Smoothness'},
+  { key: 'momentum',      label: 'Momentum Management'  },
+];
+
+function pct(sortedArr, p){
+  if (!sortedArr.length) return 0;
+  const idx = (p / 100) * (sortedArr.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  return lo === hi ? sortedArr[lo] : sortedArr[lo] + (sortedArr[hi] - sortedArr[lo]) * (idx - lo);
+}
+
+function linMap(val, inLo, inHi, outLo, outHi){
+  const t = Math.max(0, Math.min(1, (val - inLo) / (inHi - inLo)));
+  return outLo + t * (outHi - outLo);
+}
+
+function dimColor(n){ return n >= 80 ? 'var(--good)' : n >= 55 ? 'var(--warn)' : 'var(--danger)'; }
+
+function analyzeDrive(drive){
+  const smp = drive.samples || [];
+  const n   = smp.length;
+  if (n < 3){
+    const dims = { peakHarshness:85, throttle:85, steering:85, braking:85, cornering:85, transitions:85, momentum:85 };
+    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0 };
+  }
+
+  const durationMin = (drive.durationMs || 0) / 60000;
+  const distanceMi  = metersToMiles(drive.distanceMeters || 0);
+
+  // ── 1. Peak Harshness — p90 of harshness magnitude ───────────────────────
+  const hSorted = smp.map(s => s.h || 0).sort((a,b) => a - b);
+  const p90H    = pct(hSorted, 90);
+  const peakHarshness = Math.round(clamp(linMap(p90H, 0.3, 4.0, 100, 0), 0, 100)); // ← tune
+
+  // ── 2. Throttle Steadiness — rapid longitudinal sign-flip rate ───────────
+  // "Rapid" = sign flips within LONG_WIN samples of the previous flip.
+  const LONG_WIN  = 8;    // ← tune (GPS samples, ~8 s)
+  const LONG_DEAD = 0.15; // ← tune (m/s² dead-band, ignore near-zero la)
+  let longFlips = 0, lastLSign = 0, lastLFlip = -Infinity;
+  for (let i = 0; i < n; i++){
+    const la = smp[i].la || 0;
+    if (Math.abs(la) < LONG_DEAD) continue;
+    const sg = la > 0 ? 1 : -1;
+    if (lastLSign !== 0 && sg !== lastLSign){
+      if (i - lastLFlip <= LONG_WIN) longFlips++;
+      lastLFlip = i;
+    }
+    lastLSign = sg;
+  }
+  const longFlipsPerMin = durationMin > 0 ? longFlips / durationMin : 0;
+  const throttle = Math.round(clamp(linMap(longFlipsPerMin, 0, 8, 100, 0), 0, 100)); // ← tune
+
+  // ── 3. Steering Steadiness — rapid lateral sign-flip rate ────────────────
+  const LAT_WIN  = 6;    // ← tune
+  const LAT_DEAD = 0.15; // ← tune
+  let latFlips = 0, lastRSign = 0, lastRFlip = -Infinity;
+  for (let i = 0; i < n; i++){
+    const ra = smp[i].ra || 0;
+    if (Math.abs(ra) < LAT_DEAD) continue;
+    const sg = ra > 0 ? 1 : -1;
+    if (lastRSign !== 0 && sg !== lastRSign){
+      if (i - lastRFlip <= LAT_WIN) latFlips++;
+      lastRFlip = i;
+    }
+    lastRSign = sg;
+  }
+  const latFlipsPerMin = durationMin > 0 ? latFlips / durationMin : 0;
+  const steering = Math.round(clamp(linMap(latFlipsPerMin, 0, 10, 100, 0), 0, 100)); // ← tune
+
+  // ── 4. Braking Anticipation — approach quality for each stop ─────────────
+  // Approach: from last time speed > STOP_ENTRY until speed < STOP_EXIT.
+  const STOP_ENTRY = 2.2;  // m/s ← tune
+  const STOP_EXIT  = 0.9;  // m/s ← tune
+  const LOOK_BACK  = 30;   // samples ← tune
+  let stopScores = [], wasMoving = false;
+  for (let i = 1; i < n; i++){
+    if ((smp[i-1].speed || 0) > STOP_ENTRY) wasMoving = true;
+    if (wasMoving && (smp[i].speed || 0) < STOP_EXIT){
+      wasMoving = false;
+      const start = Math.max(0, i - LOOK_BACK);
+      let decelSum = 0, decelN = 0;
+      for (let j = start; j < i; j++){
+        const la = smp[j].la || 0;
+        if (la < 0){ decelSum += Math.abs(la); decelN++; }
+      }
+      const approachLen  = i - start;
+      const avgDecel     = decelN > 0 ? decelSum / decelN : 0;
+      const lenScore   = clamp(linMap(approachLen, 5, 20, 0, 100), 0, 100); // ← tune
+      const decelScore = clamp(linMap(avgDecel, 2.0, 0.5, 0, 100), 0, 100); // ← tune
+      stopScores.push((lenScore + decelScore) / 2);
+    }
+  }
+  const braking = stopScores.length > 0
+    ? Math.round(stopScores.reduce((a,b) => a+b, 0) / stopScores.length)
+    : 85; // ← tune (default when no stops detected)
+
+  // ── 5. Corner Composure — simultaneous braking + lateral force ───────────
+  const CORN_LA = -0.5; // ← tune
+  const CORN_RA =  0.8; // ← tune
+  let cornerCount = 0;
+  for (const s of smp){
+    if ((s.la || 0) < CORN_LA && Math.abs(s.ra || 0) > CORN_RA) cornerCount++;
+  }
+  const cornerPct = n > 0 ? cornerCount / n : 0;
+  const cornering = Math.round(clamp(linMap(cornerPct, 0, 0.08, 100, 0), 0, 100)); // ← tune
+
+  // ── 6. Transition Smoothness — mean jerk magnitude ───────────────────────
+  let jerkSum = 0, jerkN = 0;
+  for (let i = 1; i < n; i++){
+    const dt  = Math.max(0.1, (smp[i].t - smp[i-1].t) / 1000);
+    jerkSum  += Math.abs(((smp[i].la || 0) - (smp[i-1].la || 0)) / dt);
+    jerkN++;
+  }
+  const meanJerk  = jerkN > 0 ? jerkSum / jerkN : 0;
+  const transitions = Math.round(clamp(linMap(meanJerk, 0.3, 3.0, 100, 0), 0, 100)); // ← tune
+
+  // ── 7. Momentum Management — full stops per mile ─────────────────────────
+  const STOP_SPD = 0.5;   // m/s ← tune
+  const STOP_MS  = 1500;  // ms  ← tune
+  let fullStops = 0, stopStartIdx = -1;
+  for (let i = 0; i < n; i++){
+    const spd = smp[i].speed || 0;
+    if (spd < STOP_SPD && stopStartIdx < 0)  stopStartIdx = i;
+    if (spd >= STOP_SPD && stopStartIdx >= 0){
+      if ((smp[i].t - smp[stopStartIdx].t) >= STOP_MS) fullStops++;
+      stopStartIdx = -1;
+    }
+  }
+  if (stopStartIdx >= 0 && (smp[n-1].t - smp[stopStartIdx].t) >= STOP_MS) fullStops++;
+  const stopsPerMile = distanceMi > 0 ? fullStops / distanceMi : 0;
+  const momentum = Math.round(clamp(linMap(stopsPerMile, 0, 6, 100, 0), 0, 100)); // ← tune
+
+  // ── Composite ─────────────────────────────────────────────────────────────
+  const dims = { peakHarshness, throttle, steering, braking, cornering, transitions, momentum };
+  const score = Math.round(
+    Object.entries(DIM_WEIGHTS).reduce((s, [k,w]) => s + (dims[k] || 0) * w, 0)
+  );
+
+  return { score, dims, fullStops, stopsPerMile: +stopsPerMile.toFixed(2),
+           longFlipsPerMin: +longFlipsPerMin.toFixed(1),
+           latFlipsPerMin:  +latFlipsPerMin.toFixed(1),
+           p90Harshness:    +p90H.toFixed(2) };
+}
+
+function driveCoaching(analysis){
+  const { dims, stopsPerMile, longFlipsPerMin, latFlipsPerMin, p90Harshness, fullStops } = analysis;
+  const cards = [];
+
+  // Worst 2 dimensions below threshold → warning cards
+  const ranked = Object.entries(dims).sort((a,b) => a[1] - b[1]);
+  let warned = 0;
+  for (const [key, score] of ranked){
+    if (warned >= 2 || score >= 70) break;
+    const texts = {
+      peakHarshness: { title: 'Harsh inputs detected',
+        body: `Your 90th-percentile harshness was ${p90Harshness.toFixed(2)} m/s² — aim for under 0.8. Feather the brakes and smooth your turn entries.` },
+      throttle:      { title: 'Throttle pumping',
+        body: `You toggled between gas and brake ~${longFlipsPerMin.toFixed(1)}× per minute. Aim for under 3/min by coasting more and reading stops earlier.` },
+      steering:      { title: 'Frequent steering corrections',
+        body: `Lateral direction reversed ~${latFlipsPerMin.toFixed(1)}× per minute. Look further ahead — your hands follow your eyes.` },
+      braking:       { title: 'Late braking',
+        body: `Stops came with short approach distances and sharp decel. Spot brake zones earlier and ease in gradually over a longer runway.` },
+      cornering:     { title: 'Braking mid-corner',
+        body: `Simultaneous braking and lateral force hurts balance. Brake before the apex, not through it.` },
+      transitions:   { title: 'Jerky pedal transitions',
+        body: `High jerk between pedal phases — blend smoothly between braking, coasting, and acceleration.` },
+      momentum:      { title: `${fullStops} full stop${fullStops !== 1 ? 's' : ''}`,
+        body: `${stopsPerMile.toFixed(1)} stops/mile. Read lights and traffic to maintain a rolling pace — the goal is to never fully stop.` },
+    };
+    if (texts[key]){ cards.push({ type: 'warning', ...texts[key] }); warned++; }
+  }
+
+  // Best dimension ≥ 80 → positive card
+  const [bestKey, bestScore] = ranked[ranked.length - 1];
+  if (bestScore >= 80){
+    const praise = {
+      peakHarshness: { title: 'Impressively smooth inputs',
+        body: `Your 90th-percentile harshness was just ${p90Harshness.toFixed(2)} m/s². Passengers felt barely a ripple.` },
+      throttle:      { title: 'Steady throttle control',
+        body: `Only ${longFlipsPerMin.toFixed(1)} throttle reversals per minute — smooth progressive pedal work.` },
+      steering:      { title: 'Committed steering lines',
+        body: `Lateral corrections at just ${latFlipsPerMin.toFixed(1)}/min — you tracked your intended path confidently.` },
+      braking:       { title: 'Excellent braking anticipation',
+        body: `Long, gentle approaches to every stop — exactly what the car and your passengers want.` },
+      cornering:     { title: 'Clean corner exits',
+        body: `Minimal braking-while-cornering. Textbook corner entry technique.` },
+      transitions:   { title: 'Silky pedal transitions',
+        body: `Very low jerk between phases. Passengers won't even reach for the grab handle.` },
+      momentum:      { title: 'Excellent momentum management',
+        body: `Only ${fullStops} full stop${fullStops !== 1 ? 's' : ''} (${stopsPerMile.toFixed(1)}/mile). You read the road and kept rolling.` },
+    };
+    if (praise[bestKey]) cards.push({ type: 'positive', ...praise[bestKey] });
+  }
+
+  if (!cards.length)
+    cards.push({ type: 'positive', title: 'Smooth AF', body: 'Strong across all seven dimensions. Your passengers felt the difference.' });
+
+  return cards;
+}
+
 // -------------------------------------------------------------------------
 // LocalStorage — drives
 // -------------------------------------------------------------------------
@@ -859,14 +1079,13 @@ function finalizeAndReview(){
   }
   const duration = samples[samples.length-1].t - samples[0].t;
   const events = [...state.events];
-  const score = scoreFromEvents(events, CFG, samples.length);
 
   const drive = {
     startTime: state.startTime,
     durationMs: duration,
     distanceMeters: distance,
     topSpeedMps: topSpeed,
-    score,
+    score: 0,  // computed below via analyzeDrive
     samples: samples.map(s => ({
       t:       s.t - state.startTime,
       lat:     +s.lat.toFixed(6),
@@ -887,8 +1106,10 @@ function finalizeAndReview(){
     simulated: state.simulated,
     settingsSnapshot: { ...CFG },
   };
+
+  drive.score = analyzeDrive(drive).score;
   saveDrive(drive);
-  pushDriveToSupabase(drive); // fire-and-forget upload
+  pushDriveToSupabase(drive);
   renderReview(drive);
   renderDriveList();
 }
@@ -902,23 +1123,29 @@ let mapLayers = [];
 function renderReview(drive){
   showScreen('review');
 
+  const analysis = analyzeDrive(drive);
+  const coaching = driveCoaching(analysis);
+
+  // ── Header ─────────────────────────────────────────────────────────────────
   const when = new Date(drive.startTime);
   $('#review-when').textContent =
     when.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'}) +
     ' · ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
 
+  // ── Score ──────────────────────────────────────────────────────────────────
   const scoreEl = $('#review-score');
-  scoreEl.textContent = drive.score;
-  scoreEl.className = 'score-big ' + (drive.score >= 85 ? 'good' : drive.score >= 60 ? 'mid' : 'bad');
+  scoreEl.textContent = analysis.score;
+  scoreEl.className = 'score-big ' + (analysis.score >= 85 ? 'good' : analysis.score >= 60 ? 'mid' : 'bad');
 
+  // ── Events (informational — no longer drive the score) ─────────────────────
   $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
   $('#ev-accel').textContent = drive.events.filter(e => e.type === 'accel').length;
   $('#ev-turn').textContent  = drive.events.filter(e => e.type === 'turn').length;
 
+  // ── Stat strip ─────────────────────────────────────────────────────────────
   $('#r-distance').textContent = metersToMiles(drive.distanceMeters).toFixed(1);
   $('#r-duration').textContent = fmtDuration(drive.durationMs);
   $('#r-topspeed').textContent  = Math.round(mpsToMph(drive.topSpeedMps));
-
   const roadEl = $('#r-road-quality');
   if (roadEl && drive.samples.length){
     const avgRough = drive.samples.reduce((s,x) => s + (x.roadRoughness || 0), 0) / drive.samples.length;
@@ -926,35 +1153,31 @@ function renderReview(drive){
     roadEl.style.color = avgRough < 0.15 ? 'var(--good)' : avgRough < 0.5 ? 'var(--sage)' : avgRough < 1.0 ? 'var(--warn)' : 'var(--danger)';
   }
 
-  // ---- Peak values from samples ----
-  let peakDecel = 0, peakAccel = 0, peakTurn = 0;
-  for (const s of drive.samples){
-    const la = s.la || 0, ra = Math.abs(s.ra || 0);
-    if (la < 0 && Math.abs(la) > peakDecel) peakDecel = Math.abs(la);
-    if (la > 0 && la > peakAccel) peakAccel = la;
-    if (ra > peakTurn) peakTurn = ra;
+  // ── Seven dimension bars ───────────────────────────────────────────────────
+  const dimsList = $('#dims-list');
+  if (dimsList){
+    dimsList.innerHTML = DIM_DISPLAY.map(({ key, label }) => {
+      const val   = analysis.dims[key] || 0;
+      const color = dimColor(val);
+      return `<div class="dim-row">
+        <div class="dim-label">${label}</div>
+        <div class="dim-bar-wrap"><div class="dim-bar" style="width:${val}%;background:${color}"></div></div>
+        <div class="dim-score" style="color:${color}">${val}</div>
+      </div>`;
+    }).join('');
   }
-  const thresh = drive.settingsSnapshot || CFG;
-  const peakDecelEl = $('#peak-decel');
-  const peakAccelEl = $('#peak-accel');
-  const peakTurnEl  = $('#peak-turn');
-  if (peakDecelEl){
-    peakDecelEl.textContent = peakDecel.toFixed(2);
-    peakDecelEl.style.color = peakDecel >= thresh.hardBrake ? 'var(--danger)' : peakDecel >= thresh.hardBrake * 0.8 ? 'var(--warn)' : 'var(--cream)';
-  }
-  if (peakAccelEl){
-    peakAccelEl.textContent = peakAccel.toFixed(2);
-    peakAccelEl.style.color = peakAccel >= thresh.hardAccel ? 'var(--warn)' : peakAccel >= thresh.hardAccel * 0.8 ? '#C4A962' : 'var(--cream)';
-  }
-  if (peakTurnEl){
-    peakTurnEl.textContent = peakTurn.toFixed(2);
-    peakTurnEl.style.color = peakTurn >= thresh.sharpTurn ? 'var(--gold)' : peakTurn >= thresh.sharpTurn * 0.8 ? '#C4A962' : 'var(--cream)';
-  }
-  const tbEl = $('#thresh-brake'); if (tbEl) tbEl.textContent = `/ ${thresh.hardBrake} limit`;
-  const taEl = $('#thresh-accel'); if (taEl) taEl.textContent = `/ ${thresh.hardAccel} limit`;
-  const ttEl = $('#thresh-turn');  if (ttEl) ttEl.textContent = `/ ${thresh.sharpTurn} limit`;
 
-  // ---- Map ----
+  // ── Coaching cards ─────────────────────────────────────────────────────────
+  const coachEl = $('#coaching-cards');
+  if (coachEl){
+    coachEl.innerHTML = coaching.map(c => `
+      <div class="noticed-card ${c.type}">
+        <div class="noticed-card-title">${c.title}</div>
+        <div class="noticed-card-body">${c.body}</div>
+      </div>`).join('');
+  }
+
+  // ── Map ────────────────────────────────────────────────────────────────────
   if (!mapInstance){
     mapInstance = L.map('map', { zoomControl: true, attributionControl: true, preferCanvas: true });
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
