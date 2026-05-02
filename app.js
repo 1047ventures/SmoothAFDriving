@@ -1168,19 +1168,36 @@ function renderReview(drive){
     roadEl.style.color = avgRough < 0.15 ? 'var(--good)' : avgRough < 0.5 ? 'var(--sage)' : avgRough < 1.0 ? 'var(--warn)' : 'var(--danger)';
   }
 
-  // ── Seven dimension bars ───────────────────────────────────────────────────
+  // ── Seven dimension tiles ─────────────────────────────────────────────────
   const dimsList = $('#dims-list');
   if (dimsList){
-    dimsList.innerHTML = DIM_DISPLAY.map(({ key, label }) => {
+    const regularDims = DIM_DISPLAY.filter(d => d.key !== 'momentum');
+    const mVal  = analysis.dims.momentum || 0;
+    const mColor = dimColor(mVal);
+    const tiles = regularDims.map(({ key, label }) => {
       const val   = analysis.dims[key] || 0;
       const color = dimColor(val);
-      return `<div class="dim-row">
-        <div class="dim-label">${label}</div>
-        <div class="dim-bar-wrap"><div class="dim-bar" style="width:${val}%;background:${color}"></div></div>
-        <div class="dim-score" style="color:${color}">${val}</div>
+      return `<div class="dim-tile" style="border-color:${color}44">
+        <div class="dim-tile-score" style="color:${color}">${val}</div>
+        <div class="dim-tile-label">${label}</div>
       </div>`;
     }).join('');
+    const momentum = `<div class="dim-tile momentum" id="dim-tile-momentum" style="border-color:${mColor}44">
+      <div class="momentum-left">
+        <div class="dim-tile-score" style="color:${mColor}">${mVal}</div>
+        <div class="dim-tile-label">Momentum</div>
+      </div>
+      <div class="momentum-right">
+        ${analysis.fullStops} full stop${analysis.fullStops !== 1 ? 's' : ''}<br>
+        ${analysis.stopsPerMile.toFixed(1)} per mile<br>
+        <div class="momentum-map-link" style="color:${mColor}">View on map →</div>
+      </div>
+    </div>`;
+    dimsList.innerHTML = tiles + momentum;
+    document.getElementById('dim-tile-momentum')?.addEventListener('click', () => enterMapFilter('stop'));
   }
+  const dimsToggle = document.getElementById('dims-toggle');
+  if (dimsToggle) dimsToggle.onclick = () => document.getElementById('dims-section')?.classList.toggle('open');
 
   // ── Coaching cards (collapsed by default, tap to expand) ──────────────────
   const coachEl = $('#coaching-cards');

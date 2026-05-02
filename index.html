@@ -289,15 +289,23 @@
   .chart-section{margin-bottom:18px}
   .gforce-chart{width:100%;height:80px;display:block;border-radius:10px;overflow:hidden;background:rgba(244,235,217,.03)}
 
-  /* ── Seven-dimension bars ── */
+  /* ── Seven-dimension tiles ── */
   .dims-section{margin-bottom:18px;padding-top:14px;border-top:1px solid rgba(244,235,217,.08)}
-  .dims-head{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 12px}
-  .dims-list{display:flex;flex-direction:column;gap:9px}
-  .dim-row{display:grid;grid-template-columns:132px 1fr 30px;align-items:center;gap:10px}
-  .dim-label{font-size:11px;color:var(--cream-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .dim-bar-wrap{height:6px;border-radius:3px;background:rgba(244,235,217,.08);overflow:hidden}
-  .dim-bar{height:100%;border-radius:3px;transition:width .5s ease}
-  .dim-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:13px;text-align:right}
+  .dims-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0}
+  .dims-head{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0}
+  .dims-chev{font-size:16px;color:var(--cream-dim);transition:transform .2s;line-height:1;flex-shrink:0}
+  .dims-section.open .dims-chev{transform:rotate(90deg)}
+  .dims-body{display:none;margin-top:12px}
+  .dims-section.open .dims-body{display:block}
+  .dims-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .dim-tile{background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.08);border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;gap:5px}
+  .dim-tile-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:36px;line-height:1}
+  .dim-tile-label{font-size:9px;letter-spacing:.12em;color:var(--cream-dim);text-transform:uppercase}
+  .dim-tile.momentum{grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;cursor:pointer}
+  .dim-tile.momentum:active{opacity:.7}
+  .momentum-left{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+  .momentum-right{flex:1;font-size:11px;color:var(--cream-dim);line-height:1.8;border-left:1px solid rgba(244,235,217,.08);padding-left:16px}
+  .momentum-map-link{font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
 
   .ev-marker{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-family:var(--serif);font-weight:700;font-style:italic;font-size:14px;color:var(--cream);border:2px solid var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.5)}
   .ev-marker.brake{background:var(--danger)}.ev-marker.accel{background:var(--warn);color:var(--bg)}.ev-marker.turn{background:var(--gold);color:var(--bg)}.ev-marker.stop{background:#7C3AED}
@@ -380,7 +388,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v25</div>
+<div id="app-version">v26</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -479,10 +487,15 @@
       <!-- Coaching cards -->
       <div class="noticed-cards" id="coaching-cards"></div>
 
-      <!-- Seven dimension bars -->
-      <div class="dims-section">
-        <p class="dims-head">Drive dimensions</p>
-        <div class="dims-list" id="dims-list"></div>
+      <!-- Seven dimension tiles (collapsed by default) -->
+      <div class="dims-section" id="dims-section">
+        <div class="dims-toggle" id="dims-toggle">
+          <p class="dims-head">Drive dimensions</p>
+          <span class="dims-chev">›</span>
+        </div>
+        <div class="dims-body">
+          <div class="dims-grid" id="dims-list"></div>
+        </div>
       </div>
 
       <button id="btn-new-drive" class="new-drive-btn">New drive <span style="font-family:var(--sans);font-style:normal">→</span></button>
