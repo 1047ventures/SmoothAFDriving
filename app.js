@@ -1126,6 +1126,30 @@ function finalizeAndReview(){
 }
 
 // -------------------------------------------------------------------------
+// Driving style verdict
+// -------------------------------------------------------------------------
+function drivingStyleVerdict(analysis, drive){
+  const { score, stopsPerMile } = analysis;
+  const topMph = Math.round(mpsToMph(drive.topSpeedMps || 0));
+  const isHighway  = topMph > 60;
+  const neverStops = stopsPerMile < 0.4;
+
+  if (score >= 93) return { label:'Smooth AF',           sub:'Peak level. Passengers won\'t even notice they\'re moving.' };
+  if (score >= 86){
+    if (isHighway)   return { label:'Fast & Fluid',       sub:'High speed, zero drama. The highway is yours.' };
+    if (neverStops)  return { label:'In The Flow',        sub:'Reading traffic like a pro — you barely had to stop.' };
+                     return { label:'Pretty Damn Smooth', sub:'Composed, consistent, controlled. Solid drive.' };
+  }
+  if (score >= 76){
+    if (isHighway)   return { label:'Mostly Smooth',      sub:'Good at speed, a few rough moments slipped through.' };
+                     return { label:'Slow & Steady',      sub:'Deliberate driving. A little choppy at times but you stayed patient.' };
+  }
+  if (score >= 62)   return { label:'Getting There',      sub:'Some smooth patches, some rough ones. The map markers show where to tighten up.' };
+  if (score >= 45)   return { label:'Room To Grow',       sub:'Foundation is there. Focus on anticipating stops earlier.' };
+                     return { label:'Rough Ride',         sub:'The road had its way today. Study the map markers and find the patterns.' };
+}
+
+// -------------------------------------------------------------------------
 // Leaflet review rendering
 // -------------------------------------------------------------------------
 let mapInstance = null;
@@ -1138,7 +1162,6 @@ function renderReview(drive){
   reviewDrive = drive;
 
   const analysis = analyzeDrive(drive);
-  const coaching = driveCoaching(analysis);
 
   // ── Header ─────────────────────────────────────────────────────────────────
   const when = new Date(drive.startTime);
@@ -1199,21 +1222,16 @@ function renderReview(drive){
   const dimsToggle = document.getElementById('dims-toggle');
   if (dimsToggle) dimsToggle.onclick = () => document.getElementById('dims-section')?.classList.toggle('open');
 
-  // ── Coaching cards (collapsed by default, tap to expand) ──────────────────
+  // ── Style verdict ──────────────────────────────────────────────────────────
   const coachEl = $('#coaching-cards');
   if (coachEl){
-    coachEl.innerHTML = coaching.map(c => `
-      <div class="noticed-card ${c.type}">
-        <div class="noticed-card-header">
-          <div class="noticed-card-title">${c.title}</div>
-          <span class="noticed-card-chevron">›</span>
-        </div>
-        <div class="noticed-card-body">${c.body}</div>
-      </div>`).join('');
-    coachEl.onclick = e => {
-      const card = e.target.closest('.noticed-card');
-      if (card) card.classList.toggle('open');
-    };
+    const verdict = drivingStyleVerdict(analysis, drive);
+    const vColor  = dimColor(analysis.score);
+    coachEl.innerHTML = `
+      <div class="verdict-card">
+        <div class="verdict-label" style="color:${vColor}">${verdict.label}</div>
+        <div class="verdict-sub">${verdict.sub}</div>
+      </div>`;
   }
 
   // ── Map ────────────────────────────────────────────────────────────────────
@@ -1267,10 +1285,11 @@ function renderReview(drive){
 
   reviewEventMarkers = { brake: [], accel: [], turn: [], stop: [] };
   for (const s of analysis.stopMarkers){
+    const secs = (s.durationMs / 1000).toFixed(s.durationMs < 10000 ? 1 : 0);
     const m = L.marker([s.lat, s.lon], {
-      icon: L.divIcon({ className:'', html:'<div class="ev-marker stop">S</div>', iconSize:[26,26], iconAnchor:[13,13] })
+      icon: L.divIcon({ className:'', html:`<div class="ev-marker stop-pill">${secs}s</div>`, iconSize:[52,24], iconAnchor:[26,12] })
     }).addTo(mapInstance);
-    m.bindPopup(`<b>Full stop</b><br>${(s.durationMs/1000).toFixed(1)}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
+    m.bindPopup(`<b>Full stop</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
     mapLayers.push(m);
     reviewEventMarkers.stop.push(m);
   }
