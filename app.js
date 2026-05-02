@@ -1373,15 +1373,6 @@ const REMOVEBG_KEY    = 'smoothaf.removebg_key';
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
 function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || '9BMp9XXKWRiqoXeqEPp1T63U'; }
 
-function loadImageFromSrc(src){
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
 async function removeBgAPI(file){
   const key = getRemoveBgKey();
   if (!key) throw Object.assign(new Error('No key'), { code: 'no-key' });
@@ -1396,46 +1387,6 @@ async function removeBgAPI(file){
   if (res.status === 403) throw Object.assign(new Error('Invalid key'), { code: 'invalid-key' });
   if (!res.ok) throw new Error(`remove.bg ${res.status}`);
   return res.blob();
-}
-
-function cartoonizeImage(img){
-  const MAX = 900;
-  const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
-  const w = Math.round(img.naturalWidth * scale);
-  const h = Math.round(img.naturalHeight * scale);
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-
-  // Dark outline — draw offset copies to create comic-book edge
-  const OFFSETS = [-2, 0, 2];
-  ctx.globalAlpha = 0.9;
-  for (const dx of OFFSETS) for (const dy of OFFSETS){
-    if (!dx && !dy) continue;
-    ctx.filter = 'brightness(0)';
-    ctx.drawImage(img, dx, dy, w, h);
-  }
-  ctx.globalAlpha = 1; ctx.filter = 'none';
-
-  // Draw car on top
-  ctx.drawImage(img, 0, 0, w, h);
-
-  // Posterize + saturation boost
-  const px = ctx.getImageData(0, 0, w, h), d = px.data;
-  const LEVELS = 5, step = 255 / LEVELS;
-  for (let i = 0; i < d.length; i += 4){
-    if (d[i+3] < 20) continue;
-    d[i]   = Math.round(Math.round(d[i]   / step) * step);
-    d[i+1] = Math.round(Math.round(d[i+1] / step) * step);
-    d[i+2] = Math.round(Math.round(d[i+2] / step) * step);
-    const avg = (d[i] + d[i+1] + d[i+2]) / 3;
-    const S = 1.45;
-    d[i]   = Math.max(0, Math.min(255, avg + (d[i]   - avg) * S));
-    d[i+1] = Math.max(0, Math.min(255, avg + (d[i+1] - avg) * S));
-    d[i+2] = Math.max(0, Math.min(255, avg + (d[i+2] - avg) * S));
-  }
-  ctx.putImageData(px, 0, 0);
-  return canvas.toDataURL('image/png', 0.92);
 }
 
 function savePhotoPlain(file){
@@ -1458,28 +1409,27 @@ function savePhotoPlain(file){
 }
 
 async function processCarPhoto(file){
-  // Show loading state immediately
   const container = document.getElementById('car-display');
   if (container) container.innerHTML = '<div class="car-loading"><span>Processing…</span></div>';
 
-  if (!getRemoveBgKey()){
-    showApiKeyPrompt(file);
-    return;
-  }
   try {
-    const blob   = await removeBgAPI(file);
-    const objUrl = URL.createObjectURL(blob);
-    const img    = await loadImageFromSrc(objUrl);
-    URL.revokeObjectURL(objUrl);
-    const dataUrl = cartoonizeImage(img);
-    try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
+    const blob = await removeBgAPI(file);
+    await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        try { localStorage.setItem(CAR_PHOTO_KEY, e.target.result); } catch {}
+        resolve();
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
     renderCarDisplay(); renderRecAvatar();
   } catch (err) {
     if (err.code === 'invalid-key'){
       localStorage.removeItem(REMOVEBG_KEY);
       showApiKeyPrompt(file, 'That key didn\'t work — try again.');
     } else {
-      console.warn('AI photo failed, using plain:', err);
+      console.warn('remove.bg failed, using plain:', err);
       savePhotoPlain(file);
     }
   }
@@ -1499,14 +1449,9 @@ function renderCarDisplay(){
   const photo = loadCarPhoto();
   if (photo){
     container.innerHTML = `
-      <div style="position:relative;display:flex;flex-direction:column;align-items:center">
-        <div class="avatar-circle">
-          <img src="${photo}" class="car-avatar" alt="Your car">
-        </div>
-        <label class="car-change-lbl">Change photo
-          <input type="file" accept="image/*" style="display:none">
-        </label>
-      </div>`;
+      <img src="${photo}" class="car-full" alt="Your car">
+      <div class="car-vignette"></div>
+      <label class="car-change-lbl">Change photo<input type="file" accept="image/*" style="display:none"></label>`;
     container.querySelector('input[type=file]').addEventListener('change', e => {
       if (e.target.files[0]) processCarPhoto(e.target.files[0]);
     });

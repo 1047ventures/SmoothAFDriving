@@ -2,7 +2,7 @@
 // Network-first for app shell so updates land immediately when online.
 // Cache-first fallback for offline + opportunistic CDN caching.
 
-const CACHE = 'smoothaf-v26';
+const CACHE = 'smoothaf-v27';
 const SHELL = [
   './',
   './index.html',
