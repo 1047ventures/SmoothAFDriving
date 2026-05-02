@@ -1211,6 +1211,25 @@ function renderReview(drive){
     mapLayers.push(seg);
   }
 
+  // Direction-of-travel arrows — ~7 evenly spaced along the route
+  const smp = drive.samples;
+  const step = Math.max(1, Math.floor(smp.length / 7));
+  for (let i = step; i < smp.length - 1; i += step){
+    const a = smp[i], b = smp[i + 1];
+    const dy = b.lat - a.lat, dx = b.lon - a.lon;
+    if (Math.abs(dy) < 1e-6 && Math.abs(dx) < 1e-6) continue;
+    const deg = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+    const arrow = L.marker([a.lat, a.lon], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div class="route-arrow" style="transform:rotate(${deg}deg)">▲</div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7]
+      }),
+      interactive: false
+    }).addTo(mapInstance);
+    mapLayers.push(arrow);
+  }
+
   const first = drive.samples[0], last = drive.samples[drive.samples.length-1];
   [
     L.marker([first.lat, first.lon], { icon: L.divIcon({ className:'', html:'<div class="start-marker"></div>', iconSize:[14,14], iconAnchor:[7,7] }) }).addTo(mapInstance).bindPopup('Start'),
