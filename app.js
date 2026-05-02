@@ -531,15 +531,25 @@ function analyzeDrive(drive){
   const STOP_SPD = 0.5;   // m/s ← tune
   const STOP_MS  = 1500;  // ms  ← tune
   let fullStops = 0, stopStartIdx = -1;
+  const stopMarkers = [];
+  function recordStop(startIdx, endIdx){
+    const durMs = smp[endIdx].t - smp[startIdx].t;
+    if (durMs < STOP_MS) return;
+    fullStops++;
+    const mid = Math.round((startIdx + endIdx) / 2);
+    const approachIdx = Math.max(0, startIdx - 1);
+    stopMarkers.push({
+      lat: smp[mid].lat, lon: smp[mid].lon,
+      t: smp[startIdx].t, durationMs: durMs,
+      speedMph: Math.round(mpsToMph(smp[approachIdx].speed || 0))
+    });
+  }
   for (let i = 0; i < n; i++){
     const spd = smp[i].speed || 0;
     if (spd < STOP_SPD && stopStartIdx < 0)  stopStartIdx = i;
-    if (spd >= STOP_SPD && stopStartIdx >= 0){
-      if ((smp[i].t - smp[stopStartIdx].t) >= STOP_MS) fullStops++;
-      stopStartIdx = -1;
-    }
+    if (spd >= STOP_SPD && stopStartIdx >= 0){ recordStop(stopStartIdx, i); stopStartIdx = -1; }
   }
-  if (stopStartIdx >= 0 && (smp[n-1].t - smp[stopStartIdx].t) >= STOP_MS) fullStops++;
+  if (stopStartIdx >= 0) recordStop(stopStartIdx, n - 1);
   const stopsPerMile = distanceMi > 0 ? fullStops / distanceMi : 0;
   const momentum = Math.round(clamp(linMap(stopsPerMile, 0, 6, 100, 0), 0, 100)); // ← tune
 
@@ -550,6 +560,7 @@ function analyzeDrive(drive){
   );
 
   return { score, dims, fullStops, stopsPerMile: +stopsPerMile.toFixed(2),
+           stopMarkers,
            longFlipsPerMin: +longFlipsPerMin.toFixed(1),
            latFlipsPerMin:  +latFlipsPerMin.toFixed(1),
            p90Harshness:    +p90H.toFixed(2) };
@@ -1144,6 +1155,7 @@ function renderReview(drive){
   $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
   $('#ev-accel').textContent = drive.events.filter(e => e.type === 'accel').length;
   $('#ev-turn').textContent  = drive.events.filter(e => e.type === 'turn').length;
+  $('#ev-stop').textContent  = analysis.stopMarkers.length;
 
   // ── Stat strip ─────────────────────────────────────────────────────────────
   $('#r-distance').textContent = metersToMiles(drive.distanceMeters).toFixed(1);
@@ -1236,7 +1248,15 @@ function renderReview(drive){
     L.marker([last.lat,  last.lon],  { icon: L.divIcon({ className:'', html:'<div class="end-marker"></div>',   iconSize:[14,14], iconAnchor:[7,7] }) }).addTo(mapInstance).bindPopup('End'),
   ].forEach(m => mapLayers.push(m));
 
-  reviewEventMarkers = { brake: [], accel: [], turn: [] };
+  reviewEventMarkers = { brake: [], accel: [], turn: [], stop: [] };
+  for (const s of analysis.stopMarkers){
+    const m = L.marker([s.lat, s.lon], {
+      icon: L.divIcon({ className:'', html:'<div class="ev-marker stop">S</div>', iconSize:[26,26], iconAnchor:[13,13] })
+    }).addTo(mapInstance);
+    m.bindPopup(`<b>Full stop</b><br>${(s.durationMs/1000).toFixed(1)}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
+    mapLayers.push(m);
+    reviewEventMarkers.stop.push(m);
+  }
   for (const e of drive.events){
     const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
     const label = e.type === 'brake' ? 'Hard brake' : e.type === 'accel' ? 'Hard accel' : 'Sharp turn';
@@ -1261,7 +1281,7 @@ function enterMapFilter(type){
     if (btn){ btn.textContent = '×'; btn.setAttribute('aria-label', 'Close map'); }
     setTimeout(() => mapInstance.invalidateSize(), 100);
   }
-  ['brake','accel','turn'].forEach(t => {
+  ['brake','accel','turn','stop'].forEach(t => {
     reviewEventMarkers[t].forEach(m => {
       if (t === type){ if (!mapInstance.hasLayer(m)) m.addTo(mapInstance); }
       else           { if (mapInstance.hasLayer(m))  mapInstance.removeLayer(m); }
@@ -1272,14 +1292,15 @@ function enterMapFilter(type){
   const badge = document.getElementById('map-filter-badge');
   const labelEl = document.getElementById('map-filter-label');
   if (badge && labelEl){
-    labelEl.textContent = type === 'brake' ? 'BRAKES' : type === 'accel' ? 'ACCELS' : 'TURNS';
+    const labels = { brake:'BRAKES', accel:'ACCELS', turn:'TURNS', stop:'FULL STOPS' };
+    labelEl.textContent = labels[type] || type.toUpperCase();
     badge.classList.add('visible');
   }
 }
 
 function clearMapFilter(){
   if (!mapInstance) return;
-  ['brake','accel','turn'].forEach(t => {
+  ['brake','accel','turn','stop'].forEach(t => {
     reviewEventMarkers[t].forEach(m => { if (!mapInstance.hasLayer(m)) m.addTo(mapInstance); });
   });
   const badge = document.getElementById('map-filter-badge');
@@ -1544,7 +1565,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.event-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const type = chip.classList.contains('brake') ? 'brake'
-                 : chip.classList.contains('accel') ? 'accel' : 'turn';
+                 : chip.classList.contains('accel') ? 'accel'
+                 : chip.classList.contains('stop')  ? 'stop' : 'turn';
       enterMapFilter(type);
     });
   });
