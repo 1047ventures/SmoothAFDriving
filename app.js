@@ -310,19 +310,19 @@ function detectEventWithThresh(la, ra, cfg, jerk, speed){
   const t = cfg.sharpTurn * (speed > 11.2 ? 1.5 : 1.0);
 
   // ── Tier 3 — harsh ────────────────────────────────────────────────────────
-  if (la < -(b * 1.75)) return { type:'brake', severity: clamp((Math.abs(la)-b*1.75)/2+2.5, 2.5, 4), tier:3 };
-  if (la >  (a * 1.75)) return { type:'accel', severity: clamp((la-a*1.75)/2+2.5,           2.5, 4), tier:3 };
-  if (Math.abs(ra) > t * 1.75) return { type:'turn', severity: clamp((Math.abs(ra)-t*1.75)/2+2.5, 2.5, 4), tier:3 };
+  if (la < -(b * 1.75)) return { type:'brake', severity: clamp((Math.abs(la)-b*1.75)/2+2.5, 2.5, 4), tier:3, la };
+  if (la >  (a * 1.75)) return { type:'accel', severity: clamp((la-a*1.75)/2+2.5,           2.5, 4), tier:3, la };
+  if (Math.abs(ra) > t * 1.75) return { type:'turn', severity: clamp((Math.abs(ra)-t*1.75)/2+2.5, 2.5, 4), tier:3, ra };
 
   // ── Tier 2 — moderate ─────────────────────────────────────────────────────
-  if (la < -b) return { type:'brake', severity: clamp((Math.abs(la)-b)/2+1, 1, 2.5), tier:2 };
-  if (la >  a) return { type:'accel', severity: clamp((la-a)/2+1,           1, 2.5), tier:2 };
-  if (Math.abs(ra) > t) return { type:'turn', severity: clamp((Math.abs(ra)-t)/2+1, 1, 2.5), tier:2 };
+  if (la < -b) return { type:'brake', severity: clamp((Math.abs(la)-b)/2+1, 1, 2.5), tier:2, la };
+  if (la >  a) return { type:'accel', severity: clamp((la-a)/2+1,           1, 2.5), tier:2, la };
+  if (Math.abs(ra) > t) return { type:'turn', severity: clamp((Math.abs(ra)-t)/2+1, 1, 2.5), tier:2, ra };
 
   // ── Tier 1 — subtle ───────────────────────────────────────────────────────
-  if (la < -(b * 0.55)) return { type:'brake', severity:0.6, tier:1 };
-  if (la >  (a * 0.55)) return { type:'accel', severity:0.6, tier:1 };
-  if (Math.abs(ra) > t * 0.58) return { type:'turn', severity:0.6, tier:1 };
+  if (la < -(b * 0.55)) return { type:'brake', severity:0.6, tier:1, la };
+  if (la >  (a * 0.55)) return { type:'accel', severity:0.6, tier:1, la };
+  if (Math.abs(ra) > t * 0.58) return { type:'turn', severity:0.6, tier:1, ra };
 
   // ── Gear/transmission jerk (informational only — never penalised in score) ─
   if (Math.abs(jerk) > (cfg.jerkThreshold || 5.5) && Math.abs(la) > 0.5)
@@ -1119,9 +1119,12 @@ function finalizeAndReview(){
 // -------------------------------------------------------------------------
 let mapInstance = null;
 let mapLayers = [];
+let reviewEventMarkers = { brake: [], accel: [], turn: [] };
+let reviewDrive = null;
 
 function renderReview(drive){
   showScreen('review');
+  reviewDrive = drive;
 
   const analysis = analyzeDrive(drive);
   const coaching = driveCoaching(analysis);
@@ -1167,14 +1170,21 @@ function renderReview(drive){
     }).join('');
   }
 
-  // ── Coaching cards ─────────────────────────────────────────────────────────
+  // ── Coaching cards (collapsed by default, tap to expand) ──────────────────
   const coachEl = $('#coaching-cards');
   if (coachEl){
     coachEl.innerHTML = coaching.map(c => `
       <div class="noticed-card ${c.type}">
-        <div class="noticed-card-title">${c.title}</div>
+        <div class="noticed-card-header">
+          <div class="noticed-card-title">${c.title}</div>
+          <span class="noticed-card-chevron">›</span>
+        </div>
         <div class="noticed-card-body">${c.body}</div>
       </div>`).join('');
+    coachEl.onclick = e => {
+      const card = e.target.closest('.noticed-card');
+      if (card) card.classList.toggle('open');
+    };
   }
 
   // ── Map ────────────────────────────────────────────────────────────────────
@@ -1207,17 +1217,58 @@ function renderReview(drive){
     L.marker([last.lat,  last.lon],  { icon: L.divIcon({ className:'', html:'<div class="end-marker"></div>',   iconSize:[14,14], iconAnchor:[7,7] }) }).addTo(mapInstance).bindPopup('End'),
   ].forEach(m => mapLayers.push(m));
 
+  reviewEventMarkers = { brake: [], accel: [], turn: [] };
   for (const e of drive.events){
     const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
-    const label = e.type === 'brake' ? 'Hard brake' : e.type === 'accel' ? 'Hard acceleration' : 'Sharp turn';
+    const label = e.type === 'brake' ? 'Hard brake' : e.type === 'accel' ? 'Hard accel' : 'Sharp turn';
+    const raw = e.la != null ? `${Math.abs(e.la).toFixed(1)} m/s²` : e.ra != null ? `${Math.abs(e.ra).toFixed(1)} m/s²` : `sev ${(e.severity||1).toFixed(1)}×`;
     const m = L.marker([e.lat, e.lon], {
       icon: L.divIcon({ className:'', html:`<div class="ev-marker ${e.type}">${glyph}</div>`, iconSize:[26,26], iconAnchor:[13,13] })
     }).addTo(mapInstance);
-    m.bindPopup(`<b>${label}</b><br>At ${e.speedMph} mph · severity ${(e.severity||1).toFixed(1)}×<br><span style="color:#8A7B72">t+${fmtDuration(e.t)}</span>`);
+    m.bindPopup(`<b>${label}</b><br>${e.speedMph} mph · ${raw}<br><span style="color:#8A7B72">t+${fmtDuration(e.t)}</span>`);
     mapLayers.push(m);
+    if (reviewEventMarkers[e.type]) reviewEventMarkers[e.type].push(m);
   }
 
   setTimeout(() => mapInstance.invalidateSize(), 80);
+}
+
+function enterMapFilter(type){
+  if (!mapInstance) return;
+  const mapBlock = document.querySelector('.review-map-block');
+  const btn = document.getElementById('btn-map-expand');
+  if (mapBlock && !mapBlock.classList.contains('map-full')){
+    mapBlock.classList.add('map-full');
+    if (btn){ btn.textContent = '×'; btn.setAttribute('aria-label', 'Close map'); }
+    setTimeout(() => mapInstance.invalidateSize(), 100);
+  }
+  ['brake','accel','turn'].forEach(t => {
+    reviewEventMarkers[t].forEach(m => {
+      if (t === type){ if (!mapInstance.hasLayer(m)) m.addTo(mapInstance); }
+      else           { if (mapInstance.hasLayer(m))  mapInstance.removeLayer(m); }
+    });
+  });
+  const pts = reviewEventMarkers[type].map(m => m.getLatLng());
+  if (pts.length) mapInstance.fitBounds(L.latLngBounds(pts), { padding:[60,60] });
+  const badge = document.getElementById('map-filter-badge');
+  const labelEl = document.getElementById('map-filter-label');
+  if (badge && labelEl){
+    labelEl.textContent = type === 'brake' ? 'BRAKES' : type === 'accel' ? 'ACCELS' : 'TURNS';
+    badge.classList.add('visible');
+  }
+}
+
+function clearMapFilter(){
+  if (!mapInstance) return;
+  ['brake','accel','turn'].forEach(t => {
+    reviewEventMarkers[t].forEach(m => { if (!mapInstance.hasLayer(m)) m.addTo(mapInstance); });
+  });
+  const badge = document.getElementById('map-filter-badge');
+  if (badge) badge.classList.remove('visible');
+  if (reviewDrive && reviewDrive.samples.length){
+    const bounds = L.latLngBounds(reviewDrive.samples.map(s => [s.lat, s.lon]));
+    mapInstance.fitBounds(bounds, { padding:[40,40] });
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -1449,6 +1500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mapBlock = document.querySelector('.review-map-block');
     if (mapBlock && mapBlock.classList.contains('map-full')) {
       mapBlock.classList.remove('map-full');
+      clearMapFilter();
       const expandBtn = document.getElementById('btn-map-expand');
       if (expandBtn) { expandBtn.textContent = '⤢'; expandBtn.setAttribute('aria-label', 'Expand map'); }
       setTimeout(() => mapInstance && mapInstance.invalidateSize(), 100);
@@ -1464,7 +1516,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const isFull = mapBlock.classList.toggle('map-full');
     btn.textContent = isFull ? '×' : '⤢';
     btn.setAttribute('aria-label', isFull ? 'Close map' : 'Expand map');
+    if (!isFull) clearMapFilter();
     setTimeout(() => mapInstance && mapInstance.invalidateSize(), 100);
+  });
+
+  document.getElementById('map-filter-clear')?.addEventListener('click', clearMapFilter);
+
+  document.querySelectorAll('.event-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const type = chip.classList.contains('brake') ? 'brake'
+                 : chip.classList.contains('accel') ? 'accel' : 'turn';
+      enterMapFilter(type);
+    });
   });
 
   // Remove.bg API key modal

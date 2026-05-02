@@ -263,15 +263,27 @@
 
   .noticed-head,.analytics-head,.chart-head{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
   .noticed-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
-  .noticed-card{padding:12px 14px;border-radius:12px;background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.08)}
+  .noticed-card{padding:12px 14px;border-radius:12px;background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.08);cursor:pointer}
   .noticed-card.positive{border-color:rgba(111,182,105,.28);background:rgba(111,182,105,.07)}
   .noticed-card.warning{border-color:rgba(232,160,58,.22);background:rgba(232,160,58,.06)}
   .noticed-card.danger{border-color:rgba(224,59,47,.22);background:rgba(224,59,47,.06)}
-  .noticed-card-title{font-weight:600;font-size:13px;margin-bottom:3px}
+  .noticed-card-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .noticed-card-title{font-weight:600;font-size:13px}
   .noticed-card.positive .noticed-card-title{color:var(--good)}
   .noticed-card.warning .noticed-card-title{color:var(--warn)}
   .noticed-card.danger .noticed-card-title{color:var(--danger)}
-  .noticed-card-body{font-size:12px;color:var(--cream-dim);line-height:1.5}
+  .noticed-card-chevron{font-size:14px;color:var(--cream-dim);flex-shrink:0;transition:transform .2s;line-height:1}
+  .noticed-card.open .noticed-card-chevron{transform:rotate(90deg)}
+  .noticed-card-body{font-size:12px;color:var(--cream-dim);line-height:1.5;display:none;margin-top:8px}
+  .noticed-card.open .noticed-card-body{display:block}
+  /* Map filter badge */
+  .map-filter-badge{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:600;background:rgba(11,11,11,.88);border:1px solid rgba(244,235,217,.18);border-radius:999px;padding:5px 8px 5px 14px;display:none;align-items:center;gap:8px;white-space:nowrap}
+  .map-filter-badge.visible{display:flex}
+  .map-filter-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream)}
+  .map-filter-clear{background:none;border:none;color:var(--cream-dim);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+  /* Event chips clickable */
+  .event-chip{cursor:pointer}
+  .event-chip:active{opacity:.65}
 
   .chart-section{margin-bottom:18px}
   .gforce-chart{width:100%;height:80px;display:block;border-radius:10px;overflow:hidden;background:rgba(244,235,217,.03)}
@@ -367,7 +379,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v18</div>
+<div id="app-version">v19</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -430,6 +442,10 @@
         <div class="lg-row"><div class="lg-sw" style="background:#E03B2F"></div><span>Harsh</span></div>
       </div>
       <button class="map-expand-btn" id="btn-map-expand" aria-label="Expand map">⤢</button>
+      <div class="map-filter-badge" id="map-filter-badge">
+        <span class="map-filter-label" id="map-filter-label">BRAKES</span>
+        <button class="map-filter-clear" id="map-filter-clear" aria-label="Clear filter">×</button>
+      </div>
     </div>
 
     <!-- Scrollable results body -->
