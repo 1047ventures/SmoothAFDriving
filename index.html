@@ -173,49 +173,136 @@
   .prestart-cancel{appearance:none;border:1px solid rgba(244,235,217,.14);cursor:pointer;background:transparent;color:var(--muted);font-family:var(--sans);font-size:13px;font-weight:500;padding:12px 28px;border-radius:12px;margin-top:20px}
   .prestart-cancel:active{background:rgba(244,235,217,.06)}
 
-  /* ============ RECORDING ============ */
+  /* ============ RECORDING — redesigned ============ */
   #screen-record{
-    background:radial-gradient(ellipse 120% 70% at 50% 110%,rgba(232,93,58,.11),transparent 60%),var(--bg);
-    align-items:center;padding:0 24px calc(env(safe-area-inset-bottom,0) + 28px);
+    background:var(--bg);position:relative;
+    align-items:center;padding:0 24px calc(env(safe-area-inset-bottom,0) + 24px);
+    overflow:hidden;
   }
+  /* Blurred car photo fills the recording screen bg */
+  .rec-bg{
+    position:absolute;inset:0;z-index:0;
+    background-size:cover;background-position:center 38%;
+    filter:blur(28px) brightness(0.2) saturate(0.55);
+    transform:scale(1.1);
+    transition:background-image .4s;
+  }
+  /* Dark vignette over rec-bg */
+  .rec-bg-vignette{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(ellipse 90% 80% at 50% 50%, transparent 30%, rgba(10,8,8,.7) 100%),
+               linear-gradient(to bottom, rgba(10,8,8,.5) 0%, transparent 20%, transparent 75%, rgba(10,8,8,.8) 100%);
+  }
+  /* All direct children of #screen-record appear above the bg */
+  #screen-record > *:not(.rec-bg):not(.rec-bg-vignette){ position:relative;z-index:2; }
   .rec-head{display:flex;justify-content:space-between;align-items:center;padding-top:calc(env(safe-area-inset-top,0) + 18px);width:100%}
   .rec-dot{width:10px;height:10px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.55)}70%{box-shadow:0 0 0 12px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
   .rec-label{font-size:11px;letter-spacing:.3em;color:var(--cream-dim);text-transform:uppercase;display:flex;align-items:center;gap:10px}
   .rec-source{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
 
-  /* SmoothRing */
-  .smooth-ring-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;margin:20px 0 16px;flex-shrink:0}
+  /* Central ring zone — expands to fill available height */
+  .rec-ring-zone{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0}
+
+  /* SmoothRing — now larger, speed lives inside */
+  .smooth-ring-wrap{position:relative;width:min(272px,66vw);height:min(272px,66vw);display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .smooth-ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;transition:border-color .4s,box-shadow .4s}
   .smooth-ring.smooth{border-color:rgba(111,182,105,.85);box-shadow:0 0 0 6px rgba(111,182,105,.07),0 0 50px rgba(111,182,105,.14);animation:ring-breathe 3s ease-in-out infinite}
-  .smooth-ring.brake{border-color:rgba(224,59,47,.9);box-shadow:0 0 0 8px rgba(224,59,47,.1),0 0 60px rgba(224,59,47,.18);animation:ring-flash .45s ease-out}
-  .smooth-ring.accel{border-color:rgba(232,160,58,.9);box-shadow:0 0 0 8px rgba(232,160,58,.1),0 0 60px rgba(232,160,58,.18);animation:ring-flash .45s ease-out}
-  .smooth-ring.turn{border-color:rgba(196,169,98,.9);box-shadow:0 0 0 8px rgba(196,169,98,.09),0 0 50px rgba(196,169,98,.16);animation:ring-flash .45s ease-out}
-  @keyframes ring-breathe{0%,100%{box-shadow:0 0 0 5px rgba(111,182,105,.06),0 0 35px rgba(111,182,105,.1)}50%{box-shadow:0 0 0 14px rgba(111,182,105,.1),0 0 70px rgba(111,182,105,.18)}}
-  @keyframes ring-flash{0%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .smooth-ring.brake{border-color:rgba(224,59,47,.9);box-shadow:0 0 0 8px rgba(224,59,47,.1),0 0 60px rgba(224,59,47,.25);animation:ring-flash .45s ease-out}
+  .smooth-ring.accel{border-color:rgba(232,160,58,.9);box-shadow:0 0 0 8px rgba(232,160,58,.1),0 0 60px rgba(232,160,58,.25);animation:ring-flash .45s ease-out}
+  .smooth-ring.turn{border-color:rgba(196,169,98,.9);box-shadow:0 0 0 8px rgba(196,169,98,.09),0 0 50px rgba(196,169,98,.2);animation:ring-flash .45s ease-out}
+  @keyframes ring-breathe{0%,100%{box-shadow:0 0 0 5px rgba(111,182,105,.06),0 0 35px rgba(111,182,105,.1)}50%{box-shadow:0 0 0 16px rgba(111,182,105,.1),0 0 80px rgba(111,182,105,.2)}}
+  @keyframes ring-flash{0%{transform:scale(1.06)}100%{transform:scale(1)}}
 
   /* Force lines */
   .force-line{position:absolute;opacity:0;pointer-events:none;border-radius:2px;transition:opacity .15s}
   .force-line.vis{opacity:1}
-  .force-line.fl-brake{top:2px;left:50%;transform:translateX(-50%);width:3px;height:42px;background:linear-gradient(180deg,transparent,rgba(224,59,47,.75))}
-  .force-line.fl-accel{bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:42px;background:linear-gradient(0deg,transparent,rgba(232,160,58,.75))}
-  .force-line.fl-left{left:2px;top:50%;transform:translateY(-50%);height:3px;width:42px;background:linear-gradient(90deg,transparent,rgba(196,169,98,.75))}
-  .force-line.fl-right{right:2px;top:50%;transform:translateY(-50%);height:3px;width:42px;background:linear-gradient(270deg,transparent,rgba(196,169,98,.75))}
+  .force-line.fl-brake{top:4px;left:50%;transform:translateX(-50%);width:3px;height:48px;background:linear-gradient(180deg,transparent,rgba(224,59,47,.75))}
+  .force-line.fl-accel{bottom:4px;left:50%;transform:translateX(-50%);width:3px;height:48px;background:linear-gradient(0deg,transparent,rgba(232,160,58,.75))}
+  .force-line.fl-left{left:4px;top:50%;transform:translateY(-50%);height:3px;width:48px;background:linear-gradient(90deg,transparent,rgba(196,169,98,.75))}
+  .force-line.fl-right{right:4px;top:50%;transform:translateY(-50%);height:3px;width:48px;background:linear-gradient(270deg,transparent,rgba(196,169,98,.75))}
 
-  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(26vw,140px);line-height:.92;letter-spacing:-.04em;color:var(--cream);margin:0;text-align:center}
-  .speed-unit{font-family:var(--sans);font-size:12px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:2px;text-align:center}
+  /* Speed + unit centered inside ring */
+  .speed-center{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:2px}
+  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(21vw,108px);line-height:.92;letter-spacing:-.04em;color:var(--cream);margin:0;text-align:center}
+  .speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:rgba(244,235,217,.55);text-transform:uppercase;text-align:center}
+
+  /* Live G-force horizontal bar */
+  .live-g-wrap{width:100%;display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .live-g-bar{flex:1;height:3px;background:rgba(244,235,217,.1);border-radius:2px;position:relative}
+  .live-g-needle{
+    position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;
+    background:rgba(244,235,217,.9);border:2px solid rgba(10,8,8,.6);
+    transform:translate(-50%,-50%);
+    transition:left .12s ease-out,background .2s,box-shadow .2s;
+    box-shadow:0 0 8px rgba(244,235,217,.4);
+  }
+  .live-g-zero{position:absolute;top:-4px;bottom:-4px;left:50%;width:1.5px;background:rgba(244,235,217,.2);transform:translateX(-50%)}
+  .live-g-label{font-size:11px;letter-spacing:.1em;color:var(--cream-dim);min-width:46px;text-align:right;font-variant-numeric:tabular-nums}
+
   .gauge-row{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%;padding:0 4px}
   .gauge{text-align:center}
-  .gauge-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:52px;letter-spacing:-.02em;color:var(--cream);line-height:1}
-  .gauge-lbl{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:6px}
-  .event-ticker{min-height:40px;display:flex;justify-content:center;align-items:center;margin-top:10px}
-  .event-flash{padding:8px 14px;border-radius:999px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;background:rgba(224,59,47,.14);color:var(--danger);border:1px solid rgba(224,59,47,.35);animation:flash-in .25s ease,flash-out .6s ease 1.8s forwards}
+  .gauge-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:44px;letter-spacing:-.02em;color:var(--cream);line-height:1}
+  .gauge-lbl{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:5px}
+  .event-ticker{min-height:36px;display:flex;justify-content:center;align-items:center;margin-top:8px}
+  .event-flash{padding:7px 14px;border-radius:999px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;background:rgba(224,59,47,.14);color:var(--danger);border:1px solid rgba(224,59,47,.35);animation:flash-in .25s ease,flash-out .6s ease 1.8s forwards}
   .event-flash.warn{background:rgba(232,160,58,.14);color:var(--warn);border-color:rgba(232,160,58,.35)}
   .event-flash.turn-warn{background:rgba(196,169,98,.14);color:var(--gold);border-color:rgba(196,169,98,.35)}
   @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
-  .stop-btn{appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:20px;border-radius:18px;margin-top:auto;width:100%;box-shadow:0 12px 30px rgba(244,235,217,.14)}
+  .stop-btn{appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:18px;border-radius:18px;margin-top:auto;width:100%;box-shadow:0 12px 40px rgba(244,235,217,.18);transition:transform .1s ease}
   .stop-btn:active{transform:scale(.985)}
+
+  /* Burst effects (inside ring wrap) */
+  .burst{position:absolute;pointer-events:none;opacity:0;border-radius:50%}
+  .burst.b-brake{bottom:-18px;left:50%;transform:translateX(-50%);width:90px;height:30px;background:radial-gradient(ellipse,rgba(239,68,68,.95) 0%,transparent 75%)}
+  .burst.b-accel{top:-18px;left:50%;transform:translateX(-50%);width:90px;height:30px;background:radial-gradient(ellipse,rgba(251,146,60,.95) 0%,transparent 75%)}
+  .burst.b-left{left:-18px;top:50%;transform:translateY(-50%);width:30px;height:90px;background:radial-gradient(ellipse,rgba(251,146,60,.9) 0%,transparent 75%)}
+  .burst.b-right{right:-18px;top:50%;transform:translateY(-50%);width:30px;height:90px;background:radial-gradient(ellipse,rgba(251,146,60,.9) 0%,transparent 75%)}
+  @keyframes burst-out{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(2)}}
+  @keyframes burst-accel{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(2)}}
+  @keyframes burst-side-l{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(2)}}
+  @keyframes burst-side-r{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(2)}}
+  .burst.b-brake.fire{animation:burst-out .75s ease-out forwards}
+  .burst.b-accel.fire{animation:burst-accel .75s ease-out forwards}
+  .burst.b-left.fire{animation:burst-side-l .75s ease-out forwards}
+  .burst.b-right.fire{animation:burst-side-r .75s ease-out forwards}
+
+  /* ── Vehicle type sheet ── */
+  .vehicle-sheet{
+    position:fixed;inset:0;z-index:950;
+    background:rgba(10,8,8,.97);
+    display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top,0)+20px) 20px calc(env(safe-area-inset-bottom,0)+24px);
+    animation:bdp-in .25s ease-out;
+  }
+  .vs-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .vs-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:34px;color:var(--cream);line-height:1}
+  .vs-close{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:28px;cursor:pointer;line-height:1;padding:0 4px}
+  .vs-sub{font-size:13px;color:var(--cream-dim);margin-bottom:22px;line-height:1.5}
+  .vs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;overflow-y:auto;flex:1;padding-bottom:4px}
+  .vs-card{
+    border:1px solid rgba(244,235,217,.1);border-radius:16px;
+    background:rgba(244,235,217,.04);padding:22px 12px 18px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    cursor:pointer;transition:background .15s,border-color .15s;text-align:center;
+  }
+  .vs-card:active{background:rgba(244,235,217,.1);border-color:rgba(244,235,217,.25)}
+  .vs-card.selected{border-color:var(--tang);background:rgba(232,93,58,.08)}
+  .vs-icon{font-size:44px;line-height:1}
+  .vs-label{font-size:11px;font-weight:700;color:var(--cream-dim);letter-spacing:.12em;text-transform:uppercase}
+  .vs-status{display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px;flex:1}
+  .vs-status.active{display:flex}
+  .vs-spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(232,93,58,.2);border-top-color:var(--tang);animation:vs-spin .8s linear infinite}
+  @keyframes vs-spin{to{transform:rotate(360deg)}}
+  .vs-status-text{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--cream-dim);text-align:center}
+  .vs-upload-lbl{
+    margin-top:14px;flex-shrink:0;display:block;cursor:pointer;
+    border:1px solid rgba(244,235,217,.14);border-radius:12px;
+    padding:14px 20px;font-size:13px;color:var(--cream-dim);text-align:center;
+    transition:background .15s;
+  }
+  .vs-upload-lbl:active{background:rgba(244,235,217,.06)}
 
   /* ============ REVIEW ============ */
   #screen-review{background:var(--bg);flex-direction:column;overflow:hidden}
@@ -342,34 +429,9 @@
     z-index:1000;pointer-events:none;font-variant-numeric:tabular-nums;
   }
 
-  /* ── Avatar (recording screen only) ── */
+  /* car-avatar kept for future use */
   .car-avatar{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
-  .avatar-circle{
-    border-radius:50%;overflow:hidden;
-    box-shadow:0 0 0 3px rgba(232,93,58,.4),0 8px 32px rgba(0,0,0,.7);
-    flex-shrink:0;
-  }
-  /* Recording screen avatar */
-  .rec-avatar-wrap{
-    position:relative;width:160px;height:160px;
-    flex-shrink:0;margin:12px 0 4px;
-  }
-  .rec-avatar-wrap .avatar-circle{width:160px;height:160px}
-  /* Directional bursts */
-  .burst{position:absolute;pointer-events:none;opacity:0;border-radius:50%}
-  .burst.b-brake{bottom:-18px;left:50%;transform:translateX(-50%);width:80px;height:28px;background:radial-gradient(ellipse,rgba(239,68,68,.95) 0%,transparent 75%)}
-  .burst.b-accel{top:-18px;left:50%;transform:translateX(-50%);width:80px;height:28px;background:radial-gradient(ellipse,rgba(251,146,60,.95) 0%,transparent 75%)}
-  .burst.b-left{left:-18px;top:50%;transform:translateY(-50%);width:28px;height:80px;background:radial-gradient(ellipse,rgba(251,146,60,.9) 0%,transparent 75%)}
-  .burst.b-right{right:-18px;top:50%;transform:translateY(-50%);width:28px;height:80px;background:radial-gradient(ellipse,rgba(251,146,60,.9) 0%,transparent 75%)}
-  @keyframes burst-out{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
-  @keyframes burst-out-y{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
-  @keyframes burst-accel{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.8)}}
-  @keyframes burst-side-l{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(1.8)}}
-  @keyframes burst-side-r{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(1.8)}}
-  .burst.b-brake.fire{animation:burst-out .7s ease-out forwards}
-  .burst.b-accel.fire{animation:burst-accel .7s ease-out forwards}
-  .burst.b-left.fire{animation:burst-side-l .7s ease-out forwards}
-  .burst.b-right.fire{animation:burst-side-r .7s ease-out forwards}
+  .avatar-circle{border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px rgba(232,93,58,.4),0 8px 32px rgba(0,0,0,.7);flex-shrink:0}
 
   /* ============ UTIL ============ */
   .hidden{display:none!important}
@@ -384,11 +446,9 @@
 
   /* ── Car loading state ── */
   .car-loading{
-    width:220px;height:220px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    border:1.5px dashed rgba(232,93,58,.35);background:rgba(232,93,58,.04);
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     font-family:var(--serif);font-style:italic;color:var(--muted);font-size:15px;
-    animation:rec-pulse 1.6s infinite;
+    background:rgba(10,8,8,.7);
   }
   /* ── remove.bg key modal ── */
   .removebg-error{color:var(--danger);font-size:12px;min-height:16px;margin:0 0 10px;text-align:center}
@@ -430,7 +490,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v33</div>
+<div id="app-version">v34</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -450,7 +510,10 @@
       <button id="btn-start" class="primary-btn">
         <span>Start drive</span><span class="arrow">→</span>
       </button>
-      <button class="view-drives-link" id="btn-view-drives">Past drives</button>
+      <div style="display:flex;gap:0;border-top:1px solid rgba(244,235,217,.07);margin-top:2px">
+        <button class="view-drives-link" id="btn-vehicle-type" style="flex:1;border-right:1px solid rgba(244,235,217,.07)">Your vehicle</button>
+        <button class="view-drives-link" id="btn-view-drives" style="flex:1">Past drives</button>
+      </div>
       <div class="drives-list" id="drives-list-panel">
         <div id="drives-container"></div>
       </div>
@@ -460,24 +523,50 @@
 
   <!-- ═══════════════════════════ RECORDING ═══════════════════════════ -->
   <section id="screen-record" class="screen">
+    <!-- Blurred car photo background -->
+    <div class="rec-bg" id="rec-bg"></div>
+    <div class="rec-bg-vignette"></div>
+
+    <!-- Top bar -->
     <div class="rec-head">
       <div class="rec-label"><span class="rec-dot"></span> Recording</div>
       <div class="rec-source" id="rec-source">GPS + Motion</div>
     </div>
-    <div class="rec-avatar-wrap" id="rec-avatar-wrap">
-      <div class="burst b-brake" id="burst-brake"></div>
-      <div class="burst b-accel" id="burst-accel"></div>
-      <div class="burst b-left"  id="burst-left"></div>
-      <div class="burst b-right" id="burst-right"></div>
+
+    <!-- Central ring zone — ring + speed inside -->
+    <div class="rec-ring-zone">
+      <div class="smooth-ring-wrap">
+        <div class="smooth-ring" id="smooth-ring"></div>
+        <div class="force-line fl-brake" id="fl-brake"></div>
+        <div class="force-line fl-accel" id="fl-accel"></div>
+        <div class="force-line fl-left"  id="fl-left"></div>
+        <div class="force-line fl-right" id="fl-right"></div>
+        <div class="burst b-brake" id="burst-brake"></div>
+        <div class="burst b-accel" id="burst-accel"></div>
+        <div class="burst b-left"  id="burst-left"></div>
+        <div class="burst b-right" id="burst-right"></div>
+        <div class="speed-center">
+          <div class="speed-big" id="live-speed">0</div>
+          <div class="speed-unit">mph</div>
+        </div>
+      </div>
     </div>
-    <div class="speed-big" id="live-speed">0</div>
-    <div class="speed-unit">mph</div>
-    <div class="gauge-row" style="margin-top:16px">
+
+    <!-- Live G-force bar -->
+    <div class="live-g-wrap">
+      <div class="live-g-bar">
+        <div class="live-g-needle" id="live-g-needle"></div>
+        <div class="live-g-zero"></div>
+      </div>
+      <span id="live-g" class="live-g-label">0.00G</span>
+    </div>
+
+    <!-- Gauges -->
+    <div class="gauge-row">
       <div class="gauge"><div class="gauge-val" id="live-time">0:00</div><div class="gauge-lbl">Duration</div></div>
       <div class="gauge"><div class="gauge-val" id="live-avg-speed">0</div><div class="gauge-lbl">Avg mph</div></div>
     </div>
-    <span id="live-g" style="display:none" aria-hidden="true">0.00</span>
-    <div id="calib-status" style="display:none;font-size:12px;text-align:center;margin-top:8px;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.4)"></div>
+    <div id="calib-status" style="display:none;font-size:12px;text-align:center;margin-top:6px;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.5)"></div>
     <div class="event-ticker" id="event-ticker"></div>
     <button id="btn-stop" class="stop-btn">Stop drive</button>
   </section>
@@ -563,6 +652,24 @@
   </section>
 
 
+  <!-- VEHICLE TYPE SELECTOR SHEET -->
+  <div id="vehicle-sheet" class="vehicle-sheet hidden">
+    <div class="vs-bar">
+      <div class="vs-title">Your vehicle</div>
+      <button class="vs-close" id="vs-close">×</button>
+    </div>
+    <div class="vs-sub">Pick a type — AI generates a cinematic photo of your ride</div>
+    <div class="vs-grid" id="vs-grid"></div>
+    <div class="vs-status" id="vs-status">
+      <div class="vs-spinner"></div>
+      <div class="vs-status-text" id="vs-status-text">Generating your ride…</div>
+    </div>
+    <label class="vs-upload-lbl">
+      Or upload your own photo
+      <input type="file" accept="image/*" id="vs-upload-input" style="display:none">
+    </label>
+  </div>
+
   <!-- REMOVE.BG API KEY MODAL -->
   <div id="removebg-modal" class="permission-hint hidden">
     <div class="permission-card">
@@ -592,6 +699,7 @@
 
 </div>
 
+<script src="https://js.puter.com/v2/" async></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="app.js"></script>

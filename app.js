@@ -24,6 +24,27 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 const STORAGE_KEY  = 'smoothaf.drives.v1';
 const DEVICE_KEY   = 'smoothaf.device_id';
 const SYNCED_KEY   = 'smoothaf.synced_ids';
+
+// ── Vehicle types for AI-generated home + driving screen photos ──────────────
+const VEHICLE_KEY = 'smoothaf.vehicle_type';
+const VEHICLE_TYPES = [
+  { id:'sedan',      label:'Sedan',        icon:'🚗',
+    prompt:'ultra-cinematic low-angle automotive photograph, sleek modern black luxury sedan, wet city street, dramatic rim lighting, moody dark atmosphere, professional car photography, 4k photorealistic' },
+  { id:'crossover',  label:'Crossover',    icon:'🚙',
+    prompt:'ultra-cinematic low-angle automotive photograph, dark grey modern crossover SUV, winding mountain road, golden hour dramatic side lighting, professional car photography, 4k photorealistic' },
+  { id:'suv',        label:'Full-size SUV',icon:'🚐',
+    prompt:'ultra-cinematic low-angle automotive photograph, massive black luxury SUV, vast desert highway at dusk, dramatic undercar lighting, imposing presence, professional car photography, 4k photorealistic' },
+  { id:'sports',     label:'Sports Car',   icon:'🏎️',
+    prompt:'ultra-cinematic low-angle automotive photograph, dark red sports coupe, racetrack at night, dramatic rim lighting, motion blur background, professional car photography, 4k photorealistic' },
+  { id:'convertible',label:'Convertible',  icon:'🚘',
+    prompt:'ultra-cinematic low-angle automotive photograph, silver luxury convertible, coastal cliff road, breathtaking golden hour sunset, professional car photography, 4k photorealistic' },
+  { id:'truck',      label:'Pickup Truck', icon:'🛻',
+    prompt:'ultra-cinematic low-angle automotive photograph, black lifted pickup truck, rugged mountain trail at dusk, dramatic storm clouds, professional car photography, 4k photorealistic' },
+  { id:'hatchback',  label:'Hatchback',    icon:'🚗',
+    prompt:'ultra-cinematic low-angle automotive photograph, dark hot hatchback, wet European city street at night, vivid neon reflections, professional car photography, 4k photorealistic' },
+  { id:'electric',   label:'Electric',     icon:'⚡',
+    prompt:'ultra-cinematic low-angle automotive photograph, sleek white electric car, futuristic modern city at night, dramatic blue accent lighting, professional car photography, 4k photorealistic' },
+];
 const MAX_STORED_DRIVES = 20;
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
@@ -930,8 +951,30 @@ function updateLiveUI(){
   const last = state.samples[state.samples.length - 1];
   const mph = last ? mpsToMph(last.speed || 0) : 0;
   $('#live-speed').textContent = Math.round(mph);
-  $('#live-g').textContent = state.lastMotionG ? state.lastMotionG.toFixed(2) :
-    (last ? Math.min(2.5, (last.harshness||0)/9.81).toFixed(2) : '0.00');
+
+  // G-force label
+  const gVal = state.lastMotionG
+    ? state.lastMotionG.toFixed(2)
+    : (last ? Math.min(2.5, (last.harshness||0)/9.81).toFixed(2) : '0.00');
+  const gEl = $('#live-g');
+  if (gEl) gEl.textContent = gVal + 'G';
+
+  // G-force needle (longitudinal axis drives left=brake, right=accel)
+  const la = last ? (last.longAccel || 0) : 0;
+  const needle = document.getElementById('live-g-needle');
+  if (needle){
+    const pct = 50 + clamp(la / 6, -1, 1) * 44;
+    needle.style.left = pct + '%';
+    needle.style.background   = la < -0.6 ? '#E03B2F' : la > 0.6 ? '#E8A03A' : 'rgba(244,235,217,.9)';
+    needle.style.boxShadow    = la < -0.6 ? '0 0 12px rgba(224,59,47,.7)' : la > 0.6 ? '0 0 12px rgba(232,160,58,.7)' : '0 0 8px rgba(244,235,217,.35)';
+  }
+
+  // Keep ring in smooth state if not currently flashing
+  const ring = document.getElementById('smooth-ring');
+  if (ring && !ring.className.match(/brake|accel|turn/)){
+    ring.className = 'smooth-ring smooth';
+  }
+
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
   const avgMph = state.samples.length
     ? Math.round(state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length * 2.23694)
@@ -962,14 +1005,21 @@ function flashEvent(type, latAccel){
   ticker.appendChild(el);
   setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
 
-  // Directional burst on avatar
+  // Animate smooth ring
+  const ring = document.getElementById('smooth-ring');
+  if (ring){
+    ring.className = 'smooth-ring ' + type;
+    setTimeout(() => { ring.className = 'smooth-ring smooth'; }, 1200);
+  }
+
+  // Directional burst
   const burstId = type === 'brake' ? 'burst-brake'
                 : type === 'accel' ? 'burst-accel'
                 : (latAccel >= 0 ? 'burst-right' : 'burst-left');
   const burst = document.getElementById(burstId);
   if (burst){
     burst.classList.remove('fire');
-    void burst.offsetWidth; // reflow to restart animation
+    void burst.offsetWidth;
     burst.classList.add('fire');
     setTimeout(() => burst.classList.remove('fire'), 800);
   }
@@ -1744,6 +1794,74 @@ function showApiKeyPrompt(pendingFile, errorMsg){
   modal.classList.remove('hidden');
 }
 
+// ── Vehicle sheet: AI image generation via Puter.js ─────────────────────────
+function buildVehicleGrid(){
+  const grid = document.getElementById('vs-grid');
+  if (!grid) return;
+  const saved = localStorage.getItem(VEHICLE_KEY);
+  grid.innerHTML = VEHICLE_TYPES.map(v => `
+    <div class="vs-card${v.id === saved ? ' selected' : ''}" data-id="${v.id}">
+      <div class="vs-icon">${v.icon}</div>
+      <div class="vs-label">${v.label}</div>
+    </div>`).join('');
+  grid.querySelectorAll('.vs-card').forEach(card => {
+    card.addEventListener('click', () => generateVehicleImage(card.dataset.id));
+  });
+}
+
+function showVehicleSheet(){
+  const sheet = document.getElementById('vehicle-sheet');
+  if (!sheet) return;
+  buildVehicleGrid();
+  const grid = document.getElementById('vs-grid');
+  const status = document.getElementById('vs-status');
+  if (grid) grid.style.display = '';
+  if (status) status.classList.remove('active');
+  sheet.classList.remove('hidden');
+}
+
+function hideVehicleSheet(){
+  document.getElementById('vehicle-sheet')?.classList.add('hidden');
+}
+
+async function generateVehicleImage(vehicleId){
+  const vType = VEHICLE_TYPES.find(v => v.id === vehicleId);
+  if (!vType) return;
+  localStorage.setItem(VEHICLE_KEY, vehicleId);
+
+  const grid   = document.getElementById('vs-grid');
+  const status = document.getElementById('vs-status');
+  const statusTxt = document.getElementById('vs-status-text');
+  if (grid)   grid.style.display = 'none';
+  if (status) { status.classList.add('active'); }
+  if (statusTxt) statusTxt.textContent = `Generating your ${vType.label}…`;
+
+  try {
+    if (typeof puter === 'undefined' || !puter.ai) throw new Error('Puter not loaded');
+    const imgEl = await puter.ai.txt2img(vType.prompt, false);
+    // Convert the returned HTMLImageElement blob src to a data URL via canvas
+    const canvas = document.createElement('canvas');
+    const loadedImg = await new Promise((res, rej) => {
+      if (imgEl.complete && imgEl.naturalWidth) { res(imgEl); return; }
+      imgEl.onload = () => res(imgEl);
+      imgEl.onerror = rej;
+    });
+    canvas.width  = loadedImg.naturalWidth  || 1024;
+    canvas.height = loadedImg.naturalHeight || 768;
+    canvas.getContext('2d').drawImage(loadedImg, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
+    hideVehicleSheet();
+    renderCarDisplay();
+    renderRecAvatar();
+  } catch(err) {
+    console.warn('Vehicle generation failed:', err);
+    if (statusTxt) statusTxt.textContent = 'Generation failed — try uploading a photo below.';
+    if (grid)   grid.style.display = '';
+    if (status) status.classList.remove('active');
+  }
+}
+
 function renderCarDisplay(){
   const container = document.getElementById('car-display');
   if (!container) return;
@@ -1757,24 +1875,33 @@ function renderCarDisplay(){
       if (e.target.files[0]) processCarPhoto(e.target.files[0]);
     });
   } else {
+    // No photo — show vehicle-type invite that opens the sheet
     container.innerHTML = `
-      <label class="car-upload-prompt">
-        <input type="file" accept="image/*" style="display:none">
+      <div class="car-upload-prompt" id="car-type-invite" style="cursor:pointer">
         <div class="car-upload-icon">🚗</div>
-        <div class="car-upload-title">Add your ride</div>
-        <div class="car-upload-sub">Tap to upload</div>
-      </label>`;
-    container.querySelector('input[type=file]').addEventListener('change', e => {
-      if (e.target.files[0]) processCarPhoto(e.target.files[0]);
-    });
+        <div class="car-upload-title">Choose your ride</div>
+        <div class="car-upload-sub">AI generates a cinematic photo</div>
+      </div>`;
+    document.getElementById('car-type-invite')?.addEventListener('click', showVehicleSheet);
   }
   renderRecAvatar();
 }
 
 function renderRecAvatar(){
+  // Set recording screen blurred background from car photo
+  const bg = document.getElementById('rec-bg');
+  const photo = loadCarPhoto();
+  if (bg){
+    if (photo){
+      bg.style.backgroundImage = `url(${photo})`;
+      bg.style.display = 'block';
+    } else {
+      bg.style.display = 'none';
+    }
+  }
+  // Legacy avatar wrap — no longer used in recording screen but keep for compat
   const wrap = document.getElementById('rec-avatar-wrap');
   if (!wrap) return;
-  const photo = loadCarPhoto();
   // Remove any existing avatar img (keep burst divs)
   wrap.querySelectorAll('img,.avatar-circle').forEach(el => el.remove());
   if (photo){
@@ -1847,6 +1974,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('removebg-modal').classList.add('hidden');
     const f = document.getElementById('removebg-modal')._pendingFile;
     if (f) savePhotoPlain(f);
+  });
+
+  // Vehicle type sheet
+  document.getElementById('btn-vehicle-type')?.addEventListener('click', showVehicleSheet);
+  document.getElementById('vs-close')?.addEventListener('click', hideVehicleSheet);
+  document.getElementById('vs-upload-input')?.addEventListener('change', e => {
+    if (e.target.files[0]){
+      hideVehicleSheet();
+      processCarPhoto(e.target.files[0]);
+    }
   });
 
   // Past drives toggle
