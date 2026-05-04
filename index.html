@@ -397,10 +397,29 @@
   }
   .removebg-input::placeholder{color:var(--muted)}
   .removebg-link{font-size:12px;color:var(--cream-dim);text-align:center;display:block;margin-bottom:14px}
+
+  /* ── Brake event profile panel ── */
+  .brake-detail-panel{
+    position:absolute;bottom:0;left:0;right:0;z-index:700;
+    background:rgba(10,8,8,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-top:1px solid rgba(224,59,47,.3);padding:12px 16px 14px;
+    animation:bdp-in .22s ease-out;
+  }
+  @keyframes bdp-in{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .bdp-header{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+  .bdp-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:15px;color:var(--cream)}
+  .bdp-meta{font-size:11px;color:var(--cream-dim);flex:1}
+  .bdp-close{background:none;border:none;color:var(--cream-dim);font-size:22px;cursor:pointer;line-height:1;padding:0 2px;margin-left:auto;flex-shrink:0}
+  .brake-spark{width:100%;height:72px;display:block;border-radius:8px;background:rgba(244,235,217,.03)}
+  .bdp-stats{display:flex;justify-content:space-around;margin-top:10px}
+  .bdp-stat{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+  .bdp-stat-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1}
+  .bdp-stat-u{font-size:9px;font-style:normal;margin-left:1px;color:var(--cream-dim);font-family:var(--sans);font-weight:400}
+  .bdp-stat-l{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 </style>
 </head>
 <body>
-<div id="app-version">v31</div>
+<div id="app-version">v32</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->

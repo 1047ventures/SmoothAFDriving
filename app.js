@@ -90,17 +90,17 @@ function syncPendingDrives(){
 const DEFAULTS = {
   // ── Detection thresholds (tier-2 baseline) ───────────────────────────────
   // Tier 1 fires at 55% of these, tier 3 at 175%.
-  hardBrake:     2.8,   // m/s² (was 3.5 — more sensitive to catch trail-braking etc.)
-  hardAccel:     2.2,   // m/s² (was 2.8)
-  sharpTurn:     2.6,   // m/s² lateral (was 3.6 — catches highway weaves)
-  emaAlpha:      0.32,  // smoothing (was 0.45 — slightly more smoothed)
+  // Raised from previous values — GPS-derived lateral G has too much noise at low thresholds.
+  hardBrake:     3.8,   // m/s²
+  hardAccel:     3.2,   // m/s²
+  sharpTurn:     3.8,   // m/s² lateral — GPS heading jitter was causing false highway events
+  emaAlpha:      0.25,  // more smoothing vs 0.32 — filters single-sample GPS spikes
   jerkThreshold: 5.5,   // m/s³ — gear-change / abrupt transmission event
   // ── Tier-2 base penalties (multiplied by tier factor below) ─────────────
   penaltyBrake:  4.5,
   penaltyAccel:  3.2,
   penaltyTurn:   4.0,
   // ── Tier multipliers: tier1 × 0.14, tier2 × 1.0, tier3 × 2.4 ───────────
-  // These are constants — not exposed as sliders yet.
 };
 
 const CFG = { ...DEFAULTS };
@@ -305,9 +305,9 @@ function detectEventWithThresh(la, ra, cfg, jerk, speed){
   jerk  = jerk  || 0;
   speed = speed || 0; // m/s
   const b = cfg.hardBrake, a = cfg.hardAccel;
-  // Highway speed gate: above 25 mph (11.2 m/s), turn threshold relaxed 50%
-  // Lane changes and sweeping curves at freeway speed are not harsh driving.
-  const t = cfg.sharpTurn * (speed > 11.2 ? 1.5 : 1.0);
+  // Highway speed gate: above 30 mph (13.4 m/s), turn threshold doubled.
+  // GPS heading noise at freeway speed makes lateral G unreliable — only flag extreme maneuvers.
+  const t = cfg.sharpTurn * (speed > 13.4 ? 2.5 : 1.0);
 
   // ── Tier 3 — harsh ────────────────────────────────────────────────────────
   if (la < -(b * 1.75)) return { type:'brake', severity: clamp((Math.abs(la)-b*1.75)/2+2.5, 2.5, 4), tier:3, la };
@@ -1109,9 +1109,12 @@ function finalizeAndReview(){
     })),
     events: events.map(e => ({
       type: e.type, severity: +((e.severity||1).toFixed(2)),
+      tier: e.tier || 2,
       lat: +e.lat.toFixed(6), lon: +e.lon.toFixed(6),
       speedMph: Math.round(e.speedMph||0),
       t: e.t - state.startTime,
+      la: e.la != null ? +e.la.toFixed(3) : null,
+      ra: e.ra != null ? +e.ra.toFixed(3) : null,
     })),
     eventCount: events.length,
     simulated: state.simulated,
@@ -1174,10 +1177,11 @@ function renderReview(drive){
   scoreEl.textContent = analysis.score;
   scoreEl.className = 'score-big ' + (analysis.score >= 85 ? 'good' : analysis.score >= 60 ? 'mid' : 'bad');
 
-  // ── Events (informational — no longer drive the score) ─────────────────────
-  $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
-  $('#ev-accel').textContent = drive.events.filter(e => e.type === 'accel').length;
-  $('#ev-turn').textContent  = drive.events.filter(e => e.type === 'turn').length;
+  // ── Events — only tier 2+ shown (tier 1 is GPS noise, not real harshness) ──
+  const sig = e => e.tier >= 2;
+  $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake' && sig(e)).length;
+  $('#ev-accel').textContent = drive.events.filter(e => e.type === 'accel' && sig(e)).length;
+  $('#ev-turn').textContent  = drive.events.filter(e => e.type === 'turn'  && sig(e)).length;
   $('#ev-stop').textContent  = analysis.stopMarkers.length;
 
   // ── Stat strip ─────────────────────────────────────────────────────────────
@@ -1294,18 +1298,154 @@ function renderReview(drive){
     reviewEventMarkers.stop.push(m);
   }
   for (const e of drive.events){
+    if ((e.tier || 1) < 2) continue; // skip tier 1 — GPS noise, not real harshness
     const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
     const label = e.type === 'brake' ? 'Hard brake' : e.type === 'accel' ? 'Hard accel' : 'Sharp turn';
     const raw = e.la != null ? `${Math.abs(e.la).toFixed(1)} m/s²` : e.ra != null ? `${Math.abs(e.ra).toFixed(1)} m/s²` : `sev ${(e.severity||1).toFixed(1)}×`;
     const m = L.marker([e.lat, e.lon], {
       icon: L.divIcon({ className:'', html:`<div class="ev-marker ${e.type}">${glyph}</div>`, iconSize:[26,26], iconAnchor:[13,13] })
     }).addTo(mapInstance);
-    m.bindPopup(`<b>${label}</b><br>${e.speedMph} mph · ${raw}<br><span style="color:#8A7B72">t+${fmtDuration(e.t)}</span>`);
+    if (e.type === 'brake'){
+      m.on('click', () => showBrakeProfile(e, drive));
+    } else {
+      m.bindPopup(`<b>${label}</b><br>${e.speedMph} mph · ${raw}<br><span style="color:#8A7B72">t+${fmtDuration(e.t)}</span>`);
+    }
     mapLayers.push(m);
     if (reviewEventMarkers[e.type]) reviewEventMarkers[e.type].push(m);
   }
 
   setTimeout(() => mapInstance.invalidateSize(), 80);
+}
+
+// -------------------------------------------------------------------------
+// Brake event deceleration profile panel + sparkline
+// -------------------------------------------------------------------------
+function showBrakeProfile(e, drive){
+  const existing = document.getElementById('brake-detail-panel');
+  if (existing) existing.remove();
+
+  const PRE_MS  = 4000;
+  const POST_MS = 6000;
+  const slice = drive.samples.filter(s => s.t >= e.t - PRE_MS && s.t <= e.t + POST_MS);
+  if (slice.length < 2) return;
+
+  const laVals  = slice.map(s => s.la || 0);
+  const minLa   = Math.min(-0.3, ...laVals);
+  const maxLa   = Math.max( 0.3, ...laVals);
+  const peakLa  = Math.min(...laVals);
+  const peakG   = (Math.abs(peakLa) / 9.81).toFixed(2);
+  const peakMs2 = Math.abs(peakLa).toFixed(1);
+
+  const brakePts = slice.filter(s => (s.la || 0) < -0.3);
+  const dur = brakePts.length >= 2
+    ? ((brakePts[brakePts.length-1].t - brakePts[0].t) / 1000).toFixed(1)
+    : brakePts.length === 1 ? '<1' : '—';
+
+  const qualLabel = peakG >= 0.4 ? 'Hard' : peakG >= 0.2 ? 'Moderate' : 'Light';
+  const qualColor = peakG >= 0.4 ? 'var(--danger)' : peakG >= 0.2 ? 'var(--warn)' : 'var(--good)';
+
+  const panel = document.createElement('div');
+  panel.id = 'brake-detail-panel';
+  panel.className = 'brake-detail-panel';
+  panel.innerHTML = `
+    <div class="bdp-header">
+      <span class="bdp-title" style="color:${qualColor}">${qualLabel} brake</span>
+      <span class="bdp-meta">${e.speedMph} mph entry · tier ${e.tier || 2}</span>
+      <button class="bdp-close" aria-label="Close">×</button>
+    </div>
+    <canvas class="brake-spark" id="brake-spark"></canvas>
+    <div class="bdp-stats">
+      <div class="bdp-stat">
+        <div class="bdp-stat-v" style="color:${qualColor}">${peakG}<span class="bdp-stat-u">G</span></div>
+        <div class="bdp-stat-l">Peak G</div>
+      </div>
+      <div class="bdp-stat">
+        <div class="bdp-stat-v">${peakMs2}<span class="bdp-stat-u">m/s²</span></div>
+        <div class="bdp-stat-l">Peak force</div>
+      </div>
+      <div class="bdp-stat">
+        <div class="bdp-stat-v">${dur}<span class="bdp-stat-u">s</span></div>
+        <div class="bdp-stat-l">Duration</div>
+      </div>
+      <div class="bdp-stat">
+        <div class="bdp-stat-v">${e.speedMph}<span class="bdp-stat-u">mph</span></div>
+        <div class="bdp-stat-l">Entry</div>
+      </div>
+    </div>`;
+
+  const mapBlock = document.querySelector('.review-map-block');
+  if (!mapBlock) return;
+  mapBlock.appendChild(panel);
+  panel.querySelector('.bdp-close').onclick = () => panel.remove();
+
+  requestAnimationFrame(() =>
+    drawBrakeSparkline(document.getElementById('brake-spark'), slice, e.t, minLa, maxLa)
+  );
+}
+
+function drawBrakeSparkline(canvas, slice, eventT, minLa, maxLa){
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.offsetWidth;
+  const H   = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const t0    = slice[0].t;
+  const tSpan = (slice[slice.length-1].t - t0) || 1;
+  const laRange = maxLa - minLa || 1;
+
+  const tx = t  => ((t - t0) / tSpan) * W;
+  const ty = la => H * (maxLa - la) / laRange;
+  const zero = ty(0);
+
+  // Zero baseline
+  ctx.strokeStyle = 'rgba(244,235,217,.14)';
+  ctx.lineWidth   = 1;
+  ctx.beginPath(); ctx.moveTo(0, zero); ctx.lineTo(W, zero); ctx.stroke();
+
+  // Event timestamp dashed line
+  const ex = tx(eventT);
+  if (ex >= 0 && ex <= W){
+    ctx.strokeStyle = 'rgba(224,59,47,.45)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(ex, 0); ctx.lineTo(ex, H); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const pts = slice.map(s => ({ x: tx(s.t), y: ty(s.la || 0) }));
+
+  // Filled area under the curve
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, zero);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, zero);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(224,59,47,.48)');
+  grad.addColorStop(1, 'rgba(224,59,47,.04)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Stroke line
+  ctx.beginPath();
+  pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+  ctx.strokeStyle = '#E03B2F';
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // Peak G label
+  const peakPt = pts.reduce((a, b) => b.y > a.y ? b : a); // highest y = most negative la
+  ctx.fillStyle = 'rgba(224,59,47,.9)';
+  ctx.font      = `bold ${9 * dpr / dpr}px var(--sans)`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${(Math.abs(Math.min(...slice.map(s=>s.la||0)))/9.81).toFixed(2)}G`, clamp(peakPt.x, 18, W-18), Math.max(10, peakPt.y - 6));
 }
 
 function enterMapFilter(type){
