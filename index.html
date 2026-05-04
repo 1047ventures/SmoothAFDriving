@@ -322,6 +322,8 @@
 
   .ev-marker{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-family:var(--serif);font-weight:700;font-style:italic;font-size:14px;color:var(--cream);border:2px solid var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.5)}
   .ev-marker.brake{background:var(--danger)}.ev-marker.accel{background:var(--warn);color:var(--bg)}.ev-marker.turn{background:var(--gold);color:var(--bg)}
+  .ev-marker-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(10,8,8,.7);box-shadow:0 2px 6px rgba(0,0,0,.5);opacity:.85}
+  .ev-marker-dot.brake{background:var(--danger)}.ev-marker-dot.accel{background:var(--warn)}.ev-marker-dot.turn{background:var(--gold)}
   .ev-marker.stop-pill{background:#7C3AED;border-radius:12px;width:auto;height:24px;padding:0 8px;font-family:var(--sans);font-style:normal;font-size:11px;font-weight:700;white-space:nowrap;border:2px solid var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.5)}
   /* Style verdict card */
   .verdict-card{padding:18px 16px;border-radius:16px;background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.1);margin-bottom:18px}
@@ -416,10 +418,19 @@
   .bdp-stat-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1}
   .bdp-stat-u{font-size:9px;font-style:normal;margin-left:1px;color:var(--cream-dim);font-family:var(--sans);font-weight:400}
   .bdp-stat-l{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+
+  /* ── Force timeline chart ── */
+  .force-timeline-section{margin-bottom:18px;padding-top:14px;border-top:1px solid rgba(244,235,217,.08)}
+  .force-timeline-head{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+  .force-timeline-canvas{width:100%;height:80px;display:block;border-radius:10px;background:rgba(244,235,217,.03)}
+  .force-timeline-key{display:flex;gap:14px;margin-top:7px}
+  .ftk{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.06em;color:var(--cream-dim)}
+  .ftk::before{content:'';display:inline-block;width:18px;height:3px;border-radius:2px;flex-shrink:0}
+  .ftk.brake::before{background:var(--danger)}.ftk.accel::before{background:var(--warn)}.ftk.turn::before{background:var(--gold)}
 </style>
 </head>
 <body>
-<div id="app-version">v32</div>
+<div id="app-version">v33</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -482,9 +493,10 @@
         <div class="review-when" id="review-when">—</div>
       </div>
       <div class="legend">
-        <div class="lg-row"><div class="lg-sw" style="background:#6FB669"></div><span>Smooth</span></div>
-        <div class="lg-row"><div class="lg-sw" style="background:#E8A03A"></div><span>Jerky</span></div>
-        <div class="lg-row"><div class="lg-sw" style="background:#E03B2F"></div><span>Harsh</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#6FB669"></div><span>Coast</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#E03B2F"></div><span>Brake</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#E8A03A"></div><span>Accel</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#C4A962"></div><span>Turn</span></div>
       </div>
       <button class="map-expand-btn" id="btn-map-expand" aria-label="Expand map">⤢</button>
       <div class="map-filter-badge" id="map-filter-badge">
@@ -518,6 +530,17 @@
         <div class="cell"><div class="cell-v"><span id="r-duration">0:00</span></div><div class="cell-l">Duration</div></div>
         <div class="cell"><div class="cell-v"><span id="r-topspeed">0</span></div><div class="cell-l">Top mph</div></div>
         <div class="cell"><div class="cell-v"><span id="r-road-quality">—</span></div><div class="cell-l">Road quality</div></div>
+      </div>
+
+      <!-- Force timeline -->
+      <div class="force-timeline-section">
+        <p class="force-timeline-head">Force timeline</p>
+        <canvas id="force-timeline-canvas" class="force-timeline-canvas"></canvas>
+        <div class="force-timeline-key">
+          <span class="ftk accel">Accel</span>
+          <span class="ftk brake">Brake</span>
+          <span class="ftk turn">Lateral</span>
+        </div>
       </div>
 
       <!-- Coaching cards -->
