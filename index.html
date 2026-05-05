@@ -54,14 +54,9 @@
     z-index:1;
     overflow:hidden;
   }
-  .car-full{
-    position:absolute;
-    inset:0;
-    width:100%;height:100%;
-    object-fit:cover;
-    object-position:center 38%;
-    display:block;
-    filter:none;
+  .car-photo-bg{
+    position:absolute;inset:0;
+    background-size:cover;background-repeat:no-repeat;
   }
   .car-vignette{
     position:absolute;inset:0;pointer-events:none;
@@ -78,12 +73,48 @@
   .car-upload-icon{font-size:38px}
   .car-upload-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;color:var(--cream);text-align:center}
   .car-upload-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;text-align:center;padding:0 16px}
-  .car-change-lbl{
+  /* Action row: Change + Reposition buttons */
+  .car-action-row{
     position:absolute;bottom:calc(env(safe-area-inset-bottom,0) + 174px);
     left:50%;transform:translateX(-50%);
-    font-size:10px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
-    color:rgba(244,235,217,.38);cursor:pointer;padding:8px;z-index:5;
+    display:flex;gap:10px;z-index:5;
   }
+  .car-action-btn{
+    appearance:none;cursor:pointer;
+    background:rgba(10,8,8,.55);border:1px solid rgba(244,235,217,.22);
+    color:rgba(244,235,217,.65);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    padding:7px 16px;border-radius:99px;white-space:nowrap;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .car-action-btn:active{background:rgba(244,235,217,.12)}
+  /* Reposition drag overlay */
+  .car-reposition-overlay{
+    position:absolute;inset:0;z-index:10;touch-action:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    padding-bottom:calc(env(safe-area-inset-bottom,0) + 186px);
+    background:rgba(0,0,0,.22);
+  }
+  .car-reposition-hint{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.75);margin-bottom:18px;text-align:center}
+  .car-reposition-done{
+    appearance:none;border:0;cursor:pointer;
+    background:var(--tang);color:var(--bg);
+    font-family:var(--serif);font-style:italic;font-weight:700;
+    font-size:18px;padding:14px 44px;border-radius:14px;
+    box-shadow:0 8px 24px rgba(232,93,58,.35);
+  }
+  .car-reposition-reset{
+    appearance:none;border:1px solid rgba(244,235,217,.22);background:transparent;
+    color:var(--cream-dim);font-size:12px;padding:9px 20px;border-radius:12px;
+    margin-top:10px;cursor:pointer;
+  }
+  /* Camera button on recording screen */
+  .rec-photo-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    background:rgba(10,8,8,.5);border:1px solid rgba(244,235,217,.18);
+    color:rgba(244,235,217,.6);font-size:15px;cursor:pointer;
+  }
+  .rec-photo-btn:active{background:rgba(244,235,217,.1)}
 
   /* Floating glass gradient top bar */
   .home-topbar{
@@ -153,6 +184,17 @@
   .drive-stats{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
   .drive-chev{color:var(--muted);font-size:22px}
   .empty-drives{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:18px 4px}
+  /* ── Driver persona badge ── */
+  .persona-badge{
+    padding:12px 14px 10px;border-radius:14px;margin-bottom:14px;
+    background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.09);
+  }
+  .persona-title{
+    font-family:var(--serif);font-style:italic;font-weight:700;
+    font-size:20px;color:var(--cream);letter-spacing:-.01em;line-height:1.1;
+    margin-bottom:4px;
+  }
+  .persona-sub{font-size:12px;color:var(--cream-dim);line-height:1.5}
 
 
   /* ============ PRESTART ============ */
@@ -497,7 +539,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v37</div>
+<div id="app-version">v38</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -514,6 +556,7 @@
         <!-- Glass frosted bottom sheet -->
     <div class="home-bottom-sheet">
       <div class="sheet-handle"></div>
+      <div id="persona-badge" class="persona-badge" style="display:none"></div>
       <button id="btn-start" class="primary-btn">
         <span>Start drive</span><span class="arrow">→</span>
       </button>
@@ -537,7 +580,13 @@
     <!-- Top bar -->
     <div class="rec-head">
       <div class="rec-label"><span class="rec-dot"></span> Recording</div>
-      <div class="rec-source" id="rec-source">GPS + Motion</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="rec-source" id="rec-source">GPS + Motion</div>
+        <label class="rec-photo-btn" title="Set driving screen background">
+          🖼
+          <input type="file" accept="image/*" id="rec-photo-input" style="display:none">
+        </label>
+      </div>
     </div>
 
     <!-- Central ring zone — ring + speed inside -->

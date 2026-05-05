@@ -679,9 +679,73 @@ function saveDrive(drive){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed)); } catch {}
 }
 
+function getDriverPersona(drives){
+  if (!drives || drives.length < 2) return null;
+  const totalMi   = drives.reduce((s,d) => s + metersToMiles(d.distanceMeters||0), 0);
+  const avgMi     = totalMi / drives.length;
+  const avgScore  = Math.round(drives.reduce((s,d) => s + (d.score||0), 0) / drives.length);
+  const avgTop    = drives.reduce((s,d) => s + (d.topSpeedMps||0), 0) / drives.length * 2.237; // mph
+  const avgDurMin = drives.reduce((s,d) => s + (d.durationMs||0), 0) / drives.length / 60000;
+
+  // Classify drive type by top speed and trip length
+  const hiwayCnt  = drives.filter(d => (d.topSpeedMps||0)*2.237 > 60).length;
+  const cityRatio = 1 - hiwayCnt / drives.length;
+  const isHighway = hiwayCnt / drives.length > 0.55;
+  const isCity    = cityRatio > 0.65;
+  const isMixed   = !isHighway && !isCity;
+  const isLong    = avgMi > 20;
+  const isShort   = avgMi < 5;
+  const isSmooth  = avgScore >= 85;
+  const isRough   = avgScore < 65;
+
+  let title, sub;
+  if (isHighway && isLong && isSmooth){
+    title = 'Mile-Eater';
+    sub   = `Cruising ${Math.round(avgMi)} mi avg at highway pace. Clean, consistent, unfazed.`;
+  } else if (isHighway && isLong && isRough){
+    title = 'Highway Charger';
+    sub   = `Long hauls, fast pace, heavy inputs. Smooth it out and save on fuel.`;
+  } else if (isCity && isShort && isSmooth){
+    title = 'Urban Ghost';
+    sub   = `Threading city blocks like water. ${Math.round(avgDurMin)} min trips, almost no drama.`;
+  } else if (isCity && isShort && isRough){
+    title = 'Stop-Light Sprinter';
+    sub   = `Short hops, hard stops. Ease off the pedal and your score will climb.`;
+  } else if (isCity && isSmooth){
+    title = 'City Glider';
+    sub   = `Reading traffic before it happens. Smooth across ${drives.length} city drives.`;
+  } else if (isMixed && isSmooth){
+    title = 'All-Roads Driver';
+    sub   = `Highways, surface streets — handles both clean. ${Math.round(totalMi)} mi logged.`;
+  } else if (isMixed && !isSmooth){
+    title = 'Mixed-Bag Driver';
+    sub   = `All kinds of roads, all kinds of inputs. Consistency will push that score up.`;
+  } else if (isHighway){
+    title = 'Open Road Cruiser';
+    sub   = `Happiest at speed. Avg ${Math.round(avgTop)} mph top, ${Math.round(avgMi)} mi per drive.`;
+  } else {
+    title = 'Daily Driver';
+    sub   = `${drives.length} drives, ${Math.round(totalMi)} mi total. Avg score ${avgScore}.`;
+  }
+  return {title, sub, avgScore, drives: drives.length, totalMi: Math.round(totalMi)};
+}
+
+function renderPersonaBadge(){
+  const el = document.getElementById('persona-badge');
+  if (!el) return;
+  const drives = loadDrives();
+  const p = getDriverPersona(drives);
+  if (!p){ el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="persona-title">${p.title}</div>
+    <div class="persona-sub">${p.sub}</div>`;
+}
+
 function renderDriveList(){
   const host = $('#drives-container');
   const all = loadDrives();
+  renderPersonaBadge();
   if (!all.length){
     host.innerHTML = '<div class="empty-drives">No drives yet. Tap start.</div>';
     return;
@@ -1713,9 +1777,14 @@ function wireStartButton(btnId){
 // ── Car photo — background removal + cartoon ─────────────────────────────────
 const CAR_PHOTO_KEY   = 'smoothaf.car_photo';
 const REMOVEBG_KEY    = 'smoothaf.removebg_key';
+const CAR_POS_KEY     = 'smoothaf.car_pos';
+const REC_PHOTO_KEY   = 'smoothaf.rec_photo';
 
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
 function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || '9BMp9XXKWRiqoXeqEPp1T63U'; }
+function loadCarPos(){ try { return JSON.parse(localStorage.getItem(CAR_POS_KEY)) || {x:50,y:38}; } catch { return {x:50,y:38}; } }
+function saveCarPos(p){ try { localStorage.setItem(CAR_POS_KEY, JSON.stringify(p)); } catch {} }
+function loadRecPhoto(){ try { return localStorage.getItem(REC_PHOTO_KEY); } catch { return null; } }
 
 async function removeBgAPI(file){
   const key = getRemoveBgKey();
@@ -1841,13 +1910,16 @@ function renderCarDisplay(){
   if (!container) return;
   const src = getCarImageSrc('front');
   if (src){
+    const pos = loadCarPos();
     container.innerHTML = `
-      <img src="${src}" class="car-full" alt="Your car">
+      <div class="car-photo-bg" id="car-photo-bg" style="background-image:url(${src});background-position:${pos.x}% ${pos.y}%"></div>
       <div class="car-vignette"></div>
-      <label class="car-change-lbl">Change photo<input type="file" accept="image/*" style="display:none"></label>`;
-    container.querySelector('input[type=file]').addEventListener('change', e => {
-      if (e.target.files[0]) processCarPhoto(e.target.files[0]);
-    });
+      <div class="car-action-row">
+        <button class="car-action-btn" id="car-change-btn">Change</button>
+        <button class="car-action-btn" id="car-reposition-btn">Reposition</button>
+      </div>`;
+    document.getElementById('car-change-btn').addEventListener('click', showVehicleSheet);
+    document.getElementById('car-reposition-btn').addEventListener('click', enterRepositionMode);
   } else {
     container.innerHTML = `
       <div class="car-upload-prompt" id="car-type-invite" style="cursor:pointer">
@@ -1860,10 +1932,78 @@ function renderCarDisplay(){
   renderRecAvatar();
 }
 
+function enterRepositionMode(){
+  const container = document.getElementById('car-display');
+  const bg = document.getElementById('car-photo-bg');
+  if (!container || !bg) return;
+
+  let pos = loadCarPos();
+  let startTouch = null, startPos = {...pos};
+  const w = container.offsetWidth  || 390;
+  const h = container.offsetHeight || 600;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'car-reposition-overlay';
+  overlay.innerHTML = `
+    <div class="car-reposition-hint">Drag to reposition</div>
+    <button class="car-reposition-done" id="repo-done">Done</button>
+    <button class="car-reposition-reset" id="repo-reset">Reset position</button>`;
+  container.appendChild(overlay);
+
+  overlay.addEventListener('touchstart', e => {
+    if (e.touches.length === 1){
+      startTouch = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+      startPos = {...pos};
+    }
+    e.preventDefault();
+  }, {passive: false});
+
+  overlay.addEventListener('touchmove', e => {
+    if (e.touches.length === 1 && startTouch){
+      const dx = e.touches[0].clientX - startTouch.x;
+      const dy = e.touches[0].clientY - startTouch.y;
+      pos.x = Math.max(0, Math.min(100, startPos.x - dx * (100/w)));
+      pos.y = Math.max(0, Math.min(100, startPos.y - dy * (100/h)));
+      bg.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
+    }
+    e.preventDefault();
+  }, {passive: false});
+
+  overlay.addEventListener('touchend', () => { startTouch = null; });
+
+  document.getElementById('repo-done').addEventListener('click', () => {
+    saveCarPos(pos);
+    overlay.remove();
+  });
+  document.getElementById('repo-reset').addEventListener('click', () => {
+    pos = {x:50, y:38};
+    bg.style.backgroundPosition = '50% 38%';
+    saveCarPos(pos);
+    overlay.remove();
+  });
+}
+
+function saveRecPhoto(file){
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 1200, scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      canvas.width  = Math.round(img.naturalWidth  * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      try { localStorage.setItem(REC_PHOTO_KEY, canvas.toDataURL('image/jpeg', 0.88)); } catch {}
+      renderRecAvatar();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function renderRecAvatar(){
-  // Set recording screen blurred background from car photo or vehicle type (rear view)
   const bg = document.getElementById('rec-bg');
-  const src = getCarImageSrc('rear');
+  const src = loadRecPhoto() || getCarImageSrc('rear');
   if (bg){
     if (src){
       bg.style.backgroundImage = `url(${src})`;
@@ -1871,21 +2011,6 @@ function renderRecAvatar(){
     } else {
       bg.style.display = 'none';
     }
-  }
-  // Legacy avatar wrap — no longer used in recording screen but keep for compat
-  const wrap = document.getElementById('rec-avatar-wrap');
-  if (!wrap) return;
-  // Remove any existing avatar img (keep burst divs)
-  wrap.querySelectorAll('img,.avatar-circle').forEach(el => el.remove());
-  if (photo){
-    const circle = document.createElement('div');
-    circle.className = 'avatar-circle';
-    const img = document.createElement('img');
-    img.src = photo;
-    img.className = 'car-avatar';
-    img.alt = 'Your car';
-    circle.appendChild(img);
-    wrap.insertBefore(circle, wrap.firstChild);
   }
 }
 
@@ -1947,6 +2072,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('removebg-modal').classList.add('hidden');
     const f = document.getElementById('removebg-modal')._pendingFile;
     if (f) savePhotoPlain(f);
+  });
+
+  // Recording screen background upload
+  document.getElementById('rec-photo-input')?.addEventListener('change', e => {
+    if (e.target.files[0]) saveRecPhoto(e.target.files[0]);
   });
 
   // Vehicle type sheet
