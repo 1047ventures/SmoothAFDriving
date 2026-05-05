@@ -1830,6 +1830,7 @@ function hideVehicleSheet(){
 function selectVehicleType(vehicleId){
   if (!VEHICLE_TYPES.find(v => v.id === vehicleId)) return;
   localStorage.setItem(VEHICLE_KEY, vehicleId);
+  try { localStorage.removeItem(CAR_PHOTO_KEY); } catch {}
   hideVehicleSheet();
   renderCarDisplay();
   renderRecAvatar();

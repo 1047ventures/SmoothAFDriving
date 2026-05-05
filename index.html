@@ -194,7 +194,7 @@
                linear-gradient(to bottom, rgba(10,8,8,.5) 0%, transparent 20%, transparent 75%, rgba(10,8,8,.8) 100%);
   }
   /* All direct children of #screen-record appear above the bg */
-  #screen-record > *:not(.rec-bg):not(.rec-bg-vignette){ position:relative;z-index:2; }
+  #screen-record > *:not(.rec-bg):not(.rec-bg-vignette):not(.stop-btn){ position:relative;z-index:2; }
   .rec-head{display:flex;justify-content:space-between;align-items:center;padding-top:calc(env(safe-area-inset-top,0) + 18px);width:100%}
   .rec-dot{width:10px;height:10px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.55)}70%{box-shadow:0 0 0 12px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
@@ -497,7 +497,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v36</div>
+<div id="app-version">v37</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
