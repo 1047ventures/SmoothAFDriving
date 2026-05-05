@@ -490,7 +490,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v34</div>
+<div id="app-version">v35</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -658,12 +658,8 @@
       <div class="vs-title">Your vehicle</div>
       <button class="vs-close" id="vs-close">×</button>
     </div>
-    <div class="vs-sub">Pick a type — AI generates a cinematic photo of your ride</div>
+    <div class="vs-sub">Pick a type to set your driving screen</div>
     <div class="vs-grid" id="vs-grid"></div>
-    <div class="vs-status" id="vs-status">
-      <div class="vs-spinner"></div>
-      <div class="vs-status-text" id="vs-status-text">Generating your ride…</div>
-    </div>
     <label class="vs-upload-lbl">
       Or upload your own photo
       <input type="file" accept="image/*" id="vs-upload-input" style="display:none">
@@ -699,7 +695,6 @@
 
 </div>
 
-<script src="https://js.puter.com/v2/" async></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="app.js"></script>

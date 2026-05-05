@@ -1794,7 +1794,15 @@ function showApiKeyPrompt(pendingFile, errorMsg){
   modal.classList.remove('hidden');
 }
 
-// ── Vehicle sheet: AI image generation via Puter.js ─────────────────────────
+// ── Vehicle sheet: static pre-generated images ───────────────────────────────
+function getCarImageSrc(){
+  const custom = loadCarPhoto();
+  if (custom) return custom;
+  const type = localStorage.getItem(VEHICLE_KEY);
+  if (type) return `vehicles/${type}.jpg`;
+  return null;
+}
+
 function buildVehicleGrid(){
   const grid = document.getElementById('vs-grid');
   if (!grid) return;
@@ -1805,7 +1813,7 @@ function buildVehicleGrid(){
       <div class="vs-label">${v.label}</div>
     </div>`).join('');
   grid.querySelectorAll('.vs-card').forEach(card => {
-    card.addEventListener('click', () => generateVehicleImage(card.dataset.id));
+    card.addEventListener('click', () => selectVehicleType(card.dataset.id));
   });
 }
 
@@ -1813,10 +1821,6 @@ function showVehicleSheet(){
   const sheet = document.getElementById('vehicle-sheet');
   if (!sheet) return;
   buildVehicleGrid();
-  const grid = document.getElementById('vs-grid');
-  const status = document.getElementById('vs-status');
-  if (grid) grid.style.display = '';
-  if (status) status.classList.remove('active');
   sheet.classList.remove('hidden');
 }
 
@@ -1824,63 +1828,32 @@ function hideVehicleSheet(){
   document.getElementById('vehicle-sheet')?.classList.add('hidden');
 }
 
-async function generateVehicleImage(vehicleId){
-  const vType = VEHICLE_TYPES.find(v => v.id === vehicleId);
-  if (!vType) return;
+function selectVehicleType(vehicleId){
+  if (!VEHICLE_TYPES.find(v => v.id === vehicleId)) return;
   localStorage.setItem(VEHICLE_KEY, vehicleId);
-
-  const grid   = document.getElementById('vs-grid');
-  const status = document.getElementById('vs-status');
-  const statusTxt = document.getElementById('vs-status-text');
-  if (grid)   grid.style.display = 'none';
-  if (status) { status.classList.add('active'); }
-  if (statusTxt) statusTxt.textContent = `Generating your ${vType.label}…`;
-
-  try {
-    if (typeof puter === 'undefined' || !puter.ai) throw new Error('Puter not loaded');
-    const imgEl = await puter.ai.txt2img(vType.prompt, false);
-    // Convert the returned HTMLImageElement blob src to a data URL via canvas
-    const canvas = document.createElement('canvas');
-    const loadedImg = await new Promise((res, rej) => {
-      if (imgEl.complete && imgEl.naturalWidth) { res(imgEl); return; }
-      imgEl.onload = () => res(imgEl);
-      imgEl.onerror = rej;
-    });
-    canvas.width  = loadedImg.naturalWidth  || 1024;
-    canvas.height = loadedImg.naturalHeight || 768;
-    canvas.getContext('2d').drawImage(loadedImg, 0, 0);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-    try { localStorage.setItem(CAR_PHOTO_KEY, dataUrl); } catch {}
-    hideVehicleSheet();
-    renderCarDisplay();
-    renderRecAvatar();
-  } catch(err) {
-    console.warn('Vehicle generation failed:', err);
-    if (statusTxt) statusTxt.textContent = 'Generation failed — try uploading a photo below.';
-    if (grid)   grid.style.display = '';
-    if (status) status.classList.remove('active');
-  }
+  hideVehicleSheet();
+  renderCarDisplay();
+  renderRecAvatar();
 }
 
 function renderCarDisplay(){
   const container = document.getElementById('car-display');
   if (!container) return;
-  const photo = loadCarPhoto();
-  if (photo){
+  const src = getCarImageSrc();
+  if (src){
     container.innerHTML = `
-      <img src="${photo}" class="car-full" alt="Your car">
+      <img src="${src}" class="car-full" alt="Your car">
       <div class="car-vignette"></div>
       <label class="car-change-lbl">Change photo<input type="file" accept="image/*" style="display:none"></label>`;
     container.querySelector('input[type=file]').addEventListener('change', e => {
       if (e.target.files[0]) processCarPhoto(e.target.files[0]);
     });
   } else {
-    // No photo — show vehicle-type invite that opens the sheet
     container.innerHTML = `
       <div class="car-upload-prompt" id="car-type-invite" style="cursor:pointer">
         <div class="car-upload-icon">🚗</div>
         <div class="car-upload-title">Choose your ride</div>
-        <div class="car-upload-sub">AI generates a cinematic photo</div>
+        <div class="car-upload-sub">Select a vehicle type or upload a photo</div>
       </div>`;
     document.getElementById('car-type-invite')?.addEventListener('click', showVehicleSheet);
   }
@@ -1888,12 +1861,12 @@ function renderCarDisplay(){
 }
 
 function renderRecAvatar(){
-  // Set recording screen blurred background from car photo
+  // Set recording screen blurred background from car photo or vehicle type
   const bg = document.getElementById('rec-bg');
-  const photo = loadCarPhoto();
+  const src = getCarImageSrc();
   if (bg){
-    if (photo){
-      bg.style.backgroundImage = `url(${photo})`;
+    if (src){
+      bg.style.backgroundImage = `url(${src})`;
       bg.style.display = 'block';
     } else {
       bg.style.display = 'none';
