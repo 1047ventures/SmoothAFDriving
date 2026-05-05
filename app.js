@@ -1331,9 +1331,22 @@ function renderReview(drive){
   // ── Force timeline chart ───────────────────────────────────────────────────
   renderForceTimeline(drive);
 
-  // ── Seven dimension tiles ─────────────────────────────────────────────────
-  const dimsList = $('#dims-list');
-  if (dimsList){
+  // ── Style verdict + analysis sheet ────────────────────────────────────────
+  const verdict = drivingStyleVerdict(analysis, drive);
+  const vColor  = dimColor(analysis.score);
+
+  // Verdict preview on score header
+  const verdictTag = document.getElementById('score-verdict-tag');
+  if (verdictTag) verdictTag.textContent = verdict.label;
+
+  // Populate analysis sheet
+  const asLabel = document.getElementById('as-verdict-label');
+  const asSub   = document.getElementById('as-verdict-sub');
+  if (asLabel) { asLabel.textContent = verdict.label; asLabel.style.color = vColor; }
+  if (asSub)   asSub.textContent = verdict.sub;
+
+  const asDims = document.getElementById('as-dims-list');
+  if (asDims){
     const regularDims = DIM_DISPLAY.filter(d => d.key !== 'momentum');
     const mVal  = analysis.dims.momentum || 0;
     const mColor = dimColor(mVal);
@@ -1356,23 +1369,21 @@ function renderReview(drive){
         <div class="momentum-map-link" style="color:${mColor}">View on map →</div>
       </div>
     </div>`;
-    dimsList.innerHTML = tiles + momentum;
-    document.getElementById('dim-tile-momentum')?.addEventListener('click', () => enterMapFilter('stop'));
+    asDims.innerHTML = tiles + momentum;
+    document.getElementById('dim-tile-momentum')?.addEventListener('click', () => {
+      document.getElementById('analysis-sheet')?.classList.add('hidden');
+      enterMapFilter('stop');
+    });
   }
-  const dimsToggle = document.getElementById('dims-toggle');
-  if (dimsToggle) dimsToggle.onclick = () => document.getElementById('dims-section')?.classList.toggle('open');
 
-  // ── Style verdict ──────────────────────────────────────────────────────────
-  const coachEl = $('#coaching-cards');
-  if (coachEl){
-    const verdict = drivingStyleVerdict(analysis, drive);
-    const vColor  = dimColor(analysis.score);
-    coachEl.innerHTML = `
-      <div class="verdict-card">
-        <div class="verdict-label" style="color:${vColor}">${verdict.label}</div>
-        <div class="verdict-sub">${verdict.sub}</div>
-      </div>`;
+  // Wire score header tap
+  const scoreBtn = document.getElementById('score-header-btn');
+  if (scoreBtn){
+    scoreBtn.onclick = () => document.getElementById('analysis-sheet')?.classList.remove('hidden');
   }
+  document.getElementById('as-close')?.addEventListener('click', () => {
+    document.getElementById('analysis-sheet')?.classList.add('hidden');
+  });
 
   // ── Map ────────────────────────────────────────────────────────────────────
   if (!mapInstance){
@@ -1989,12 +2000,19 @@ function saveRecPhoto(file){
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const MAX = 1200, scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      const MAX = 900, scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
       canvas.width  = Math.round(img.naturalWidth  * scale);
       canvas.height = Math.round(img.naturalHeight * scale);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      try { localStorage.setItem(REC_PHOTO_KEY, canvas.toDataURL('image/jpeg', 0.88)); } catch {}
-      renderRecAvatar();
+      // Try progressively lower quality until it fits in localStorage
+      for (const q of [0.82, 0.65, 0.5, 0.35]){
+        try {
+          const dataUrl = canvas.toDataURL('image/jpeg', q);
+          localStorage.setItem(REC_PHOTO_KEY, dataUrl);
+          renderRecAvatar();
+          return;
+        } catch {}
+      }
     };
     img.src = ev.target.result;
   };
