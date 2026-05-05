@@ -44,7 +44,7 @@
   #screen-home{background:#0A0808;padding:0;overflow:hidden}
 
   /* Top 75%: car image panel */
-  .home-car-panel{flex:3;position:relative;overflow:hidden}
+  .home-car-panel{flex:2;position:relative;overflow:hidden}
 
   /* Car display fills the panel */
   #car-display{
@@ -198,8 +198,8 @@
   /* ============ RECORDING ============ */
   #screen-record{background:#060404;overflow:hidden;padding:0}
 
-  /* Top 75%: car image + ring */
-  .rec-car-panel{flex:3;position:relative;overflow:hidden}
+  /* Top 67%: car image + ring */
+  .rec-car-panel{flex:2;position:relative;overflow:hidden}
 
   /* Car photo — nearly no blur, centered */
   .rec-bg{
@@ -249,7 +249,7 @@
   .speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:rgba(244,235,217,.5);text-transform:uppercase;text-align:center}
 
   /* G-force bar */
-  .live-g-wrap{width:100%;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .live-g-wrap{width:100%;display:flex;align-items:center;gap:12px}
   .live-g-bar{flex:1;height:12px;background:rgba(244,235,217,.1);border-radius:6px;position:relative}
   .live-g-needle{position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:rgba(244,235,217,.9);border:2px solid rgba(6,4,4,.7);transform:translate(-50%,-50%);transition:left .12s ease-out,background .2s,box-shadow .2s;box-shadow:0 0 10px rgba(244,235,217,.35)}
   .live-g-zero{position:absolute;top:-3px;bottom:-3px;left:50%;width:2px;background:rgba(244,235,217,.28);transform:translateX(-50%)}
@@ -258,11 +258,11 @@
   /* Duration + avg speed */
   .gauge-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%;padding:0 4px}
   .gauge{text-align:center}
-  .gauge-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:42px;letter-spacing:-.02em;color:var(--cream);line-height:1}
-  .gauge-lbl{font-size:10px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-top:5px}
+  .gauge-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:34px;letter-spacing:-.02em;color:var(--cream);line-height:1}
+  .gauge-lbl{font-size:10px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-top:3px}
 
   /* Event flash */
-  .event-ticker{min-height:34px;display:flex;justify-content:center;align-items:center;margin-top:8px}
+  .event-ticker{display:flex;justify-content:center;align-items:center}
   .event-flash{padding:6px 14px;border-radius:999px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;background:rgba(224,59,47,.14);color:var(--danger);border:1px solid rgba(224,59,47,.35);animation:flash-in .25s ease,flash-out .6s ease 1.8s forwards}
   .event-flash.warn{background:rgba(232,160,58,.14);color:var(--warn);border-color:rgba(232,160,58,.35)}
   .event-flash.turn-warn{background:rgba(196,169,98,.14);color:var(--gold);border-color:rgba(196,169,98,.35)}
@@ -529,7 +529,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v46</div>
+<div id="app-version">v47</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
