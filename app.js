@@ -786,6 +786,7 @@ async function requestMotionPermissionIfNeeded(){
       typeof DeviceMotionEvent.requestPermission === 'function'){
     try {
       const res = await DeviceMotionEvent.requestPermission();
+      if (res === 'granted') localStorage.setItem('smoothaf.motion_perm', 'granted');
       return res === 'granted';
     } catch { return false; }
   }
@@ -1769,6 +1770,12 @@ function wireStartButton(btnId){
     const needsPermission = typeof DeviceMotionEvent !== 'undefined' &&
                             typeof DeviceMotionEvent.requestPermission === 'function';
     if (needsPermission){
+      // Already granted before — call silently (iOS returns cached result)
+      if (localStorage.getItem('smoothaf.motion_perm') === 'granted'){
+        await requestMotionPermissionIfNeeded();
+        startRecording();
+        return;
+      }
       $('#perm-modal').classList.remove('hidden');
       $('#perm-allow').onclick = async () => {
         $('#perm-modal').classList.add('hidden');
