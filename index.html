@@ -176,7 +176,7 @@
   /* ============ RECORDING — redesigned ============ */
   #screen-record{
     background:var(--bg);position:relative;
-    align-items:center;padding:0 24px calc(env(safe-area-inset-bottom,0) + 24px);
+    align-items:center;padding:0 24px calc(env(safe-area-inset-bottom,0) + 88px);
     overflow:hidden;
   }
   /* Blurred car photo fills the recording screen bg */
@@ -224,20 +224,20 @@
 
   /* Speed + unit centered inside ring */
   .speed-center{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:2px}
-  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(21vw,108px);line-height:.92;letter-spacing:-.04em;color:var(--cream);margin:0;text-align:center}
+  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(25vw,130px);line-height:.92;letter-spacing:-.04em;color:var(--cream);margin:0;text-align:center}
   .speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:rgba(244,235,217,.55);text-transform:uppercase;text-align:center}
 
   /* Live G-force horizontal bar */
   .live-g-wrap{width:100%;display:flex;align-items:center;gap:12px;margin-bottom:18px}
-  .live-g-bar{flex:1;height:3px;background:rgba(244,235,217,.1);border-radius:2px;position:relative}
+  .live-g-bar{flex:1;height:12px;background:rgba(244,235,217,.1);border-radius:6px;position:relative}
   .live-g-needle{
-    position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;
+    position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;
     background:rgba(244,235,217,.9);border:2px solid rgba(10,8,8,.6);
     transform:translate(-50%,-50%);
     transition:left .12s ease-out,background .2s,box-shadow .2s;
-    box-shadow:0 0 8px rgba(244,235,217,.4);
+    box-shadow:0 0 10px rgba(244,235,217,.4);
   }
-  .live-g-zero{position:absolute;top:-4px;bottom:-4px;left:50%;width:1.5px;background:rgba(244,235,217,.2);transform:translateX(-50%)}
+  .live-g-zero{position:absolute;top:-3px;bottom:-3px;left:50%;width:2px;background:rgba(244,235,217,.3);transform:translateX(-50%)}
   .live-g-label{font-size:11px;letter-spacing:.1em;color:var(--cream-dim);min-width:46px;text-align:right;font-variant-numeric:tabular-nums}
 
   .gauge-row{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;width:100%;padding:0 4px}
@@ -250,7 +250,14 @@
   .event-flash.turn-warn{background:rgba(196,169,98,.14);color:var(--gold);border-color:rgba(196,169,98,.35)}
   @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
-  .stop-btn{appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:18px;border-radius:18px;margin-top:auto;width:100%;box-shadow:0 12px 40px rgba(244,235,217,.18);transition:transform .1s ease}
+  .stop-btn{
+    appearance:none;border:0;cursor:pointer;
+    background:var(--cream);color:var(--bg);
+    font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;
+    padding:18px;border-radius:18px;
+    position:absolute;bottom:calc(env(safe-area-inset-bottom,0) + 24px);left:24px;right:24px;
+    box-shadow:0 12px 40px rgba(244,235,217,.18);transition:transform .1s ease;z-index:3;
+  }
   .stop-btn:active{transform:scale(.985)}
 
   /* Burst effects (inside ring wrap) */
@@ -490,7 +497,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v35</div>
+<div id="app-version">v36</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->

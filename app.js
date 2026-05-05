@@ -25,25 +25,18 @@ const STORAGE_KEY  = 'smoothaf.drives.v1';
 const DEVICE_KEY   = 'smoothaf.device_id';
 const SYNCED_KEY   = 'smoothaf.synced_ids';
 
-// ── Vehicle types for AI-generated home + driving screen photos ──────────────
+// ── Vehicle types — imgFront: home screen, imgRear: recording screen ──────────
 const VEHICLE_KEY = 'smoothaf.vehicle_type';
 const VEHICLE_TYPES = [
-  { id:'sedan',      label:'Sedan',        icon:'🚗',
-    prompt:'ultra-cinematic low-angle automotive photograph, sleek modern black luxury sedan, wet city street, dramatic rim lighting, moody dark atmosphere, professional car photography, 4k photorealistic' },
-  { id:'crossover',  label:'Crossover',    icon:'🚙',
-    prompt:'ultra-cinematic low-angle automotive photograph, dark grey modern crossover SUV, winding mountain road, golden hour dramatic side lighting, professional car photography, 4k photorealistic' },
-  { id:'suv',        label:'Full-size SUV',icon:'🚐',
-    prompt:'ultra-cinematic low-angle automotive photograph, massive black luxury SUV, vast desert highway at dusk, dramatic undercar lighting, imposing presence, professional car photography, 4k photorealistic' },
-  { id:'sports',     label:'Sports Car',   icon:'🏎️',
-    prompt:'ultra-cinematic low-angle automotive photograph, dark red sports coupe, racetrack at night, dramatic rim lighting, motion blur background, professional car photography, 4k photorealistic' },
-  { id:'convertible',label:'Convertible',  icon:'🚘',
-    prompt:'ultra-cinematic low-angle automotive photograph, silver luxury convertible, coastal cliff road, breathtaking golden hour sunset, professional car photography, 4k photorealistic' },
-  { id:'truck',      label:'Pickup Truck', icon:'🛻',
-    prompt:'ultra-cinematic low-angle automotive photograph, black lifted pickup truck, rugged mountain trail at dusk, dramatic storm clouds, professional car photography, 4k photorealistic' },
-  { id:'hatchback',  label:'Hatchback',    icon:'🚗',
-    prompt:'ultra-cinematic low-angle automotive photograph, dark hot hatchback, wet European city street at night, vivid neon reflections, professional car photography, 4k photorealistic' },
-  { id:'electric',   label:'Electric',     icon:'⚡',
-    prompt:'ultra-cinematic low-angle automotive photograph, sleek white electric car, futuristic modern city at night, dramatic blue accent lighting, professional car photography, 4k photorealistic' },
+  { id:'sedan',      label:'Sedan',        icon:'🚗' },
+  { id:'crossover',  label:'Crossover',    icon:'🚙' },
+  { id:'suv',        label:'Lux SUV',      icon:'🚐',
+    imgFront:'vehicles/suv-front.jpg', imgRear:'vehicles/suv-rear.jpg' },
+  { id:'sports',     label:'Sports Car',   icon:'🏎️' },
+  { id:'convertible',label:'Convertible',  icon:'🚘' },
+  { id:'truck',      label:'Pickup Truck', icon:'🛻' },
+  { id:'hatchback',  label:'Hatchback',    icon:'🚗' },
+  { id:'electric',   label:'Electric',     icon:'⚡' },
 ];
 const MAX_STORED_DRIVES = 20;
 
@@ -1795,12 +1788,18 @@ function showApiKeyPrompt(pendingFile, errorMsg){
 }
 
 // ── Vehicle sheet: static pre-generated images ───────────────────────────────
-function getCarImageSrc(){
+function getCarImageSrc(ctx){
+  // ctx = 'front' (home screen) | 'rear' (recording screen) | undefined (either)
   const custom = loadCarPhoto();
   if (custom) return custom;
-  const type = localStorage.getItem(VEHICLE_KEY);
-  if (type) return `vehicles/${type}.jpg`;
-  return null;
+  const typeId = localStorage.getItem(VEHICLE_KEY);
+  if (!typeId) return null;
+  const vt = VEHICLE_TYPES.find(v => v.id === typeId);
+  if (!vt) return null;
+  if (ctx === 'rear' && vt.imgRear) return vt.imgRear;
+  if (ctx === 'front' && vt.imgFront) return vt.imgFront;
+  if (vt.imgFront) return vt.imgFront; // fallback default
+  return `vehicles/${typeId}.jpg`;
 }
 
 function buildVehicleGrid(){
@@ -1839,7 +1838,7 @@ function selectVehicleType(vehicleId){
 function renderCarDisplay(){
   const container = document.getElementById('car-display');
   if (!container) return;
-  const src = getCarImageSrc();
+  const src = getCarImageSrc('front');
   if (src){
     container.innerHTML = `
       <img src="${src}" class="car-full" alt="Your car">
@@ -1861,9 +1860,9 @@ function renderCarDisplay(){
 }
 
 function renderRecAvatar(){
-  // Set recording screen blurred background from car photo or vehicle type
+  // Set recording screen blurred background from car photo or vehicle type (rear view)
   const bg = document.getElementById('rec-bg');
-  const src = getCarImageSrc();
+  const src = getCarImageSrc('rear');
   if (bg){
     if (src){
       bg.style.backgroundImage = `url(${src})`;
