@@ -1852,11 +1852,14 @@ const CAR_PHOTO_KEY   = 'smoothaf.car_photo';
 const REMOVEBG_KEY    = 'smoothaf.removebg_key';
 const CAR_POS_KEY     = 'smoothaf.car_pos';
 const REC_PHOTO_KEY   = 'smoothaf.rec_photo';
+const REC_POS_KEY     = 'smoothaf.rec_pos';
 
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
 function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || '9BMp9XXKWRiqoXeqEPp1T63U'; }
 function loadCarPos(){ try { return JSON.parse(localStorage.getItem(CAR_POS_KEY)) || {x:50,y:38}; } catch { return {x:50,y:38}; } }
 function saveCarPos(p){ try { localStorage.setItem(CAR_POS_KEY, JSON.stringify(p)); } catch {} }
+function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)) || {x:50,y:50}; } catch { return {x:50,y:50}; } }
+function saveRecPos(p){ try { localStorage.setItem(REC_POS_KEY, JSON.stringify(p)); } catch {} }
 function loadRecPhoto(){ try { return localStorage.getItem(REC_PHOTO_KEY); } catch { return null; } }
 
 async function removeBgAPI(file){
@@ -2058,6 +2061,44 @@ function enterRepositionMode(){
   });
 }
 
+function enterRecRepositionMode(){
+  const panel = document.querySelector('.rec-car-panel');
+  const bg = document.getElementById('rec-bg');
+  if (!panel || !bg) return;
+  let pos = loadRecPos();
+  let startTouch = null, startPos = {...pos};
+  const w = panel.offsetWidth || 390;
+  const h = panel.offsetHeight || 500;
+  const overlay = document.createElement('div');
+  overlay.className = 'car-reposition-overlay';
+  overlay.innerHTML = `
+    <div class="car-reposition-hint">Drag to reposition</div>
+    <button class="car-reposition-done" id="rec-repo-done">Done</button>
+    <button class="car-reposition-reset" id="rec-repo-reset">Reset position</button>`;
+  panel.appendChild(overlay);
+  overlay.addEventListener('touchstart', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    if (e.touches.length === 1){ startTouch = {x:e.touches[0].clientX, y:e.touches[0].clientY}; startPos = {...pos}; }
+    e.preventDefault();
+  }, {passive:false});
+  overlay.addEventListener('touchmove', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    if (e.touches.length === 1 && startTouch){
+      const dx = e.touches[0].clientX - startTouch.x;
+      const dy = e.touches[0].clientY - startTouch.y;
+      pos.x = Math.max(0, Math.min(100, startPos.x - dx*(100/w)));
+      pos.y = Math.max(0, Math.min(100, startPos.y - dy*(100/h)));
+      bg.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
+    }
+    e.preventDefault();
+  }, {passive:false});
+  overlay.addEventListener('touchend', () => { startTouch = null; });
+  document.getElementById('rec-repo-done').addEventListener('click', () => { saveRecPos(pos); overlay.remove(); });
+  document.getElementById('rec-repo-reset').addEventListener('click', () => {
+    pos = {x:50,y:50}; bg.style.backgroundPosition = '50% 50%'; saveRecPos(pos); overlay.remove();
+  });
+}
+
 function saveRecPhoto(file){
   const reader = new FileReader();
   reader.onload = ev => {
@@ -2088,7 +2129,9 @@ function renderRecAvatar(){
   const src = loadRecPhoto() || getCarImageSrc('rear');
   if (bg){
     if (src){
+      const pos = loadRecPos();
       bg.style.backgroundImage = `url(${src})`;
+      bg.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
       bg.style.display = 'block';
     } else {
       bg.style.display = 'none';
@@ -2159,6 +2202,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Recording screen background upload
   document.getElementById('rec-photo-input')?.addEventListener('change', e => {
     if (e.target.files[0]) saveRecPhoto(e.target.files[0]);
+  });
+  document.getElementById('rec-repo-btn')?.addEventListener('click', enterRecRepositionMode);
+  document.getElementById('btn-go-home')?.addEventListener('click', () => {
+    showScreen('home');
+    renderDriveList();
   });
 
   // Vehicle type sheet

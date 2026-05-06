@@ -105,13 +105,19 @@
   .wordmark-lg .af{color:var(--tang)}
 
   /* Camera button on recording screen */
-  .rec-photo-btn{
+  .rec-photo-btn,.rec-action-btn{
     display:flex;align-items:center;justify-content:center;
     width:32px;height:32px;border-radius:50%;flex-shrink:0;
     background:rgba(10,8,8,.5);border:1px solid rgba(244,235,217,.18);
-    color:rgba(244,235,217,.6);font-size:15px;cursor:pointer;
+    color:rgba(244,235,217,.6);font-size:15px;cursor:pointer;appearance:none;
   }
-  .rec-photo-btn:active{background:rgba(244,235,217,.1)}
+  .rec-photo-btn:active,.rec-action-btn:active{background:rgba(244,235,217,.1)}
+  .home-link-btn{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    display:block;width:100%;text-align:center;margin-top:10px;
+    font-size:13px;letter-spacing:.1em;color:var(--muted);padding:12px 0;
+  }
+  .home-link-btn:active{color:var(--cream-dim)}
 
   /* Bottom 25%: controls panel */
   .home-bottom-sheet{
@@ -208,17 +214,17 @@
   /* Top 67%: car image + ring */
   .rec-car-panel{flex:2;position:relative;overflow:hidden}
 
-  /* Car photo — nearly no blur, centered */
+  /* Car photo — no blur, just slightly darkened */
   .rec-bg{
     position:absolute;inset:0;z-index:0;
-    background-size:cover;background-position:center 30%;
-    filter:blur(2px) brightness(0.65) saturate(0.75);
-    transform:scale(1.03);transition:background-image .4s;
+    background-size:cover;background-position:center 50%;
+    filter:brightness(0.72) saturate(0.9);
+    transition:background-image .4s,background-position .15s;
   }
-  /* Dark gradient only at top (for recording label readability) */
+  /* Gradient at top for label readability, bottom for controls contrast */
   .rec-overlay{
     position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg,rgba(4,2,2,.72) 0%,rgba(4,2,2,0) 32%);
+    background:linear-gradient(180deg,rgba(4,2,2,.68) 0%,rgba(4,2,2,0) 28%,rgba(4,2,2,0) 72%,rgba(4,2,2,.45) 100%);
   }
   /* Recording label — overlaid top of car panel */
   .rec-head{
@@ -318,7 +324,7 @@
     position:fixed;inset:0;z-index:950;
     background:rgba(10,8,8,.97);
     display:flex;flex-direction:column;
-    padding:calc(env(safe-area-inset-top,0)+20px) 20px calc(env(safe-area-inset-bottom,0)+24px);
+    padding:calc(env(safe-area-inset-top,0)+54px) 24px calc(env(safe-area-inset-bottom,0)+24px);
     animation:bdp-in .25s ease-out;
   }
   .vs-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -542,7 +548,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v50</div>
+<div id="app-version">v51</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -582,8 +588,9 @@
       <div class="rec-overlay"></div>
       <div class="rec-head">
         <div class="rec-label"><span class="rec-dot"></span> Recording</div>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
           <div class="rec-source" id="rec-source">GPS + Motion</div>
+          <button class="rec-action-btn" id="rec-repo-btn" title="Reposition background">⊹</button>
           <label class="rec-photo-btn" title="Set driving screen background">
             🖼
             <input type="file" accept="image/*" id="rec-photo-input" style="display:none">
@@ -694,6 +701,7 @@
       </div>
 
       <button id="btn-new-drive" class="new-drive-btn">New drive <span style="font-family:var(--sans);font-style:normal">→</span></button>
+      <button id="btn-go-home" class="home-link-btn">← Back to home</button>
     </div>
 
   </section>
