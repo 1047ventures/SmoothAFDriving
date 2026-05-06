@@ -672,11 +672,26 @@ function loadDrives(){
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
+function saveDrives(all){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(0, MAX_STORED_DRIVES))); } catch {}
+}
 function saveDrive(drive){
   const all = loadDrives();
   all.unshift(drive);
-  const trimmed = all.slice(0, MAX_STORED_DRIVES);
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed)); } catch {}
+  saveDrives(all);
+}
+function toggleFavoriteDrive(idx){
+  const all = loadDrives();
+  if (!all[idx]) return;
+  all[idx].starred = !all[idx].starred;
+  saveDrives(all);
+  renderDriveList();
+}
+function deleteDrive(idx){
+  const all = loadDrives();
+  all.splice(idx, 1);
+  saveDrives(all);
+  renderDriveList();
 }
 
 function getDriverPersona(drives){
@@ -750,7 +765,10 @@ function renderDriveList(){
     host.innerHTML = '<div class="empty-drives">No drives yet. Tap start.</div>';
     return;
   }
-  host.innerHTML = all.map((d, i) => {
+  const sorted = all
+    .map((d, i) => ({d, i}))
+    .sort((a, b) => (b.d.starred ? 1 : 0) - (a.d.starred ? 1 : 0));
+  host.innerHTML = sorted.map(({d, i}) => {
     const when = new Date(d.startTime);
     const mi = d.distanceMeters ? metersToMiles(d.distanceMeters).toFixed(1) : '0.0';
     return `
@@ -760,13 +778,41 @@ function renderDriveList(){
           <div class="drive-when">${when.toLocaleDateString([], {month:'short', day:'numeric'})} · ${when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
           <div class="drive-stats">${mi} MI · ${fmtDuration(d.durationMs)} · ${d.eventCount || 0} events</div>
         </div>
-        <div class="drive-chev">›</div>
+        <div class="drive-actions">
+          <button class="drive-star-btn${d.starred ? ' starred' : ''}" data-idx="${i}" aria-label="Favorite">${d.starred ? '★' : '☆'}</button>
+          <button class="drive-del-btn" data-idx="${i}" aria-label="Delete">×</button>
+        </div>
       </div>`;
   }).join('');
   $$('#drives-container .drive-row').forEach(row => {
-    row.addEventListener('click', () => {
+    row.addEventListener('click', e => {
+      if (e.target.closest('.drive-star-btn, .drive-del-btn')) return;
       const idx = Number(row.dataset.idx);
       renderReview(loadDrives()[idx]);
+    });
+  });
+  $$('#drives-container .drive-star-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavoriteDrive(Number(btn.dataset.idx));
+    });
+  });
+  $$('#drives-container .drive-del-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const row = btn.closest('.drive-row');
+      if (btn.dataset.confirm === '1'){
+        deleteDrive(Number(btn.dataset.idx));
+      } else {
+        btn.dataset.confirm = '1';
+        btn.textContent = 'Delete?';
+        btn.classList.add('confirming');
+        setTimeout(() => {
+          btn.dataset.confirm = '0';
+          btn.textContent = '×';
+          btn.classList.remove('confirming');
+        }, 2500);
+      }
     });
   });
 }
@@ -786,11 +832,20 @@ async function requestMotionPermissionIfNeeded(){
       typeof DeviceMotionEvent.requestPermission === 'function'){
     try {
       const res = await DeviceMotionEvent.requestPermission();
-      if (res === 'granted') localStorage.setItem('smoothaf.motion_perm', 'granted');
+      if (res === 'granted'){
+        try { localStorage.setItem('smoothaf.motion_perm', 'granted'); } catch {}
+        try { document.cookie = 'saf_mp=1;max-age=31536000;path=/;SameSite=Strict'; } catch {}
+      }
       return res === 'granted';
     } catch { return false; }
   }
   return true;
+}
+
+function motionPermGranted(){
+  try { if (localStorage.getItem('smoothaf.motion_perm') === 'granted') return true; } catch {}
+  try { if (document.cookie.includes('saf_mp=1')) return true; } catch {}
+  return false;
 }
 
 function startRecording(){
@@ -1771,7 +1826,7 @@ function wireStartButton(btnId){
                             typeof DeviceMotionEvent.requestPermission === 'function';
     if (needsPermission){
       // Already granted before — call silently (iOS returns cached result)
-      if (localStorage.getItem('smoothaf.motion_perm') === 'granted'){
+      if (motionPermGranted()){
         await requestMotionPermissionIfNeeded();
         startRecording();
         return;
@@ -1969,6 +2024,7 @@ function enterRepositionMode(){
   container.appendChild(overlay);
 
   overlay.addEventListener('touchstart', e => {
+    if (e.target.tagName === 'BUTTON') return;
     if (e.touches.length === 1){
       startTouch = {x: e.touches[0].clientX, y: e.touches[0].clientY};
       startPos = {...pos};
@@ -1977,6 +2033,7 @@ function enterRepositionMode(){
   }, {passive: false});
 
   overlay.addEventListener('touchmove', e => {
+    if (e.target.tagName === 'BUTTON') return;
     if (e.touches.length === 1 && startTouch){
       const dx = e.touches[0].clientX - startTouch.x;
       const dy = e.touches[0].clientY - startTouch.y;
