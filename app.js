@@ -1065,14 +1065,18 @@ function updateLiveUI(){
   const mph = last ? mpsToMph(last.speed || 0) : 0;
   $('#live-speed').textContent = Math.round(mph);
 
-  // G-force label
+  // G-force value
   const gVal = state.lastMotionG
     ? state.lastMotionG.toFixed(2)
     : (last ? Math.min(2.5, (last.harshness||0)/9.81).toFixed(2) : '0.00');
   const gEl = $('#live-g');
   if (gEl) gEl.textContent = gVal + 'G';
 
-  // G-force needle — circle moves left/right along bar and shows current G value
+  // G value inside ring
+  const gInRing = document.getElementById('g-in-ring');
+  if (gInRing) gInRing.textContent = gVal;
+
+  // G-force bar needle
   const la = last ? (last.longAccel || 0) : 0;
   const needle = document.getElementById('live-g-needle');
   if (needle){
@@ -1085,10 +1089,17 @@ function updateLiveUI(){
     needle.textContent      = gVal;
   }
 
-  // Keep ring in smooth state if not currently flashing
+  // Ring color — tracks G-force continuously; events can override briefly
   const ring = document.getElementById('smooth-ring');
-  if (ring && !ring.className.match(/brake|accel|turn/)){
-    ring.className = 'smooth-ring smooth';
+  if (ring && !ring._eventLock){
+    if (la < -0.5)      ring.className = 'smooth-ring brake';
+    else if (la > 0.5)  ring.className = 'smooth-ring accel';
+    else                ring.className = 'smooth-ring smooth';
+  }
+
+  // G value inside ring color matches ring state
+  if (gInRing){
+    gInRing.style.color = la < -0.5 ? '#E03B2F' : la > 0.5 ? '#E8A03A' : 'var(--cream)';
   }
 
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
@@ -1121,11 +1132,12 @@ function flashEvent(type, latAccel){
   ticker.appendChild(el);
   setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
 
-  // Animate smooth ring
+  // Animate smooth ring (lock briefly so continuous G update doesn't override)
   const ring = document.getElementById('smooth-ring');
   if (ring){
+    ring._eventLock = true;
     ring.className = 'smooth-ring ' + type;
-    setTimeout(() => { ring.className = 'smooth-ring smooth'; }, 1200);
+    setTimeout(() => { ring._eventLock = false; }, 1200);
   }
 
   // Directional burst

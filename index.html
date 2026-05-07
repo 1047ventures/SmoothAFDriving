@@ -228,9 +228,13 @@
   }
   /* Recording label — overlaid top of car panel */
   .rec-head{
-    position:absolute;top:0;left:0;right:0;z-index:3;
+    position:absolute;left:0;right:0;z-index:3;
     display:flex;justify-content:space-between;align-items:center;
-    padding:calc(env(safe-area-inset-top,0)+28px) 20px 0;
+    padding:18px 20px 0;
+    /* start below Dynamic Island / notch */
+    top:0;
+    top:constant(safe-area-inset-top);
+    top:env(safe-area-inset-top);
   }
   .rec-dot{width:9px;height:9px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 10px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
@@ -256,10 +260,13 @@
   .force-line.fl-left{left:4px;top:50%;transform:translateY(-50%);height:3px;width:48px;background:linear-gradient(90deg,transparent,rgba(196,169,98,.75))}
   .force-line.fl-right{right:4px;top:50%;transform:translateY(-50%);height:3px;width:48px;background:linear-gradient(270deg,transparent,rgba(196,169,98,.75))}
 
-  /* Speed inside ring */
-  .speed-center{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:2px}
-  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(24vw,124px);line-height:.9;letter-spacing:-.04em;color:var(--cream);margin:0;text-align:center}
-  .speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:rgba(244,235,217,.5);text-transform:uppercase;text-align:center}
+  /* Speed + G inside ring */
+  .speed-center{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:0}
+  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(20vw,104px);line-height:.88;letter-spacing:-.04em;color:var(--cream);margin:0;text-align:center}
+  .speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:rgba(244,235,217,.5);text-transform:uppercase;text-align:center;margin-bottom:6px}
+  .g-in-ring{display:flex;align-items:baseline;gap:3px;margin-top:4px}
+  .g-in-ring-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(9vw,46px);line-height:1;letter-spacing:-.02em;color:var(--cream);transition:color .18s}
+  .g-in-ring-lbl{font-size:12px;letter-spacing:.18em;color:rgba(244,235,217,.5);text-transform:uppercase}
 
   /* G-force bar */
   .live-g-wrap{width:100%;display:flex;align-items:center;justify-content:center;padding:0 28px;margin-top:20px}
@@ -325,10 +332,13 @@
     background:rgba(10,8,8,.97);
     display:flex;flex-direction:column;
     animation:bdp-in .25s ease-out;
+    /* push all content below the Dynamic Island / notch */
+    padding-top:constant(safe-area-inset-top);
+    padding-top:env(safe-area-inset-top);
   }
   .gs-bar{
     display:flex;align-items:center;gap:10px;flex-shrink:0;
-    padding:calc(env(safe-area-inset-top,0)+54px) 20px 12px;
+    padding:20px 20px 12px;
   }
   .gs-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;color:var(--cream);line-height:1;flex:1}
   .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
@@ -567,7 +577,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v54</div>
+<div id="app-version">v55</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -632,6 +642,10 @@
           <div class="speed-center">
             <div class="speed-big" id="live-speed">0</div>
             <div class="speed-unit">mph</div>
+            <div class="g-in-ring">
+              <span class="g-in-ring-val" id="g-in-ring">0.00</span>
+              <span class="g-in-ring-lbl">G</span>
+            </div>
           </div>
         </div>
       </div>
