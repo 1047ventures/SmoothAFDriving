@@ -1072,14 +1072,17 @@ function updateLiveUI(){
   const gEl = $('#live-g');
   if (gEl) gEl.textContent = gVal + 'G';
 
-  // G-force needle (longitudinal axis drives left=brake, right=accel)
+  // G-force needle — circle moves left/right along bar and shows current G value
   const la = last ? (last.longAccel || 0) : 0;
   const needle = document.getElementById('live-g-needle');
   if (needle){
     const pct = 50 + clamp(la / 6, -1, 1) * 44;
-    needle.style.left = pct + '%';
-    needle.style.background   = la < -0.6 ? '#E03B2F' : la > 0.6 ? '#E8A03A' : 'rgba(244,235,217,.9)';
-    needle.style.boxShadow    = la < -0.6 ? '0 0 12px rgba(224,59,47,.7)' : la > 0.6 ? '0 0 12px rgba(232,160,58,.7)' : '0 0 8px rgba(244,235,217,.35)';
+    const isBrake = la < -0.6, isAccel = la > 0.6;
+    needle.style.left       = pct + '%';
+    needle.style.background = isBrake ? '#E03B2F' : isAccel ? '#E8A03A' : 'rgba(244,235,217,.9)';
+    needle.style.boxShadow  = isBrake ? '0 0 14px rgba(224,59,47,.7)' : isAccel ? '0 0 14px rgba(232,160,58,.7)' : '0 0 10px rgba(244,235,217,.3)';
+    needle.style.color      = (isBrake || isAccel) ? 'rgba(10,8,8,.9)' : 'rgba(10,8,8,.85)';
+    needle.textContent      = gVal;
   }
 
   // Keep ring in smooth state if not currently flashing
@@ -1932,19 +1935,208 @@ function showApiKeyPrompt(pendingFile, errorMsg){
   modal.classList.remove('hidden');
 }
 
-// ── Vehicle sheet: static pre-generated images ───────────────────────────────
+// ── Garage ────────────────────────────────────────────────────────────────────
+const GARAGE_KEY = 'smoothaf.garage';
+
+function generateId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function loadGarage(){
+  try { return JSON.parse(localStorage.getItem(GARAGE_KEY)) || []; } catch { return []; }
+}
+
+function saveGarage(vehicles){
+  try { localStorage.setItem(GARAGE_KEY, JSON.stringify(vehicles)); } catch {}
+}
+
+function getActiveVehicle(){
+  const g = loadGarage();
+  return g.find(v => v.active) || g[0] || null;
+}
+
+function setActiveVehicle(id){
+  const g = loadGarage();
+  g.forEach(v => v.active = v.id === id);
+  saveGarage(g);
+}
+
+function migrateFromOldVehicleKey(){
+  if (loadGarage().length > 0) return;
+  const oldType = localStorage.getItem(VEHICLE_KEY);
+  if (!oldType) return;
+  saveGarage([{
+    id: generateId(), type: oldType,
+    make:'', model:'', year:'', color:'', licensePlate:'', vin:'',
+    insurance:{ provider:'', policyNumber:'', expiryDate:'', agentPhone:'' },
+    registration:{ state:'', expiryDate:'' },
+    active: true
+  }]);
+}
+
+// ── Vehicle images ─────────────────────────────────────────────────────────────
 function getCarImageSrc(ctx){
-  // ctx = 'front' (home screen) | 'rear' (recording screen) | undefined (either)
   const custom = loadCarPhoto();
   if (custom) return custom;
-  const typeId = localStorage.getItem(VEHICLE_KEY);
+  const active = getActiveVehicle();
+  const typeId = active?.type || localStorage.getItem(VEHICLE_KEY);
   if (!typeId) return null;
   const vt = VEHICLE_TYPES.find(v => v.id === typeId);
   if (!vt) return null;
   if (ctx === 'rear' && vt.imgRear) return vt.imgRear;
   if (ctx === 'front' && vt.imgFront) return vt.imgFront;
-  if (vt.imgFront) return vt.imgFront; // fallback default
+  if (vt.imgFront) return vt.imgFront;
   return `vehicles/${typeId}.jpg`;
+}
+
+// ── Garage UI ──────────────────────────────────────────────────────────────────
+let _editingVehicleId = null;
+
+function showGarageSheet(){
+  const sheet = document.getElementById('garage-sheet');
+  if (!sheet) return;
+  migrateFromOldVehicleKey();
+  renderGarageList();
+  showGarageView('list');
+  sheet.classList.remove('hidden');
+}
+
+function hideGarageSheet(){
+  document.getElementById('garage-sheet')?.classList.add('hidden');
+}
+
+function showGarageView(view){
+  document.getElementById('garage-list-view')?.classList.toggle('hidden', view !== 'list');
+  document.getElementById('garage-form-view')?.classList.toggle('hidden', view !== 'form');
+}
+
+function renderGarageList(){
+  const container = document.getElementById('garage-list');
+  if (!container) return;
+  const vehicles = loadGarage();
+  if (vehicles.length === 0){
+    container.innerHTML = '<div class="gs-empty">No vehicles yet. Add one below.</div>';
+    return;
+  }
+  container.innerHTML = vehicles.map(v => {
+    const vt = VEHICLE_TYPES.find(t => t.id === v.type) || { icon:'🚗', label:'Vehicle' };
+    const nameLine = [v.year, v.make, v.model].filter(Boolean).join(' ') || vt.label;
+    const detail = [v.color, v.licensePlate].filter(Boolean).join(' · ');
+    return `
+      <div class="gs-card${v.active ? ' active-vehicle' : ''}" data-id="${v.id}">
+        <div class="gs-card-icon">${vt.icon}</div>
+        <div class="gs-card-body">
+          <div class="gs-card-name">${nameLine}</div>
+          ${detail ? `<div class="gs-card-detail">${detail}</div>` : ''}
+        </div>
+        ${v.active ? '<div class="gs-card-badge">Driving today</div>' : ''}
+        <button class="gs-card-edit" data-edit="${v.id}">Edit</button>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.gs-card').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('[data-edit]')) return;
+      setActiveVehicle(card.dataset.id);
+      renderGarageList();
+      renderCarDisplay();
+      renderRecAvatar();
+    });
+  });
+  container.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); openVehicleForm(btn.dataset.edit); });
+  });
+}
+
+function openVehicleForm(vehicleId){
+  _editingVehicleId = vehicleId || null;
+  const v = vehicleId ? loadGarage().find(x => x.id === vehicleId) : null;
+
+  document.getElementById('gs-form-title').textContent = v ? 'Edit vehicle' : 'Add vehicle';
+  buildGarageTypeGrid(v?.type || null);
+
+  document.getElementById('gs-make').value           = v?.make || '';
+  document.getElementById('gs-model').value          = v?.model || '';
+  document.getElementById('gs-year').value           = v?.year || '';
+  document.getElementById('gs-color').value          = v?.color || '';
+  document.getElementById('gs-plate').value          = v?.licensePlate || '';
+  document.getElementById('gs-vin').value            = v?.vin || '';
+  document.getElementById('gs-ins-provider').value   = v?.insurance?.provider || '';
+  document.getElementById('gs-ins-policy').value     = v?.insurance?.policyNumber || '';
+  document.getElementById('gs-ins-expiry').value     = v?.insurance?.expiryDate || '';
+  document.getElementById('gs-ins-agent').value      = v?.insurance?.agentPhone || '';
+  document.getElementById('gs-reg-state').value      = v?.registration?.state || '';
+  document.getElementById('gs-reg-expiry').value     = v?.registration?.expiryDate || '';
+
+  document.getElementById('gs-delete')?.classList.toggle('hidden', !v);
+  showGarageView('form');
+}
+
+function buildGarageTypeGrid(selectedType){
+  const grid = document.getElementById('gs-type-grid');
+  if (!grid) return;
+  grid.innerHTML = VEHICLE_TYPES.map(vt => `
+    <div class="gs-type-card${vt.id === selectedType ? ' selected' : ''}" data-type="${vt.id}">
+      <div class="gs-type-icon">${vt.icon}</div>
+      <div class="gs-type-label">${vt.label}</div>
+    </div>`).join('');
+  grid.querySelectorAll('.gs-type-card').forEach(card => {
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.gs-type-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+}
+
+function saveVehicleForm(){
+  const vehicles = loadGarage();
+  const selectedTypeEl = document.querySelector('#gs-type-grid .gs-type-card.selected');
+  const data = {
+    type:         selectedTypeEl?.dataset.type || 'sedan',
+    make:         document.getElementById('gs-make').value.trim(),
+    model:        document.getElementById('gs-model').value.trim(),
+    year:         document.getElementById('gs-year').value.trim(),
+    color:        document.getElementById('gs-color').value.trim(),
+    licensePlate: document.getElementById('gs-plate').value.trim(),
+    vin:          document.getElementById('gs-vin').value.trim(),
+    insurance: {
+      provider:     document.getElementById('gs-ins-provider').value.trim(),
+      policyNumber: document.getElementById('gs-ins-policy').value.trim(),
+      expiryDate:   document.getElementById('gs-ins-expiry').value,
+      agentPhone:   document.getElementById('gs-ins-agent').value.trim(),
+    },
+    registration: {
+      state:      document.getElementById('gs-reg-state').value.trim(),
+      expiryDate: document.getElementById('gs-reg-expiry').value,
+    },
+  };
+
+  let refreshDisplay = false;
+  if (_editingVehicleId){
+    const idx = vehicles.findIndex(v => v.id === _editingVehicleId);
+    if (idx !== -1){
+      refreshDisplay = vehicles[idx].active;
+      vehicles[idx] = { ...vehicles[idx], ...data };
+    }
+  } else {
+    data.id = generateId();
+    data.active = vehicles.length === 0;
+    refreshDisplay = data.active;
+    vehicles.push(data);
+  }
+
+  saveGarage(vehicles);
+  if (refreshDisplay){ renderCarDisplay(); renderRecAvatar(); }
+  showGarageView('list');
+  renderGarageList();
+}
+
+function deleteVehicle(id){
+  const vehicles = loadGarage().filter(v => v.id !== id);
+  if (vehicles.length > 0 && !vehicles.find(v => v.active)) vehicles[0].active = true;
+  saveGarage(vehicles);
+  renderCarDisplay();
+  renderRecAvatar();
+  showGarageView('list');
+  renderGarageList();
 }
 
 function buildVehicleGrid(){
@@ -1994,7 +2186,7 @@ function renderCarDisplay(){
         <button class="car-action-btn" id="car-change-btn">Change</button>
         <button class="car-action-btn" id="car-reposition-btn">Reposition</button>
       </div>`;
-    document.getElementById('car-change-btn').addEventListener('click', showVehicleSheet);
+    document.getElementById('car-change-btn').addEventListener('click', showGarageSheet);
     document.getElementById('car-reposition-btn').addEventListener('click', enterRepositionMode);
   } else {
     container.innerHTML = `
@@ -2003,7 +2195,7 @@ function renderCarDisplay(){
         <div class="car-upload-title">Choose your ride</div>
         <div class="car-upload-sub">Select a vehicle type or upload a photo</div>
       </div>`;
-    document.getElementById('car-type-invite')?.addEventListener('click', showVehicleSheet);
+    document.getElementById('car-type-invite')?.addEventListener('click', showGarageSheet);
   }
   renderRecAvatar();
 }
@@ -2209,14 +2401,16 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDriveList();
   });
 
-  // Vehicle type sheet
-  document.getElementById('btn-vehicle-type')?.addEventListener('click', showVehicleSheet);
-  document.getElementById('vs-close')?.addEventListener('click', hideVehicleSheet);
-  document.getElementById('vs-upload-input')?.addEventListener('change', e => {
-    if (e.target.files[0]){
-      hideVehicleSheet();
-      processCarPhoto(e.target.files[0]);
-    }
+  // Garage sheet
+  document.getElementById('btn-vehicle-type')?.addEventListener('click', showGarageSheet);
+  document.getElementById('gs-close')?.addEventListener('click', hideGarageSheet);
+  document.getElementById('gs-form-close')?.addEventListener('click', hideGarageSheet);
+  document.getElementById('gs-back')?.addEventListener('click', () => showGarageView('list'));
+  document.getElementById('gs-add-btn')?.addEventListener('click', () => openVehicleForm(null));
+  document.getElementById('gs-save')?.addEventListener('click', saveVehicleForm);
+  document.getElementById('gs-delete')?.addEventListener('click', () => {
+    if (!_editingVehicleId) return;
+    if (confirm('Delete this vehicle?')) deleteVehicle(_editingVehicleId);
   });
 
   // Past drives toggle
