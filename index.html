@@ -239,7 +239,7 @@
 
   /* Ring + speed — centered within the car panel */
   .rec-ring-zone{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center}
-  .smooth-ring-wrap{position:relative;width:min(260px,63vw);height:min(260px,63vw);display:flex;align-items:center;justify-content:center;flex-shrink:0;transform:translateY(40px)}
+  .smooth-ring-wrap{position:relative;width:min(260px,63vw);height:min(260px,63vw);display:flex;align-items:center;justify-content:center;flex-shrink:0;transform:translateY(80px)}
   .smooth-ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;transition:border-color .4s,box-shadow .4s}
   .smooth-ring.smooth{border-color:rgba(111,182,105,.85);box-shadow:0 0 0 6px rgba(111,182,105,.07),0 0 50px rgba(111,182,105,.14);animation:ring-breathe 3s ease-in-out infinite}
   .smooth-ring.brake{border-color:rgba(224,59,47,.9);box-shadow:0 0 0 8px rgba(224,59,47,.1),0 0 60px rgba(224,59,47,.25);animation:ring-flash .45s ease-out}
@@ -262,7 +262,7 @@
   .speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.3em;color:rgba(244,235,217,.5);text-transform:uppercase;text-align:center}
 
   /* G-force bar */
-  .live-g-wrap{width:100%;display:flex;align-items:center;justify-content:center;padding:0 28px}
+  .live-g-wrap{width:100%;display:flex;align-items:center;justify-content:center;padding:0 28px;margin-top:20px}
   .live-g-bar{width:100%;max-width:260px;height:22px;background:rgba(244,235,217,.1);border-radius:11px;position:relative;overflow:visible}
   .live-g-needle{position:absolute;top:50%;left:50%;width:56px;height:56px;border-radius:50%;background:rgba(244,235,217,.9);border:2.5px solid rgba(6,4,4,.7);transform:translate(-50%,-50%);transition:left .12s ease-out,background .2s,box-shadow .2s;box-shadow:0 0 12px rgba(244,235,217,.3);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-weight:700;font-size:15px;color:rgba(10,8,8,.85);z-index:2;line-height:1}
   .live-g-zero{position:absolute;top:-7px;bottom:-7px;left:50%;width:2px;background:rgba(244,235,217,.3);transform:translateX(-50%);z-index:1}
@@ -567,7 +567,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v52</div>
+<div id="app-version">v53</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
