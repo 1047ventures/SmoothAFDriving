@@ -230,7 +230,7 @@
   .rec-head{
     position:absolute;top:0;left:0;right:0;z-index:3;
     display:flex;justify-content:space-between;align-items:center;
-    padding:calc(env(safe-area-inset-top,0)+14px) 20px 0;
+    padding:calc(env(safe-area-inset-top,0)+28px) 20px 0;
   }
   .rec-dot{width:9px;height:9px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 10px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
@@ -328,7 +328,7 @@
   }
   .gs-bar{
     display:flex;align-items:center;gap:10px;flex-shrink:0;
-    padding:calc(env(safe-area-inset-top,0)+14px) 20px 12px;
+    padding:calc(env(safe-area-inset-top,0)+54px) 20px 12px;
   }
   .gs-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;color:var(--cream);line-height:1;flex:1}
   .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
@@ -567,7 +567,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v53</div>
+<div id="app-version">v54</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -609,12 +609,14 @@
         <div class="rec-label"><span class="rec-dot"></span> Recording</div>
         <div style="display:flex;align-items:center;gap:8px">
           <div class="rec-source" id="rec-source">GPS + Motion</div>
-          <button class="rec-action-btn" id="rec-repo-btn" title="Reposition background">⊹</button>
           <label class="rec-photo-btn" title="Set driving screen background">
             🖼
             <input type="file" accept="image/*" id="rec-photo-input" style="display:none">
           </label>
         </div>
+      </div>
+      <div class="car-action-row" id="rec-action-row">
+        <button class="car-action-btn" id="rec-repo-btn">Reposition</button>
       </div>
       <div class="rec-ring-zone">
         <div class="smooth-ring-wrap">
