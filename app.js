@@ -1072,10 +1072,6 @@ function updateLiveUI(){
   const gEl = $('#live-g');
   if (gEl) gEl.textContent = gVal + 'G';
 
-  // G value inside ring
-  const gInRing = document.getElementById('g-in-ring');
-  if (gInRing) gInRing.textContent = gVal;
-
   // G-force bar needle
   const la = last ? (last.longAccel || 0) : 0;
   const needle = document.getElementById('live-g-needle');
@@ -1097,10 +1093,6 @@ function updateLiveUI(){
     else                ring.className = 'smooth-ring smooth';
   }
 
-  // G value inside ring color matches ring state
-  if (gInRing){
-    gInRing.style.color = la < -0.5 ? '#E03B2F' : la > 0.5 ? '#E8A03A' : 'var(--cream)';
-  }
 
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
   const avgMph = state.samples.length
@@ -1873,7 +1865,7 @@ function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } cat
 function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || '9BMp9XXKWRiqoXeqEPp1T63U'; }
 function loadCarPos(){ try { return JSON.parse(localStorage.getItem(CAR_POS_KEY)) || {x:50,y:38}; } catch { return {x:50,y:38}; } }
 function saveCarPos(p){ try { localStorage.setItem(CAR_POS_KEY, JSON.stringify(p)); } catch {} }
-function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)) || {x:50,y:50}; } catch { return {x:50,y:50}; } }
+function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)) || {x:50,y:42}; } catch { return {x:50,y:42}; } }
 function saveRecPos(p){ try { localStorage.setItem(REC_POS_KEY, JSON.stringify(p)); } catch {} }
 function loadRecPhoto(){ try { return localStorage.getItem(REC_PHOTO_KEY); } catch { return null; } }
 
@@ -2407,7 +2399,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rec-photo-input')?.addEventListener('change', e => {
     if (e.target.files[0]) saveRecPhoto(e.target.files[0]);
   });
-  document.getElementById('rec-repo-btn')?.addEventListener('click', enterRecRepositionMode);
   document.getElementById('btn-go-home')?.addEventListener('click', () => {
     showScreen('home');
     renderDriveList();
