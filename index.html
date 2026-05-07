@@ -214,11 +214,13 @@
   /* Top 67%: car image + ring */
   .rec-car-panel{flex:2;position:relative;overflow:hidden}
 
-  /* Car photo fills car panel */
+  /* Car photo — zoomed out to show more of the scene */
   .rec-bg{
     position:absolute;inset:0;z-index:0;
-    background-size:cover;background-position:center 50%;
-    filter:brightness(0.72) saturate(0.9);
+    background-size:auto 82%;
+    background-position:center 50%;
+    background-repeat:no-repeat;
+    filter:brightness(0.8) saturate(0.9);
     transition:background-image .4s,background-position .15s;
   }
   /* Gradient: dark at top for label readability, clears in the middle */
@@ -580,7 +582,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v59</div>
+<div id="app-version">v60</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
