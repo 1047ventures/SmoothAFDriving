@@ -209,22 +209,22 @@
   .prestart-cancel:active{background:rgba(244,235,217,.06)}
 
   /* ============ RECORDING ============ */
-  #screen-record{background:#060404;overflow:hidden;padding:0}
+  #screen-record{background:#060404;overflow:hidden;padding:0;isolation:isolate}
 
   /* Top 67%: car image + ring */
   .rec-car-panel{flex:2;position:relative;overflow:hidden}
 
-  /* Car photo — no blur, just slightly darkened */
+  /* Full-screen background — sits behind both panels */
   .rec-bg{
-    position:absolute;inset:0;z-index:0;
-    background-size:cover;background-position:center 50%;
+    position:absolute;inset:0;z-index:-1;
+    background-size:cover;background-position:center 42%;
     filter:brightness(0.72) saturate(0.9);
     transition:background-image .4s,background-position .15s;
   }
-  /* Gradient at top for label readability, bottom for controls contrast */
+  /* Gradient: dark at top for label readability, clears in the middle */
   .rec-overlay{
     position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg,rgba(4,2,2,.68) 0%,rgba(4,2,2,0) 28%,rgba(4,2,2,0) 72%,rgba(4,2,2,.45) 100%);
+    background:linear-gradient(180deg,rgba(4,2,2,.72) 0%,rgba(4,2,2,0) 30%,rgba(4,2,2,0) 100%);
   }
   /* Recording label — overlaid top of car panel */
   .rec-head{
@@ -286,10 +286,11 @@
   @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
 
-  /* Bottom 33%: gauges + stop button */
+  /* Bottom 33%: gauges + stop button — gradient so road bleeds through */
   .rec-controls-panel{
     flex:1;min-height:0;
-    background:rgba(6,4,4,.97);border-top:1px solid rgba(244,235,217,.09);
+    background:linear-gradient(to bottom, rgba(6,4,4,.1) 0%, rgba(6,4,4,.72) 22%, rgba(6,4,4,.95) 55%);
+    border-top:none;
     padding:14px 20px calc(env(safe-area-inset-bottom,0)+14px);
     display:flex;flex-direction:column;align-items:center;
     justify-content:space-between;width:100%;
@@ -574,7 +575,7 @@
 </style>
 </head>
 <body>
-<div id="app-version">v57</div>
+<div id="app-version">v58</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -608,9 +609,11 @@
   <!-- ═══════════════════════════ RECORDING ═══════════════════════════ -->
   <section id="screen-record" class="screen">
 
-    <!-- Top 75%: car image + ring overlaid -->
+    <!-- Full-screen background: stretches through both panels -->
+    <div class="rec-bg" id="rec-bg"></div>
+
+    <!-- Top panel: ring + head overlaid on bg -->
     <div class="rec-car-panel">
-      <div class="rec-bg" id="rec-bg"></div>
       <div class="rec-overlay"></div>
       <div class="rec-head">
         <div class="rec-label"><span class="rec-dot"></span> Recording</div>
