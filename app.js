@@ -1079,13 +1079,13 @@ function updateLiveUI(){
     const pct = 50 + clamp(la / 6, -1, 1) * 44;
     const isBrake = la < -0.6, isAccel = la > 0.6;
     needle.style.left       = pct + '%';
-    needle.style.background = isBrake ? '#E03B2F' : isAccel ? '#E8A03A' : 'rgba(244,235,217,.9)';
-    needle.style.boxShadow  = isBrake ? '0 0 14px rgba(224,59,47,.7)' : isAccel ? '0 0 14px rgba(232,160,58,.7)' : '0 0 10px rgba(244,235,217,.3)';
+    needle.style.background = isBrake ? '#E03B2F' : isAccel ? '#6FB669' : 'rgba(244,235,217,.9)';
+    needle.style.boxShadow  = isBrake ? '0 0 14px rgba(224,59,47,.7)' : isAccel ? '0 0 14px rgba(111,182,105,.7)' : '0 0 10px rgba(244,235,217,.3)';
     needle.style.color      = (isBrake || isAccel) ? 'rgba(10,8,8,.9)' : 'rgba(10,8,8,.85)';
     needle.textContent      = gVal;
   }
 
-  // Ring color — tracks G-force continuously; events can override briefly
+  // Ring color — white=smooth, green=accel, red=brake
   const ring = document.getElementById('smooth-ring');
   if (ring && !ring._eventLock){
     if (la < -0.5)      ring.className = 'smooth-ring brake';
@@ -1093,6 +1093,22 @@ function updateLiveUI(){
     else                ring.className = 'smooth-ring smooth';
   }
 
+  // Live score
+  const scoreEl = document.getElementById('live-score');
+  if (scoreEl){
+    const durationMins = (Date.now() - state.startTime) / 60000;
+    if (durationMins < 0.1){
+      scoreEl.textContent = '--';
+    } else {
+      const penalty = state.events.reduce((s, e) => {
+        const w = e.type === 'brake' ? 4 : e.type === 'accel' ? 2.5 : 1.5;
+        return s + w * (e.magnitude || 1);
+      }, 0);
+      const score = Math.max(0, Math.min(100, Math.round(100 - penalty / durationMins * 1.4)));
+      scoreEl.textContent = score;
+      state.liveScore = score;
+    }
+  }
 
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
   const avgMph = state.samples.length
@@ -2258,13 +2274,13 @@ function enterRepositionMode(){
 }
 
 function enterRecRepositionMode(){
-  const panel = document.querySelector('.rec-car-panel');
+  const panel = document.getElementById('screen-record');
   const bg = document.getElementById('rec-bg');
   if (!panel || !bg) return;
   let pos = loadRecPos();
   let startTouch = null, startPos = {...pos};
   const w = panel.offsetWidth || 390;
-  const h = panel.offsetHeight || 500;
+  const h = panel.offsetHeight || 844;
   const overlay = document.createElement('div');
   overlay.className = 'car-reposition-overlay';
   overlay.innerHTML = `
