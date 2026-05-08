@@ -586,10 +586,11 @@
   .ftk{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.06em;color:var(--cream-dim)}
   .ftk::before{content:'';display:inline-block;width:18px;height:3px;border-radius:2px;flex-shrink:0}
   .ftk.brake::before{background:var(--danger)}.ftk.accel::before{background:var(--warn)}.ftk.turn::before{background:var(--gold)}
+
+  #app-version{font-size:10px;letter-spacing:.18em;color:rgba(244,235,217,.18);text-align:center;padding:10px 0 2px;font-family:var(--sans)}
 </style>
 </head>
 <body>
-<div id="app-version">v60</div>
 <div id="app">
 
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
@@ -616,6 +617,7 @@
       <div class="drives-list" id="drives-list-panel">
         <div id="drives-container"></div>
       </div>
+      <div id="app-version">v61</div>
     </div>
 
   </section>
