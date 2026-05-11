@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smooth AF — UI Mockup v3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #050505;
+      font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+      color: #F2E8D5;
+      padding: 64px 0 120px;
+    }
+
+    /* ── Page dividers ───────────────────────────────────────── */
+    .screen-label {
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: #222;
+      padding: 56px 0 24px;
+      font-weight: 600;
+    }
+    .screen-label span {
+      border: 1px solid #1c1c1c;
+      padding: 6px 20px;
+    }
+
+    /* ── Screen shell ────────────────────────────────────────── */
+    .screen {
+      max-width: 390px;
+      min-height: 844px;
+      margin: 0 auto;
+      background: #080808;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Shared typography atoms ─────────────────────────────── */
+    .label {
+      font-size: 9px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.35);
+      font-weight: 400;
+    }
+    .label-11 {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.35);
+      font-weight: 400;
+    }
+    .playfair {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 700;
+    }
+    .muted { color: rgba(242,232,213,0.35); }
+    .cream { color: #F2E8D5; }
+    .orange { color: #E8501A; }
+    .green  { color: #5A9E52; }
+    .red    { color: #C93828; }
+    .gold   { color: #C49A28; }
+    .blue   { color: #1A5CFF; }
+    .italic { font-style: italic; }
+
+    /* ── Gradient text utility ───────────────────────────────── */
+    .grad-orange {
+      background: linear-gradient(135deg, #E8501A 0%, #C49A28 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .grad-cyan {
+      background: linear-gradient(135deg, #00C4A8 0%, #00E8CC 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .grad-gold {
+      background: linear-gradient(135deg, #C49A28 0%, #F0D070 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .grad-blue {
+      background: linear-gradient(135deg, #1A5CFF 0%, #4A8CFF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Horizontal rule ─────────────────────────────────────── */
+    .rule {
+      width: 100%;
+      height: 1px;
+      background: rgba(242,232,213,0.07);
+      flex-shrink: 0;
+    }
+    .rule-full {
+      width: 100%;
+      height: 1px;
+      background: rgba(242,232,213,0.07);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       SCREEN 1 — HOME
+    ───────────────────────────────────────────────────────── */
+
+    /* Top bar */
+    .s1-topbar {
+      height: 52px;
+      padding: 16px 24px 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Score zone */
+    .s1-score-zone {
+      padding: 20px 24px 0;
+      flex-shrink: 0;
+    }
+    .s1-hero-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .s1-hero-number {
+      font-size: 160px;
+      line-height: 0.85;
+      flex-shrink: 0;
+    }
+    .s1-hero-side {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 8px;
+    }
+    .s1-delta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: #5A9E52;
+    }
+    .s1-delta svg { flex-shrink: 0; }
+
+    .s1-persona {
+      padding: 16px 24px 0;
+    }
+
+    /* Stats row */
+    .s1-stats {
+      display: flex;
+      margin: 32px 0 0;
+      border-top: 1px solid rgba(242,232,213,0.07);
+      border-bottom: 1px solid rgba(242,232,213,0.07);
+      flex-shrink: 0;
+    }
+    .s1-stat {
+      flex: 1;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+    }
+    .s1-stat + .s1-stat {
+      border-left: 1px solid rgba(242,232,213,0.07);
+    }
+    .s1-stat-num {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    /* Next unlock */
+    .s1-unlock {
+      margin: 24px 24px 0;
+      height: 48px;
+      border-left: 3px solid #E8501A;
+      background: rgba(232,80,26,0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Trend */
+    .s1-trend {
+      margin: 32px 24px 0;
+      flex-shrink: 0;
+    }
+
+    /* Leaderboard strip */
+    .s1-rival {
+      margin: 24px 0 0;
+      height: 56px;
+      background: #111010;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+    .s1-rival-left { display: flex; flex-direction: column; gap: 4px; }
+
+    /* CTA */
+    .s1-cta {
+      margin-top: auto;
+      height: 80px;
+      background: #E8501A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .s1-cta-text {
+      font-size: 14px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #080808;
+      font-weight: 600;
+    }
+    .s1-cta-arrow {
+      font-size: 24px;
+      color: #080808;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       SCREEN 2 — SCORE BREAKDOWN
+    ───────────────────────────────────────────────────────── */
+
+    .s2-header {
+      padding: 20px 24px 0;
+      flex-shrink: 0;
+    }
+    .s2-score-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .s2-score-big {
+      font-size: 90px;
+      line-height: 0.9;
+      flex-shrink: 0;
+    }
+    .s2-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 12px;
+    }
+
+    .s2-route-type {
+      padding: 16px 24px 0;
+      flex-shrink: 0;
+    }
+
+    .s2-dimensions {
+      margin-top: 24px;
+      flex-shrink: 0;
+    }
+    .s2-dim-row {
+      padding: 0 24px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    .s2-dim-row-inner {
+      padding: 12px 24px 0;
+    }
+    .s2-dim-name {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.35);
+      width: 96px;
+      flex-shrink: 0;
+    }
+    .s2-dim-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: rgba(242,232,213,0.08);
+      position: relative;
+    }
+    .s2-dim-bar-fill {
+      position: absolute;
+      top: 0; left: 0;
+      height: 4px;
+      animation: bar-grow 0.9s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes bar-grow {
+      from { width: 0 !important; }
+    }
+    .s2-dim-score {
+      font-size: 24px;
+      line-height: 1;
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .s2-dim-insight {
+      padding: 4px 24px 12px;
+      font-size: 11px;
+      color: rgba(242,232,213,0.35);
+      font-style: italic;
+    }
+    .s2-dim-block {
+      border-bottom: 1px solid rgba(242,232,213,0.07);
+    }
+
+    .s2-worst {
+      margin: 24px 24px 0;
+      min-height: 72px;
+      border-left: 3px solid #C93828;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .s2-coaching {
+      margin: 24px 0 0;
+      height: 56px;
+      background: #111010;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       SCREEN 3 — REWARDS
+    ───────────────────────────────────────────────────────── */
+
+    .s3-header {
+      padding: 20px 24px 0;
+      flex-shrink: 0;
+    }
+
+    .s3-earned-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      font-size: 110px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 700;
+      color: rgba(242,232,213,0.03);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+
+    .s3-next-unlock {
+      margin: 32px 24px 0;
+      min-height: 96px;
+      border-left: 4px solid #E8501A;
+      padding: 16px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .s3-unlock-progress {
+      margin-top: 8px;
+    }
+    .s3-progress-track {
+      height: 3px;
+      background: rgba(242,232,213,0.08);
+      position: relative;
+    }
+    .s3-progress-fill {
+      position: absolute;
+      top: 0; left: 0;
+      height: 3px;
+      background: #E8501A;
+      animation: bar-grow 1s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .s3-progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .s3-tiers {
+      margin-top: 32px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .s3-tier {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid rgba(242,232,213,0.04);
+      gap: 0;
+    }
+    .s3-tier-border {
+      width: 4px;
+      height: 100%;
+      flex-shrink: 0;
+      margin-right: 16px;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+    }
+    .s3-tier-border-line {
+      width: 4px;
+      height: 32px;
+    }
+    .s3-tier-info { flex: 1; }
+    .s3-tier-name { font-size: 13px; font-weight: 600; }
+    .s3-tier-range { font-size: 11px; color: rgba(242,232,213,0.35); margin-top: 2px; }
+    .s3-tier-reward {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.35);
+      text-align: right;
+    }
+    .s3-tier-current {
+      background: rgba(232,80,26,0.05);
+    }
+    .s3-tier-locked { opacity: 0.3; }
+
+    /* ─────────────────────────────────────────────────────────
+       SCREEN 4 — LEADERBOARD
+    ───────────────────────────────────────────────────────── */
+
+    .s4-tabs {
+      display: flex;
+      padding: 20px 24px 0;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+    .s4-tab {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.35);
+      padding-bottom: 8px;
+      cursor: pointer;
+    }
+    .s4-tab-active {
+      color: #F2E8D5;
+      border-bottom: 2px solid #1A5CFF;
+    }
+
+    .s4-rank-zone {
+      padding: 24px 24px 0;
+      flex-shrink: 0;
+    }
+    .s4-rank-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .s4-rank-big {
+      font-size: 140px;
+      line-height: 0.85;
+      flex-shrink: 0;
+    }
+    .s4-rank-side {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 16px;
+    }
+
+    .s4-divider-context {
+      margin: 24px 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .s4-divider-context .rule { flex: 1; }
+    .s4-divider-context-text {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.25);
+      white-space: nowrap;
+    }
+
+    .s4-list {
+      margin-top: 16px;
+      flex-shrink: 0;
+    }
+    .s4-row {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid rgba(242,232,213,0.05);
+    }
+    .s4-row:nth-child(even) { background: rgba(255,255,255,0.015); }
+    .s4-row-rank {
+      font-size: 28px;
+      width: 48px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .s4-row-driver { flex: 1; padding-left: 8px; }
+    .s4-row-name { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .s4-row-region { font-size: 10px; color: rgba(242,232,213,0.35); margin-top: 2px; }
+    .s4-row-score-wrap { text-align: right; }
+    .s4-row-score { font-size: 22px; line-height: 1; }
+    .s4-row-delta { font-size: 10px; margin-top: 2px; }
+
+    .s4-anchor {
+      margin-top: auto;
+      height: 40px;
+      background: #111010;
+      border-top: 1px solid rgba(242,232,213,0.07);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       SCREEN 5 — START DRIVE
+    ───────────────────────────────────────────────────────── */
+
+    .s5 { background: #080808; }
+
+    .s5-top {
+      padding: 20px 24px 0;
+      flex-shrink: 0;
+    }
+
+    .s5-hero-zone {
+      padding: 40px 24px 0;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .s5-glow {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(232,80,26,0.18) 0%, transparent 70%);
+      animation: glow-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.12); }
+    }
+    .s5-go {
+      font-size: 200px;
+      line-height: 0.85;
+      color: #E8501A;
+      position: relative;
+      z-index: 1;
+    }
+
+    .s5-car {
+      padding: 24px 24px 0;
+      flex-shrink: 0;
+    }
+    .s5-challenge {
+      padding: 12px 24px 0;
+      flex-shrink: 0;
+    }
+
+    .s5-sensor-row {
+      padding: 24px 24px 0;
+      display: flex;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+    .s5-sensor {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.45);
+    }
+    .s5-dot-active {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #5A9E52;
+      flex-shrink: 0;
+    }
+    .s5-dot-inactive {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(242,232,213,0.35);
+      flex-shrink: 0;
+    }
+
+    .s5-cta {
+      margin-top: auto;
+      height: 80px;
+      background: #E8501A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .s5-cta-text {
+      font-size: 14px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #080808;
+      font-weight: 600;
+    }
+    .s5-cta-arrow {
+      font-size: 20px;
+      color: #080808;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1 — HOME
+══════════════════════════════════════════════ -->
+<div class="screen-label"><span>Screen 1 — Home</span></div>
+
+<div class="screen">
+
+  <!-- Top bar -->
+  <div class="s1-topbar">
+    <span style="font-size:10px;letter-spacing:0.35em;text-transform:uppercase;color:rgba(242,232,213,0.35);">SMOOTH AF</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="rgba(242,232,213,0.45)" stroke-width="1.5" stroke-linecap="round">
+      <path d="M6 4l4 4-4 4"/>
+    </svg>
+  </div>
+
+  <!-- Score zone -->
+  <div class="s1-score-zone">
+    <span class="label" style="letter-spacing:0.4em;">LIFETIME SCORE</span>
+    <div class="s1-hero-row">
+      <div class="playfair s1-hero-number grad-orange">87</div>
+      <div class="s1-hero-side">
+        <div class="s1-delta">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#5A9E52" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9V3M3 6l3-3 3 3"/>
+          </svg>
+          <span>+4 this week</span>
+        </div>
+        <div style="font-size:13px;color:rgba(242,232,213,0.35);">#47 globally</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule + persona -->
+  <div style="margin-top:16px;" class="rule-full"></div>
+  <div class="s1-persona" style="padding-bottom: 0;">
+    <div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(242,232,213,0.9);margin-bottom:6px;">URBAN GHOST</div>
+    <div style="font-size:13px;color:rgba(242,232,213,0.45);line-height:1.55;font-style:italic;">Threading city blocks like water. 23 min trips, almost no drama.</div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="s1-stats" style="margin-top:32px;">
+    <div class="s1-stat">
+      <span class="label">DRIVES</span>
+      <span class="playfair s1-stat-num cream">31</span>
+    </div>
+    <div class="s1-stat">
+      <span class="label">MILES</span>
+      <span class="playfair s1-stat-num cream">847</span>
+    </div>
+    <div class="s1-stat">
+      <span class="label">BEST</span>
+      <span class="playfair s1-stat-num cream">94</span>
+    </div>
+  </div>
+
+  <!-- Next unlock -->
+  <div class="s1-unlock">
+    <span style="font-size:11px;color:rgba(242,232,213,0.35);">12 pts from</span>
+    <span style="font-size:13px;color:#F2E8D5;">Free Tank of Gas</span>
+    <span style="font-size:13px;color:rgba(242,232,213,0.35);margin-left:auto;">&#8594;</span>
+  </div>
+
+  <!-- 7-day trend -->
+  <div class="s1-trend">
+    <span class="label">7-DAY TREND</span>
+    <div style="margin-top:12px;">
+      <svg width="100%" height="40" viewBox="0 0 342 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Points: scores 81,83,79,85,88,86,87 mapped over width=342, height=40
+             min=79 max=88, range=9
+             x positions: 0, 57, 114, 171, 228, 285, 342 - half step margins: x_i = 24 + i*49
+             y = 40 - ((score-79)/9)*36 + 2  (2px top pad)
+        -->
+        <!-- x: 24,73,122,171,220,269,318 -->
+        <!-- 81: y=40-((81-79)/9)*36+2 = 40-8+2=34 => 34 -->
+        <!-- 83: y=40-((83-79)/9)*36+2 = 40-16+2=26 => 26 -->
+        <!-- 79: y=40-0+2=42 cap at 38 => 38 -->
+        <!-- 85: y=40-24+2=18 => 18 -->
+        <!-- 88: y=40-36+2=6 => 6 -->
+        <!-- 86: y=40-28+2=14 => 14 -->
+        <!-- 87: y=40-32+2=10 => 10 -->
+        <polyline
+          points="24,34 73,26 122,38 171,18 220,6 269,14 318,10"
+          fill="none"
+          stroke="rgba(242,232,213,0.2)"
+          stroke-width="1"
+          stroke-linejoin="round"
+        />
+        <!-- Dots for past 6 -->
+        <circle cx="24"  cy="34" r="2" fill="rgba(242,232,213,0.3)"/>
+        <circle cx="73"  cy="26" r="2" fill="rgba(242,232,213,0.3)"/>
+        <circle cx="122" cy="38" r="2" fill="rgba(242,232,213,0.3)"/>
+        <circle cx="171" cy="18" r="2" fill="rgba(242,232,213,0.3)"/>
+        <circle cx="220" cy="6"  r="2" fill="rgba(242,232,213,0.3)"/>
+        <circle cx="269" cy="14" r="2" fill="rgba(242,232,213,0.3)"/>
+        <!-- Last dot orange -->
+        <circle cx="318" cy="10" r="4" fill="#E8501A"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Leaderboard strip -->
+  <div class="s1-rival" style="margin-top:24px;">
+    <div class="s1-rival-left">
+      <span class="label">CLOSEST RIVAL</span>
+      <span style="font-size:13px;color:#F2E8D5;margin-top:2px;">Marcus R. — 89 pts</span>
+    </div>
+    <span style="font-size:12px;color:#E8501A;">2 pts behind &#8594;</span>
+  </div>
+
+  <!-- CTA -->
+  <div class="s1-cta" style="margin-top:32px;">
+    <span class="s1-cta-text">Begin Drive</span>
+    <span class="s1-cta-arrow">&#8594;</span>
+  </div>
+
+</div><!-- /screen 1 -->
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2 — SCORE BREAKDOWN
+══════════════════════════════════════════════ -->
+<div class="screen-label"><span>Screen 2 — Score Breakdown</span></div>
+
+<div class="screen">
+
+  <!-- Header -->
+  <div class="s2-header">
+    <span class="label">DRIVE #31</span>
+    <div class="s2-score-row">
+      <div class="playfair s2-score-big grad-cyan">91</div>
+      <div class="s2-meta">
+        <span style="font-size:11px;color:rgba(242,232,213,0.35);">Tue 14 May</span>
+        <span style="font-size:11px;color:rgba(242,232,213,0.35);">8.4 mi · 23 min</span>
+      </div>
+    </div>
+  </div>
+  <div class="rule-full" style="margin-top:16px;"></div>
+
+  <!-- Route type -->
+  <div class="s2-route-type">
+    <span style="font-size:10px;color:rgba(242,232,213,0.35);font-style:italic;letter-spacing:0.08em;">CITY COMMUTE · mostly stop-and-go</span>
+  </div>
+
+  <!-- Dimensions -->
+  <div class="s2-dimensions">
+
+    <!-- Braking 91 -->
+    <div class="s2-dim-block">
+      <div class="s2-dim-row">
+        <span class="s2-dim-name">Braking</span>
+        <div class="s2-dim-bar-wrap">
+          <div class="s2-dim-bar-fill" style="width:91%;background:#00C4A8;"></div>
+        </div>
+        <span class="playfair s2-dim-score" style="color:#F2E8D5;">91</span>
+      </div>
+      <div class="s2-dim-insight">(Easiest brake was at mile 3.2)</div>
+    </div>
+
+    <!-- Acceleration 78 -->
+    <div class="s2-dim-block">
+      <div class="s2-dim-row">
+        <span class="s2-dim-name">Accel</span>
+        <div class="s2-dim-bar-wrap">
+          <div class="s2-dim-bar-fill" style="width:78%;background:#E8501A;"></div>
+        </div>
+        <span class="playfair s2-dim-score" style="color:#F2E8D5;">78</span>
+      </div>
+      <div class="s2-dim-insight">(Strongest pull near the on-ramp at mile 1.1)</div>
+    </div>
+
+    <!-- Cornering 88 -->
+    <div class="s2-dim-block">
+      <div class="s2-dim-row">
+        <span class="s2-dim-name">Cornering</span>
+        <div class="s2-dim-bar-wrap">
+          <div class="s2-dim-bar-fill" style="width:88%;background:#00C4A8;"></div>
+        </div>
+        <span class="playfair s2-dim-score" style="color:#F2E8D5;">88</span>
+      </div>
+      <div class="s2-dim-insight">(Cleanest arc: the left turn onto Elm)</div>
+    </div>
+
+    <!-- Smoothness 72 -->
+    <div class="s2-dim-block">
+      <div class="s2-dim-row">
+        <span class="s2-dim-name">Smoothness</span>
+        <div class="s2-dim-bar-wrap">
+          <div class="s2-dim-bar-fill" style="width:72%;background:#E8501A;"></div>
+        </div>
+        <span class="playfair s2-dim-score" style="color:#F2E8D5;">72</span>
+      </div>
+      <div class="s2-dim-insight">(Three micro-corrections on the freeway)</div>
+    </div>
+
+    <!-- Consistency 93 -->
+    <div class="s2-dim-block" style="border-bottom:none;">
+      <div class="s2-dim-row">
+        <span class="s2-dim-name">Consistency</span>
+        <div class="s2-dim-bar-wrap">
+          <div class="s2-dim-bar-fill" style="width:93%;background:#00C4A8;"></div>
+        </div>
+        <span class="playfair s2-dim-score" style="color:#F2E8D5;">93</span>
+      </div>
+      <div class="s2-dim-insight">(Your most consistent drive this month)</div>
+    </div>
+
+  </div>
+
+  <div class="rule-full" style="margin-top:4px;"></div>
+
+  <!-- Worst moment -->
+  <div class="s2-worst">
+    <span class="label">WORST MOMENT</span>
+    <span style="font-size:13px;color:#F2E8D5;line-height:1.5;margin-top:2px;">Hard brake on Oak St. at 0:14:32 — 0.8G</span>
+  </div>
+
+  <!-- Coaching CTA -->
+  <div class="s2-coaching" style="margin-top:24px;">
+    <div>
+      <div style="font-size:12px;color:rgba(242,232,213,0.35);font-style:italic;">Your cornering dropped 8 pts this week.</div>
+    </div>
+    <span style="font-size:13px;color:#E8501A;white-space:nowrap;">Book a session &#8594;</span>
+  </div>
+
+  <!-- Spacer -->
+  <div style="flex:1;"></div>
+
+</div><!-- /screen 2 -->
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 3 — REWARDS
+══════════════════════════════════════════════ -->
+<div class="screen-label"><span>Screen 3 — Rewards</span></div>
+
+<div class="screen">
+
+  <!-- EARNED watermark -->
+  <div class="s3-earned-watermark">EARNED</div>
+
+  <!-- Header -->
+  <div class="s3-header" style="position:relative;z-index:1;">
+    <span class="label">REWARDS</span>
+    <div style="margin-top:8px;">
+      <span class="playfair grad-gold" style="font-size:28px;">SMOOTH AF TIER</span>
+    </div>
+    <div style="margin-top:6px;">
+      <span style="font-size:12px;color:rgba(242,232,213,0.35);">Score 86–95 · You're here</span>
+    </div>
+  </div>
+
+  <!-- Next unlock hero -->
+  <div class="s3-next-unlock">
+    <span class="label">CLOSEST UNLOCK</span>
+    <span class="playfair cream" style="font-size:22px;margin-top:4px;">Free Tank of Gas</span>
+    <span style="font-size:11px;color:rgba(242,232,213,0.35);margin-top:2px;">Shell · Redeem at 3 nearby locations</span>
+    <div class="s3-unlock-progress">
+      <div class="s3-progress-track">
+        <div class="s3-progress-fill" style="width:96.7%;"></div><!-- 87/90 -->
+      </div>
+      <div class="s3-progress-label">
+        <span style="font-size:10px;color:rgba(242,232,213,0.35);">87 pts</span>
+        <span style="font-size:10px;color:rgba(242,232,213,0.35);">90 pts needed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tier list -->
+  <div class="s3-tiers">
+
+    <!-- Smooth Starter 0-60 — passed (dim) -->
+    <div class="s3-tier s3-tier-locked">
+      <div class="s3-tier-border">
+        <div class="s3-tier-border-line" style="background:#555;"></div>
+      </div>
+      <div class="s3-tier-info">
+        <div class="s3-tier-name" style="color:#F2E8D5;">Smooth Starter</div>
+        <div class="s3-tier-range">0 – 60</div>
+      </div>
+      <div class="s3-tier-reward">Safe Driver<br>Discount</div>
+    </div>
+
+    <!-- Getting Smooth 61-75 — unlocked but not current (dim) -->
+    <div class="s3-tier s3-tier-locked">
+      <div class="s3-tier-border">
+        <div class="s3-tier-border-line" style="background:#5A9E52;"></div>
+      </div>
+      <div class="s3-tier-info">
+        <div class="s3-tier-name" style="color:#F2E8D5;">Getting Smooth</div>
+        <div class="s3-tier-range">61 – 75</div>
+      </div>
+      <div class="s3-tier-reward">Monthly<br>Report Card</div>
+    </div>
+
+    <!-- Smooth Driver 76-85 — previous tier (dim slightly) -->
+    <div class="s3-tier s3-tier-locked">
+      <div class="s3-tier-border">
+        <div class="s3-tier-border-line" style="background:#C49A28;"></div>
+      </div>
+      <div class="s3-tier-info">
+        <div class="s3-tier-name" style="color:#F2E8D5;">Smooth Driver</div>
+        <div class="s3-tier-range">76 – 85</div>
+      </div>
+      <div class="s3-tier-reward">Referral<br>Bonus</div>
+    </div>
+
+    <!-- Smooth AF 86-95 — CURRENT -->
+    <div class="s3-tier s3-tier-current">
+      <div class="s3-tier-border">
+        <div class="s3-tier-border-line" style="background:#E8501A;"></div>
+      </div>
+      <div class="s3-tier-info">
+        <div class="s3-tier-name" style="color:#E8501A;">Smooth AF</div>
+        <div class="s3-tier-range" style="color:rgba(232,80,26,0.6);">86 – 95 · <span style="color:#E8501A;font-size:10px;letter-spacing:0.1em;">YOU ARE HERE</span></div>
+      </div>
+      <div class="s3-tier-reward" style="color:rgba(232,80,26,0.7);">Free Tank<br>of Gas</div>
+    </div>
+
+    <!-- Legend 96-100 — locked -->
+    <div class="s3-tier s3-tier-locked">
+      <div class="s3-tier-border">
+        <div class="s3-tier-border-line" style="background:#F2E8D5;"></div>
+      </div>
+      <div class="s3-tier-info">
+        <div class="s3-tier-name" style="color:#F2E8D5;">Legend</div>
+        <div class="s3-tier-range">96 – 100</div>
+      </div>
+      <div class="s3-tier-reward">1-on-1 Coaching<br>Annual Cash Reward</div>
+    </div>
+
+  </div>
+
+  <div style="flex:1;"></div>
+
+</div><!-- /screen 3 -->
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 4 — LEADERBOARD
+══════════════════════════════════════════════ -->
+<div class="screen-label"><span>Screen 4 — Leaderboard</span></div>
+
+<div class="screen">
+
+  <!-- Tabs -->
+  <div class="s4-tabs">
+    <span class="s4-tab s4-tab-active">Global</span>
+    <span class="s4-tab">Friends</span>
+    <span class="s4-tab">This Week</span>
+  </div>
+  <div class="rule-full" style="margin-top:0;"></div>
+
+  <!-- Your rank hero -->
+  <div class="s4-rank-zone">
+    <span class="label">YOUR RANK</span>
+    <div class="s4-rank-row">
+      <div class="playfair s4-rank-big grad-blue">#47</div>
+      <div class="s4-rank-side">
+        <span style="font-size:13px;color:#F2E8D5;font-weight:600;letter-spacing:0.06em;">ALEX M.</span>
+        <span style="font-size:13px;color:rgba(242,232,213,0.5);">87 pts</span>
+        <span style="font-size:12px;color:#5A9E52;margin-top:4px;">&#8593; 3 places this week</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divider with context -->
+  <div class="s4-divider-context">
+    <div class="rule"></div>
+    <span class="s4-divider-context-text">TOP 10 — 9 pts away</span>
+    <div class="rule"></div>
+  </div>
+
+  <!-- Top 5 list -->
+  <div class="s4-list">
+
+    <div class="s4-row">
+      <span class="playfair s4-row-rank orange">1</span>
+      <div class="s4-row-driver">
+        <div class="s4-row-name">James K.</div>
+        <div class="s4-row-region">Austin TX</div>
+      </div>
+      <div class="s4-row-score-wrap">
+        <div class="playfair s4-row-score cream">96</div>
+        <div class="s4-row-delta green">+2</div>
+      </div>
+    </div>
+
+    <div class="s4-row">
+      <span class="playfair s4-row-rank muted">2</span>
+      <div class="s4-row-driver">
+        <div class="s4-row-name">Sarah M.</div>
+        <div class="s4-row-region">Portland OR</div>
+      </div>
+      <div class="s4-row-score-wrap">
+        <div class="playfair s4-row-score cream">95</div>
+        <div class="s4-row-delta muted">—</div>
+      </div>
+    </div>
+
+    <div class="s4-row">
+      <span class="playfair s4-row-rank muted">3</span>
+      <div class="s4-row-driver">
+        <div class="s4-row-name">Dev P.</div>
+        <div class="s4-row-region">Chicago IL</div>
+      </div>
+      <div class="s4-row-score-wrap">
+        <div class="playfair s4-row-score cream">94</div>
+        <div class="s4-row-delta green">+1</div>
+      </div>
+    </div>
+
+    <div class="s4-row">
+      <span class="playfair s4-row-rank muted">4</span>
+      <div class="s4-row-driver">
+        <div class="s4-row-name">Chris L.</div>
+        <div class="s4-row-region">Seattle WA</div>
+      </div>
+      <div class="s4-row-score-wrap">
+        <div class="playfair s4-row-score cream">92</div>
+        <div class="s4-row-delta red">-2</div>
+      </div>
+    </div>
+
+    <div class="s4-row">
+      <span class="playfair s4-row-rank muted">5</span>
+      <div class="s4-row-driver">
+        <div class="s4-row-name">Mia T.</div>
+        <div class="s4-row-region">Miami FL</div>
+      </div>
+      <div class="s4-row-score-wrap">
+        <div class="playfair s4-row-score cream">91</div>
+        <div class="s4-row-delta green">+1</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="flex:1;"></div>
+
+  <!-- Anchor bar -->
+  <div class="s4-anchor">
+    <span style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(242,232,213,0.35);">#47</span>
+    <span style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(242,232,213,0.5);">Alex M.</span>
+    <span style="font-size:10px;letter-spacing:0.12em;color:rgba(242,232,213,0.35);">87 pts</span>
+  </div>
+
+</div><!-- /screen 4 -->
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 5 — START DRIVE
+══════════════════════════════════════════════ -->
+<div class="screen-label"><span>Screen 5 — Start Drive</span></div>
+
+<div class="screen s5">
+
+  <!-- Top -->
+  <div class="s5-top">
+    <div style="font-size:10px;letter-spacing:0.35em;text-transform:uppercase;color:rgba(242,232,213,0.35);">SMOOTH AF</div>
+    <div style="font-size:12px;color:rgba(242,232,213,0.35);margin-top:4px;letter-spacing:0.1em;">Alex M. · Urban Ghost</div>
+  </div>
+
+  <!-- Hero: GO. -->
+  <div class="s5-hero-zone">
+    <div class="s5-glow"></div>
+    <div class="playfair s5-go">GO.</div>
+  </div>
+
+  <!-- Car line -->
+  <div class="s5-car">
+    <span style="font-size:13px;color:rgba(242,232,213,0.4);">2021 BMW M3 Competition &#8594;</span>
+  </div>
+
+  <!-- Challenge -->
+  <div class="s5-challenge">
+    <span style="font-size:12px;color:#E8501A;font-style:italic;">Can you beat your 91 from last Tuesday?</span>
+  </div>
+
+  <!-- Rule -->
+  <div class="rule-full" style="margin-top:24px;"></div>
+
+  <!-- Sensor row -->
+  <div class="s5-sensor-row">
+    <div class="s5-sensor">
+      <div class="s5-dot-active"></div>
+      GPS
+    </div>
+    <div class="s5-sensor">
+      <div class="s5-dot-active"></div>
+      MOTION
+    </div>
+    <div class="s5-sensor">
+      <div class="s5-dot-inactive"></div>
+      AUDIO
+    </div>
+  </div>
+
+  <div style="flex:1;min-height:40px;"></div>
+
+  <!-- CTA -->
+  <div class="s5-cta">
+    <span class="s5-cta-text">Begin Drive</span>
+    <span class="s5-cta-arrow" style="font-size:20px;color:#080808;">&#8594;</span>
+  </div>
+
+</div><!-- /screen 5 -->
+
+</body>
+</html>
