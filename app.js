@@ -1097,39 +1097,50 @@ function updateLiveUI(){
   const gEl = $('#live-g');
   if (gEl) gEl.textContent = gVal + 'G';
 
-  // G-force needle — kept off-screen but still updated for JS compat
-  const la = last ? (last.longAccel || 0) : 0;
-  const needle = document.getElementById('live-g-needle');
-  if (needle){
-    const pct = 50 + clamp(la / 6, -1, 1) * 44;
-    const isBrake = la < -0.6, isAccel = la > 0.6;
-    needle.style.left      = pct + '%';
-    needle.style.background = isBrake ? '#E03B2F' : isAccel ? '#6FB669' : 'rgba(244,235,217,.9)';
-    needle.style.boxShadow  = isBrake ? '0 0 14px rgba(224,59,47,.7)' : isAccel ? '0 0 14px rgba(111,182,105,.7)' : '0 0 10px rgba(244,235,217,.3)';
-    needle.textContent      = gVal;
-  }
+  const la  = last ? (last.longAccel || 0) : 0;
+  const ra  = last ? (last.latAccel  || 0) : 0;
+  const isBrake = la < -0.5, isAccel = la > 0.5;
 
-  // Ring color — white=smooth, green=accel, red=brake
-  const ring = document.getElementById('smooth-ring');
-  if (ring && !ring._eventLock){
-    if (la < -0.5)      ring.className = 'smooth-ring brake';
-    else if (la > 0.5)  ring.className = 'smooth-ring accel';
-    else                ring.className = 'smooth-ring smooth';
-  }
-
-  // Cumulative live score — starts from lifetime score, penalised by events, recovers gently
+  // Cumulative live score — compute first so arc fill is in sync
   const scoreEl = document.getElementById('live-score');
-  if (scoreEl){
+  {
     const durationMins = (Date.now() - state.startTime) / 60000;
     const penalty = state.events.reduce((s, e) => {
       const w = e.type === 'brake' ? 5 : e.type === 'accel' ? 3 : 2;
       return s + w * (e.magnitude || 1);
     }, 0);
-    const recovery = Math.min(durationMins * 1.5, 6); // up to +6 for a long smooth drive
+    const recovery = Math.min(durationMins * 1.5, 6);
     const score = Math.max(0, Math.min(100, Math.round(state.driveStartScore - penalty + recovery)));
-    scoreEl.textContent = score;
+    if (scoreEl) scoreEl.textContent = score;
     state.liveScore = score;
   }
+
+  // Arc gauge: fill dashoffset from score, color + glow from driving state
+  const arcProgress = document.getElementById('arc-progress');
+  const arcSvg      = document.getElementById('arc-svg');
+  if (arcProgress && arcSvg && !arcProgress._eventLock){
+    arcProgress.style.strokeDashoffset = String(499.2 * (1 - state.liveScore / 100));
+    const arcColor = isBrake ? 'rgba(224,59,47,.92)' : isAccel ? 'rgba(111,182,105,.92)' : 'rgba(244,235,217,.9)';
+    const glowCol  = isBrake ? 'rgba(224,59,47,.5)'  : isAccel ? 'rgba(111,182,105,.5)'  : 'rgba(244,235,217,.28)';
+    arcProgress.setAttribute('stroke', arcColor);
+    arcSvg.style.filter = `drop-shadow(0 0 10px ${glowCol})`;
+  }
+
+  // G-force radar dot: x=lateral, y=longitudinal (accel=up, brake=down)
+  const radarDot = document.getElementById('g-radar-dot');
+  if (radarDot){
+    const maxG = 1.4;
+    const xPct = 50 + clamp(ra / maxG, -1, 1) * 36;
+    const yPct = 50 - clamp(la / maxG, -1, 1) * 36;
+    radarDot.style.left       = xPct + '%';
+    radarDot.style.top        = yPct + '%';
+    radarDot.style.background = isBrake ? 'rgba(224,59,47,.95)' : isAccel ? 'rgba(111,182,105,.95)' : 'rgba(244,235,217,.95)';
+    radarDot.style.boxShadow  = isBrake ? '0 0 8px rgba(224,59,47,.7)' : isAccel ? '0 0 8px rgba(111,182,105,.7)' : '0 0 8px rgba(244,235,217,.5)';
+  }
+
+  // Off-screen needle — JS compat
+  const needle = document.getElementById('live-g-needle');
+  if (needle){ needle.style.left = (50 + clamp(la / 6, -1, 1) * 44) + '%'; }
 
   // Duration
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
@@ -1174,12 +1185,16 @@ function flashEvent(type, latAccel){
   ticker.appendChild(el);
   setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
 
-  // Animate smooth ring (lock briefly so continuous G update doesn't override)
-  const ring = document.getElementById('smooth-ring');
-  if (ring){
-    ring._eventLock = true;
-    ring.className = 'smooth-ring ' + type;
-    setTimeout(() => { ring._eventLock = false; }, 1200);
+  // Flash arc color on event (lock briefly so G update doesn't override)
+  const arcProg = document.getElementById('arc-progress');
+  const arcSvgEl = document.getElementById('arc-svg');
+  if (arcProg && arcSvgEl){
+    arcProg._eventLock = true;
+    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(111,182,105,.95)' : 'rgba(196,169,98,.95)';
+    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(111,182,105,.65)' : 'rgba(196,169,98,.55)';
+    arcProg.setAttribute('stroke', eColor);
+    arcSvgEl.style.filter = `drop-shadow(0 0 16px ${eGlow})`;
+    setTimeout(() => { arcProg._eventLock = false; }, 1200);
   }
 
   // Directional burst
