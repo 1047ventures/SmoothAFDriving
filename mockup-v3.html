@@ -244,112 +244,194 @@
     }
 
     /* ─────────────────────────────────────────────────────────
-       SCREEN 2 — SCORE BREAKDOWN
+       SCREEN 2 — POST-DRIVE REVEAL
     ───────────────────────────────────────────────────────── */
 
-    .s2-header {
-      padding: 20px 24px 0;
+    /* Map */
+    .s2-map {
+      width: 100%;
+      height: 354px;
+      background: #0F0F0F;
+      position: relative;
       flex-shrink: 0;
+      overflow: hidden;
     }
-    .s2-score-row {
+    .s2-map-label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 9px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: rgba(242,232,213,0.30);
+      font-weight: 400;
+      z-index: 2;
+    }
+    .s2-map-expand {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 14px;
+      color: rgba(242,232,213,0.35);
+      z-index: 2;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* Score reveal */
+    .s2-score-zone {
+      padding: 20px 24px 0;
       display: flex;
       align-items: flex-start;
       gap: 16px;
-      margin-top: 8px;
-    }
-    .s2-score-big {
-      font-size: 90px;
-      line-height: 0.9;
       flex-shrink: 0;
     }
-    .s2-meta {
+    .s2-score-num {
+      font-size: 88px;
+      line-height: 0.88;
+      flex-shrink: 0;
+    }
+    .s2-score-right {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      padding-top: 12px;
+      gap: 5px;
+      padding-top: 14px;
     }
-
-    .s2-route-type {
-      padding: 16px 24px 0;
+    .s2-verdict {
+      padding: 10px 24px 0;
       flex-shrink: 0;
     }
 
-    .s2-dimensions {
-      margin-top: 24px;
-      flex-shrink: 0;
-    }
-    .s2-dim-row {
-      padding: 0 24px;
-      height: 48px;
+    /* Stats row */
+    .s2-stats {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-    }
-    .s2-dim-row-inner {
-      padding: 12px 24px 0;
-    }
-    .s2-dim-name {
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(242,232,213,0.35);
-      width: 96px;
-      flex-shrink: 0;
-    }
-    .s2-dim-bar-wrap {
-      flex: 1;
-      height: 4px;
-      background: rgba(242,232,213,0.08);
-      position: relative;
-    }
-    .s2-dim-bar-fill {
-      position: absolute;
-      top: 0; left: 0;
-      height: 4px;
-      animation: bar-grow 0.9s cubic-bezier(0.22,1,0.36,1) both;
-    }
-    @keyframes bar-grow {
-      from { width: 0 !important; }
-    }
-    .s2-dim-score {
-      font-size: 24px;
-      line-height: 1;
-      width: 36px;
-      text-align: right;
-      flex-shrink: 0;
-    }
-    .s2-dim-insight {
-      padding: 4px 24px 12px;
-      font-size: 11px;
-      color: rgba(242,232,213,0.35);
-      font-style: italic;
-    }
-    .s2-dim-block {
+      height: 48px;
+      margin-top: 16px;
+      border-top: 1px solid rgba(242,232,213,0.07);
       border-bottom: 1px solid rgba(242,232,213,0.07);
+      flex-shrink: 0;
     }
-
-    .s2-worst {
-      margin: 24px 24px 0;
-      min-height: 72px;
-      border-left: 3px solid #C93828;
-      padding: 12px 16px;
+    .s2-stat {
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 8px;
-      flex-shrink: 0;
+      align-items: center;
+      gap: 3px;
+    }
+    .s2-stat + .s2-stat {
+      border-left: 1px solid rgba(242,232,213,0.07);
+    }
+    .s2-stat-val {
+      font-size: 20px;
+      line-height: 1;
     }
 
-    .s2-coaching {
-      margin: 24px 0 0;
-      height: 56px;
-      background: #111010;
+    /* Events columns */
+    .s2-events {
+      padding: 20px 12px 0;
+      flex-shrink: 0;
+    }
+    .s2-events-cols {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .s2-col-smooth {
+      flex: 1;
+      background: rgba(90,158,82,0.08);
+      border-left: 3px solid #5A9E52;
+      padding: 10px 12px 10px;
+    }
+    .s2-col-events {
+      flex: 1;
+      background: rgba(201,56,40,0.08);
+      border-left: 3px solid #C93828;
+      padding: 10px 12px 10px;
+    }
+    .s2-col-headline {
+      font-size: 16px;
+      font-weight: 700;
+      color: #F2E8D5;
+      line-height: 1.2;
+      margin-top: 5px;
+    }
+    .s2-col-sub {
+      font-size: 11px;
+      color: rgba(242,232,213,0.35);
+      font-style: italic;
+      margin-top: 3px;
+    }
+    .s2-col-sub-2 {
+      font-size: 13px;
+      color: rgba(242,232,213,0.55);
+      margin-top: 2px;
+    }
+    .s2-col-tap {
+      font-size: 10px;
+      color: #E8501A;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    /* Worst moment */
+    .s2-worst {
+      margin: 16px 12px 0;
+      height: 52px;
+      border-left: 3px solid #C93828;
+      background: rgba(201,56,40,0.05);
+      padding: 0 14px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
+      gap: 0;
       flex-shrink: 0;
+    }
+    .s2-worst-inner {
+      flex: 1;
+    }
+    .s2-worst-tap {
+      font-size: 10px;
+      color: #E8501A;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    /* Bottom buttons */
+    .s2-actions {
+      margin-top: auto;
+      height: 72px;
+      display: flex;
+      flex-shrink: 0;
+    }
+    .s2-btn-share {
+      width: 40%;
+      height: 100%;
+      border: 1px solid rgba(242,232,213,0.35);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #F2E8D5;
+      font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+    }
+    .s2-btn-next {
+      width: 60%;
+      height: 100%;
+      background: #E8501A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #080808;
+      font-weight: 600;
+      font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
     }
 
     /* ─────────────────────────────────────────────────────────
@@ -773,113 +855,216 @@
 
 
 <!-- ══════════════════════════════════════════════
-     SCREEN 2 — SCORE BREAKDOWN
+     SCREEN 2 — POST-DRIVE REVEAL
 ══════════════════════════════════════════════ -->
-<div class="screen-label"><span>Screen 2 — Score Breakdown</span></div>
+<div class="screen-label"><span>Screen 2 — Post-Drive Reveal</span></div>
 
 <div class="screen">
 
-  <!-- Header -->
-  <div class="s2-header">
-    <span class="label">DRIVE #31</span>
-    <div class="s2-score-row">
-      <div class="playfair s2-score-big grad-cyan">91</div>
-      <div class="s2-meta">
-        <span style="font-size:11px;color:rgba(242,232,213,0.35);">Tue 14 May</span>
-        <span style="font-size:11px;color:rgba(242,232,213,0.35);">8.4 mi · 23 min</span>
-      </div>
+  <!-- ── MAP — top 42% ──────────────────────────── -->
+  <div class="s2-map">
+    <span class="s2-map-label">ROUTE MAP</span>
+    <span class="s2-map-expand">⤢</span>
+
+    <svg
+      width="100%" height="354"
+      viewBox="0 0 390 354"
+      preserveAspectRatio="xMidYMid slice"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <!-- Background fill -->
+      <rect width="390" height="354" fill="#0F0F0F"/>
+
+      <!-- Faint grid lines -->
+      <!-- Vertical lines every ~39px -->
+      <line x1="39"  y1="0" x2="39"  y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="78"  y1="0" x2="78"  y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="117" y1="0" x2="117" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="156" y1="0" x2="156" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="195" y1="0" x2="195" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="234" y1="0" x2="234" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="273" y1="0" x2="273" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="312" y1="0" x2="312" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="351" y1="0" x2="351" y2="354" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <!-- Horizontal lines every ~44px -->
+      <line x1="0" y1="44"  x2="390" y2="44"  stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="0" y1="88"  x2="390" y2="88"  stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="0" y1="132" x2="390" y2="132" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="0" y1="176" x2="390" y2="176" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="0" y1="220" x2="390" y2="220" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="0" y1="264" x2="390" y2="264" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+      <line x1="0" y1="308" x2="390" y2="308" stroke="rgba(242,232,213,0.04)" stroke-width="1"/>
+
+      <!--
+        Route: winding urban path, left-to-right with direction changes.
+        Control points chosen for organic city-block feel.
+
+        SEGMENT 1 — green (smooth): start → first event
+        From (38, 260) heading right, curve up through streets,
+        end at (178, 148) — first hard brake event
+
+        SEGMENT 2 — green (smooth): after first event → second event
+        From (178, 148) continuing, curve right-down,
+        end at (272, 212) — sharp turn event
+
+        SEGMENT 3 — orange-green (smooth recovery): second event → end
+        From (272, 212) curving right and down toward (352, 290)
+      -->
+
+      <!-- Segment 1 — GREEN smooth -->
+      <path
+        d="M 38,260
+           C 60,255 72,230 88,210
+           C 104,190 100,168 116,155
+           C 130,143 155,150 178,148"
+        fill="none"
+        stroke="#5A9E52"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+
+      <!-- Hard brake event dot at (178, 148) -->
+      <!-- Glow halo -->
+      <circle cx="178" cy="148" r="9" fill="rgba(201,56,40,0.20)"/>
+      <circle cx="178" cy="148" r="5" fill="#C93828"/>
+      <circle cx="178" cy="148" r="2.5" fill="#FF6B55"/>
+
+      <!-- Segment 2 — GREEN smooth -->
+      <path
+        d="M 178,148
+           C 198,146 214,136 228,148
+           C 244,162 240,192 256,204
+           C 262,208 268,211 272,212"
+        fill="none"
+        stroke="#5A9E52"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+
+      <!-- Sharp turn event dot at (272, 212) -->
+      <circle cx="272" cy="212" r="8" fill="rgba(220,120,30,0.22)"/>
+      <circle cx="272" cy="212" r="4.5" fill="#DC7820"/>
+      <circle cx="272" cy="212" r="2" fill="#FFAA55"/>
+
+      <!-- Segment 3 — ORANGE tending GREEN (smooth recovery) -->
+      <path
+        d="M 272,212
+           C 285,214 296,228 308,238
+           C 320,248 330,258 340,268
+           C 346,274 350,282 352,290"
+        fill="none"
+        stroke="url(#routeGradEnd)"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+
+      <!-- Gradient for segment 3: orange → green -->
+      <defs>
+        <linearGradient id="routeGradEnd" x1="272" y1="212" x2="352" y2="290" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#DC7820"/>
+          <stop offset="100%" stop-color="#5A9E52"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Start dot (green circle) -->
+      <circle cx="38" cy="260" r="5" fill="#5A9E52"/>
+      <circle cx="38" cy="260" r="9" fill="none" stroke="rgba(90,158,82,0.35)" stroke-width="1.5"/>
+
+      <!-- End dot (orange circle) -->
+      <circle cx="352" cy="290" r="5" fill="#E8501A"/>
+      <circle cx="352" cy="290" r="9" fill="none" stroke="rgba(232,80,26,0.35)" stroke-width="1.5"/>
+
+      <!-- START label -->
+      <text x="44" y="256" font-family="system-ui,-apple-system,sans-serif" font-size="8" letter-spacing="0.15em" fill="rgba(90,158,82,0.7)" text-transform="uppercase">START</text>
+
+      <!-- END label -->
+      <text x="330" y="288" font-family="system-ui,-apple-system,sans-serif" font-size="8" letter-spacing="0.15em" fill="rgba(232,80,26,0.7)">END</text>
+
+      <!-- Event label 1: Hard brake -->
+      <text x="183" y="142" font-family="system-ui,-apple-system,sans-serif" font-size="8" letter-spacing="0.1em" fill="rgba(201,56,40,0.8)">HARD BRAKE</text>
+
+      <!-- Event label 2: Sharp turn -->
+      <text x="277" y="208" font-family="system-ui,-apple-system,sans-serif" font-size="8" letter-spacing="0.1em" fill="rgba(220,120,30,0.8)">SHARP TURN</text>
+
+    </svg>
+  </div>
+
+  <!-- ── SCORE REVEAL ──────────────────────────── -->
+  <div class="s2-score-zone">
+    <!-- Big score -->
+    <div class="playfair s2-score-num grad-orange">91</div>
+    <!-- Right meta -->
+    <div class="s2-score-right">
+      <span class="label" style="letter-spacing:0.32em;">THIS DRIVE</span>
+      <span style="font-size:12px;color:#5A9E52;font-weight:600;letter-spacing:0.05em;">+4 vs your avg</span>
     </div>
   </div>
-  <div class="rule-full" style="margin-top:16px;"></div>
 
-  <!-- Route type -->
-  <div class="s2-route-type">
-    <span style="font-size:10px;color:rgba(242,232,213,0.35);font-style:italic;letter-spacing:0.08em;">CITY COMMUTE · mostly stop-and-go</span>
+  <!-- Verdict -->
+  <div class="s2-verdict">
+    <span class="playfair cream" style="font-size:18px;">Pretty Damn Smooth</span>
   </div>
 
-  <!-- Dimensions -->
-  <div class="s2-dimensions">
+  <!-- Full-bleed rule -->
+  <div class="rule-full" style="margin-top:14px;"></div>
 
-    <!-- Braking 91 -->
-    <div class="s2-dim-block">
-      <div class="s2-dim-row">
-        <span class="s2-dim-name">Braking</span>
-        <div class="s2-dim-bar-wrap">
-          <div class="s2-dim-bar-fill" style="width:91%;background:#00C4A8;"></div>
-        </div>
-        <span class="playfair s2-dim-score" style="color:#F2E8D5;">91</span>
-      </div>
-      <div class="s2-dim-insight">(Easiest brake was at mile 3.2)</div>
+  <!-- ── DRIVE STATS ────────────────────────────── -->
+  <div class="s2-stats">
+    <div class="s2-stat">
+      <span class="playfair s2-stat-val cream">8.4 MI</span>
+      <span class="label" style="font-size:9px;">DISTANCE</span>
     </div>
-
-    <!-- Acceleration 78 -->
-    <div class="s2-dim-block">
-      <div class="s2-dim-row">
-        <span class="s2-dim-name">Accel</span>
-        <div class="s2-dim-bar-wrap">
-          <div class="s2-dim-bar-fill" style="width:78%;background:#E8501A;"></div>
-        </div>
-        <span class="playfair s2-dim-score" style="color:#F2E8D5;">78</span>
-      </div>
-      <div class="s2-dim-insight">(Strongest pull near the on-ramp at mile 1.1)</div>
+    <div class="s2-stat">
+      <span class="playfair s2-stat-val cream">23 MIN</span>
+      <span class="label" style="font-size:9px;">DURATION</span>
     </div>
-
-    <!-- Cornering 88 -->
-    <div class="s2-dim-block">
-      <div class="s2-dim-row">
-        <span class="s2-dim-name">Cornering</span>
-        <div class="s2-dim-bar-wrap">
-          <div class="s2-dim-bar-fill" style="width:88%;background:#00C4A8;"></div>
-        </div>
-        <span class="playfair s2-dim-score" style="color:#F2E8D5;">88</span>
-      </div>
-      <div class="s2-dim-insight">(Cleanest arc: the left turn onto Elm)</div>
+    <div class="s2-stat">
+      <span class="playfair s2-stat-val cream">6:42 AM</span>
+      <span class="label" style="font-size:9px;">TIME</span>
     </div>
-
-    <!-- Smoothness 72 -->
-    <div class="s2-dim-block">
-      <div class="s2-dim-row">
-        <span class="s2-dim-name">Smoothness</span>
-        <div class="s2-dim-bar-wrap">
-          <div class="s2-dim-bar-fill" style="width:72%;background:#E8501A;"></div>
-        </div>
-        <span class="playfair s2-dim-score" style="color:#F2E8D5;">72</span>
-      </div>
-      <div class="s2-dim-insight">(Three micro-corrections on the freeway)</div>
-    </div>
-
-    <!-- Consistency 93 -->
-    <div class="s2-dim-block" style="border-bottom:none;">
-      <div class="s2-dim-row">
-        <span class="s2-dim-name">Consistency</span>
-        <div class="s2-dim-bar-wrap">
-          <div class="s2-dim-bar-fill" style="width:93%;background:#00C4A8;"></div>
-        </div>
-        <span class="playfair s2-dim-score" style="color:#F2E8D5;">93</span>
-      </div>
-      <div class="s2-dim-insight">(Your most consistent drive this month)</div>
-    </div>
-
   </div>
 
-  <div class="rule-full" style="margin-top:4px;"></div>
+  <!-- ── EVENTS ─────────────────────────────────── -->
+  <div class="s2-events">
+    <span class="label">WHAT HAPPENED</span>
+    <div class="s2-events-cols">
 
-  <!-- Worst moment -->
+      <!-- Smooth column -->
+      <div class="s2-col-smooth">
+        <span class="label" style="color:#5A9E52;font-size:9px;">SMOOTH</span>
+        <div class="s2-col-headline">14 clean stretches</div>
+        <div class="s2-col-sub">4.2 mi without an event</div>
+        <div class="s2-col-tap">› See route</div>
+      </div>
+
+      <!-- Events column -->
+      <div class="s2-col-events">
+        <span class="label" style="color:#C93828;font-size:9px;">EVENTS</span>
+        <div class="s2-col-headline">3 hard brakes</div>
+        <div class="s2-col-sub-2">1 sharp turn</div>
+        <div class="s2-col-tap">› See on map</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── WORST MOMENT ───────────────────────────── -->
   <div class="s2-worst">
-    <span class="label">WORST MOMENT</span>
-    <span style="font-size:13px;color:#F2E8D5;line-height:1.5;margin-top:2px;">Hard brake on Oak St. at 0:14:32 — 0.8G</span>
-  </div>
-
-  <!-- Coaching CTA -->
-  <div class="s2-coaching" style="margin-top:24px;">
-    <div>
-      <div style="font-size:12px;color:rgba(242,232,213,0.35);font-style:italic;">Your cornering dropped 8 pts this week.</div>
+    <div class="s2-worst-inner">
+      <div class="label" style="margin-bottom:4px;">HARDEST MOMENT</div>
+      <div style="font-size:13px;color:#F2E8D5;">Hard brake on Oak St. · 0:14:32 · 0.8G</div>
     </div>
-    <span style="font-size:13px;color:#E8501A;white-space:nowrap;">Book a session &#8594;</span>
+    <span class="s2-worst-tap">› Tap to replay on map</span>
   </div>
 
-  <!-- Spacer -->
-  <div style="flex:1;"></div>
+  <!-- ── SHARE + NEXT ───────────────────────────── -->
+  <div class="s2-actions">
+    <button class="s2-btn-share">Share</button>
+    <button class="s2-btn-next">Next Drive →</button>
+  </div>
 
 </div><!-- /screen 2 -->
 
