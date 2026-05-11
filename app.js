@@ -21,9 +21,16 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 // -------------------------------------------------------------------------
 // Globals
 // -------------------------------------------------------------------------
-const STORAGE_KEY  = 'smoothaf.drives.v1';
-const DEVICE_KEY   = 'smoothaf.device_id';
-const SYNCED_KEY   = 'smoothaf.synced_ids';
+const STORAGE_KEY       = 'smoothaf.drives.v1';
+const DEVICE_KEY        = 'smoothaf.device_id';
+const SYNCED_KEY        = 'smoothaf.synced_ids';
+const LIFETIME_SCORE_KEY = 'smoothaf.lifetime_score';
+const DRIVER_NAME_KEY   = 'smoothaf.driver_name';
+
+function loadLifetimeScore(){ try { const v = parseFloat(localStorage.getItem(LIFETIME_SCORE_KEY)); return isNaN(v) ? 100 : v; } catch { return 100; } }
+function saveLifetimeScore(s){ try { localStorage.setItem(LIFETIME_SCORE_KEY, String(Math.round(s))); } catch {} }
+function loadDriverName(){ try { return localStorage.getItem(DRIVER_NAME_KEY) || ''; } catch { return ''; } }
+function saveDriverName(n){ try { localStorage.setItem(DRIVER_NAME_KEY, n.trim()); } catch {} }
 
 // ── Vehicle types — imgFront: home screen, imgRear: recording screen ──────────
 const VEHICLE_KEY = 'smoothaf.vehicle_type';
@@ -149,6 +156,7 @@ const state = {
   liveScore: 100,
   tickInterval: null,
   wakeLock: null,
+  driveStartScore: 100,
 };
 
 const EVENT_COOLDOWN_MS    = 1500; // 1.5s — prevents one brake from logging 3 events
@@ -1065,23 +1073,22 @@ function updateLiveUI(){
   const mph = last ? mpsToMph(last.speed || 0) : 0;
   $('#live-speed').textContent = Math.round(mph);
 
-  // G-force value
+  // G-force value (shown as text in bottom-right stat)
   const gVal = state.lastMotionG
     ? state.lastMotionG.toFixed(2)
     : (last ? Math.min(2.5, (last.harshness||0)/9.81).toFixed(2) : '0.00');
   const gEl = $('#live-g');
   if (gEl) gEl.textContent = gVal + 'G';
 
-  // G-force bar needle
+  // G-force needle — kept off-screen but still updated for JS compat
   const la = last ? (last.longAccel || 0) : 0;
   const needle = document.getElementById('live-g-needle');
   if (needle){
     const pct = 50 + clamp(la / 6, -1, 1) * 44;
     const isBrake = la < -0.6, isAccel = la > 0.6;
-    needle.style.left       = pct + '%';
+    needle.style.left      = pct + '%';
     needle.style.background = isBrake ? '#E03B2F' : isAccel ? '#6FB669' : 'rgba(244,235,217,.9)';
     needle.style.boxShadow  = isBrake ? '0 0 14px rgba(224,59,47,.7)' : isAccel ? '0 0 14px rgba(111,182,105,.7)' : '0 0 10px rgba(244,235,217,.3)';
-    needle.style.color      = (isBrake || isAccel) ? 'rgba(10,8,8,.9)' : 'rgba(10,8,8,.85)';
     needle.textContent      = gVal;
   }
 
@@ -1093,28 +1100,38 @@ function updateLiveUI(){
     else                ring.className = 'smooth-ring smooth';
   }
 
-  // Live score
+  // Cumulative live score — starts from lifetime score, penalised by events, recovers gently
   const scoreEl = document.getElementById('live-score');
   if (scoreEl){
     const durationMins = (Date.now() - state.startTime) / 60000;
-    if (durationMins < 0.1){
-      scoreEl.textContent = '--';
-    } else {
-      const penalty = state.events.reduce((s, e) => {
-        const w = e.type === 'brake' ? 4 : e.type === 'accel' ? 2.5 : 1.5;
-        return s + w * (e.magnitude || 1);
-      }, 0);
-      const score = Math.max(0, Math.min(100, Math.round(100 - penalty / durationMins * 1.4)));
-      scoreEl.textContent = score;
-      state.liveScore = score;
-    }
+    const penalty = state.events.reduce((s, e) => {
+      const w = e.type === 'brake' ? 5 : e.type === 'accel' ? 3 : 2;
+      return s + w * (e.magnitude || 1);
+    }, 0);
+    const recovery = Math.min(durationMins * 1.5, 6); // up to +6 for a long smooth drive
+    const score = Math.max(0, Math.min(100, Math.round(state.driveStartScore - penalty + recovery)));
+    scoreEl.textContent = score;
+    state.liveScore = score;
   }
 
+  // Duration
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
+
+  // Avg speed
   const avgMph = state.samples.length
     ? Math.round(state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length * 2.23694)
     : 0;
   $('#live-avg-speed').textContent = avgMph;
+
+  // Distance (avg speed × elapsed time, converted to miles)
+  const distEl = document.getElementById('live-distance');
+  if (distEl){
+    const elapsedSecs = (Date.now() - state.startTime) / 1000;
+    const avgMps = state.samples.length
+      ? state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length : 0;
+    distEl.textContent = (avgMps * elapsedSecs / 1609.34).toFixed(1);
+  }
+
   updateRoadUI();
 }
 
@@ -1208,7 +1225,8 @@ function resetState(){
   state.roughnessBuf = [];
   state.currentRoughness = 0;
   state.stabBuf = [];
-  state.liveScore = 100;
+  state.driveStartScore = loadLifetimeScore();
+  state.liveScore = state.driveStartScore;
   resetCalib();
 }
 
@@ -1337,6 +1355,12 @@ function finalizeAndReview(){
   drive.score = analyzeDrive(drive).score;
   saveDrive(drive);
   pushDriveToSupabase(drive);
+
+  // Persist final score as new lifetime baseline
+  saveLifetimeScore(state.liveScore);
+  const driverName = loadDriverName();
+  if (driverName) syncToLeaderboard(driverName, state.liveScore).catch(() => {});
+
   renderReview(drive);
   renderDriveList();
 }
@@ -1824,6 +1848,96 @@ function clearMapFilter(){
     const bounds = L.latLngBounds(reviewDrive.samples.map(s => [s.lat, s.lon]));
     mapInstance.fitBounds(bounds, { padding:[40,40] });
   }
+}
+
+// -------------------------------------------------------------------------
+// Leaderboard
+// -------------------------------------------------------------------------
+async function syncToLeaderboard(name, score){
+  try {
+    await fetch(`${SB_URL}/rest/v1/drivers`, {
+      method:'POST',
+      headers:{
+        'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`,
+        'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'
+      },
+      body:JSON.stringify({ device_id:getDeviceId(), username:name.trim(), lifetime_score:Math.round(score), updated_at:new Date().toISOString() })
+    });
+  } catch {}
+}
+
+async function fetchLeaderboard(){
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/drivers?select=username,lifetime_score&order=lifetime_score.desc&limit=25`,
+      { headers:{ 'apikey':SB_ANON, 'Authorization':`Bearer ${SB_ANON}` } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+async function openLeaderboard(){
+  showScreen('leaderboard');
+  const myName = loadDriverName();
+  const myScore = loadLifetimeScore();
+
+  // Update "my" card
+  document.getElementById('lb-my-name-display').textContent = myName || 'You';
+  document.getElementById('lb-my-score-val').textContent = myName ? myScore : '--';
+  document.getElementById('btn-set-driver-name').textContent = myName ? 'Edit name' : 'Set name';
+
+  // Show join CTA if no name yet
+  document.getElementById('lb-join-cta').style.display = myName ? 'none' : 'block';
+
+  // Fetch rankings
+  const list = document.getElementById('lb-list');
+  list.innerHTML = '<div class="lb-empty">Loading…</div>';
+
+  const rows = await fetchLeaderboard();
+  if (!rows || rows.length === 0){
+    list.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
+    return;
+  }
+
+  const deviceId = getDeviceId();
+  let myRank = '--';
+  list.innerHTML = rows.map((row, i) => {
+    const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const isMe = myName && row.username === myName;
+    if (isMe) myRank = '#' + (i + 1);
+    return `<div class="lb-row${isMe ? ' lb-row--me' : ''}">
+      <div class="lb-rank ${rankClass}">${i + 1}</div>
+      <div class="lb-row-name">${row.username}</div>
+      <div class="lb-row-score">${row.lifetime_score}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('lb-my-rank').textContent = myRank;
+}
+
+function openSignupModal(onSave){
+  const modal = document.getElementById('signup-modal');
+  const input = document.getElementById('signup-name-input');
+  input.value = loadDriverName();
+  modal.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+
+  const submit = document.getElementById('signup-submit-btn');
+  const cancel = document.getElementById('signup-cancel-btn');
+
+  const cleanup = () => { modal.style.display = 'none'; };
+  const handleSave = () => {
+    const name = input.value.trim();
+    if (!name) return;
+    saveDriverName(name);
+    cleanup();
+    if (onSave) onSave(name);
+  };
+
+  submit.onclick = handleSave;
+  input.onkeydown = e => { if (e.key === 'Enter') handleSave(); };
+  cancel.onclick = cleanup;
 }
 
 // -------------------------------------------------------------------------
@@ -2419,6 +2533,12 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('home');
     renderDriveList();
   });
+
+  // Leaderboard
+  document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard());
+  document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
+  document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
+  document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
 
   // Garage sheet
   document.getElementById('btn-vehicle-type')?.addEventListener('click', showGarageSheet);
