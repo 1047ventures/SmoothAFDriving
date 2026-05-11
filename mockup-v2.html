@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smooth AF — UI Mockup v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700;1,900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #060606;
+      font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+      color: #F0EBE3;
+      padding: 60px 0 100px;
+    }
+
+    /* ── SVG noise filter (shared) ──────────────────────────── */
+    .noise-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── Page-level divider labels ──────────────────────────── */
+    .screen-label {
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #2a2a2a;
+      padding: 52px 0 20px;
+      font-weight: 700;
+    }
+    .screen-label span {
+      border: 1px solid #1e1e1e;
+      padding: 5px 18px;
+      border-radius: 2px;
+    }
+
+    /* ── Screen shell ───────────────────────────────────────── */
+    .screen {
+      max-width: 390px;
+      min-height: 844px;
+      margin: 0 auto;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow:
+        0 0 0 1px #111,
+        0 60px 120px rgba(0,0,0,0.9),
+        0 0 1px #000;
+    }
+
+    /* ── Status bar ─────────────────────────────────────────── */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 28px 0;
+      font-size: 12px;
+      font-weight: 700;
+      position: relative;
+      z-index: 10;
+    }
+    .status-bar .time { font-size: 14px; font-weight: 800; }
+    .status-icons { display: flex; gap: 5px; align-items: center; font-size: 11px; }
+
+    /* ── Full-bleed horizontal rules ────────────────────────── */
+    .rule {
+      width: 100%;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.12;
+    }
+
+    /* ── Diagonal slash divider ─────────────────────────────── */
+    .slash-divider {
+      width: 100%;
+      height: 40px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .slash-divider::after {
+      content: '';
+      position: absolute;
+      left: -5%;
+      width: 110%;
+      height: 2px;
+      top: 50%;
+      transform: rotate(-2.5deg);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 1 — HOME
+    ════════════════════════════════════════════════════════════ */
+
+    .home-screen {
+      background: #050404;
+    }
+
+    /* Radial glow behind the score */
+    .home-glow {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,61,31,0.28) 0%, rgba(255,61,31,0.08) 40%, transparent 70%);
+      animation: scorePulse 3s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes scorePulse {
+      0%, 100% { opacity: 0.15; transform: translateX(-50%) scale(1); }
+      50%       { opacity: 0.35; transform: translateX(-50%) scale(1.08); }
+    }
+
+    /* Diagonal bg accent */
+    .home-diagonal {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 520px;
+      background: linear-gradient(155deg, #0d0302 0%, #050404 60%, #030202 100%);
+      clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+      z-index: 0;
+    }
+
+    .home-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .home-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px 0;
+    }
+    .home-wordmark {
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #2e2e2e;
+    }
+    .home-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #0e0e0e;
+      border: 1.5px solid #FF3D1F;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #FF3D1F;
+    }
+
+    /* Hero score block */
+    .home-hero {
+      padding: 14px 0 0 18px;
+      position: relative;
+    }
+    .home-score-eyebrow {
+      font-size: 8px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #3a3a3a;
+      display: block;
+      margin-bottom: -8px;
+    }
+    .home-score-number {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 190px;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      background: linear-gradient(135deg, #FF3D1F 0%, #FF8C00 60%, #FF3D1F 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      /* bleed off right edge intentionally */
+      margin-right: -24px;
+      display: block;
+    }
+    .home-score-sub {
+      font-size: 8px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #2e2e2e;
+      display: block;
+      margin-top: -4px;
+    }
+
+    /* Tier */
+    .home-tier {
+      padding: 6px 24px 0;
+    }
+    .home-tier-name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 28px;
+      color: #FF3D1F;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .home-tier-sub {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #2a2a2a;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Full-bleed rule */
+    .home-rule {
+      height: 1px;
+      background: linear-gradient(90deg, #FF3D1F, transparent);
+      margin: 20px 0 0;
+      opacity: 0.25;
+    }
+
+    /* Unlocks grid */
+    .home-unlocks {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 0;
+      padding: 24px 0 0;
+      flex: 1;
+    }
+    .unlock-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 4px;
+      border-right: 1px solid #111;
+    }
+    .unlock-cell:last-child { border-right: none; }
+    .unlock-cell .u-icon { font-size: 24px; line-height: 1; }
+    .unlock-cell .u-label {
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #2e2e2e;
+      font-weight: 800;
+      text-align: center;
+    }
+    .unlock-cell.active .u-label { color: #FF3D1F; }
+
+    /* Begin drive button */
+    .home-cta {
+      margin-top: auto;
+      height: 80px;
+      background: #FF3D1F;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .home-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #FF3D1F, #FF6B00);
+    }
+    .home-cta-label {
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #060606;
+      position: relative;
+      z-index: 1;
+    }
+    .home-cta-arrow {
+      font-size: 24px;
+      font-weight: 800;
+      color: #060606;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 2 — SCORE BREAKDOWN
+    ════════════════════════════════════════════════════════════ */
+
+    .breakdown-screen {
+      background: #040808;
+    }
+
+    .breakdown-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,229,204,0.12) 0%, transparent 70%),
+        linear-gradient(170deg, #040c0a 0%, #020606 50%, #040408 100%);
+      z-index: 0;
+    }
+
+    .breakdown-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .breakdown-eyebrow {
+      padding: 20px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breakdown-drive-label {
+      font-size: 9px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #0d3330;
+    }
+    .breakdown-back {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #0d3330;
+    }
+
+    .breakdown-hero {
+      padding: 0 24px 0;
+    }
+    .breakdown-drive-id {
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #0a4a42;
+      display: block;
+      margin-bottom: -6px;
+    }
+    .breakdown-score {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 130px;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      background: linear-gradient(135deg, #00E5CC 0%, #00FFEA 50%, #00B8A0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+      margin-right: -8px;
+    }
+    .breakdown-score-foot {
+      font-size: 8px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #0a4a42;
+      display: block;
+    }
+
+    .breakdown-meta {
+      padding: 4px 24px 0;
+      display: flex;
+      gap: 20px;
+    }
+    .bdmeta-item {
+      font-size: 10px;
+      color: #0e5c50;
+      font-weight: 600;
+    }
+    .bdmeta-item strong {
+      color: #1a8a78;
+      font-weight: 800;
+    }
+
+    /* Dimension rows — full-bleed, no card */
+    .breakdown-rule {
+      height: 1px;
+      background: linear-gradient(90deg, #00E5CC, transparent);
+      margin: 18px 0 0;
+      opacity: 0.18;
+    }
+
+    .dim-rows {
+      padding: 4px 0 0;
+    }
+    .dim-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 24px;
+      border-bottom: 1px solid #0a1a18;
+      gap: 0;
+    }
+    .dim-row-name {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #1a5a50;
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .dim-row-bar-track {
+      flex: 1;
+      height: 6px;
+      background: #061210;
+      /* no border-radius — sharp */
+      overflow: hidden;
+      border-radius: 0;
+      margin: 0 14px;
+    }
+    .dim-row-bar-fill {
+      height: 100%;
+      background: #00E5CC;
+    }
+    .dim-row-bar-fill.ok  { background: #00C2AA; }
+    .dim-row-bar-fill.low { background: #FF3D1F; }
+    .dim-row-score {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 28px;
+      color: #00E5CC;
+      line-height: 1;
+      width: 46px;
+      text-align: right;
+      letter-spacing: -0.04em;
+    }
+    .dim-row-score.ok  { color: #00C2AA; }
+    .dim-row-score.low { color: #FF3D1F; }
+
+    /* Coaching insights */
+    .coaching-section {
+      padding: 18px 0 24px;
+    }
+    .coaching-label {
+      font-size: 8px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #0a3a32;
+      padding: 0 24px;
+      margin-bottom: 10px;
+    }
+    .coaching-insight {
+      border-left: 6px solid #00E5CC;
+      padding: 10px 20px 10px 16px;
+      margin: 0 0 2px 0;
+      background: rgba(0,229,204,0.03);
+    }
+    .coaching-insight + .coaching-insight {
+      border-left-color: rgba(0,229,204,0.35);
+    }
+    .coaching-insight:nth-child(3) {
+      border-left-color: rgba(0,229,204,0.15);
+    }
+    .coaching-insight p {
+      font-size: 11px;
+      color: #2a6a60;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    .coaching-insight p strong { color: #00C2AA; font-weight: 700; }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 3 — REWARDS
+    ════════════════════════════════════════════════════════════ */
+
+    .rewards-screen {
+      background: #060500;
+    }
+
+    .rewards-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 45% at 80% 20%, rgba(255,184,0,0.10) 0%, transparent 65%),
+        linear-gradient(160deg, #080600 0%, #050400 60%, #080500 100%);
+      z-index: 0;
+    }
+
+    /* Giant watermark "EARNED" */
+    .rewards-watermark {
+      position: absolute;
+      bottom: 120px;
+      left: -20px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 120px;
+      color: #FFB800;
+      opacity: 0.04;
+      transform: rotate(-30deg);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 1;
+      user-select: none;
+    }
+
+    .rewards-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rewards-header {
+      padding: 20px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .rewards-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #2a2000;
+    }
+    .rewards-score-chip {
+      font-size: 11px;
+      font-weight: 800;
+      color: #FFB800;
+      border: 1px solid rgba(255,184,0,0.3);
+      padding: 4px 12px;
+      border-radius: 2px;
+      letter-spacing: 0.08em;
+    }
+
+    .rewards-title-block {
+      padding: 6px 24px 0;
+    }
+    .rewards-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 52px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #FFB800 0%, #FFD966 50%, #FF8C00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .rewards-subtitle {
+      font-size: 9px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #2a2000;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .rewards-rule {
+      height: 1px;
+      background: linear-gradient(90deg, #FFB800, transparent);
+      margin: 16px 0 0;
+      opacity: 0.2;
+    }
+
+    /* Tier pills */
+    .tiers-list {
+      padding: 8px 0 0;
+      flex: 1;
+    }
+    .tier-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px 14px 0;
+      border-bottom: 1px solid #0d0a00;
+      position: relative;
+      gap: 0;
+    }
+    .tier-row-accent {
+      width: 6px;
+      align-self: stretch;
+      flex-shrink: 0;
+      margin-right: 16px;
+    }
+    .tier-row.current {
+      background: rgba(255,184,0,0.06);
+    }
+    .tier-row.locked { opacity: 0.35; }
+
+    .tier-row-body { flex: 1; min-width: 0; }
+    .tier-row-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: #c8a820;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    .tier-row.current .tier-row-name { color: #FFB800; }
+    .tier-row-range {
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      color: #2a2000;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .tier-chips {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .tier-chip {
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      padding: 2px 7px;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+    .tier-row-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .tier-score-pill {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+    .tier-lock {
+      font-size: 14px;
+      opacity: 0.3;
+    }
+    .tier-current-badge {
+      font-size: 7px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #FFB800;
+      border: 1px solid rgba(255,184,0,0.4);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 4 — LEADERBOARD
+    ════════════════════════════════════════════════════════════ */
+
+    .leaderboard-screen {
+      background: #020408;
+    }
+
+    .leaderboard-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 90% 55% at 30% 10%, rgba(0,102,255,0.14) 0%, transparent 65%),
+        linear-gradient(170deg, #020510 0%, #020408 55%, #030210 100%);
+      z-index: 0;
+    }
+
+    .leaderboard-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .leaderboard-eyebrow {
+      padding: 20px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lb-eye-label {
+      font-size: 9px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #051030;
+    }
+    .lb-eye-week {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #051030;
+    }
+
+    /* Hero rank */
+    .lb-hero {
+      padding: 0 24px 0 18px;
+      position: relative;
+    }
+    .lb-rank-eyebrow {
+      font-size: 8px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #050f2a;
+      display: block;
+      margin-bottom: -10px;
+    }
+    .lb-rank-number {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 155px;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      background: linear-gradient(135deg, #0066FF 0%, #3399FF 60%, #0044CC 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+      margin-right: -10px;
+    }
+    .lb-rank-sub {
+      font-size: 8px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #050f2a;
+      display: block;
+    }
+
+    .lb-identity {
+      padding: 8px 24px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    .lb-your-score {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 38px;
+      letter-spacing: -0.04em;
+      color: #0066FF;
+    }
+    .lb-your-score span { font-size: 14px; color: #082050; font-style: normal; font-family: system-ui; letter-spacing: 0.14em; }
+    .lb-your-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: #082050;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .lb-rule {
+      height: 1px;
+      background: linear-gradient(90deg, #0066FF, transparent);
+      margin: 16px 0 0;
+      opacity: 0.2;
+    }
+
+    /* Top 5 list */
+    .lb-top-label {
+      font-size: 8px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #051030;
+      padding: 10px 24px 4px;
+    }
+    .lb-rows {
+      flex: 1;
+    }
+    .lb-row {
+      display: flex;
+      align-items: center;
+      padding: 11px 24px;
+      border-bottom: 1px solid #050a1a;
+      gap: 0;
+    }
+    .lb-row:nth-child(even) { background: rgba(0,102,255,0.03); }
+    .lb-row-rank {
+      font-size: 12px;
+      font-weight: 800;
+      color: #082050;
+      width: 28px;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .lb-row-rank.top3 { color: #0066FF; }
+    .lb-row-name {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0a2060;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0 10px;
+    }
+    .lb-row-score {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 18px;
+      color: #0066FF;
+      letter-spacing: -0.03em;
+    }
+
+    /* CTA at bottom */
+    .lb-bottom-cta {
+      padding: 16px 24px 32px;
+      text-align: center;
+    }
+    .lb-gap-text {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #0066FF;
+      text-shadow: 0 0 20px rgba(0,102,255,0.5);
+    }
+    .lb-gap-sub {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: #051030;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SCREEN 5 — START DRIVE
+    ════════════════════════════════════════════════════════════ */
+
+    .start-screen {
+      background: #020202;
+    }
+
+    .start-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle 280px at 50% 45%, rgba(255,61,31,0.07) 0%, transparent 70%);
+      z-index: 0;
+    }
+
+    .start-content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .start-wordmark {
+      font-size: 11px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 0;
+    }
+    .start-go {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 220px;
+      line-height: 0.88;
+      letter-spacing: -0.06em;
+      color: #FF3D1F;
+      text-shadow:
+        0 0 40px rgba(255,61,31,0.6),
+        0 0 80px rgba(255,61,31,0.3),
+        0 0 120px rgba(255,61,31,0.15);
+      animation: goGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes goGlow {
+      0%, 100% { text-shadow:
+        0 0 40px rgba(255,61,31,0.6),
+        0 0 80px rgba(255,61,31,0.3),
+        0 0 120px rgba(255,61,31,0.15); }
+      50% { text-shadow:
+        0 0 60px rgba(255,61,31,0.9),
+        0 0 100px rgba(255,61,31,0.5),
+        0 0 160px rgba(255,61,31,0.25); }
+    }
+    .start-line {
+      width: 120px;
+      height: 1px;
+      background: #1e1e1e;
+      margin: 20px 0 14px;
+    }
+    .start-tap {
+      font-size: 11px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 1 — HOME
+═══════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span>01 · HOME SCREEN</span></div>
+
+<div class="screen home-screen">
+  <div class="noise-overlay"></div>
+  <div class="home-diagonal"></div>
+  <div class="home-glow"></div>
+
+  <div class="home-content">
+    <!-- Status bar -->
+    <div class="status-bar" style="color:#1e1e1e;">
+      <span class="time" style="color:#2a2a2a;">9:41</span>
+      <div class="status-icons">
+        <span>▲▲▲</span>
+        <span>WiFi</span>
+        <span style="color:#FF3D1F;">87%</span>
+      </div>
+    </div>
+
+    <!-- Top bar -->
+    <div class="home-top-bar">
+      <span class="home-wordmark">Smooth AF</span>
+      <div class="home-avatar">A</div>
+    </div>
+
+    <!-- Hero score -->
+    <div class="home-hero">
+      <span class="home-score-eyebrow">Smooth AF Score</span>
+      <span class="home-score-number">87</span>
+      <span class="home-score-sub">/ 100 · Week of May 11</span>
+    </div>
+
+    <!-- Tier -->
+    <div class="home-tier">
+      <div class="home-tier-name">Pretty Damn Smooth</div>
+      <div class="home-tier-sub">Tier 4 of 5 · +2 from last week</div>
+    </div>
+
+    <!-- Full-bleed rule -->
+    <div class="home-rule"></div>
+
+    <!-- Unlocks grid -->
+    <div class="home-unlocks">
+      <div class="unlock-cell active">
+        <div class="u-icon">🏆</div>
+        <div class="u-label">Rewards</div>
+      </div>
+      <div class="unlock-cell active">
+        <div class="u-icon">🎯</div>
+        <div class="u-label">Coaching</div>
+      </div>
+      <div class="unlock-cell active">
+        <div class="u-icon">📊</div>
+        <div class="u-label">Leaderboard</div>
+      </div>
+      <div class="unlock-cell">
+        <div class="u-icon">🔥</div>
+        <div class="u-label" style="color:#1a1a1a;">Streaks</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="home-cta">
+      <span class="home-cta-label">Begin Drive</span>
+      <span class="home-cta-arrow">→</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 2 — SCORE BREAKDOWN
+═══════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span>02 · SCORE BREAKDOWN</span></div>
+
+<div class="screen breakdown-screen">
+  <div class="noise-overlay"></div>
+  <div class="breakdown-bg"></div>
+
+  <div class="breakdown-content">
+    <!-- Status bar -->
+    <div class="status-bar" style="color:#051f1a;">
+      <span class="time" style="color:#082a24;">9:41</span>
+      <div class="status-icons" style="color:#051f1a;">
+        <span>▲▲▲</span>
+        <span>WiFi</span>
+        <span style="color:#00E5CC;">87%</span>
+      </div>
+    </div>
+
+    <!-- Eyebrow -->
+    <div class="breakdown-eyebrow">
+      <span class="breakdown-drive-label">Drive Summary</span>
+      <span class="breakdown-back">← Back</span>
+    </div>
+
+    <!-- Hero score -->
+    <div class="breakdown-hero">
+      <span class="breakdown-drive-id">Drive #47 · Today, 8:14 AM</span>
+      <span class="breakdown-score">91</span>
+      <span class="breakdown-score-foot">Overall Score</span>
+    </div>
+
+    <!-- Meta row -->
+    <div class="breakdown-meta">
+      <span class="bdmeta-item"><strong>12.4 mi</strong> Distance</span>
+      <span class="bdmeta-item"><strong>31 min</strong> Duration</span>
+      <span class="bdmeta-item"><strong>+4 pts</strong> vs avg</span>
+    </div>
+
+    <!-- Rule -->
+    <div class="breakdown-rule"></div>
+
+    <!-- Dimension rows -->
+    <div class="dim-rows">
+      <div class="dim-row">
+        <span class="dim-row-name">Smoothness</span>
+        <div class="dim-row-bar-track">
+          <div class="dim-row-bar-fill" style="width:94%"></div>
+        </div>
+        <span class="dim-row-score">94</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-row-name">Braking</span>
+        <div class="dim-row-bar-track">
+          <div class="dim-row-bar-fill" style="width:88%"></div>
+        </div>
+        <span class="dim-row-score">88</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-row-name">Cornering</span>
+        <div class="dim-row-bar-track">
+          <div class="dim-row-bar-fill ok" style="width:82%"></div>
+        </div>
+        <span class="dim-row-score ok">82</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-row-name">Speed</span>
+        <div class="dim-row-bar-track">
+          <div class="dim-row-bar-fill ok" style="width:78%"></div>
+        </div>
+        <span class="dim-row-score ok">78</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-row-name">Phone Use</span>
+        <div class="dim-row-bar-track">
+          <div class="dim-row-bar-fill low" style="width:61%"></div>
+        </div>
+        <span class="dim-row-score low">61</span>
+      </div>
+    </div>
+
+    <!-- Coaching -->
+    <div class="coaching-section">
+      <div class="coaching-label">Coach Says</div>
+      <div class="coaching-insight">
+        <p><strong>Braking is your superpower.</strong> 88/100 — you're anticipating stops 40% earlier than average drivers. Keep that cushion.</p>
+      </div>
+      <div class="coaching-insight">
+        <p><strong>Phone use is dragging you down.</strong> 2 pickup events during the drive. Enabling Do Not Disturb before you start could unlock Tier 5.</p>
+      </div>
+      <div class="coaching-insight">
+        <p>Corner entry speed was elevated twice on the same left turn. Try braking 20m earlier on the off-ramp.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 3 — REWARDS
+═══════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span>03 · REWARDS</span></div>
+
+<div class="screen rewards-screen">
+  <div class="noise-overlay"></div>
+  <div class="rewards-bg"></div>
+  <div class="rewards-watermark">EARNED</div>
+
+  <div class="rewards-content">
+    <!-- Status bar -->
+    <div class="status-bar" style="color:#1a1200;">
+      <span class="time" style="color:#2a2000;">9:41</span>
+      <div class="status-icons" style="color:#1a1200;">
+        <span>▲▲▲</span>
+        <span>WiFi</span>
+        <span style="color:#FFB800;">87%</span>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="rewards-header">
+      <span class="rewards-eyebrow">Your Rewards</span>
+      <span class="rewards-score-chip">87 PTS</span>
+    </div>
+
+    <div class="rewards-title-block">
+      <div class="rewards-title">Tiers</div>
+      <div class="rewards-subtitle">Score-based unlocks · All time</div>
+    </div>
+
+    <div class="rewards-rule"></div>
+
+    <!-- Tier rows -->
+    <div class="tiers-list">
+
+      <!-- Tier 1: Rookie (0–49) — locked below -->
+      <div class="tier-row locked">
+        <div class="tier-row-accent" style="background:#3a3a3a;"></div>
+        <div class="tier-row-body">
+          <div class="tier-row-name" style="color:#2a2a2a;">Rookie Driver</div>
+          <div class="tier-row-range">0 – 49 pts</div>
+          <div class="tier-chips">
+            <span class="tier-chip" style="color:#2a2a2a; border-color:#1a1a1a;">Safe Driver Badge</span>
+          </div>
+        </div>
+        <div class="tier-row-right">
+          <span class="tier-score-pill" style="color:#2a2a2a;">0</span>
+          <span class="tier-lock">🔒</span>
+        </div>
+      </div>
+
+      <!-- Tier 2: Decent (50–69) -->
+      <div class="tier-row">
+        <div class="tier-row-accent" style="background:#3a8a50;"></div>
+        <div class="tier-row-body">
+          <div class="tier-row-name" style="color:#3a8a50;">Getting There</div>
+          <div class="tier-row-range">50 – 69 pts</div>
+          <div class="tier-chips">
+            <span class="tier-chip" style="color:#3a8a50;">-5% Insurance</span>
+            <span class="tier-chip" style="color:#3a8a50;">Fuel Rewards</span>
+          </div>
+        </div>
+        <div class="tier-row-right">
+          <span class="tier-score-pill" style="color:#3a8a50;">60</span>
+        </div>
+      </div>
+
+      <!-- Tier 3: Smooth (70–85) -->
+      <div class="tier-row">
+        <div class="tier-row-accent" style="background:#c8a820;"></div>
+        <div class="tier-row-body">
+          <div class="tier-row-name" style="color:#c8a820;">Smooth Operator</div>
+          <div class="tier-row-range">70 – 85 pts</div>
+          <div class="tier-chips">
+            <span class="tier-chip" style="color:#c8a820;">-10% Insurance</span>
+            <span class="tier-chip" style="color:#c8a820;">Priority Service</span>
+          </div>
+        </div>
+        <div class="tier-row-right">
+          <span class="tier-score-pill" style="color:#c8a820;">78</span>
+        </div>
+      </div>
+
+      <!-- Tier 4: Smooth AF (86–95) — CURRENT -->
+      <div class="tier-row current">
+        <div class="tier-row-accent" style="background:#FFB800;"></div>
+        <div class="tier-row-body">
+          <div class="tier-row-name">Smooth AF</div>
+          <div class="tier-row-range">86 – 95 pts</div>
+          <div class="tier-chips">
+            <span class="tier-chip" style="color:#FFB800;">-18% Insurance</span>
+            <span class="tier-chip" style="color:#FFB800;">Loaner Car</span>
+            <span class="tier-chip" style="color:#FFB800;">VIP Lane</span>
+          </div>
+        </div>
+        <div class="tier-row-right">
+          <span class="tier-score-pill">87</span>
+          <span class="tier-current-badge">CURRENT</span>
+        </div>
+      </div>
+
+      <!-- Tier 5: Silky (96–100) — locked above -->
+      <div class="tier-row locked">
+        <div class="tier-row-accent" style="background:#FF8C00;"></div>
+        <div class="tier-row-body">
+          <div class="tier-row-name" style="color:#3a2000;">Silky Smooth</div>
+          <div class="tier-row-range">96 – 100 pts</div>
+          <div class="tier-chips">
+            <span class="tier-chip" style="color:#3a2000; border-color:#2a1500;">-25% Insurance</span>
+            <span class="tier-chip" style="color:#3a2000; border-color:#2a1500;">Track Day</span>
+          </div>
+        </div>
+        <div class="tier-row-right">
+          <span class="tier-score-pill" style="color:#3a2000;">—</span>
+          <span class="tier-lock">🔒</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 4 — LEADERBOARD
+═══════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span>04 · LEADERBOARD</span></div>
+
+<div class="screen leaderboard-screen">
+  <div class="noise-overlay"></div>
+  <div class="leaderboard-bg"></div>
+
+  <div class="leaderboard-content">
+    <!-- Status bar -->
+    <div class="status-bar" style="color:#040e28;">
+      <span class="time" style="color:#060f2a;">9:41</span>
+      <div class="status-icons" style="color:#040e28;">
+        <span>▲▲▲</span>
+        <span>WiFi</span>
+        <span style="color:#0066FF;">87%</span>
+      </div>
+    </div>
+
+    <!-- Eyebrow -->
+    <div class="leaderboard-eyebrow">
+      <span class="lb-eye-label">Global Rank</span>
+      <span class="lb-eye-week">May 2026</span>
+    </div>
+
+    <!-- Hero rank -->
+    <div class="lb-hero">
+      <span class="lb-rank-eyebrow"># Your Rank</span>
+      <span class="lb-rank-number">47</span>
+      <span class="lb-rank-sub">of 12,481 drivers this month</span>
+    </div>
+
+    <!-- Identity row -->
+    <div class="lb-identity">
+      <div class="lb-your-score">87 <span>pts</span></div>
+      <div class="lb-your-name">Alex M.</div>
+    </div>
+
+    <!-- Rule -->
+    <div class="lb-rule"></div>
+
+    <!-- Top 5 -->
+    <div class="lb-top-label">Top 5 This Month</div>
+    <div class="lb-rows">
+      <div class="lb-row">
+        <span class="lb-row-rank top3">1</span>
+        <span class="lb-row-name">Jordan K.</span>
+        <span class="lb-row-score">99</span>
+      </div>
+      <div class="lb-row">
+        <span class="lb-row-rank top3">2</span>
+        <span class="lb-row-name">Sam T.</span>
+        <span class="lb-row-score">98</span>
+      </div>
+      <div class="lb-row">
+        <span class="lb-row-rank top3">3</span>
+        <span class="lb-row-name">Riley B.</span>
+        <span class="lb-row-score">97</span>
+      </div>
+      <div class="lb-row">
+        <span class="lb-row-rank">4</span>
+        <span class="lb-row-name">Morgan C.</span>
+        <span class="lb-row-score">96</span>
+      </div>
+      <div class="lb-row">
+        <span class="lb-row-rank">5</span>
+        <span class="lb-row-name">Casey L.</span>
+        <span class="lb-row-score">96</span>
+      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="lb-bottom-cta">
+      <div class="lb-gap-text">9 pts from Top 10</div>
+      <div class="lb-gap-sub">Drive cleaner to close the gap</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 5 — START DRIVE
+═══════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span>05 · START DRIVE</span></div>
+
+<div class="screen start-screen">
+  <div class="noise-overlay"></div>
+  <div class="start-bg"></div>
+
+  <!-- Status bar -->
+  <div class="status-bar" style="color:#141414; position:relative; z-index:10;">
+    <span class="time" style="color:#1a1a1a;">9:41</span>
+    <div class="status-icons" style="color:#141414;">
+      <span>▲▲▲</span>
+      <span>WiFi</span>
+      <span style="color:#FF3D1F;">87%</span>
+    </div>
+  </div>
+
+  <div class="start-content">
+    <div class="start-wordmark">Smooth AF</div>
+    <div class="start-go">GO</div>
+    <div class="start-line"></div>
+    <div class="start-tap">Tap to Begin</div>
+  </div>
+</div>
+
+</body>
+</html>
