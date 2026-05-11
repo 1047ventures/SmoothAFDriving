@@ -128,9 +128,10 @@
   }
   .view-drives-link{
     appearance:none;border:0;background:transparent;cursor:pointer;
-    display:block;width:100%;text-align:center;
-    font-size:12px;letter-spacing:.15em;color:var(--muted);
-    text-transform:uppercase;padding:14px 0 2px;
+    display:flex;align-items:center;justify-content:center;
+    width:100%;text-align:center;
+    font-size:11px;letter-spacing:.14em;color:var(--muted);
+    text-transform:uppercase;padding:14px 4px;min-height:48px;
   }
   .view-drives-link:active{color:var(--cream-dim)}
   .drives-list{display:none;margin-top:8px}
@@ -596,7 +597,7 @@
     <div class="home-car-panel">
       <div class="home-topbar">
         <div class="wordmark-lg">Smooth<br><span class="af">AF</span></div>
-        <div id="app-version">v63</div>
+        <div id="app-version">v64</div>
       </div>
       <div id="car-display"></div>
     </div>
@@ -607,7 +608,7 @@
       <button id="btn-start" class="primary-btn">
         <span>Start drive</span><span class="arrow">→</span>
       </button>
-      <div style="display:flex;gap:0;border-top:1px solid rgba(244,235,217,.07);margin-top:2px">
+      <div style="display:flex;align-items:stretch;gap:0;border-top:1px solid rgba(244,235,217,.07);margin-top:2px">
         <button class="view-drives-link" id="btn-vehicle-type" style="flex:1;border-right:1px solid rgba(244,235,217,.07)">Your vehicle</button>
         <button class="view-drives-link" id="btn-view-drives" style="flex:1;border-right:1px solid rgba(244,235,217,.07)">Past drives</button>
         <button class="view-drives-link" id="btn-leaderboard" style="flex:1">Leaderboard 🏆</button>

@@ -32,6 +32,23 @@ function saveLifetimeScore(s){ try { localStorage.setItem(LIFETIME_SCORE_KEY, St
 function loadDriverName(){ try { return localStorage.getItem(DRIVER_NAME_KEY) || ''; } catch { return ''; } }
 function saveDriverName(n){ try { localStorage.setItem(DRIVER_NAME_KEY, n.trim()); } catch {} }
 
+// Run once if no lifetime score saved yet — derive it from stored drives.
+// Most-recent drive carries the most weight (exponential decay factor 0.65).
+function migrateLifetimeScore(){
+  if (localStorage.getItem(LIFETIME_SCORE_KEY) !== null) return; // already set
+  const drives = loadDrives().filter(d => d.score != null);
+  if (!drives.length){ saveLifetimeScore(100); return; }
+  // drives[0] is newest; apply decay so older drives matter less
+  let weightedSum = 0, totalWeight = 0;
+  drives.forEach((d, i) => {
+    const w = Math.pow(0.65, i);
+    weightedSum += (d.score || 0) * w;
+    totalWeight += w;
+  });
+  const derived = Math.round(weightedSum / totalWeight);
+  saveLifetimeScore(derived);
+}
+
 // ── Vehicle types — imgFront: home screen, imgRear: recording screen ──────────
 const VEHICLE_KEY = 'smoothaf.vehicle_type';
 const VEHICLE_TYPES = [
@@ -2466,6 +2483,7 @@ function renderRecAvatar(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  migrateLifetimeScore();
   renderDriveList();
   syncPendingDrives();
   renderCarDisplay();
