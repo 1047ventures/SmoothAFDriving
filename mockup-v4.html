@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smooth AF — Mockup v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a1a;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #F2E8D5;
+    padding: 40px 0 60px;
+  }
+
+  /* Screen wrapper */
+  .screen-wrap {
+    max-width: 390px;
+    margin: 0 auto 0;
+  }
+
+  /* Divider between screens */
+  .screen-divider {
+    max-width: 390px;
+    margin: 0 auto;
+    padding: 20px 24px 16px;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .screen-divider span {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.4);
+    white-space: nowrap;
+  }
+  .screen-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(242,232,213,0.12);
+  }
+
+  /* Base screen */
+  .screen {
+    width: 390px;
+    min-height: 844px;
+    background: #080808;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Utility */
+  .label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+  }
+  .playfair {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+  }
+  .cream { color: #F2E8D5; }
+  .muted { color: rgba(242,232,213,0.35); }
+  .orange { color: #E8501A; }
+  .green { color: #5A9E52; }
+  .red { color: #C93828; }
+  .gold { color: #C49A28; }
+
+  .grad-text {
+    background: linear-gradient(135deg, #E8501A, #C49A28);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===================== SCREEN 1 — HOME ===================== */
+  #screen1 { height: 844px; }
+
+  .s1-topbar {
+    height: 52px;
+    padding-top: 44px;
+    padding-left: 24px;
+    padding-right: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 0;
+  }
+  .s1-topbar .brand {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+  }
+  .s1-topbar .settings-icon {
+    width: 20px;
+    height: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .s1-topbar .settings-icon span {
+    display: block;
+    height: 1.5px;
+    background: rgba(242,232,213,0.5);
+    width: 100%;
+  }
+  .s1-topbar .settings-icon span:last-child {
+    width: 70%;
+  }
+
+  .s1-score-zone {
+    padding: 20px 0 0;
+  }
+  .s1-score-label {
+    padding-left: 24px;
+    margin-bottom: 4px;
+  }
+  .s1-score-row {
+    display: flex;
+    align-items: center;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .s1-hero-num {
+    font-size: 160px;
+    line-height: 0.85;
+    flex-shrink: 0;
+  }
+  .s1-score-right {
+    margin-left: auto;
+    padding-left: 12px;
+    text-align: right;
+  }
+  .s1-delta {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    color: #5A9E52;
+    letter-spacing: 0.05em;
+  }
+  .s1-rank {
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    color: rgba(242,232,213,0.35);
+    margin-top: 4px;
+  }
+  .s1-rule {
+    height: 1px;
+    background: rgba(242,232,213,0.12);
+    margin: 8px 0 10px;
+  }
+  .s1-archetype-name {
+    padding-left: 24px;
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.9);
+    margin-bottom: 6px;
+  }
+  .s1-archetype-desc {
+    padding-left: 24px;
+    padding-right: 24px;
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    color: rgba(242,232,213,0.35);
+    line-height: 1.6;
+  }
+
+  .s1-stats-row {
+    display: flex;
+    height: 56px;
+    margin: 20px 24px 0;
+    border-top: 1px solid rgba(242,232,213,0.1);
+    border-bottom: 1px solid rgba(242,232,213,0.1);
+  }
+  .s1-stat-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-left: 4px;
+  }
+  .s1-stat-col:not(:first-child) {
+    border-left: 1px solid rgba(242,232,213,0.1);
+    padding-left: 16px;
+  }
+  .s1-stat-col:first-child { padding-left: 0; }
+  .s1-stat-val {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 22px;
+    color: #F2E8D5;
+    line-height: 1;
+  }
+  .s1-stat-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-top: 4px;
+  }
+
+  .s1-next-unlock {
+    margin: 20px 24px 0;
+    border-left: 3px solid #E8501A;
+    background: rgba(232,80,26,0.06);
+    padding: 14px 16px;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .s1-next-unlock .unlock-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 4px;
+  }
+  .s1-next-unlock .unlock-text {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    color: #F2E8D5;
+  }
+
+  .s1-sparkline {
+    padding: 20px 24px 0;
+  }
+  .s1-sparkline-label {
+    margin-bottom: 12px;
+  }
+
+  .s1-rival {
+    margin: 16px 0 0;
+    background: #111010;
+    padding: 0 24px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .s1-rival-left .rival-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 3px;
+  }
+  .s1-rival-left .rival-name {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #F2E8D5;
+  }
+  .s1-rival-right {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    color: #E8501A;
+  }
+
+  .s1-cta {
+    margin-top: auto;
+    height: 80px;
+    background: #E8501A;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    flex-shrink: 0;
+    min-height: 48px;
+  }
+  .s1-cta-text {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #080808;
+    font-weight: 600;
+  }
+  .s1-cta-arrow {
+    font-size: 22px;
+    color: #080808;
+    line-height: 1;
+  }
+
+  /* ===================== SCREEN 2 — POST-DRIVE ===================== */
+  #screen2 { height: 844px; }
+
+  .s2-map {
+    width: 100%;
+    height: 354px;
+    background: #0F0F0F;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .s2-map-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+  }
+  .s2-map-expand {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 14px;
+    color: rgba(242,232,213,0.7);
+    cursor: pointer;
+  }
+
+  .s2-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .s2-score-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+  }
+  .s2-hero-num {
+    font-size: 88px;
+    line-height: 0.9;
+  }
+  .s2-score-right {
+    text-align: right;
+    padding-top: 8px;
+  }
+  .s2-score-right .drive-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 4px;
+  }
+  .s2-score-right .drive-delta {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    color: #5A9E52;
+  }
+  .s2-tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 18px;
+    color: #F2E8D5;
+    padding: 4px 24px 0;
+  }
+  .s2-rule {
+    height: 1px;
+    background: rgba(242,232,213,0.1);
+    margin: 12px 0 0;
+  }
+
+  .s2-drive-stats {
+    display: flex;
+    height: 48px;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(242,232,213,0.1);
+  }
+  .s2-stat-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .s2-stat-col:not(:first-child) {
+    border-left: 1px solid rgba(242,232,213,0.1);
+    padding-left: 16px;
+  }
+  .s2-stat-val {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 20px;
+    color: #F2E8D5;
+    line-height: 1;
+  }
+  .s2-stat-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-top: 3px;
+  }
+
+  .s2-what-happened {
+    padding: 20px 12px 0;
+  }
+  .s2-what-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    padding-left: 12px;
+    margin-bottom: 16px;
+  }
+  .s2-what-cols {
+    display: flex;
+    gap: 8px;
+  }
+  .s2-col {
+    flex: 1;
+    padding: 12px;
+  }
+  .s2-col-smooth {
+    background: rgba(90,158,82,0.08);
+    border-left: 3px solid #5A9E52;
+  }
+  .s2-col-events {
+    background: rgba(201,56,40,0.08);
+    border-left: 3px solid #C93828;
+  }
+  .s2-col-cat {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .s2-col-main {
+    font-family: system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #F2E8D5;
+    margin-bottom: 4px;
+  }
+  .s2-col-sub {
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    font-style: italic;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 8px;
+  }
+  .s2-col-link {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    color: #E8501A;
+  }
+
+  .s2-worst {
+    margin: 0 24px 16px;
+    background: rgba(201,56,40,0.05);
+    border-left: 3px solid #C93828;
+    padding: 14px 16px;
+    min-height: 52px;
+  }
+  .s2-worst-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 4px;
+  }
+  .s2-worst-text {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    color: #F2E8D5;
+    margin-bottom: 6px;
+  }
+  .s2-worst-link {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    color: #E8501A;
+    text-align: right;
+    display: block;
+  }
+
+  .s2-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 24px;
+    margin-top: auto;
+    margin-bottom: 0;
+    height: 72px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .s2-btn-share {
+    flex: 0 0 40%;
+    height: 48px;
+    border: 1px solid rgba(242,232,213,0.5);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #F2E8D5;
+    cursor: pointer;
+  }
+  .s2-btn-next {
+    flex: 0 0 calc(60% - 8px);
+    height: 48px;
+    background: #E8501A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #080808;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ===================== SCREEN 3 — REWARDS ===================== */
+  #screen3 { height: 844px; }
+
+  .s3-topbar {
+    height: 52px;
+    padding-top: 44px;
+    padding-left: 24px;
+    padding-right: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+  .s3-back {
+    position: absolute;
+    left: 24px;
+    bottom: 2px;
+    font-family: system-ui, sans-serif;
+    font-size: 18px;
+    color: rgba(242,232,213,0.35);
+    line-height: 1;
+    cursor: pointer;
+  }
+  .s3-title {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+  }
+
+  .s3-wallet {
+    padding: 20px 24px 0;
+    flex-shrink: 0;
+  }
+  .s3-wallet-label {
+    margin-bottom: 16px;
+  }
+  .s3-wallet-stats {
+    display: flex;
+    border-top: 1px solid rgba(242,232,213,0.1);
+    border-bottom: 1px solid rgba(242,232,213,0.1);
+    height: 80px;
+  }
+  .s3-wallet-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-left: 4px;
+  }
+  .s3-wallet-col:not(:first-child) {
+    border-left: 1px solid rgba(242,232,213,0.1);
+    padding-left: 16px;
+  }
+  .s3-wallet-col:first-child { padding-left: 0; }
+  .s3-wallet-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 52px;
+    color: #F2E8D5;
+    line-height: 1;
+  }
+  .s3-wallet-num.spent { color: rgba(242,232,213,0.35); }
+  .s3-wallet-num.balance {
+    font-size: 60px;
+    background: linear-gradient(135deg, #E8501A, #C49A28);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .s3-wallet-col-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-top: 4px;
+  }
+
+  .s3-closest {
+    margin: 16px 24px 0;
+    border-left: 3px solid #E8501A;
+    background: rgba(232,80,26,0.06);
+    padding: 16px 20px;
+    flex-shrink: 0;
+  }
+  .s3-closest-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: #E8501A;
+    margin-bottom: 6px;
+  }
+  .s3-closest-reward {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 20px;
+    color: #F2E8D5;
+    margin-bottom: 10px;
+  }
+  .s3-progress-track {
+    height: 3px;
+    background: rgba(242,232,213,0.1);
+    position: relative;
+  }
+  .s3-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 96.7%;
+    background: #E8501A;
+  }
+
+  .s3-activity {
+    padding: 20px 24px 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  .s3-activity-label {
+    margin-bottom: 12px;
+  }
+  .s3-activity-list {
+    border-top: 1px solid rgba(242,232,213,0.07);
+  }
+  .s3-activity-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    border-bottom: 1px solid rgba(242,232,213,0.07);
+    padding: 8px 0;
+  }
+  .s3-activity-left {}
+  .s3-activity-main {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    color: #F2E8D5;
+    margin-bottom: 2px;
+  }
+  .s3-activity-sub {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    font-style: italic;
+    color: rgba(242,232,213,0.35);
+  }
+  .s3-activity-pts {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .s3-activity-pts.earned { color: #5A9E52; }
+  .s3-activity-pts.spent { color: rgba(242,232,213,0.35); }
+
+  .s3-drive-history {
+    padding: 20px 24px 0;
+    flex-shrink: 0;
+  }
+  .s3-history-label {
+    margin-bottom: 12px;
+  }
+  .s3-history-row {
+    display: flex;
+    align-items: center;
+    height: 52px;
+    border-bottom: 1px solid rgba(242,232,213,0.07);
+  }
+  .s3-history-date {
+    flex: 1;
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    color: rgba(242,232,213,0.7);
+  }
+  .s3-history-score {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 22px;
+    color: #F2E8D5;
+    width: 60px;
+    text-align: center;
+  }
+  .s3-history-pts {
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    color: #5A9E52;
+    width: 70px;
+    text-align: right;
+  }
+  .s3-view-all {
+    text-align: right;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    color: #E8501A;
+  }
+
+  .s3-cta {
+    background: #111010;
+    border-top: 1px solid rgba(242,232,213,0.08);
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .s3-cta-main {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #E8501A;
+    margin-bottom: 4px;
+  }
+  .s3-cta-sub {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    color: rgba(242,232,213,0.35);
+  }
+
+  /* ===================== SCREEN 4 — LEADERBOARD ===================== */
+  #screen4 { height: 844px; }
+
+  .s4-topbar {
+    height: 52px;
+    padding-top: 44px;
+    padding-bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  .s4-tabs {
+    display: flex;
+    width: 100%;
+    height: 48px;
+    border-bottom: 1px solid rgba(242,232,213,0.1);
+    flex-shrink: 0;
+  }
+  .s4-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .s4-tab.active {
+    color: #F2E8D5;
+    border-bottom-color: #E8501A;
+  }
+
+  .s4-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 20px 24px 0;
+  }
+
+  .s4-corridor-card {
+    margin-bottom: 16px;
+    border: 1px solid rgba(242,232,213,0.07);
+  }
+  .s4-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(242,232,213,0.07);
+  }
+  .s4-road-name {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #F2E8D5;
+  }
+  .s4-road-dist {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    color: rgba(242,232,213,0.35);
+  }
+  .s4-crown-rows {}
+  .s4-crown-row {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    border-bottom: 1px solid rgba(242,232,213,0.05);
+    padding: 6px 16px;
+  }
+  .s4-crown-row.today-row {
+    background: rgba(232,80,26,0.08);
+    border-left: 3px solid #E8501A;
+    padding-left: 13px;
+  }
+  .s4-crown-type {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .s4-crown-holder {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    color: #F2E8D5;
+    flex: 1;
+  }
+  .s4-crown-indicator {
+    font-size: 10px;
+    color: #C49A28;
+  }
+  .s4-your-pos {
+    background: #111010;
+    padding: 14px 16px;
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    color: rgba(242,232,213,0.7);
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+  .s4-see-more {
+    text-align: right;
+    padding: 8px 16px 12px;
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    color: #E8501A;
+    border-top: 1px solid rgba(242,232,213,0.05);
+  }
+
+  .s4-anchor {
+    background: #111010;
+    border-top: 1px solid rgba(242,232,213,0.08);
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+  }
+  .s4-anchor-text {
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    color: rgba(242,232,213,0.35);
+  }
+
+  /* ===================== SCREEN 5 — LIVE DRIVING ===================== */
+  #screen5 {
+    height: 844px;
+    background: #060404;
+    position: relative;
+  }
+
+  /* REC dot */
+  .s5-rec {
+    position: absolute;
+    top: 56px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+  }
+  .s5-rec-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #E8501A;
+    animation: recPulse 1.5s ease-in-out infinite;
+  }
+  .s5-rec-label {
+    font-family: system-ui, sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+  }
+
+  @keyframes recPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Speed hero */
+  .s5-speed {
+    position: absolute;
+    top: 140px;
+    left: 24px;
+    z-index: 10;
+  }
+  .s5-speed-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 120px;
+    color: #F2E8D5;
+    line-height: 1;
+  }
+  .s5-speed-unit {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-top: 4px;
+  }
+
+  /* Score secondary */
+  .s5-score {
+    position: absolute;
+    top: 140px;
+    right: 24px;
+    text-align: right;
+    z-index: 10;
+  }
+  .s5-score-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 4px;
+  }
+  .s5-score-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 52px;
+    background: linear-gradient(135deg, #E8501A, #C49A28);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  /* Top corner stats */
+  .s5-stat-speed-sub {
+    position: absolute;
+    top: 282px;
+    left: 24px;
+    z-index: 10;
+  }
+  .s5-stat-score-sub {
+    position: absolute;
+    top: 282px;
+    right: 24px;
+    text-align: right;
+    z-index: 10;
+  }
+  .s5-mini-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 3px;
+  }
+  .s5-mini-val {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 22px;
+    color: #F2E8D5;
+    line-height: 1;
+  }
+
+  /* Radar */
+  .s5-radar {
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateY(-40px);
+    z-index: 5;
+  }
+
+  /* Ghost trail dots */
+  .s5-ghost-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .s5-trail-dot {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(242,232,213,0.5);
+    animation: dotDrift 3s ease-in-out infinite;
+  }
+
+  @keyframes dotDrift {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(2px, -2px); }
+    66% { transform: translate(-1px, 1px); }
+  }
+
+  /* Live dot */
+  .s5-live-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #F2E8D5;
+    filter: drop-shadow(0 0 8px rgba(242,232,213,0.7));
+    animation: livePulse 2s ease-in-out infinite;
+    z-index: 10;
+    /* centered at (175,152) in 320x320 radar */
+    left: calc(175px - 6px);
+    top: calc(152px - 6px);
+  }
+
+  @keyframes livePulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+
+  /* Bottom stats row */
+  .s5-bottom-stats {
+    position: absolute;
+    bottom: 196px;
+    left: 0;
+    right: 0;
+    display: flex;
+    padding: 0 24px;
+    z-index: 10;
+  }
+  .s5-bottom-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .s5-bottom-stat:not(:first-child) {
+    padding-left: 16px;
+    border-left: 1px solid rgba(242,232,213,0.08);
+  }
+  .s5-bottom-label {
+    font-family: system-ui, sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.35);
+    margin-bottom: 3px;
+  }
+  .s5-bottom-val {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 18px;
+    color: #F2E8D5;
+    line-height: 1;
+  }
+  .s5-bottom-val.fuel-high { color: #5A9E52; }
+
+  /* Waveform strip */
+  .s5-waveform {
+    position: absolute;
+    bottom: 136px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(242,232,213,0.03);
+    border-top: 1px solid rgba(242,232,213,0.06);
+    z-index: 10;
+  }
+
+  /* Corridor strip */
+  .s5-corridor {
+    position: absolute;
+    bottom: 56px;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: #0A0808;
+    border-top: 1px solid rgba(242,232,213,0.08);
+    z-index: 10;
+    overflow: hidden;
+  }
+  .s5-corridor-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px 0;
+  }
+  .s5-corridor-name {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(242,232,213,0.8);
+  }
+  .s5-corridor-rank {
+    font-family: system-ui, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #E8501A;
+  }
+  .s5-road-strip-wrap {
+    position: relative;
+    margin: 8px 20px 0;
+    height: 16px;
+    background: rgba(242,232,213,0.06);
+    overflow: hidden;
+  }
+  .s5-road-dashes {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
+    animation: dashScroll 1s linear infinite;
+  }
+  .s5-dash {
+    width: 20px;
+    height: 2px;
+    background: rgba(242,232,213,0.15);
+    flex-shrink: 0;
+  }
+  .s5-car-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 0 6px rgba(242,232,213,0.3));
+  }
+
+  @keyframes dashScroll {
+    0% { transform: translateY(-50%) translateX(0); }
+    100% { transform: translateY(-50%) translateX(-50px); }
+  }
+
+  /* Stop button */
+  .s5-stop {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #F2E8D5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    cursor: pointer;
+  }
+  .s5-stop-text {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #080808;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================== SCREEN 1 DIVIDER ============================== -->
+<div class="screen-divider"><span>Screen 1 — Home / Score Hub</span></div>
+
+<!-- ============================== SCREEN 1 ============================== -->
+<div class="screen-wrap">
+<div class="screen" id="screen1">
+
+  <!-- Top bar -->
+  <div class="s1-topbar">
+    <span class="brand">Smooth AF</span>
+    <div class="settings-icon" style="width:20px;height:16px;display:flex;flex-direction:column;justify-content:space-between;">
+      <span style="display:block;height:1.5px;background:rgba(242,232,213,0.5);width:100%;"></span>
+      <span style="display:block;height:1.5px;background:rgba(242,232,213,0.5);width:100%;"></span>
+      <span style="display:block;height:1.5px;background:rgba(242,232,213,0.5);width:70%;"></span>
+    </div>
+  </div>
+
+  <!-- Score zone -->
+  <div class="s1-score-zone">
+    <div class="s1-score-label label">Lifetime Score</div>
+    <div class="s1-score-row">
+      <div class="playfair s1-hero-num grad-text">87</div>
+      <div class="s1-score-right">
+        <div class="s1-delta">&#8593; +4 THIS WEEK</div>
+        <div class="s1-rank">#47 GLOBALLY</div>
+      </div>
+    </div>
+    <div class="s1-rule" style="margin:8px 24px 10px;"></div>
+    <div class="s1-archetype-name">Urban Ghost</div>
+    <div class="s1-archetype-desc">Threading city blocks like water. 23 min trips, almost no drama.</div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="s1-stats-row">
+    <div class="s1-stat-col">
+      <div class="s1-stat-val">31</div>
+      <div class="s1-stat-label">Drives</div>
+    </div>
+    <div class="s1-stat-col">
+      <div class="s1-stat-val">847</div>
+      <div class="s1-stat-label">Miles</div>
+    </div>
+    <div class="s1-stat-col">
+      <div class="s1-stat-val">94</div>
+      <div class="s1-stat-label">Best</div>
+    </div>
+  </div>
+
+  <!-- Next unlock -->
+  <div class="s1-next-unlock">
+    <div class="unlock-label">Next Unlock</div>
+    <div class="unlock-text">Free Tank of Gas &middot; 12 pts away &#8594;</div>
+  </div>
+
+  <!-- 7-day sparkline -->
+  <div class="s1-sparkline">
+    <div class="s1-sparkline-label label">7-Day Trend</div>
+    <svg width="342" height="36" viewBox="0 0 342 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Data points: [81,83,79,85,88,86,87], mapped to y: range 79-88=9pts, height 36px -->
+      <!-- x positions: 0,57,114,171,228,285,342 -->
+      <!-- y: 88->4, 87->8, 86->12, 85->16, 83->24, 81->32, 79->36 -->
+      <!-- y = 36 - ((val-79)/9)*32 -->
+      <!-- 81 -> 36-(2/9)*32=29.1 | 83->36-(4/9)*32=21.8 | 79->36 | 85->36-(6/9)*32=14.7 | 88->36-(9/9)*32=4 | 86->36-(7/9)*32=10.7 | 87->36-(8/9)*32=7.6 -->
+      <polyline
+        points="0,29 57,22 114,36 171,15 228,4 285,11 342,8"
+        stroke="rgba(242,232,213,0.4)"
+        stroke-width="1"
+        fill="none"
+        stroke-linejoin="round"
+      />
+      <!-- Regular dots -->
+      <circle cx="0"   cy="29" r="3" fill="rgba(242,232,213,0.5)"/>
+      <circle cx="57"  cy="22" r="3" fill="rgba(242,232,213,0.5)"/>
+      <circle cx="114" cy="36" r="3" fill="rgba(242,232,213,0.5)"/>
+      <circle cx="171" cy="15" r="3" fill="rgba(242,232,213,0.5)"/>
+      <circle cx="228" cy="4"  r="3" fill="rgba(242,232,213,0.5)"/>
+      <circle cx="285" cy="11" r="3" fill="rgba(242,232,213,0.5)"/>
+      <!-- Last dot — orange glow -->
+      <circle cx="342" cy="8" r="5" fill="#E8501A" filter="url(#glow1)"/>
+      <defs>
+        <filter id="glow1" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- Rival strip -->
+  <div class="s1-rival">
+    <div class="s1-rival-left">
+      <div class="rival-label">Closest Rival</div>
+      <div class="rival-name">Marcus R. &mdash; 89 pts</div>
+    </div>
+    <div class="s1-rival-right">2 pts behind &#8594;</div>
+  </div>
+
+  <!-- Begin drive CTA -->
+  <div class="s1-cta">
+    <span class="s1-cta-text">Begin Drive</span>
+    <span class="s1-cta-arrow">&#8594;</span>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================== SCREEN 2 DIVIDER ============================== -->
+<div class="screen-divider"><span>Screen 2 — Post-Drive Reveal</span></div>
+
+<!-- ============================== SCREEN 2 ============================== -->
+<div class="screen-wrap">
+<div class="screen" id="screen2">
+
+  <!-- Map -->
+  <div class="s2-map">
+    <div class="s2-map-label">Route Map</div>
+    <div class="s2-map-expand">&#10562;</div>
+    <svg width="390" height="354" viewBox="0 0 390 354" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Grid lines -->
+      <g stroke="rgba(242,232,213,0.04)" stroke-width="0.5">
+        <line x1="0" y1="40"  x2="390" y2="40"/>
+        <line x1="0" y1="80"  x2="390" y2="80"/>
+        <line x1="0" y1="120" x2="390" y2="120"/>
+        <line x1="0" y1="160" x2="390" y2="160"/>
+        <line x1="0" y1="200" x2="390" y2="200"/>
+        <line x1="0" y1="240" x2="390" y2="240"/>
+        <line x1="0" y1="280" x2="390" y2="280"/>
+        <line x1="0" y1="320" x2="390" y2="320"/>
+        <line x1="40"  y1="0" x2="40"  y2="354"/>
+        <line x1="80"  y1="0" x2="80"  y2="354"/>
+        <line x1="120" y1="0" x2="120" y2="354"/>
+        <line x1="160" y1="0" x2="160" y2="354"/>
+        <line x1="200" y1="0" x2="200" y2="354"/>
+        <line x1="240" y1="0" x2="240" y2="354"/>
+        <line x1="280" y1="0" x2="280" y2="354"/>
+        <line x1="320" y1="0" x2="320" y2="354"/>
+        <line x1="360" y1="0" x2="360" y2="354"/>
+      </g>
+
+      <!-- Route: Segment 1+2 green -->
+      <path
+        d="M 40,280 C 80,240 120,200 160,160 C 180,140 200,130 230,140 C 250,148 260,155 278,148"
+        stroke="#5A9E52" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"
+      />
+      <!-- Hard brake event at (278,148) -->
+      <circle cx="278" cy="148" r="10" fill="rgba(201,56,40,0.3)"/>
+      <circle cx="278" cy="148" r="5" fill="#C93828"/>
+      <text x="278" y="134" font-family="system-ui" font-size="8" fill="#C93828" text-anchor="middle" letter-spacing="0.1em">HARD BRAKE</text>
+
+      <!-- Segment 3 orange/faded -->
+      <path
+        d="M 278,148 C 295,142 310,155 320,170 C 330,185 335,200 330,220"
+        stroke="rgba(232,80,26,0.7)" stroke-width="2" fill="none" stroke-linecap="round"
+      />
+      <!-- Sharp turn at (310,165) -->
+      <circle cx="310" cy="165" r="6" fill="rgba(232,80,26,0.6)"/>
+      <text x="310" y="153" font-family="system-ui" font-size="8" fill="#E8501A" text-anchor="middle" letter-spacing="0.08em">SHARP TURN</text>
+
+      <!-- Final segment green -->
+      <path
+        d="M 330,220 C 325,235 320,250 310,260 C 300,270 285,278 270,282"
+        stroke="#5A9E52" stroke-width="2" fill="none" stroke-linecap="round"
+      />
+
+      <!-- START ring -->
+      <circle cx="40" cy="280" r="8" stroke="#5A9E52" stroke-width="1.5" fill="none"/>
+      <text x="40" y="295" font-family="system-ui" font-size="8" fill="rgba(242,232,213,0.5)" text-anchor="middle" letter-spacing="0.08em">START</text>
+
+      <!-- END ring -->
+      <circle cx="270" cy="282" r="8" stroke="#E8501A" stroke-width="1.5" fill="none"/>
+      <text x="270" y="297" font-family="system-ui" font-size="8" fill="rgba(242,232,213,0.5)" text-anchor="middle" letter-spacing="0.08em">END</text>
+    </svg>
+  </div>
+
+  <!-- Score reveal -->
+  <div class="s2-body">
+    <div class="s2-score-row">
+      <div class="playfair s2-hero-num grad-text">91</div>
+      <div class="s2-score-right">
+        <div class="drive-label">This Drive</div>
+        <div class="drive-delta">+4 vs your avg</div>
+      </div>
+    </div>
+    <div class="s2-tagline">Pretty Damn Smooth</div>
+    <div class="s2-rule"></div>
+
+    <!-- Drive stats -->
+    <div class="s2-drive-stats">
+      <div class="s2-stat-col">
+        <div class="s2-stat-val">8.4 MI</div>
+        <div class="s2-stat-label">Distance</div>
+      </div>
+      <div class="s2-stat-col">
+        <div class="s2-stat-val">23 MIN</div>
+        <div class="s2-stat-label">Duration</div>
+      </div>
+      <div class="s2-stat-col">
+        <div class="s2-stat-val">6:42 AM</div>
+        <div class="s2-stat-label">Time</div>
+      </div>
+    </div>
+
+    <!-- What happened -->
+    <div class="s2-what-happened">
+      <div class="s2-what-label">What Happened</div>
+      <div class="s2-what-cols">
+        <div class="s2-col s2-col-smooth">
+          <div class="s2-col-cat" style="color:#5A9E52;">Smooth</div>
+          <div class="s2-col-main">14 clean stretches</div>
+          <div class="s2-col-sub">4.2 mi best streak</div>
+          <div class="s2-col-link">&#8250; See route</div>
+        </div>
+        <div class="s2-col s2-col-events">
+          <div class="s2-col-cat" style="color:#C93828;">Events</div>
+          <div class="s2-col-main">3 hard brakes</div>
+          <div class="s2-col-sub">1 sharp turn</div>
+          <div class="s2-col-link">&#8250; See on map</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Worst moment -->
+    <div class="s2-worst" style="margin-top:16px;">
+      <div class="s2-worst-label">Hardest Moment</div>
+      <div class="s2-worst-text">Hard brake on Oak St. &middot; 0:14:32 &middot; 0.8G</div>
+      <span class="s2-worst-link">&#8250; Tap to replay on map</span>
+    </div>
+
+    <!-- Share + Next -->
+    <div class="s2-actions">
+      <div class="s2-btn-share">Share</div>
+      <div class="s2-btn-next">Next Drive &#8594;</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================== SCREEN 3 DIVIDER ============================== -->
+<div class="screen-divider"><span>Screen 3 — Rewards / Wallet</span></div>
+
+<!-- ============================== SCREEN 3 ============================== -->
+<div class="screen-wrap">
+<div class="screen" id="screen3">
+
+  <!-- Top bar -->
+  <div class="s3-topbar">
+    <span class="s3-back">&#8249;</span>
+    <span class="s3-title">Rewards</span>
+  </div>
+
+  <!-- Wallet hero -->
+  <div class="s3-wallet">
+    <div class="s3-wallet-label label">Your Points</div>
+    <div class="s3-wallet-stats">
+      <div class="s3-wallet-col">
+        <div class="s3-wallet-num">1,240</div>
+        <div class="s3-wallet-col-label">Earned</div>
+      </div>
+      <div class="s3-wallet-col">
+        <div class="s3-wallet-num spent">300</div>
+        <div class="s3-wallet-col-label">Spent</div>
+      </div>
+      <div class="s3-wallet-col">
+        <div class="s3-wallet-num balance">940</div>
+        <div class="s3-wallet-col-label">Balance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Closest unlock -->
+  <div class="s3-closest">
+    <div class="s3-closest-label">3 pts from your next reward</div>
+    <div class="s3-closest-reward">Free Tank of Gas &mdash; Shell</div>
+    <div class="s3-progress-track">
+      <div class="s3-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="s3-activity">
+    <div class="s3-activity-label label">Recent Activity</div>
+    <div class="s3-activity-list">
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">Morning commute</div>
+          <div class="s3-activity-sub">Tue 14 May</div>
+        </div>
+        <div class="s3-activity-pts earned">+45</div>
+      </div>
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">Smooth stop streak x4</div>
+          <div class="s3-activity-sub"></div>
+        </div>
+        <div class="s3-activity-pts earned">+12</div>
+      </div>
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">Highway cruise 18.2 mi</div>
+          <div class="s3-activity-sub"></div>
+        </div>
+        <div class="s3-activity-pts earned">+24</div>
+      </div>
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">Shared drive result</div>
+          <div class="s3-activity-sub"></div>
+        </div>
+        <div class="s3-activity-pts earned">+10</div>
+      </div>
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">Referred Marcus R.</div>
+          <div class="s3-activity-sub"></div>
+        </div>
+        <div class="s3-activity-pts earned">+100</div>
+      </div>
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">Redeemed: Car wash</div>
+          <div class="s3-activity-sub"></div>
+        </div>
+        <div class="s3-activity-pts spent">&minus;50</div>
+      </div>
+      <div class="s3-activity-row">
+        <div class="s3-activity-left">
+          <div class="s3-activity-main">10th drive milestone</div>
+          <div class="s3-activity-sub"></div>
+        </div>
+        <div class="s3-activity-pts earned">+75</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drive history -->
+  <div class="s3-drive-history">
+    <div class="s3-history-label label">Drive History</div>
+    <div class="s3-history-row">
+      <div class="s3-history-date">Tue 14 May &middot; 8.4 mi</div>
+      <div class="s3-history-score playfair">91</div>
+      <div class="s3-history-pts">+81 pts</div>
+    </div>
+    <div class="s3-history-row">
+      <div class="s3-history-date">Mon 13 May &middot; 12.1 mi</div>
+      <div class="s3-history-score playfair">87</div>
+      <div class="s3-history-pts">+67 pts</div>
+    </div>
+    <div class="s3-history-row">
+      <div class="s3-history-date">Sun 12 May &middot; 5.2 mi</div>
+      <div class="s3-history-score playfair">83</div>
+      <div class="s3-history-pts">+53 pts</div>
+    </div>
+    <div class="s3-view-all">&#8250; View all drives</div>
+  </div>
+
+  <!-- Explore CTA -->
+  <div class="s3-cta" style="margin-top:auto;">
+    <div class="s3-cta-main">Explore Rewards Universe &#8594;</div>
+    <div class="s3-cta-sub">Gas &middot; Insurance &middot; Coaching &middot; Merch</div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================== SCREEN 4 DIVIDER ============================== -->
+<div class="screen-divider"><span>Screen 4 — Leaderboard</span></div>
+
+<!-- ============================== SCREEN 4 ============================== -->
+<div class="screen-wrap">
+<div class="screen" id="screen4">
+
+  <!-- Top bar spacer -->
+  <div style="height:52px;padding-top:44px;flex-shrink:0;"></div>
+
+  <!-- Tab row -->
+  <div class="s4-tabs">
+    <div class="s4-tab">Overall</div>
+    <div class="s4-tab">My Category</div>
+    <div class="s4-tab active">Corridors</div>
+    <div class="s4-tab">Friends</div>
+  </div>
+
+  <!-- Content -->
+  <div class="s4-content">
+
+    <!-- Corridor Card 1 -->
+    <div class="s4-corridor-card">
+      <div class="s4-card-header">
+        <div class="s4-road-name">I-25 Denver Metro</div>
+        <div class="s4-road-dist">24.3 mi</div>
+      </div>
+      <div class="s4-crown-rows">
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">All Time</div>
+          <div class="s4-crown-holder">James K. &middot; 94.2 avg &middot; 47 runs</div>
+          <div class="s4-crown-indicator">&#9671;</div>
+        </div>
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">This Year</div>
+          <div class="s4-crown-holder">Sarah M. &middot; 96.1 avg &middot; 12 runs</div>
+          <div class="s4-crown-indicator" style="color:transparent;">&#9671;</div>
+        </div>
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">This Month</div>
+          <div class="s4-crown-holder">Dev P. &middot; 93.8 avg &middot; 8 runs</div>
+          <div class="s4-crown-indicator" style="color:transparent;">&#9671;</div>
+        </div>
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">This Week</div>
+          <div class="s4-crown-holder">Chris L. &middot; 91.2 avg &middot; 3 runs</div>
+          <div class="s4-crown-indicator" style="color:transparent;">&#9671;</div>
+        </div>
+        <div class="s4-crown-row today-row">
+          <div class="s4-crown-type">Today</div>
+          <div class="s4-crown-holder" style="color:#E8501A;">You &middot; 91.0 &middot; this morning</div>
+          <div class="s4-crown-indicator" style="color:transparent;">&#9671;</div>
+        </div>
+      </div>
+      <div class="s4-your-pos">
+        YOUR ALL-TIME RANK: #3 &middot; 91.8 avg &middot; 23 runs &middot; 2.4 pts from crown
+      </div>
+      <div class="s4-see-more">&#8250; See sub-segments</div>
+    </div>
+
+    <!-- Corridor Card 2 -->
+    <div class="s4-corridor-card" style="margin-bottom:8px;">
+      <div class="s4-card-header">
+        <div class="s4-road-name">I-25 Denver &rarr; Wyoming</div>
+        <div class="s4-road-dist">48.1 mi</div>
+      </div>
+      <div class="s4-crown-rows">
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">All Time</div>
+          <div class="s4-crown-holder">Mike T. &middot; 92.1 avg &middot; 31 runs</div>
+          <div class="s4-crown-indicator">&#9671;</div>
+        </div>
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">This Year</div>
+          <div class="s4-crown-holder">Priya S. &middot; 93.4 avg &middot; 9 runs</div>
+          <div class="s4-crown-indicator" style="color:transparent;">&#9671;</div>
+        </div>
+        <div class="s4-crown-row">
+          <div class="s4-crown-type">Today</div>
+          <div class="s4-crown-holder" style="font-style:italic;color:rgba(242,232,213,0.35);">No runs today &mdash; be first &#8594;</div>
+          <div class="s4-crown-indicator" style="color:transparent;">&#9671;</div>
+        </div>
+      </div>
+      <div class="s4-your-pos">
+        #8 &middot; 89.4 avg &middot; 7 runs &middot; 2.7 pts from top 5
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Anchor bar -->
+  <div class="s4-anchor">
+    <div class="s4-anchor-text">OVERALL: #47 &middot; 87 pts &middot; ALEX M.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================== SCREEN 5 DIVIDER ============================== -->
+<div class="screen-divider"><span>Screen 5 — Live Driving</span></div>
+
+<!-- ============================== SCREEN 5 ============================== -->
+<div class="screen-wrap">
+<div class="screen" id="screen5">
+
+  <!-- REC indicator -->
+  <div class="s5-rec">
+    <div class="s5-rec-dot"></div>
+    <span class="s5-rec-label">REC</span>
+  </div>
+
+  <!-- Speed hero -->
+  <div class="s5-speed">
+    <div class="s5-speed-num">0</div>
+    <div class="s5-speed-unit">MPH</div>
+  </div>
+
+  <!-- Score secondary -->
+  <div class="s5-score">
+    <div class="s5-score-label">Score</div>
+    <div class="s5-score-num">87</div>
+  </div>
+
+  <!-- Avg speed (below MPH) -->
+  <div class="s5-stat-speed-sub">
+    <div class="s5-mini-label">Avg</div>
+    <div class="s5-mini-val">62 MPH</div>
+  </div>
+
+  <!-- Time (below score) -->
+  <div class="s5-stat-score-sub">
+    <div class="s5-mini-label">Time</div>
+    <div class="s5-mini-val">23:14</div>
+  </div>
+
+  <!-- RADAR centerpiece -->
+  <div class="s5-radar">
+    <svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="160" cy="160" r="150" stroke="rgba(242,232,213,0.08)" stroke-width="1" fill="none"/>
+      <!-- Mid ring -->
+      <circle cx="160" cy="160" r="100" stroke="rgba(242,232,213,0.08)" stroke-width="1" fill="none"/>
+      <!-- Inner ring -->
+      <circle cx="160" cy="160" r="50" stroke="rgba(242,232,213,0.08)" stroke-width="1" fill="none"/>
+      <!-- Crosshair H -->
+      <line x1="10" y1="160" x2="310" y2="160" stroke="rgba(242,232,213,0.06)" stroke-width="0.5"/>
+      <!-- Crosshair V -->
+      <line x1="160" y1="10" x2="160" y2="310" stroke="rgba(242,232,213,0.06)" stroke-width="0.5"/>
+      <!-- Cardinal labels -->
+      <text x="160" y="20" font-family="system-ui" font-size="8" fill="rgba(242,232,213,0.2)" text-anchor="middle" letter-spacing="0.1em">ACCEL</text>
+      <text x="160" y="308" font-family="system-ui" font-size="8" fill="rgba(242,232,213,0.2)" text-anchor="middle" letter-spacing="0.1em">BRAKE</text>
+      <text x="16" y="163" font-family="system-ui" font-size="8" fill="rgba(242,232,213,0.2)" text-anchor="start" letter-spacing="0.1em">LEFT</text>
+      <text x="304" y="163" font-family="system-ui" font-size="8" fill="rgba(242,232,213,0.2)" text-anchor="end" letter-spacing="0.1em">RIGHT</text>
+
+      <!-- Ghost trail dots -->
+      <!-- Trail: from (180,140) fading to (175,152) — 8 dots -->
+      <circle cx="180" cy="140" r="1"   fill="rgba(242,232,213,0.05)" />
+      <circle cx="179" cy="141" r="1.3" fill="rgba(242,232,213,0.08)" />
+      <circle cx="178" cy="143" r="1.6" fill="rgba(242,232,213,0.12)" />
+      <circle cx="177" cy="145" r="2"   fill="rgba(242,232,213,0.18)" />
+      <circle cx="177" cy="147" r="2.5" fill="rgba(242,232,213,0.25)" />
+      <circle cx="176" cy="149" r="3"   fill="rgba(242,232,213,0.35)" />
+      <circle cx="176" cy="150" r="4"   fill="rgba(242,232,213,0.45)" />
+      <circle cx="175" cy="151" r="5"   fill="rgba(242,232,213,0.55)" />
+    </svg>
+
+    <!-- Live dot (absolutely positioned within radar container) -->
+    <div class="s5-live-dot"></div>
+  </div>
+
+  <!-- Bottom stats row -->
+  <div class="s5-bottom-stats">
+    <div class="s5-bottom-stat">
+      <div class="s5-bottom-label">Distance</div>
+      <div class="s5-bottom-val">8.4 MI</div>
+    </div>
+    <div class="s5-bottom-stat">
+      <div class="s5-bottom-label">Fuel Eff</div>
+      <div class="s5-bottom-val fuel-high">HIGH</div>
+    </div>
+    <div class="s5-bottom-stat">
+      <div class="s5-bottom-label">Style</div>
+      <div class="s5-bottom-val">GHOST</div>
+    </div>
+  </div>
+
+  <!-- Waveform strip -->
+  <div class="s5-waveform">
+    <svg width="390" height="60" viewBox="0 0 390 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Main waveform -->
+      <path
+        d="M 0,30 C 20,30 30,30 50,28 C 60,27 70,26 80,30 C 100,35 110,20 130,30 C 150,38 160,30 180,30 C 200,30 210,30 230,28 C 240,22 250,15 270,30 C 285,40 300,30 320,30 C 340,30 360,30 390,30"
+        stroke="rgba(232,80,26,0.7)"
+        stroke-width="1.5"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <!-- Secondary faint path (depth) -->
+      <path
+        d="M 0,35 C 20,35 30,35 50,33 C 60,32 70,31 80,35 C 100,40 110,25 130,35 C 150,43 160,35 180,35 C 200,35 210,35 230,33 C 240,27 250,20 270,35 C 285,45 300,35 320,35 C 340,35 360,35 390,35"
+        stroke="rgba(232,80,26,0.15)"
+        stroke-width="1"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <!-- End glow dot -->
+      <circle cx="390" cy="30" r="3" fill="#E8501A" filter="url(#glowWave)"/>
+      <defs>
+        <filter id="glowWave" x="-200%" y="-200%" width="500%" height="500%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- Corridor strip -->
+  <div class="s5-corridor">
+    <div class="s5-corridor-labels">
+      <div class="s5-corridor-name">I-25 Denver Metro</div>
+      <div class="s5-corridor-rank">#3 on Corridor</div>
+    </div>
+    <!-- Road strip -->
+    <div class="s5-road-strip-wrap">
+      <!-- Dashes -->
+      <div class="s5-road-dashes">
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+        <div class="s5-dash"></div><div class="s5-dash"></div>
+      </div>
+      <!-- Car icon -->
+      <div class="s5-car-icon">
+        <svg width="32" height="14" viewBox="0 0 32 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Car body -->
+          <rect x="2" y="2" width="28" height="10" rx="3" fill="rgba(242,232,213,0.15)" stroke="rgba(242,232,213,0.9)" stroke-width="1.5"/>
+          <!-- Front bumper -->
+          <rect x="28" y="4" width="2" height="6" rx="1" fill="rgba(242,232,213,0.15)" stroke="rgba(242,232,213,0.9)" stroke-width="1"/>
+          <!-- Rear bumper -->
+          <rect x="2" y="4" width="2" height="6" rx="1" fill="rgba(242,232,213,0.15)" stroke="rgba(242,232,213,0.9)" stroke-width="1"/>
+          <!-- Front wheels -->
+          <circle cx="26" cy="2"  r="2" stroke="rgba(242,232,213,0.9)" stroke-width="1.5" fill="none"/>
+          <circle cx="26" cy="12" r="2" stroke="rgba(242,232,213,0.9)" stroke-width="1.5" fill="none"/>
+          <!-- Rear wheels -->
+          <circle cx="6"  cy="2"  r="2" stroke="rgba(242,232,213,0.9)" stroke-width="1.5" fill="none"/>
+          <circle cx="6"  cy="12" r="2" stroke="rgba(242,232,213,0.9)" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stop drive button -->
+  <div class="s5-stop">
+    <span class="s5-stop-text">Stop Drive</span>
+  </div>
+
+</div>
+</div>
+
+<!-- bottom spacer -->
+<div style="height:40px;"></div>
+
+</body>
+</html>
