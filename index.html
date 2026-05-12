@@ -242,8 +242,8 @@
   }
 
   /* SVG arc gauge */
-  .arc-gauge-wrap{position:relative;width:min(88vw,310px);flex-shrink:0}
-  .arc-svg{width:100%;height:auto;display:block;overflow:visible;transition:filter .35s}
+  .arc-gauge-wrap{position:relative;width:min(88vw,310px);aspect-ratio:300/215;flex-shrink:0}
+  .arc-svg{width:100%;height:100%;display:block;overflow:visible;transition:filter .35s}
   .arc-score-overlay{
     position:absolute;top:14%;left:0;right:0;
     display:flex;flex-direction:column;align-items:center;pointer-events:none;
@@ -618,7 +618,7 @@
     <div class="home-car-panel">
       <div class="home-topbar">
         <div class="wordmark-lg">Smooth<br><span class="af">AF</span></div>
-        <div id="app-version">v65</div>
+        <div id="app-version">v66</div>
       </div>
       <div id="car-display"></div>
     </div>
@@ -669,7 +669,7 @@
     <div class="rec-gauge-zone">
       <div class="arc-gauge-wrap">
         <!-- 220° arc, viewBox center=(150,150), R=130, endpoints at 160° and 20° -->
-        <svg class="arc-svg" id="arc-svg" viewBox="0 0 300 215" xmlns="http://www.w3.org/2000/svg">
+        <svg class="arc-svg" id="arc-svg" viewBox="0 0 300 215" width="300" height="215" xmlns="http://www.w3.org/2000/svg">
           <path id="arc-track"
             d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46"
             fill="none" stroke="rgba(244,235,217,.1)" stroke-width="2.5" stroke-linecap="round"/>
