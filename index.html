@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <title>Smooth AF — Driving</title>
@@ -18,7 +19,7 @@
     --bg:#0A0A0A;
     --bg2:#151212;
     --ink:#1A1414;
-    --cream:#F4EBD9;
+    --cream:#F2E8D5;
     --cream-dim:#C9BFAC;
     --muted:#6B6258;
     --tang:#E85D3A;
@@ -28,7 +29,7 @@
     --danger:#E03B2F;
     --warn:#E8A03A;
     --good:#6FB669;
-    --serif:"Georgia","Times New Roman",serif;
+    --serif:'Playfair Display',"Georgia","Times New Roman",serif;
     --sans:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -571,6 +572,152 @@
   .ftk::before{content:'';display:inline-block;width:18px;height:3px;border-radius:2px;flex-shrink:0}
   .ftk.brake::before{background:var(--danger)}.ftk.accel::before{background:var(--warn)}.ftk.turn::before{background:var(--gold)}
 
+  /* ============ HOME v2 — score hub ============ */
+  #screen-home{background:#080808!important;padding:0!important;overflow:hidden!important;flex-direction:column!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+  .home-topbar-v2{padding:calc(env(safe-area-inset-top,0)+18px) 24px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .home-brand{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  .home-settings-icon{width:20px;height:14px;display:flex;flex-direction:column;justify-content:space-between;appearance:none;border:0;background:transparent;cursor:pointer;padding:0}
+  .home-settings-icon span{display:block;height:1.5px;background:rgba(242,232,213,.5);border-radius:1px}
+  .home-score-zone{padding:20px 0 0;flex-shrink:0}
+  .home-score-label{padding-left:24px;margin-bottom:4px;font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  .home-score-row{display:flex;align-items:center;padding:0 24px}
+  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(100px,38vw,160px);line-height:.85;flex-shrink:0;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .home-score-right{margin-left:auto;padding-left:12px;text-align:right}
+  .home-score-delta{font-family:var(--sans);font-size:12px;color:#5A9E52;letter-spacing:.05em}
+  .home-score-rank{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.35);margin-top:4px}
+  .home-rule{height:1px;background:rgba(242,232,213,.12);margin:8px 24px 10px}
+  .home-archetype-name{padding-left:24px;margin-bottom:6px;font-family:var(--sans);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:rgba(242,232,213,.9)}
+  .home-archetype-desc{padding:0 24px;font-family:var(--sans);font-size:13px;font-style:italic;color:rgba(242,232,213,.35);line-height:1.6}
+  .home-stats-row{display:flex;height:56px;margin:20px 24px 0;border-top:1px solid rgba(242,232,213,.1);border-bottom:1px solid rgba(242,232,213,.1)}
+  .home-stat-col{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-left:4px}
+  .home-stat-col:not(:first-child){border-left:1px solid rgba(242,232,213,.1);padding-left:16px}
+  .home-stat-col:first-child{padding-left:0}
+  .home-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);line-height:1}
+  .home-stat-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:4px}
+  .home-next-unlock{margin:20px 24px 0;border-left:3px solid #E8501A;background:rgba(232,80,26,.06);padding:14px 16px;min-height:52px;display:flex;flex-direction:column;justify-content:center}
+  .home-unlock-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .home-unlock-text{font-family:var(--sans);font-size:13px;color:var(--cream)}
+  .home-sparkline{padding:20px 24px 0}
+  .home-sparkline-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:12px}
+  .home-rival{margin:16px 0 0;background:#111010;padding:0 24px;min-height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .home-rival-left .rival-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:3px}
+  .home-rival-left .rival-name{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--cream)}
+  .home-rival-right{font-family:var(--sans);font-size:12px;color:#E8501A}
+  .home-nav-row{display:flex;border-top:1px solid rgba(242,232,213,.07);flex-shrink:0}
+  .home-nav-btn{appearance:none;border:0;background:transparent;cursor:pointer;flex:1;text-align:center;font-family:var(--sans);font-size:11px;letter-spacing:.14em;color:rgba(242,232,213,.4);text-transform:uppercase;padding:14px 4px;min-height:48px;transition:color .15s}
+  .home-nav-btn:not(:first-child){border-left:1px solid rgba(242,232,213,.07)}
+  .home-nav-btn:active{color:var(--cream-dim)}
+  .drives-list{display:none;padding:0 20px 8px}
+  .drives-list.open{display:block}
+  .home-cta{margin-top:auto;background:#E8501A;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:calc(80px + env(safe-area-inset-bottom,0));padding-bottom:env(safe-area-inset-bottom,0);flex-shrink:0;appearance:none;border:0;cursor:pointer;width:100%;transition:filter .1s}
+  .home-cta:active{filter:brightness(.9)}
+  .home-cta-text{font-family:var(--sans);font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:#080808;font-weight:600}
+  .home-cta-arrow{font-size:22px;color:#080808;line-height:1}
+  .home-car-panel,.home-bottom-sheet,.wordmark-lg,.persona-badge{display:none!important}
+
+  /* ============ RECORDING v2 ============ */
+  #screen-record{background:radial-gradient(ellipse at 50% 70%,#1a1a18 0%,#0d0d0b 40%,#060604 100%)!important;overflow:hidden!important;padding:0!important}
+  .rec-perspective{position:absolute;inset:0;z-index:1;pointer-events:none}
+  .rec-overlay{background:linear-gradient(180deg,rgba(6,6,4,.7) 0%,rgba(6,6,4,.1) 30%,rgba(6,6,4,.1) 60%,rgba(6,6,4,.85) 100%)!important}
+  .rec-indicator{position:absolute;top:calc(env(safe-area-inset-top,0)+14px);left:16px;display:flex;align-items:center;gap:6px;z-index:20}
+  .rec-indicator-label{font-family:var(--sans);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  @keyframes rec-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .rec-speed-hero{position:absolute;top:calc(env(safe-area-inset-top,0) + 14dvh);left:24px;z-index:20}
+  .speed-big{font-family:var(--serif)!important;font-style:italic!important;font-weight:700!important;font-size:clamp(72px,25vw,110px)!important;color:var(--cream)!important;line-height:1!important;letter-spacing:-.04em!important}
+  .rec-speed-unit{font-family:var(--sans);font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:4px}
+  .rec-avg-label{font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:2px}
+  .rec-score-hero{position:absolute;top:calc(env(safe-area-inset-top,0) + 14dvh);right:24px;text-align:right;z-index:20}
+  .rec-score-label-sm{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .rec-score-num-big{font-family:var(--serif)!important;font-style:italic!important;font-weight:700!important;font-size:52px!important;line-height:1!important;letter-spacing:-.03em!important;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .rec-elapsed{font-family:var(--serif);font-style:italic;font-weight:700;font-size:14px;color:rgba(242,232,213,.35);margin-top:4px}
+  /* Big G-force radar */
+  .g-radar{position:absolute!important;width:min(68vw,280px)!important;height:min(68vw,280px)!important;left:50%!important;top:42%!important;transform:translate(-50%,-50%)!important;z-index:10!important;background:transparent!important}
+  .g-radar-ring,.g-radar-ring2,.g-radar-h,.g-radar-v{display:none!important}
+  .g-radar-dot{position:absolute!important;width:12px!important;height:12px!important;border-radius:50%!important;background:rgba(242,232,213,.95)!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s!important;box-shadow:0 0 12px rgba(242,232,213,.65)!important;z-index:15!important}
+  .rec-state-label{position:absolute;left:8px;bottom:52px;display:flex;align-items:center;gap:5px;z-index:12}
+  .rec-state-dot{width:6px;height:6px;border-radius:50%;background:#5A9E52;flex-shrink:0;transition:background .2s}
+  .rec-state-text{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#5A9E52;transition:color .2s}
+  /* Waveform strip */
+  .rec-waveform{position:absolute;bottom:136px;left:0;right:0;height:60px;background:rgba(6,6,4,.6);border-top:1px solid rgba(242,232,213,.06);z-index:20;overflow:hidden}
+  /* Corridor strip */
+  .rec-corridor{position:absolute;bottom:60px;left:0;right:0;height:76px;background:rgba(6,6,4,.85);border-top:1px solid rgba(242,232,213,.06);z-index:20;overflow:hidden}
+  .rec-corridor-labels{display:flex;justify-content:space-between;padding:8px 20px 0}
+  .rec-corridor-name{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.75)}
+  .rec-corridor-rank{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#E8501A}
+  .rec-road-strip{position:relative;margin:6px auto 0;width:200px;height:14px;background:rgba(242,232,213,.05);overflow:hidden}
+  .rec-road-dashes{position:absolute;top:50%;transform:translateY(-50%);display:flex;gap:10px;animation:dashScroll 1s linear infinite}
+  .rec-road-dash{width:20px;height:2px;background:rgba(242,232,213,.15);flex-shrink:0}
+  .rec-car-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+  @keyframes dashScroll{0%{transform:translateY(-50%) translateX(0)}100%{transform:translateY(-50%) translateX(-50px)}}
+  /* Stop button — full width */
+  .stop-btn{position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:calc(60px + env(safe-area-inset-bottom,0))!important;padding-bottom:env(safe-area-inset-bottom,0)!important;border-radius:0!important;font-family:var(--sans)!important;font-style:normal!important;font-size:12px!important;letter-spacing:.3em!important;text-transform:uppercase!important;background:var(--cream)!important;color:#080808!important;font-weight:600!important}
+  /* Move arc off-screen (JS compat) */
+  .arc-gauge-wrap{position:absolute!important;left:-9999px!important;top:-9999px!important;width:310px!important}
+  /* Hide old recording elements */
+  .rec-gauge-zone,.rec-bottom-row,.rec-speed-row,.speed-unit-inline,.arc-score-overlay,.arc-score-lbl,.rec-sub-row{display:none!important}
+  /* Top corner strip */
+  .rec-top-strip{padding-top:0!important}
+  .rec-stats-row{padding:calc(env(safe-area-inset-top,0)+8px) 20px 4px!important}
+  .rec-corner-val{font-size:min(5.5vw,20px)!important}
+  /* Event ticker — above new stop btn */
+  .event-ticker{bottom:calc(env(safe-area-inset-bottom,0) + 60px + 16px)!important}
+
+  /* ============ REWARDS ============ */
+  #screen-rewards{background:#080808;overflow:hidden}
+  .rw-topbar{height:52px;padding-top:calc(env(safe-area-inset-top,0)+14px);padding-left:24px;padding-right:24px;display:flex;align-items:flex-end;justify-content:center;position:relative;flex-shrink:0}
+  .rw-back{position:absolute;left:24px;bottom:2px;appearance:none;border:0;background:transparent;font-size:22px;color:rgba(242,232,213,.35);cursor:pointer;padding:0;line-height:1}
+  .rw-title{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  .rw-wallet{padding:20px 24px 0;flex-shrink:0}
+  .rw-wallet-label{margin-bottom:12px;font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  .rw-wallet-stats{display:flex;border-top:1px solid rgba(242,232,213,.1);border-bottom:1px solid rgba(242,232,213,.1);height:80px}
+  .rw-wallet-col{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-left:4px}
+  .rw-wallet-col:not(:first-child){border-left:1px solid rgba(242,232,213,.1);padding-left:16px}
+  .rw-wallet-col:first-child{padding-left:0}
+  .rw-wallet-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:48px;color:var(--cream);line-height:1}
+  .rw-wallet-num.rw-spent{color:rgba(242,232,213,.35)}
+  .rw-wallet-num.rw-balance{font-size:52px;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .rw-wallet-col-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:4px}
+  .rw-closest{margin:16px 24px 0;border-left:3px solid #E8501A;background:rgba(232,80,26,.06);padding:16px 20px;flex-shrink:0}
+  .rw-closest-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:#E8501A;margin-bottom:6px}
+  .rw-closest-reward{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);margin-bottom:10px}
+  .rw-progress-track{height:3px;background:rgba(242,232,213,.1);position:relative}
+  .rw-progress-fill{position:absolute;top:0;left:0;height:100%;background:#E8501A;transition:width .5s ease}
+  .rw-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 calc(env(safe-area-inset-bottom,0)+24px)}
+  .rw-section-label{padding:20px 24px 0;font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:12px}
+  .rw-activity-list{border-top:1px solid rgba(242,232,213,.07);margin:0 24px}
+  .rw-activity-row{display:flex;align-items:center;justify-content:space-between;min-height:44px;border-bottom:1px solid rgba(242,232,213,.07);padding:8px 0}
+  .rw-activity-main{font-family:var(--sans);font-size:13px;color:var(--cream);margin-bottom:2px}
+  .rw-activity-sub{font-family:var(--sans);font-size:10px;font-style:italic;color:rgba(242,232,213,.35)}
+  .rw-activity-pts{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px}
+  .rw-activity-pts.rw-earned{color:#5A9E52}
+  .rw-activity-pts.rw-spent{color:rgba(242,232,213,.35)}
+  .rw-history-row{display:flex;align-items:center;height:52px;border-bottom:1px solid rgba(242,232,213,.07);margin:0 24px;cursor:pointer}
+  .rw-history-row:active{background:rgba(242,232,213,.04)}
+  .rw-history-date{flex:1;font-family:var(--sans);font-size:12px;color:rgba(242,232,213,.7)}
+  .rw-history-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);width:60px;text-align:center}
+  .rw-history-pts{font-family:var(--sans);font-size:14px;color:#5A9E52;width:70px;text-align:right}
+  .rw-view-all{text-align:right;padding:10px 24px 4px;font-family:var(--sans);font-size:11px;color:#E8501A;cursor:pointer}
+  .rw-cta{background:#111010;border-top:1px solid rgba(242,232,213,.08);height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;appearance:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;width:100%}
+  .rw-cta-main{font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#E8501A;margin-bottom:4px}
+  .rw-cta-sub{font-family:var(--sans);font-size:10px;color:rgba(242,232,213,.35)}
+
+  /* ============ LEADERBOARD TABS ============ */
+  .lb-tabs{display:flex;border-bottom:1px solid rgba(242,232,213,.1);flex-shrink:0}
+  .lb-tab{flex:1;display:flex;align-items:center;justify-content:center;height:44px;font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.35);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;appearance:none;border-top:0;border-left:0;border-right:0;background:transparent;transition:color .15s}
+  .lb-tab.active{color:var(--cream);border-bottom-color:#E8501A}
+  .lb-tab:active{color:var(--cream-dim)}
+  .lb-corridor-card{margin-bottom:16px;border:1px solid rgba(242,232,213,.07);background:rgba(242,232,213,.02)}
+  .lb-corridor-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(242,232,213,.07)}
+  .lb-corridor-road{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--cream)}
+  .lb-corridor-dist{font-family:var(--sans);font-size:10px;color:rgba(242,232,213,.35)}
+  .lb-crown-row{display:flex;align-items:center;min-height:32px;border-bottom:1px solid rgba(242,232,213,.05);padding:6px 16px}
+  .lb-crown-row.lb-crown-you{background:rgba(232,80,26,.08);border-left:3px solid #E8501A;padding-left:13px}
+  .lb-crown-type{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.35);width:76px;flex-shrink:0}
+  .lb-crown-holder{font-family:var(--sans);font-size:12px;color:var(--cream);flex:1}
+  .lb-crown-indicator{font-size:10px;color:#C49A28}
+  .lb-your-pos{background:#111010;padding:12px 16px;font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.7);min-height:44px;display:flex;align-items:center}
+  .lb-see-more{text-align:right;padding:8px 16px 12px;font-family:var(--sans);font-size:10px;color:#E8501A;border-top:1px solid rgba(242,232,213,.05)}
+
   #app-version{font-size:10px;letter-spacing:.18em;color:rgba(244,235,217,.18);font-family:var(--sans);align-self:flex-end;padding-bottom:8px}
 
   /* ============ LEADERBOARD ============ */
@@ -597,6 +744,39 @@
   .lb-join-text{font-size:13px;color:var(--cream-dim);margin-bottom:14px;line-height:1.5}
   .lb-join-btn{appearance:none;border:0;cursor:pointer;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;padding:12px 32px;border-radius:12px}
 
+  /* ============ REVIEW v2 ============ */
+  #screen-review{background:#080808}
+  .rv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+  .rv-score-row{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 24px 0;flex-shrink:0}
+  .rv-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:88px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .rv-score-right{text-align:right;padding-top:8px}
+  .rv-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .rv-when{font-family:var(--sans);font-size:10px;letter-spacing:.15em;color:rgba(242,232,213,.35);margin-bottom:4px;margin-top:2px}
+  .rv-verdict-tag{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream)}
+  .rv-analysis-hint{font-family:var(--sans);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:4px}
+  .rv-drive-stats{display:flex;height:48px;padding:0 24px;border-top:1px solid rgba(242,232,213,.1);border-bottom:1px solid rgba(242,232,213,.1);flex-shrink:0;margin-top:12px}
+  .rv-stat-col{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+  .rv-stat-col:not(:first-child){border-left:1px solid rgba(242,232,213,.1);padding-left:16px}
+  .rv-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1}
+  .rv-stat-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:3px}
+  .rv-what-happened{padding:16px 12px 0;flex-shrink:0}
+  .rv-what-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);padding-left:12px;margin-bottom:12px}
+  .rv-what-cols{display:flex;gap:8px}
+  .rv-col{flex:1;padding:12px}
+  .rv-col-smooth{background:rgba(90,158,82,.08);border-left:3px solid #5A9E52}
+  .rv-col-events{background:rgba(201,56,40,.08);border-left:3px solid #C93828}
+  .rv-col-cat{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;margin-bottom:6px}
+  .rv-col-smooth .rv-col-cat{color:#5A9E52}
+  .rv-col-events .rv-col-cat{color:#C93828}
+  .rv-col-main{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--cream);margin-bottom:4px}
+  .rv-col-sub{font-family:var(--sans);font-size:11px;font-style:italic;color:rgba(242,232,213,.35)}
+  .rv-worst{margin:16px 24px 0;background:rgba(201,56,40,.05);border-left:3px solid #C93828;padding:14px 16px;min-height:52px;flex-shrink:0}
+  .rv-worst-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .rv-worst-text{font-family:var(--sans);font-size:13px;color:var(--cream)}
+  .rv-actions{display:flex;gap:8px;padding:0 24px;margin-top:auto;height:72px;align-items:center;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
+  .rv-btn-share{flex:0 0 38%;height:48px;background:transparent;border:1px solid rgba(242,232,213,.5);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);cursor:pointer;appearance:none}
+  .rv-btn-next{flex:1;height:48px;background:#E8501A;border:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#080808;font-weight:600;cursor:pointer;appearance:none}
+
   /* ============ SIGNUP MODAL ============ */
   .signup-overlay{position:fixed;inset:0;z-index:900;background:rgba(4,2,2,.82);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   .signup-card{background:#181010;border:1px solid rgba(244,235,217,.12);border-radius:22px;padding:28px 24px;width:100%;max-width:320px;animation:bdp-in .25s ease-out}
@@ -614,40 +794,117 @@
   <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
   <section id="screen-home" class="screen active">
 
-    <!-- Top 75%: car image, wordmark overlaid -->
-    <div class="home-car-panel">
-      <div class="home-topbar">
-        <div class="wordmark-lg">Smooth<br><span class="af">AF</span></div>
-        <div id="app-version">v66</div>
-      </div>
-      <div id="car-display"></div>
+    <!-- Top bar -->
+    <div class="home-topbar-v2">
+      <span class="home-brand">Smooth AF</span>
+      <button class="home-settings-icon" id="btn-vehicle-type" aria-label="My Garage">
+        <span></span><span></span><span style="width:70%"></span>
+      </button>
     </div>
 
-    <!-- Bottom 25%: controls -->
-    <div class="home-bottom-sheet">
-      <div id="persona-badge" class="persona-badge" style="display:none"></div>
-      <button id="btn-start" class="primary-btn">
-        <span>Start drive</span><span class="arrow">→</span>
-      </button>
-      <div style="display:flex;align-items:stretch;gap:0;border-top:1px solid rgba(244,235,217,.07);margin-top:2px">
-        <button class="view-drives-link" id="btn-vehicle-type" style="flex:1;border-right:1px solid rgba(244,235,217,.07)">Your vehicle</button>
-        <button class="view-drives-link" id="btn-view-drives" style="flex:1;border-right:1px solid rgba(244,235,217,.07)">Past drives</button>
-        <button class="view-drives-link" id="btn-leaderboard" style="flex:1">Leaderboard 🏆</button>
+    <!-- Score hero -->
+    <div class="home-score-zone">
+      <div class="home-score-label">Lifetime Score</div>
+      <div class="home-score-row">
+        <div id="home-score-num" class="home-score-num">--</div>
+        <div class="home-score-right">
+          <div id="home-score-delta" class="home-score-delta"></div>
+          <div id="home-score-rank" class="home-score-rank"></div>
+        </div>
       </div>
-      <div class="drives-list" id="drives-list-panel">
-        <div id="drives-container"></div>
+      <div class="home-rule"></div>
+      <div id="home-persona-title" class="home-archetype-name"></div>
+      <div id="home-persona-sub" class="home-archetype-desc"></div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="home-stats-row">
+      <div class="home-stat-col">
+        <div id="home-drives-count" class="home-stat-val">0</div>
+        <div class="home-stat-lbl">Drives</div>
+      </div>
+      <div class="home-stat-col">
+        <div id="home-total-miles" class="home-stat-val">0</div>
+        <div class="home-stat-lbl">Miles</div>
+      </div>
+      <div class="home-stat-col">
+        <div id="home-best-score" class="home-stat-val">--</div>
+        <div class="home-stat-lbl">Best</div>
       </div>
     </div>
+
+    <!-- Next unlock -->
+    <div class="home-next-unlock">
+      <div class="home-unlock-label">Next Unlock</div>
+      <div id="home-unlock-text" class="home-unlock-text">Start driving to earn rewards &#8594;</div>
+    </div>
+
+    <!-- 7-day sparkline -->
+    <div class="home-sparkline">
+      <div class="home-sparkline-label">7-Day Trend</div>
+      <svg id="home-sparkline-svg" width="100%" height="36" viewBox="0 0 342 36" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1" fill="none" stroke-linejoin="round"/>
+        <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#E8501A"/>
+      </svg>
+    </div>
+
+    <!-- Rival strip -->
+    <div class="home-rival">
+      <div class="home-rival-left">
+        <div class="rival-label">Closest Rival</div>
+        <div id="home-rival-name" class="rival-name">No rivals yet</div>
+      </div>
+      <div id="home-rival-pts" class="home-rival-right"></div>
+    </div>
+
+    <!-- Nav row -->
+    <div class="home-nav-row">
+      <button class="home-nav-btn" id="btn-view-drives">Past drives</button>
+      <button class="home-nav-btn" id="btn-rewards">Rewards</button>
+      <button class="home-nav-btn" id="btn-leaderboard">Leaderboard</button>
+    </div>
+
+    <!-- Drives list (collapsible) -->
+    <div class="drives-list" id="drives-list-panel">
+      <div id="drives-container"></div>
+    </div>
+
+    <!-- Hidden compat -->
+    <div id="persona-badge" style="display:none"></div>
+    <div id="car-display" style="display:none"></div>
+
+    <!-- Begin Drive CTA -->
+    <button class="home-cta" id="btn-start">
+      <span class="home-cta-text">Begin Drive</span>
+      <span class="home-cta-arrow">&#8594;</span>
+    </button>
 
   </section>
 
   <!-- ═══════════════════════════ RECORDING ═══════════════════════════ -->
   <section id="screen-record" class="screen">
 
+    <!-- Car photo background (behind everything) -->
     <div class="rec-bg" id="rec-bg"></div>
+
+    <!-- Road perspective lines -->
+    <svg class="rec-perspective" viewBox="0 0 390 844" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="195" y1="844" x2="60"  y2="440" stroke="rgba(242,232,213,.06)" stroke-width="1"/>
+      <line x1="195" y1="844" x2="330" y2="440" stroke="rgba(242,232,213,.06)" stroke-width="1"/>
+      <line x1="195" y1="844" x2="140" y2="440" stroke="rgba(242,232,213,.03)" stroke-width="0.5"/>
+      <line x1="195" y1="844" x2="250" y2="440" stroke="rgba(242,232,213,.03)" stroke-width="0.5"/>
+    </svg>
+
+    <!-- Vignette overlay -->
     <div class="rec-overlay"></div>
 
-    <!-- Top strip: corner stats + recording indicator -->
+    <!-- REC indicator -->
+    <div class="rec-indicator">
+      <div class="rec-dot"></div>
+      <span class="rec-indicator-label" id="rec-source">REC</span>
+    </div>
+
+    <!-- Distance + time corners -->
     <div class="rec-top-strip">
       <div class="rec-stats-row">
         <div class="rec-corner">
@@ -655,61 +912,87 @@
           <div class="rec-corner-val"><span id="live-distance">0.0</span><span class="rec-corner-unit"> mi</span></div>
         </div>
         <div class="rec-corner rec-corner--right">
-          <div class="rec-corner-lbl">Time Driving</div>
+          <div class="rec-corner-lbl">Time</div>
           <div class="rec-corner-val" id="live-time">0:00</div>
         </div>
       </div>
-      <div class="rec-sub-row">
-        <div class="rec-label"><span class="rec-dot"></span><span id="rec-source">GPS + Motion</span></div>
-        <label class="rec-photo-btn" title="Set background photo">🖼<input type="file" accept="image/*" id="rec-photo-input" style="display:none"></label>
-      </div>
     </div>
 
-    <!-- Center: SVG arc gauge with score + hero speed below -->
-    <div class="rec-gauge-zone">
-      <div class="arc-gauge-wrap">
-        <!-- 220° arc, viewBox center=(150,150), R=130, endpoints at 160° and 20° -->
-        <svg class="arc-svg" id="arc-svg" viewBox="0 0 300 215" width="300" height="215" xmlns="http://www.w3.org/2000/svg">
-          <path id="arc-track"
-            d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46"
-            fill="none" stroke="rgba(244,235,217,.1)" stroke-width="2.5" stroke-linecap="round"/>
-          <path id="arc-progress"
-            d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46"
-            fill="none" stroke="rgba(244,235,217,.9)" stroke-width="3.5" stroke-linecap="round"
-            stroke-dasharray="499.2" stroke-dashoffset="0"/>
-        </svg>
-        <!-- Score floats inside arc near apex -->
-        <div class="arc-score-overlay">
-          <div class="arc-score-num" id="live-score">--</div>
-          <div class="arc-score-lbl">Smooth AF Score</div>
+    <!-- Speed hero — top left -->
+    <div class="rec-speed-hero">
+      <div class="speed-big" id="live-speed">0</div>
+      <div class="rec-speed-unit">MPH</div>
+      <div class="rec-avg-label">AVG&nbsp;<span id="live-avg-speed">0</span>&nbsp;MPH</div>
+    </div>
+
+    <!-- Score — top right -->
+    <div class="rec-score-hero">
+      <div class="rec-score-label-sm">Score</div>
+      <div class="rec-score-num-big" id="live-score">--</div>
+      <div class="rec-elapsed" id="live-time-sub"></div>
+    </div>
+
+    <!-- Big G-force radar — centered -->
+    <div class="g-radar" id="g-radar">
+      <svg width="100%" height="100%" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="140" cy="140" r="138" stroke="rgba(242,232,213,.15)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="70"  stroke="rgba(242,232,213,.07)" stroke-width="1"/>
+        <line x1="2"   y1="140" x2="278" y2="140" stroke="rgba(242,232,213,.06)" stroke-width="0.5"/>
+        <line x1="140" y1="2"   x2="140" y2="278" stroke="rgba(242,232,213,.06)" stroke-width="0.5"/>
+        <text x="140" y="16"  font-family="system-ui" font-size="8" fill="rgba(242,232,213,.3)" text-anchor="middle" letter-spacing="2">ACCEL</text>
+        <text x="140" y="272" font-family="system-ui" font-size="8" fill="rgba(242,232,213,.3)" text-anchor="middle" letter-spacing="2">BRAKE</text>
+        <!-- Ghost trail -->
+        <circle id="ghost-1" cx="140" cy="140" r="3" fill="rgba(242,232,213,.08)"/>
+        <circle id="ghost-2" cx="140" cy="140" r="3" fill="rgba(242,232,213,.12)"/>
+        <circle id="ghost-3" cx="140" cy="140" r="4" fill="rgba(242,232,213,.18)"/>
+        <circle id="ghost-4" cx="140" cy="140" r="4" fill="rgba(242,232,213,.25)"/>
+        <circle id="ghost-5" cx="140" cy="140" r="5" fill="rgba(242,232,213,.35)"/>
+        <circle id="ghost-6" cx="140" cy="140" r="6" fill="rgba(242,232,213,.5)"/>
+      </svg>
+      <!-- Live dot -->
+      <div class="g-radar-dot" id="g-radar-dot"></div>
+      <!-- Drive state label -->
+      <div class="rec-state-label">
+        <div class="rec-state-dot" id="rec-state-dot"></div>
+        <span class="rec-state-text" id="rec-state-text">Smooth</span>
+      </div>
+      <!-- Burst effects -->
+      <div class="burst b-brake" id="burst-brake"></div>
+      <div class="burst b-accel" id="burst-accel"></div>
+      <div class="burst b-left"  id="burst-left"></div>
+      <div class="burst b-right" id="burst-right"></div>
+    </div>
+
+    <!-- Waveform strip -->
+    <div class="rec-waveform">
+      <svg width="100%" height="60" viewBox="0 0 390 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="rec-waveform-path"
+          d="M 0,30 L 60,30 C 80,30 90,28 110,24 C 125,21 135,30 155,30 L 210,30 C 228,30 238,22 258,18 C 272,15 282,30 300,30 L 340,30 C 355,30 365,27 375,25 L 390,25"
+          stroke="rgba(232,80,26,.55)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="390" cy="25" r="3" fill="#E8501A"/>
+      </svg>
+    </div>
+
+    <!-- Corridor strip -->
+    <div class="rec-corridor">
+      <div class="rec-corridor-labels">
+        <div class="rec-corridor-name" id="rec-corridor-name">On Corridor</div>
+        <div class="rec-corridor-rank" id="rec-corridor-rank"></div>
+      </div>
+      <div class="rec-road-strip">
+        <div class="rec-road-dashes">
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
         </div>
-        <!-- Burst effects (position:absolute relative to wrap) -->
-        <div class="burst b-brake" id="burst-brake"></div>
-        <div class="burst b-accel" id="burst-accel"></div>
-        <div class="burst b-left"  id="burst-left"></div>
-        <div class="burst b-right" id="burst-right"></div>
-      </div>
-      <!-- Hero speed number -->
-      <div class="rec-speed-row">
-        <span class="speed-big" id="live-speed">0</span>
-        <span class="speed-unit-inline">MPH</span>
-      </div>
-    </div>
-
-    <!-- Bottom stats -->
-    <div class="rec-bottom-row">
-      <div class="rec-bottom-stat">
-        <div class="rec-bottom-lbl">Avg Speed</div>
-        <div class="rec-bottom-val"><span id="live-avg-speed">0</span><span class="rec-bottom-unit"> MPH</span></div>
-      </div>
-      <div class="rec-bottom-stat rec-bottom-stat--right">
-        <div class="rec-bottom-lbl">G-Force</div>
-        <div class="g-radar" id="g-radar">
-          <div class="g-radar-ring"></div>
-          <div class="g-radar-ring2"></div>
-          <div class="g-radar-h"></div>
-          <div class="g-radar-v"></div>
-          <div class="g-radar-dot" id="g-radar-dot"></div>
+        <div class="rec-car-icon">
+          <svg width="28" height="14" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="2" width="26" height="10" rx="2.5" stroke="rgba(242,232,213,.9)" stroke-width="1.5"/>
+            <line x1="20" y1="2" x2="22" y2="12" stroke="rgba(242,232,213,.5)" stroke-width="1"/>
+            <line x1="6"  y1="2" x2="8"  y2="12" stroke="rgba(242,232,213,.5)" stroke-width="1"/>
+          </svg>
         </div>
       </div>
     </div>
@@ -721,10 +1004,17 @@
     <div class="force-line fl-left"  id="fl-left"></div>
     <div class="force-line fl-right" id="fl-right"></div>
     <div class="live-g-bar"><div class="live-g-needle" id="live-g-needle"></div><div class="live-g-zero"></div></div>
+    <label style="display:none"><input type="file" accept="image/*" id="rec-photo-input"></label>
+    <div class="arc-gauge-wrap" aria-hidden="true">
+      <svg class="arc-svg" id="arc-svg" viewBox="0 0 300 215" width="300" height="215" xmlns="http://www.w3.org/2000/svg">
+        <path id="arc-track" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(244,235,217,.1)" stroke-width="2.5" stroke-linecap="round"/>
+        <path id="arc-progress" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(244,235,217,.9)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="499.2" stroke-dashoffset="0"/>
+      </svg>
+    </div>
 
     <div class="event-ticker" id="event-ticker"></div>
-    <div id="calib-status" style="display:none;position:absolute;z-index:10;bottom:170px;left:50%;transform:translateX(-50%);font-size:12px;text-align:center;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.6);white-space:nowrap"></div>
-    <button id="btn-stop" class="stop-btn">Stop drive</button>
+    <div id="calib-status" style="display:none;position:absolute;z-index:30;bottom:150px;left:50%;transform:translateX(-50%);font-size:12px;text-align:center;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.7);white-space:nowrap;color:var(--cream)"></div>
+    <button id="btn-stop" class="stop-btn">Stop Drive</button>
 
   </section>
 
@@ -736,7 +1026,6 @@
       <div id="map"></div>
       <div class="review-top">
         <button id="btn-back" class="back-btn" aria-label="Back">×</button>
-        <div class="review-when" id="review-when">—</div>
       </div>
       <div class="legend">
         <div class="lg-row"><div class="lg-sw" style="background:#6FB669"></div><span>Coast</span></div>
@@ -751,48 +1040,74 @@
       </div>
     </div>
 
-    <!-- Scrollable results body -->
-    <div class="review-body">
+    <!-- v2 results body -->
+    <div class="rv-body">
 
-      <!-- Overall score — tap to open analysis sheet -->
-      <div class="review-score-header" id="score-header-btn" style="cursor:pointer">
-        <div id="review-score" class="score-big good">--</div>
-        <div class="score-meta">
-          <div class="score-lbl">Smoothness</div>
-          <div class="score-tag" id="score-verdict-tag" style="color:var(--cream-dim)">—</div>
-          <div style="font-size:10px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-top:4px">Tap for analysis ›</div>
+      <!-- Score hero (tap for analysis) -->
+      <div class="rv-score-row" id="score-header-btn">
+        <div id="review-score" class="rv-score-num">--</div>
+        <div class="rv-score-right">
+          <div class="rv-score-label">This Drive</div>
+          <div id="review-when" class="rv-when">—</div>
+          <div id="score-verdict-tag" class="rv-verdict-tag">—</div>
+          <div class="rv-analysis-hint">Tap for analysis ›</div>
         </div>
       </div>
 
-      <!-- Event chips -->
-      <div class="events-row">
-        <div class="event-chip brake"><span class="n" id="ev-brake">0</span><span class="l">brakes</span></div>
-        <div class="event-chip accel"><span class="n" id="ev-accel">0</span><span class="l">accels</span></div>
-        <div class="event-chip turn"><span class="n" id="ev-turn">0</span><span class="l">turns</span></div>
-        <div class="event-chip stop"><span class="n" id="ev-stop">0</span><span class="l">stops</span></div>
-      </div>
-
-      <!-- Stat strip -->
-      <div class="stat-strip">
-        <div class="cell"><div class="cell-v"><span id="r-distance">0.0</span></div><div class="cell-l">Miles</div></div>
-        <div class="cell"><div class="cell-v"><span id="r-duration">0:00</span></div><div class="cell-l">Duration</div></div>
-        <div class="cell"><div class="cell-v"><span id="r-topspeed">0</span></div><div class="cell-l">Top mph</div></div>
-        <div class="cell"><div class="cell-v"><span id="r-road-quality">—</span></div><div class="cell-l">Road quality</div></div>
-      </div>
-
-      <!-- Force timeline -->
-      <div class="force-timeline-section">
-        <p class="force-timeline-head">Force timeline</p>
-        <canvas id="force-timeline-canvas" class="force-timeline-canvas"></canvas>
-        <div class="force-timeline-key">
-          <span class="ftk accel">Accel</span>
-          <span class="ftk brake">Brake</span>
-          <span class="ftk turn">Lateral</span>
+      <!-- Drive stats -->
+      <div class="rv-drive-stats">
+        <div class="rv-stat-col">
+          <div class="rv-stat-val"><span id="r-distance">0.0</span></div>
+          <div class="rv-stat-label">Miles</div>
+        </div>
+        <div class="rv-stat-col">
+          <div class="rv-stat-val"><span id="r-duration">0:00</span></div>
+          <div class="rv-stat-label">Duration</div>
+        </div>
+        <div class="rv-stat-col">
+          <div class="rv-stat-val"><span id="r-topspeed">0</span></div>
+          <div class="rv-stat-label">Top MPH</div>
         </div>
       </div>
 
-      <button id="btn-new-drive" class="new-drive-btn">New drive <span style="font-family:var(--sans);font-style:normal">→</span></button>
-      <button id="btn-go-home" class="home-link-btn">← Back to home</button>
+      <!-- What happened -->
+      <div class="rv-what-happened">
+        <div class="rv-what-label">What Happened</div>
+        <div class="rv-what-cols">
+          <div class="rv-col rv-col-smooth">
+            <div class="rv-col-cat">Smooth</div>
+            <div class="rv-col-main" id="rv-smooth-main">—</div>
+            <div class="rv-col-sub" id="rv-smooth-sub">—</div>
+          </div>
+          <div class="rv-col rv-col-events">
+            <div class="rv-col-cat">Events</div>
+            <div class="rv-col-main" id="rv-events-main">—</div>
+            <div class="rv-col-sub" id="rv-events-sub">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hardest moment -->
+      <div class="rv-worst" id="rv-worst-block">
+        <div class="rv-worst-label">Hardest Moment</div>
+        <div class="rv-worst-text" id="rv-worst-text">—</div>
+      </div>
+
+      <!-- Hidden compat (JS still populates these) -->
+      <div style="display:none">
+        <canvas id="force-timeline-canvas"></canvas>
+        <span id="ev-brake">0</span><span id="ev-accel">0</span>
+        <span id="ev-turn">0</span><span id="ev-stop">0</span>
+        <span id="r-road-quality">—</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="rv-actions">
+        <button class="rv-btn-share" id="btn-share-drive">Share</button>
+        <button class="rv-btn-next" id="btn-new-drive">New Drive &#8594;</button>
+      </div>
+      <button id="btn-go-home" style="display:none">&#8592; Back to home</button>
+
     </div>
 
   </section>
@@ -871,6 +1186,12 @@
       <button class="back-btn" id="btn-lb-back" aria-label="Back">×</button>
       <div class="lb-title">Leaderboard</div>
     </div>
+    <!-- Tab row -->
+    <div class="lb-tabs">
+      <button class="lb-tab active" data-tab="overall">Overall</button>
+      <button class="lb-tab" data-tab="corridors">Corridors</button>
+      <button class="lb-tab" data-tab="friends">Friends</button>
+    </div>
     <div class="lb-tagline">Smoothest drivers worldwide</div>
     <div class="lb-body">
       <!-- Your card -->
@@ -891,6 +1212,58 @@
         <button class="lb-join-btn" id="btn-join-lb">Join leaderboard →</button>
       </div>
     </div>
+  </section>
+
+  <!-- ══════════════════════════ REWARDS ══════════════════════════ -->
+  <section id="screen-rewards" class="screen">
+
+    <div class="rw-topbar">
+      <button class="rw-back" id="btn-rw-back">&#8249;</button>
+      <span class="rw-title">Rewards</span>
+    </div>
+
+    <!-- Wallet hero -->
+    <div class="rw-wallet">
+      <div class="rw-wallet-label">Your Points</div>
+      <div class="rw-wallet-stats">
+        <div class="rw-wallet-col">
+          <div class="rw-wallet-num" id="rw-earned">0</div>
+          <div class="rw-wallet-col-label">Earned</div>
+        </div>
+        <div class="rw-wallet-col">
+          <div class="rw-wallet-num rw-spent" id="rw-spent">0</div>
+          <div class="rw-wallet-col-label">Spent</div>
+        </div>
+        <div class="rw-wallet-col">
+          <div class="rw-wallet-num rw-balance" id="rw-balance">0</div>
+          <div class="rw-wallet-col-label">Balance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next reward progress -->
+    <div class="rw-closest">
+      <div class="rw-closest-label" id="rw-closest-label">Drive more to earn rewards</div>
+      <div class="rw-closest-reward" id="rw-closest-reward">Keep driving smoothly</div>
+      <div class="rw-progress-track">
+        <div class="rw-progress-fill" id="rw-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="rw-body">
+      <div class="rw-section-label">Recent Activity</div>
+      <div class="rw-activity-list" id="rw-activity-list"></div>
+
+      <div class="rw-section-label">Drive History</div>
+      <div id="rw-history-list"></div>
+
+      <button class="rw-cta" id="btn-rw-explore">
+        <div class="rw-cta-main">Explore Rewards Universe &#8594;</div>
+        <div class="rw-cta-sub">Gas &middot; Insurance &middot; Coaching &middot; Merch</div>
+      </button>
+    </div>
+
   </section>
 
   <!-- SIGNUP MODAL -->

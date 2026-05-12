@@ -782,10 +782,76 @@ function renderPersonaBadge(){
     <div class="persona-sub">${p.sub}</div>`;
 }
 
+function renderHomeStats(){
+  const all   = loadDrives().filter(d => d.score != null);
+  const score = loadLifetimeScore();
+
+  const scoreEl = document.getElementById('home-score-num');
+  if (scoreEl) scoreEl.textContent = all.length ? Math.round(score) : '--';
+
+  const p = getDriverPersona(all);
+  const titleEl = document.getElementById('home-persona-title');
+  const subEl   = document.getElementById('home-persona-sub');
+  if (titleEl) titleEl.textContent = p ? p.title : '';
+  if (subEl)   subEl.textContent   = p ? p.sub   : '';
+
+  const drivesEl = document.getElementById('home-drives-count');
+  if (drivesEl) drivesEl.textContent = all.length;
+
+  const milesEl = document.getElementById('home-total-miles');
+  if (milesEl) milesEl.textContent = all.length
+    ? Math.round(all.reduce((s, d) => s + metersToMiles(d.distanceMeters || 0), 0))
+    : 0;
+
+  const bestEl = document.getElementById('home-best-score');
+  if (bestEl) bestEl.textContent = all.length ? Math.max(...all.map(d => d.score)) : '--';
+
+  // 7-day sparkline (most-recent drives, oldest first)
+  const now  = Date.now();
+  const week = all.filter(d => now - d.startTime < 7 * 86400000).slice(0, 7).reverse();
+  const sparkLine = document.getElementById('home-sparkline-line');
+  const sparkDot  = document.getElementById('home-sparkline-dot');
+  if (sparkLine && week.length > 1){
+    const vals = week.map(d => d.score);
+    const min  = Math.min(...vals), max = Math.max(...vals);
+    const rng  = max - min || 1;
+    const pts  = vals.map((v, i) => {
+      const x = Math.round(i / (vals.length - 1) * 342);
+      const y = Math.round(32 - ((v - min) / rng) * 24);
+      return x + ',' + y;
+    }).join(' ');
+    sparkLine.setAttribute('points', pts);
+    if (sparkDot){
+      const lx = 342;
+      const ly = Math.round(32 - ((vals[vals.length - 1] - min) / rng) * 24);
+      sparkDot.setAttribute('cx', lx);
+      sparkDot.setAttribute('cy', ly);
+      sparkDot.setAttribute('r', '3');
+    }
+  }
+
+  // Next unlock hint
+  const unlockEl = document.getElementById('home-unlock-text');
+  if (unlockEl){
+    if (!all.length){
+      unlockEl.textContent = 'Start driving to earn rewards →';
+    } else if (all.length < 5){
+      const n = 5 - all.length;
+      unlockEl.textContent = `${n} more drive${n !== 1 ? 's' : ''} to unlock “Smooth Starter” badge →`;
+    } else if (all.length < 10){
+      const n = 10 - all.length;
+      unlockEl.textContent = `${n} more drive${n !== 1 ? 's' : ''} to unlock the 10-drive milestone →`;
+    } else {
+      unlockEl.textContent = 'Keep driving to climb your lifetime rank →';
+    }
+  }
+}
+
 function renderDriveList(){
   const host = $('#drives-container');
   const all = loadDrives();
   renderPersonaBadge();
+  renderHomeStats();
   if (!all.length){
     host.innerHTML = '<div class="empty-drives">No drives yet. Tap start.</div>';
     return;
@@ -1138,6 +1204,17 @@ function updateLiveUI(){
     radarDot.style.boxShadow  = isBrake ? '0 0 8px rgba(224,59,47,.7)' : isAccel ? '0 0 8px rgba(111,182,105,.7)' : '0 0 8px rgba(244,235,217,.5)';
   }
 
+  // Drive state label (rec-state-dot + rec-state-text)
+  const stateDot  = document.getElementById('rec-state-dot');
+  const stateText = document.getElementById('rec-state-text');
+  if (stateDot && stateText){
+    const stateColor = isBrake ? '#C93828' : isAccel ? '#E8501A' : '#5A9E52';
+    const stateLabel = isBrake ? 'Braking'  : isAccel ? 'Accelerating' : 'Smooth';
+    stateDot.style.background = stateColor;
+    stateText.textContent     = stateLabel;
+    stateText.style.color     = stateColor;
+  }
+
   // Off-screen needle — JS compat
   const needle = document.getElementById('live-g-needle');
   if (needle){ needle.style.left = (50 + clamp(la / 6, -1, 1) * 44) + '%'; }
@@ -1463,8 +1540,55 @@ function renderReview(drive){
     roadEl.style.color = avgRough < 0.15 ? 'var(--good)' : avgRough < 0.5 ? 'var(--sage)' : avgRough < 1.0 ? 'var(--warn)' : 'var(--danger)';
   }
 
-  // ── Force timeline chart ───────────────────────────────────────────────────
+  // ── Force timeline chart (hidden, kept for analysis sheet) ───────────────
   renderForceTimeline(drive);
+
+  // ── v2 What Happened + Hardest Moment ──────────────────────────────────────
+  {
+    const brakes   = drive.events.filter(e => e.type === 'brake').length;
+    const accels   = drive.events.filter(e => e.type === 'accel').length;
+    const turns    = drive.events.filter(e => e.type === 'turn').length;
+    const totalEvs = brakes + accels + turns;
+    const distMi   = metersToMiles(drive.distanceMeters || 0);
+
+    const smEl = document.getElementById('rv-smooth-main');
+    if (smEl) smEl.textContent = totalEvs === 0
+      ? 'Perfectly clean'
+      : `${Math.max(0, distMi - totalEvs * 0.15).toFixed(1)} mi smooth`;
+
+    const ssEl = document.getElementById('rv-smooth-sub');
+    if (ssEl && drive.samples.length){
+      const avgRough = drive.samples.reduce((s, x) => s + (x.roadRoughness || 0), 0) / drive.samples.length;
+      ssEl.textContent = 'Road: ' + (avgRough < 0.15 ? 'Smooth' : avgRough < 0.5 ? 'Good' : avgRough < 1.0 ? 'Fair' : 'Rough');
+    }
+
+    const emEl = document.getElementById('rv-events-main');
+    if (emEl) emEl.textContent = totalEvs === 0 ? 'None'
+      : brakes ? `${brakes} hard brake${brakes !== 1 ? 's' : ''}`
+      : accels ? `${accels} hard accel${accels !== 1 ? 's' : ''}`
+      : `${turns} sharp turn${turns !== 1 ? 's' : ''}`;
+
+    const esEl = document.getElementById('rv-events-sub');
+    if (esEl) esEl.textContent = (accels && brakes)
+      ? `${accels} accel · ${turns} turn${turns !== 1 ? 's' : ''}`
+      : (turns && (brakes || accels)) ? `${turns} turn${turns !== 1 ? 's' : ''}` : '';
+
+    const worst = drive.events
+      .filter(e => e.type === 'brake' || e.type === 'turn' || e.type === 'accel')
+      .sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
+
+    const worstEl    = document.getElementById('rv-worst-text');
+    const worstBlock = document.getElementById('rv-worst-block');
+    if (worstEl){
+      if (worst){
+        const lbl = worst.type === 'brake' ? 'Hard brake' : worst.type === 'accel' ? 'Hard accel' : 'Sharp turn';
+        worstEl.textContent = `${lbl} · ${fmtDuration(worst.t || 0)} in · ${worst.speedMph || 0} mph`;
+      } else {
+        worstEl.textContent = 'No harsh events — clean drive!';
+      }
+    }
+    if (worstBlock) worstBlock.style.display = totalEvs === 0 ? 'none' : '';
+  }
 
   // ── Style verdict + analysis sheet ────────────────────────────────────────
   const verdict = drivingStyleVerdict(analysis, drive);
@@ -1970,6 +2094,75 @@ function openSignupModal(onSave){
   submit.onclick = handleSave;
   input.onkeydown = e => { if (e.key === 'Enter') handleSave(); };
   cancel.onclick = cleanup;
+}
+
+// -------------------------------------------------------------------------
+// Rewards screen
+// -------------------------------------------------------------------------
+function renderRewards(){
+  const drives = loadDrives().filter(d => d.score != null);
+  const earned  = drives.reduce((s, d) => s + (d.score || 0), 0);
+  const spent   = 0;
+  const balance = earned - spent;
+
+  const earnEl = document.getElementById('rw-earned');
+  const spntEl = document.getElementById('rw-spent');
+  const balEl  = document.getElementById('rw-balance');
+  if (earnEl)  earnEl.textContent  = earned.toLocaleString();
+  if (spntEl)  spntEl.textContent  = spent.toLocaleString();
+  if (balEl)   balEl.textContent   = balance.toLocaleString();
+
+  // Next reward milestone
+  const MILESTONES = [100, 250, 500, 1000, 2500, 5000];
+  const LABELS     = ['Smooth Starter Badge', 'First Reward Unlock', 'Car Wash Voucher', 'Oil Change Coupon', 'Premium Badge', 'Gas Tank Reward'];
+  const nextIdx    = MILESTONES.findIndex(m => earned < m);
+  const labelEl    = document.getElementById('rw-closest-label');
+  const rewardEl   = document.getElementById('rw-closest-reward');
+  const fillEl     = document.getElementById('rw-progress-fill');
+  if (nextIdx >= 0){
+    const prev = nextIdx > 0 ? MILESTONES[nextIdx - 1] : 0;
+    const next = MILESTONES[nextIdx];
+    const pct  = Math.min(100, Math.round((earned - prev) / (next - prev) * 100));
+    if (labelEl)  labelEl.textContent  = `${next - earned} pts from your next reward`;
+    if (rewardEl) rewardEl.textContent = LABELS[nextIdx];
+    if (fillEl)   fillEl.style.width   = pct + '%';
+  } else {
+    if (labelEl)  labelEl.textContent  = 'All milestones unlocked!';
+    if (rewardEl) rewardEl.textContent = 'Legendary Driver';
+    if (fillEl)   fillEl.style.width   = '100%';
+  }
+
+  // Recent activity — last 5 drives
+  const actList = document.getElementById('rw-activity-list');
+  if (actList){
+    const recent = drives.slice(0, 5);
+    actList.innerHTML = recent.length ? recent.map(d => {
+      const when = new Date(d.startTime);
+      const pts  = d.score || 0;
+      return `<div class="rw-activity-row">
+        <div>
+          <div class="rw-activity-main">${when.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'})}</div>
+          <div class="rw-activity-sub">${metersToMiles(d.distanceMeters || 0).toFixed(1)} mi · Score ${d.score}</div>
+        </div>
+        <div class="rw-activity-pts rw-earned">+${pts}</div>
+      </div>`;
+    }).join('')
+    : '<div style="padding:16px 0;font-size:13px;color:rgba(242,232,213,.35)">No drives yet</div>';
+  }
+
+  // Drive history rows — last 3
+  const histList = document.getElementById('rw-history-list');
+  if (histList){
+    const recent = drives.slice(0, 3);
+    histList.innerHTML = recent.map(d => {
+      const when = new Date(d.startTime);
+      return `<div class="rw-history-row">
+        <div class="rw-history-date">${when.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'})} · ${metersToMiles(d.distanceMeters || 0).toFixed(1)} mi</div>
+        <div class="rw-history-score">${d.score}</div>
+        <div class="rw-history-pts">+${d.score} pts</div>
+      </div>`;
+    }).join('');
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -2572,6 +2765,29 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
+
+  // Leaderboard tabs (visual-only for now)
+  document.querySelectorAll('.lb-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Rewards
+  document.getElementById('btn-rewards')?.addEventListener('click', () => { renderRewards(); showScreen('rewards'); });
+  document.getElementById('btn-rw-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
+  document.getElementById('btn-rw-explore')?.addEventListener('click', () => {
+    if (navigator.share) navigator.share({ title: 'Smooth AF', text: 'Check out Smooth AF — the driving score app!' }).catch(() => {});
+  });
+
+  // Share drive button
+  document.getElementById('btn-share-drive')?.addEventListener('click', () => {
+    if (navigator.share && reviewDrive){
+      const mi = metersToMiles(reviewDrive.distanceMeters || 0).toFixed(1);
+      navigator.share({ title: 'Smooth AF Drive', text: `I scored ${reviewDrive.score}/100 on a ${mi} mi drive! 🚗` }).catch(() => {});
+    }
+  });
 
   // Garage sheet
   document.getElementById('btn-vehicle-type')?.addEventListener('click', showGarageSheet);
