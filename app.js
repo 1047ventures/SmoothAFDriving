@@ -802,16 +802,15 @@ function renderHomeStats(){
     welcomeEl.textContent = name ? `Welcome back, ${name}!` : 'Hey, Driver';
   }
 
-  // Conversational score sentence
+  // Persona sentence — score number shown above, just describe the archetype here
   const sentenceEl = document.getElementById('home-score-sentence');
   if (sentenceEl){
     if (!all.length){
       sentenceEl.innerHTML = 'Start driving to build your score.';
+    } else if (p){
+      sentenceEl.innerHTML = `<em>${p.title}</em> — ${p.sub}`;
     } else {
-      const s = Math.round(score);
-      const ptitle = p ? p.title : 'Driver';
-      const psub   = p ? p.sub   : 'Keep driving to build your profile.';
-      sentenceEl.innerHTML = `Your Smooth AF Score: <em>${s}</em>. You're ${/^[AEIOU]/i.test(ptitle) ? 'an' : 'a'} <em>${ptitle}</em>. ${psub}`;
+      sentenceEl.innerHTML = `${all.length} drive${all.length !== 1 ? 's' : ''} logged. Keep going.`;
     }
   }
 
