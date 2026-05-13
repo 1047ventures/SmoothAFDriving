@@ -881,7 +881,6 @@ function renderHomeStats(){
 function renderDriveList(){
   const host = $('#drives-container');
   const all = loadDrives();
-  renderPersonaBadge();
   renderHomeStats();
   if (!all.length){
     host.innerHTML = '<div class="empty-drives">No drives yet. Tap start.</div>';
