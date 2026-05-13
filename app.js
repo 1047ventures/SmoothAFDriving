@@ -795,6 +795,38 @@ function renderHomeStats(){
   if (titleEl) titleEl.textContent = p ? p.title : '';
   if (subEl)   subEl.textContent   = p ? p.sub   : '';
 
+  // Welcome name
+  const welcomeEl = document.getElementById('home-welcome-name');
+  if (welcomeEl){
+    const name = loadDriverName();
+    welcomeEl.textContent = name ? `Welcome back, ${name}!` : 'Hey, Driver';
+  }
+
+  // Conversational score sentence
+  const sentenceEl = document.getElementById('home-score-sentence');
+  if (sentenceEl){
+    if (!all.length){
+      sentenceEl.innerHTML = 'Start driving to build your score.';
+    } else {
+      const s = Math.round(score);
+      const ptitle = p ? p.title : 'Driver';
+      const psub   = p ? p.sub   : 'Keep driving to build your profile.';
+      sentenceEl.innerHTML = `Your Smooth AF Score: <em>${s}</em>. You're ${/^[AEIOU]/i.test(ptitle) ? 'an' : 'a'} <em>${ptitle}</em>. ${psub}`;
+    }
+  }
+
+  // Routes text
+  const routesEl = document.getElementById('home-routes-text');
+  if (routesEl){
+    if (!all.length){
+      routesEl.textContent = 'Drive more to unlock corridor rankings.';
+    } else if (all.length < 5){
+      routesEl.textContent = `${all.length} drive${all.length !== 1 ? 's' : ''} logged. Keep going to unlock neighborhood rankings.`;
+    } else {
+      routesEl.textContent = `${all.length} drives logged. Corridor rankings unlock at 10 drives.`;
+    }
+  }
+
   const drivesEl = document.getElementById('home-drives-count');
   if (drivesEl) drivesEl.textContent = all.length;
 
@@ -1202,6 +1234,14 @@ function updateLiveUI(){
     radarDot.style.top        = yPct + '%';
     radarDot.style.background = isBrake ? 'rgba(224,59,47,.95)' : isAccel ? 'rgba(111,182,105,.95)' : 'rgba(244,235,217,.95)';
     radarDot.style.boxShadow  = isBrake ? '0 0 8px rgba(224,59,47,.7)' : isAccel ? '0 0 8px rgba(111,182,105,.7)' : '0 0 8px rgba(244,235,217,.5)';
+  }
+
+  // G-force radar container state glow
+  const radar = document.getElementById('g-radar');
+  if (radar){
+    radar.classList.toggle('state-brake',  isBrake);
+    radar.classList.toggle('state-accel',  !isBrake && isAccel);
+    radar.classList.toggle('state-smooth', !isBrake && !isAccel);
   }
 
   // Drive state label (rec-state-dot + rec-state-text)
@@ -2760,7 +2800,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDriveList();
   });
 
-  // Leaderboard
+  // Leaderboard / Rivals
+  document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard());
   document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard());
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
