@@ -776,6 +776,39 @@
   .rv-actions{display:flex;gap:8px;padding:0 24px;margin-top:auto;height:72px;align-items:center;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
   .rv-btn-share{flex:0 0 38%;height:48px;background:transparent;border:1px solid rgba(242,232,213,.5);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);cursor:pointer;appearance:none}
   .rv-btn-next{flex:1;height:48px;background:#E8501A;border:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#080808;font-weight:600;cursor:pointer;appearance:none}
+  .rv-home-link{display:block;text-align:center;padding:10px 24px 14px;font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,232,213,.35);cursor:pointer;background:transparent;border:0;width:100%}
+  .rv-home-link:active{color:var(--cream-dim)}
+
+  /* ============ HOME v2 — welcome + routes overrides ============ */
+  .home-welcome-block{padding:12px 24px 0;flex-shrink:0}
+  .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.4);margin-bottom:6px}
+  .home-score-sentence{font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.6}
+  .home-score-sentence em{color:#E8501A;font-style:normal;font-weight:600}
+  .home-routes{margin:12px 24px 0;border-left:3px solid rgba(242,232,213,.15);background:rgba(242,232,213,.03);padding:10px 14px;flex-shrink:0}
+  .home-routes-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .home-routes-text{font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.5}
+  .home-explore-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px 12px;border-top:1px solid rgba(242,232,213,.07);flex-shrink:0}
+  .home-explore-label{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.4)}
+  .home-explore-arrow{font-size:16px;color:rgba(242,232,213,.25)}
+  .home-cta-spacer{height:20px;flex-shrink:0;background:#080808}
+  /* hide old unlock teaser — replaced by welcome block */
+  .home-next-unlock{display:none!important}
+
+  /* ============ RECORDING v2 — layout fixes ============ */
+  .rec-bg{background-size:contain!important;background-position:center 30%!important}
+  .rec-waveform{display:none!important}
+  .rec-corridor{bottom:68px!important;height:56px!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;gap:4px!important}
+  .rec-corridor-labels{justify-content:center!important;gap:16px!important;padding:0!important;width:100%}
+  .rec-road-strip{display:none!important}
+  #g-radar{transition:filter .3s ease!important}
+  #g-radar.state-smooth{filter:drop-shadow(0 0 22px rgba(90,158,82,.5))!important}
+  #g-radar.state-accel{filter:drop-shadow(0 0 22px rgba(232,80,26,.45))!important}
+  #g-radar.state-brake{filter:drop-shadow(0 0 22px rgba(201,56,40,.6))!important}
+  .stop-btn{height:calc(68px + env(safe-area-inset-bottom,0))!important}
+  .event-ticker{bottom:calc(env(safe-area-inset-bottom,0) + 68px + 56px + 8px)!important}
+
+  /* ============ ANALYSIS SHEET — safe area fix ============ */
+  .analysis-sheet{padding:calc(env(safe-area-inset-top,0) + 52px) 20px calc(env(safe-area-inset-bottom,0) + 28px)!important}
 
   /* ============ SIGNUP MODAL ============ */
   .signup-overlay{position:fixed;inset:0;z-index:900;background:rgba(4,2,2,.82);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -802,7 +835,13 @@
       </button>
     </div>
 
-    <!-- Score hero -->
+    <!-- Welcome + score sentence -->
+    <div class="home-welcome-block">
+      <div class="home-welcome-name" id="home-welcome-name">Hey, Driver</div>
+      <div class="home-score-sentence" id="home-score-sentence">Start driving to build your score.</div>
+    </div>
+
+    <!-- Score number -->
     <div class="home-score-zone">
       <div class="home-score-label">Lifetime Score</div>
       <div class="home-score-row">
@@ -812,9 +851,12 @@
           <div id="home-score-rank" class="home-score-rank"></div>
         </div>
       </div>
-      <div class="home-rule"></div>
-      <div id="home-persona-title" class="home-archetype-name"></div>
-      <div id="home-persona-sub" class="home-archetype-desc"></div>
+    </div>
+
+    <!-- Top routes -->
+    <div class="home-routes">
+      <div class="home-routes-label">Your Top Routes</div>
+      <div class="home-routes-text" id="home-routes-text">Drive more to unlock corridor rankings.</div>
     </div>
 
     <!-- Stats row -->
@@ -833,35 +875,19 @@
       </div>
     </div>
 
-    <!-- Next unlock -->
-    <div class="home-next-unlock">
-      <div class="home-unlock-label">Next Unlock</div>
-      <div id="home-unlock-text" class="home-unlock-text">Start driving to earn rewards &#8594;</div>
-    </div>
-
     <!-- 7-day sparkline -->
     <div class="home-sparkline">
-      <div class="home-sparkline-label">7-Day Trend</div>
+      <div class="home-sparkline-label">Driving Trends</div>
       <svg id="home-sparkline-svg" width="100%" height="36" viewBox="0 0 342 36" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1" fill="none" stroke-linejoin="round"/>
+        <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
         <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#E8501A"/>
       </svg>
     </div>
 
-    <!-- Rival strip -->
-    <div class="home-rival">
-      <div class="home-rival-left">
-        <div class="rival-label">Closest Rival</div>
-        <div id="home-rival-name" class="rival-name">No rivals yet</div>
-      </div>
-      <div id="home-rival-pts" class="home-rival-right"></div>
-    </div>
-
-    <!-- Nav row -->
-    <div class="home-nav-row">
-      <button class="home-nav-btn" id="btn-view-drives">Past drives</button>
-      <button class="home-nav-btn" id="btn-rewards">Rewards</button>
-      <button class="home-nav-btn" id="btn-leaderboard">Leaderboard</button>
+    <!-- Explore past drives -->
+    <div class="home-explore-row" id="btn-view-drives">
+      <span class="home-explore-label">Explore Past Drives</span>
+      <span class="home-explore-arrow">&#8594;</span>
     </div>
 
     <!-- Drives list (collapsible) -->
@@ -869,11 +895,22 @@
       <div id="drives-container"></div>
     </div>
 
+    <!-- Nav row -->
+    <div class="home-nav-row">
+      <button class="home-nav-btn" id="btn-rivals">Rivals</button>
+      <button class="home-nav-btn" id="btn-rewards">Rewards</button>
+      <button class="home-nav-btn" id="btn-leaderboard">Leaderboard</button>
+    </div>
+
     <!-- Hidden compat -->
     <div id="persona-badge" style="display:none"></div>
     <div id="car-display" style="display:none"></div>
+    <div id="home-unlock-text" style="display:none"></div>
+    <div id="home-persona-title" style="display:none"></div>
+    <div id="home-persona-sub" style="display:none"></div>
 
-    <!-- Begin Drive CTA -->
+    <!-- Spacer + Begin Drive CTA -->
+    <div class="home-cta-spacer"></div>
     <button class="home-cta" id="btn-start">
       <span class="home-cta-text">Begin Drive</span>
       <span class="home-cta-arrow">&#8594;</span>
@@ -1070,21 +1107,10 @@
         </div>
       </div>
 
-      <!-- What happened -->
-      <div class="rv-what-happened">
-        <div class="rv-what-label">What Happened</div>
-        <div class="rv-what-cols">
-          <div class="rv-col rv-col-smooth">
-            <div class="rv-col-cat">Smooth</div>
-            <div class="rv-col-main" id="rv-smooth-main">—</div>
-            <div class="rv-col-sub" id="rv-smooth-sub">—</div>
-          </div>
-          <div class="rv-col rv-col-events">
-            <div class="rv-col-cat">Events</div>
-            <div class="rv-col-main" id="rv-events-main">—</div>
-            <div class="rv-col-sub" id="rv-events-sub">—</div>
-          </div>
-        </div>
+      <!-- Hidden compat for what-happened (JS still populates) -->
+      <div style="display:none">
+        <span id="rv-smooth-main"></span><span id="rv-smooth-sub"></span>
+        <span id="rv-events-main"></span><span id="rv-events-sub"></span>
       </div>
 
       <!-- Hardest moment -->
@@ -1106,7 +1132,7 @@
         <button class="rv-btn-share" id="btn-share-drive">Share</button>
         <button class="rv-btn-next" id="btn-new-drive">New Drive &#8594;</button>
       </div>
-      <button id="btn-go-home" style="display:none">&#8592; Back to home</button>
+      <button id="btn-go-home" class="rv-home-link">&#8592; Return to Home</button>
 
     </div>
 
