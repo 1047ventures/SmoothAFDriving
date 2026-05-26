@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Game HUD — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060404;
+  --cream:#F2E8D5;
+  --dim:rgba(242,232,213,.35);
+  --orange:#E8501A;
+  --green:#6FB669;
+  --red:#C93828;
+  --amber:#E8A03A;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ── Phone frame ───────────────────────────────────────────── */
+.frame{
+  position:relative;
+  width:390px;height:844px;
+  margin:0 auto;
+  overflow:hidden;
+  background:var(--bg);
+}
+/* Make it full-screen on actual phones */
+@media(max-width:430px){
+  .frame{width:100%;height:100dvh;max-height:none}
+  html,body{height:100dvh}
+}
+
+/* ── Car background ────────────────────────────────────────── */
+.car-bg{
+  position:absolute;inset:0;z-index:0;
+  background:url('vehicles/suv-rear.jpg') 35% center / auto 90% no-repeat;
+  filter:brightness(.42) saturate(.7);
+}
+
+/* ── Vignette overlay ──────────────────────────────────────── */
+.vignette{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(6,4,4,.92) 0%,
+    rgba(6,4,4,.2)  25%,
+    rgba(6,4,4,.05) 50%,
+    rgba(6,4,4,.25) 72%,
+    rgba(6,4,4,.95) 100%);
+}
+
+/* ── Perspective SVG lines ─────────────────────────────────── */
+.perspective{position:absolute;inset:0;z-index:2;pointer-events:none}
+
+/* ══ SMOOTHNESS BAR (very top, full width) ═════════════════════
+   Like a health bar — full = all green = smooth, drains on events */
+.smooth-track{
+  position:absolute;top:0;left:0;right:0;height:3px;z-index:30;
+  background:rgba(242,232,213,.08);
+}
+.smooth-fill{
+  height:100%;width:88%;
+  background:linear-gradient(90deg,#C93828 0%,#E8A03A 40%,#6FB669 100%);
+  background-size:600px 100%;
+  /* clip from left — high score shows the green right end */
+  /* 88% = score 88, green section visible */
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+}
+
+/* ══ REC INDICATOR ═════════════════════════════════════════════ */
+.rec{
+  position:absolute;top:20px;left:20px;z-index:20;
+  display:flex;align-items:center;gap:6px;
+}
+.rec-dot{
+  width:6px;height:6px;border-radius:50%;background:#C93828;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.rec-label{
+  font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(242,232,213,.4);
+}
+
+/* ══ ELAPSED TIME — top right ══════════════════════════════════ */
+.elapsed{
+  position:absolute;top:20px;right:20px;z-index:20;text-align:right;
+}
+.elapsed-val{font-size:12px;color:var(--dim);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+
+/* ══ SPEED — top left hero ═════════════════════════════════════ */
+.speed-hero{
+  position:absolute;left:24px;top:56px;z-index:20;
+}
+.speed-num{
+  font-family:var(--serif);font-style:italic;font-weight:700;
+  font-size:84px;color:var(--cream);line-height:.95;letter-spacing:-.04em;
+}
+.speed-unit{
+  font-size:9px;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--dim);margin-top:5px;
+}
+.speed-avg{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);margin-top:3px;
+}
+
+/* ══ SCORE — top right hero ════════════════════════════════════ */
+.score-hero{
+  position:absolute;right:24px;top:56px;z-index:20;text-align:right;
+}
+.score-num{
+  font-family:var(--serif);font-style:italic;font-weight:700;
+  font-size:84px;line-height:.95;letter-spacing:-.04em;
+  padding-right:6px; /* italic overhang bleeds past bounding box */
+  background:linear-gradient(135deg,#E8501A,#C49A28);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  transition:transform .15s,filter .15s;
+}
+.score-num.ding{
+  transform:scale(.94);filter:brightness(1.4);
+}
+.score-label{
+  font-size:9px;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--dim);margin-top:5px;
+}
+
+/* ══ CENTER G-RADAR ZONE ════════════════════════════════════════ */
+.radar-zone{
+  position:absolute;
+  left:50%;top:52%;
+  transform:translate(-50%,-50%);
+  z-index:10;
+  width:240px;height:240px;
+}
+
+/* Vertical G-bar — left edge of radar zone, shows accel/brake */
+.g-bar-v{
+  position:absolute;left:-28px;top:10%;
+  width:3px;height:80%;
+  background:rgba(242,232,213,.08);
+  border-radius:2px;
+  overflow:visible;
+}
+.g-bar-v-track{
+  position:absolute;left:-28px;top:10%;width:3px;height:80%;
+}
+.g-bar-v-labels{
+  position:absolute;left:-52px;top:8%;height:84%;
+  display:flex;flex-direction:column;justify-content:space-between;
+  align-items:flex-end;
+}
+.g-bar-v-lbl{font-size:7px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}
+
+.g-pip-v{
+  position:absolute;left:-34px;
+  width:15px;height:3px;border-radius:2px;
+  /* top: 50% = center/idle, 10% = full accel, 90% = full brake */
+  top:50%;transform:translateY(-50%);
+  background:var(--cream);
+  transition:top .12s ease-out, background .2s;
+  box-shadow:0 0 8px rgba(242,232,213,.5);
+}
+
+/* Horizontal G-bar — bottom of radar zone, shows left/right */
+.g-bar-h{
+  position:absolute;bottom:-28px;left:5%;right:5%;
+  height:3px;background:rgba(242,232,213,.08);border-radius:2px;
+}
+.g-bar-h-labels{
+  position:absolute;bottom:-44px;left:0;right:0;
+  display:flex;justify-content:space-between;
+}
+.g-bar-h-lbl{font-size:7px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}
+
+.g-pip-h{
+  position:absolute;bottom:-34px;
+  width:3px;height:15px;border-radius:2px;
+  /* left: 50% = center */
+  left:50%;transform:translateX(-50%);
+  background:var(--cream);
+  transition:left .12s ease-out, background .2s;
+  box-shadow:0 0 8px rgba(242,232,213,.5);
+}
+
+/* Live G-dot inside radar */
+.g-dot{
+  position:absolute;
+  width:11px;height:11px;border-radius:50%;
+  background:rgba(244,235,217,.95);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s;
+  box-shadow:0 0 14px rgba(242,232,213,.7);
+  z-index:15;
+}
+
+/* ══ EVENT FLASH — center, appears briefly on events ═══════════ */
+.event-flash{
+  position:absolute;
+  left:50%;top:36%;transform:translate(-50%,-50%);
+  z-index:25;
+  text-align:center;
+  opacity:0;
+  transition:opacity .08s;
+  pointer-events:none;
+}
+.event-flash.show{opacity:1}
+.event-flash.hide{opacity:0;transition:opacity .4s .8s}
+.event-type{
+  font-size:10px;letter-spacing:.36em;text-transform:uppercase;
+  color:#fff;font-weight:700;
+  text-shadow:0 0 20px rgba(201,56,40,.8);
+  margin-bottom:4px;
+}
+.event-penalty{
+  font-family:var(--serif);font-style:italic;font-weight:700;
+  font-size:22px;color:var(--red);
+  text-shadow:0 0 30px rgba(201,56,40,.6);
+}
+
+/* ══ BOTTOM LEFT — State + streak ══════════════════════════════ */
+.state-panel{
+  position:absolute;left:24px;bottom:82px;z-index:20;
+}
+.state-label{
+  font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+  font-weight:700;color:var(--green);
+  display:flex;align-items:center;gap:6px;
+  transition:color .2s;
+}
+.state-pip{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);flex-shrink:0;
+  transition:background .2s;
+}
+.streak-label{
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--dim);margin-top:5px;
+  font-variant-numeric:tabular-nums;
+}
+.streak-bar{
+  margin-top:5px;
+  width:80px;height:2px;background:rgba(242,232,213,.1);border-radius:1px;overflow:hidden;
+}
+.streak-fill{
+  height:100%;background:var(--green);border-radius:1px;
+  transition:width .5s ease, background .3s;
+}
+
+/* ══ BOTTOM RIGHT — Corridor + rank ════════════════════════════ */
+.corridor-panel{
+  position:absolute;right:24px;bottom:82px;z-index:20;text-align:right;
+}
+.corridor-name{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(242,232,213,.7);
+}
+.corridor-rank{
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--orange);margin-top:5px;
+}
+.corridor-bar{
+  margin-top:5px;
+  display:flex;justify-content:flex-end;
+  gap:2px;
+}
+.corridor-pip{
+  width:6px;height:6px;border-radius:1px;background:rgba(242,232,213,.12);
+}
+.corridor-pip.active{background:var(--orange)}
+
+/* ══ STOP BUTTON ════════════════════════════════════════════════ */
+.stop-btn{
+  position:absolute;left:0;right:0;bottom:0;
+  height:68px;z-index:30;
+  background:var(--cream);color:#080808;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;letter-spacing:.36em;text-transform:uppercase;font-weight:700;
+  border:0;cursor:pointer;
+}
+
+/* ══ COMPARE BADGE — corner label ══════════════════════════════ */
+.compare-badge{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  z-index:40;
+  background:rgba(232,80,26,.9);
+  font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:#fff;padding:4px 12px;border-radius:20px;font-weight:700;
+  white-space:nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame">
+
+  <!-- Car BG -->
+  <div class="car-bg"></div>
+  <!-- Perspective lines -->
+  <svg class="perspective" viewBox="0 0 390 844" preserveAspectRatio="none">
+    <line x1="195" y1="844" x2="60"  y2="440" stroke="rgba(242,232,213,.05)" stroke-width="1"/>
+    <line x1="195" y1="844" x2="330" y2="440" stroke="rgba(242,232,213,.05)" stroke-width="1"/>
+  </svg>
+  <!-- Vignette -->
+  <div class="vignette"></div>
+
+  <!-- Compare label -->
+  <div class="compare-badge">Game HUD Mockup</div>
+
+  <!-- ① Smoothness bar -->
+  <div class="smooth-track"><div class="smooth-fill" id="smooth-fill"></div></div>
+
+  <!-- ② REC -->
+  <div class="rec"><div class="rec-dot"></div><span class="rec-label">GPS · Motion</span></div>
+
+  <!-- ③ Elapsed -->
+  <div class="elapsed"><div class="elapsed-val" id="elapsed-val">14:22</div></div>
+
+  <!-- ④ Speed hero (top-left) -->
+  <div class="speed-hero">
+    <div class="speed-num" id="speed-num">42</div>
+    <div class="speed-unit">MPH</div>
+    <div class="speed-avg">AVG&nbsp;<span id="avg-num">31</span>&nbsp;MPH</div>
+  </div>
+
+  <!-- ⑤ Score hero (top-right) -->
+  <div class="score-hero">
+    <div class="score-num" id="score-num">88</div>
+    <div class="score-label">Score</div>
+  </div>
+
+  <!-- ⑥ G-radar zone -->
+  <div class="radar-zone" id="radar-zone">
+
+    <!-- Vertical G-bar (accel/brake) -->
+    <div class="g-bar-v-labels">
+      <span class="g-bar-v-lbl">ACCEL</span>
+      <span class="g-bar-v-lbl">BRAKE</span>
+    </div>
+    <div class="g-bar-v" id="g-bar-v">
+      <div style="position:absolute;inset:0;background:rgba(242,232,213,.08);border-radius:2px"></div>
+    </div>
+    <div class="g-pip-v" id="g-pip-v"></div>
+
+    <!-- Radar SVG -->
+    <svg width="100%" height="100%" viewBox="0 0 240 240" fill="none">
+      <circle cx="120" cy="120" r="118" stroke="rgba(242,232,213,.12)" stroke-width="1.5"/>
+      <circle cx="120" cy="120" r="60"  stroke="rgba(242,232,213,.06)" stroke-width="1"/>
+      <line x1="2"   y1="120" x2="238" y2="120" stroke="rgba(242,232,213,.05)" stroke-width=".5"/>
+      <line x1="120" y1="2"   x2="120" y2="238" stroke="rgba(242,232,213,.05)" stroke-width=".5"/>
+      <!-- cardinal labels -->
+      <text x="120" y="13" font-family="system-ui" font-size="7" fill="rgba(242,232,213,.25)" text-anchor="middle" letter-spacing="2">ACCEL</text>
+      <text x="120" y="234" font-family="system-ui" font-size="7" fill="rgba(242,232,213,.25)" text-anchor="middle" letter-spacing="2">BRAKE</text>
+    </svg>
+
+    <!-- Live G-dot -->
+    <div class="g-dot" id="g-dot"></div>
+
+    <!-- Horizontal G-bar (left/right) -->
+    <div class="g-bar-h" id="g-bar-h"></div>
+    <div class="g-bar-h-labels">
+      <span class="g-bar-h-lbl">◄ LEFT</span>
+      <span class="g-bar-h-lbl">RIGHT ►</span>
+    </div>
+    <div class="g-pip-h" id="g-pip-h"></div>
+
+  </div><!-- /radar-zone -->
+
+  <!-- ⑦ Event flash (center, shows briefly on events) -->
+  <div class="event-flash" id="event-flash">
+    <div class="event-type" id="event-type">HARD BRAKE</div>
+    <div class="event-penalty" id="event-penalty">−3 pts</div>
+  </div>
+
+  <!-- ⑧ State + streak (bottom-left) -->
+  <div class="state-panel">
+    <div class="state-label">
+      <div class="state-pip" id="state-pip"></div>
+      <span id="state-text">SMOOTH</span>
+    </div>
+    <div class="streak-label" id="streak-label">14 sec clean</div>
+    <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:70%"></div></div>
+  </div>
+
+  <!-- ⑨ Corridor + rank (bottom-right) -->
+  <div class="corridor-panel">
+    <div class="corridor-name">Mission St</div>
+    <div class="corridor-rank">#3 this week</div>
+    <div class="corridor-bar">
+      <div class="corridor-pip active"></div>
+      <div class="corridor-pip active"></div>
+      <div class="corridor-pip active"></div>
+      <div class="corridor-pip"></div>
+      <div class="corridor-pip"></div>
+    </div>
+  </div>
+
+  <!-- ⑩ Stop button -->
+  <button class="stop-btn">Stop Drive</button>
+
+</div><!-- /frame -->
+
+<script>
+// ── Demo animation engine ─────────────────────────────────────
+
+let streak       = 14;    // seconds clean
+let score        = 88;
+let speed        = 42;
+let avgSpeed     = 31;
+let elapsedSec   = 14 * 60 + 22;
+let smoothPct    = 88;    // tracks score
+let gX           = 0;     // lateral (-1..1)
+let gY           = 0;     // longitudinal (-1..1, neg=brake)
+let state        = 'smooth'; // smooth | brake | accel | turn
+
+// Elements
+const scoreEl   = document.getElementById('score-num');
+const speedEl   = document.getElementById('speed-num');
+const avgEl     = document.getElementById('avg-num');
+const elapsedEl = document.getElementById('elapsed-val');
+const dot       = document.getElementById('g-dot');
+const pipV      = document.getElementById('g-pip-v');
+const pipH      = document.getElementById('g-pip-h');
+const flash     = document.getElementById('event-flash');
+const flashType = document.getElementById('event-type');
+const flashPts  = document.getElementById('event-penalty');
+const statePip  = document.getElementById('state-pip');
+const stateText = document.getElementById('state-text');
+const streakLbl = document.getElementById('streak-label');
+const streakFill= document.getElementById('streak-fill');
+const smoothFill= document.getElementById('smooth-fill');
+
+// ── Radar zone bounds for dot positioning ─
+const RADAR_SIZE = 240;
+function setDot(nx, ny){ // nx,ny in -1..1
+  const r = RADAR_SIZE / 2;
+  const px = Math.round(50 + nx * 45);  // %
+  const py = Math.round(50 + ny * 45);  // % (positive = down = brake)
+  dot.style.left = px + '%';
+  dot.style.top  = py + '%';
+  // Color by state
+  const col = state === 'brake' ? '#C93828' : state === 'accel' ? '#E8501A' : '#F2E8D5';
+  dot.style.background    = col;
+  dot.style.boxShadow     = `0 0 14px ${col}90`;
+}
+
+function setPipV(ny){ // ny -1(accel)..0(idle)..+1(brake)
+  const pct = 50 + ny * 40; // 10%=full accel, 90%=full brake
+  pipV.style.top = pct + '%';
+  const col = ny < -.15 ? '#E8501A' : ny > .15 ? '#C93828' : 'rgba(242,232,213,.6)';
+  pipV.style.background  = col;
+  pipV.style.boxShadow   = `0 0 8px ${col}80`;
+}
+
+function setPipH(nx){ // nx -1(left)..0(idle)..+1(right)
+  const pct = 50 + nx * 40;
+  pipH.style.left = pct + '%';
+  const col = Math.abs(nx) > .15 ? '#C4A962' : 'rgba(242,232,213,.6)';
+  pipH.style.background  = col;
+  pipH.style.boxShadow   = `0 0 8px ${col}80`;
+}
+
+function setSmooth(pct){
+  smoothFill.style.width = Math.max(5, Math.min(100, pct)) + '%';
+}
+
+function setStateUI(s){
+  state = s;
+  const cfg = {
+    smooth: { label:'SMOOTH',       color:'#6FB669' },
+    brake:  { label:'BRAKING',      color:'#C93828' },
+    accel:  { label:'ACCELERATING', color:'#E8501A' },
+    turn:   { label:'TURNING',      color:'#C4A962' },
+  }[s] || { label:'SMOOTH', color:'#6FB669' };
+  statePip.style.background = cfg.color;
+  stateText.textContent     = cfg.label;
+  stateText.style.color     = cfg.color;
+}
+
+function showEvent(type, pts){
+  flashType.textContent = type;
+  flashPts.textContent  = pts;
+  flash.style.opacity   = '1';
+  flash.style.transition= 'opacity .08s';
+  setTimeout(() => {
+    flash.style.transition = 'opacity .5s .6s';
+    flash.style.opacity    = '0';
+  }, 100);
+}
+
+function fmtTime(s){
+  const m = Math.floor(s/60);
+  const sec = s % 60;
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+// ── Smooth random walk for G-dot ─
+let gTargX = 0, gTargY = 0;
+setInterval(() => {
+  if (state === 'smooth'){
+    gTargX += (Math.random()-.5)*.15;
+    gTargY += (Math.random()-.5)*.12;
+    gTargX = Math.max(-.25, Math.min(.25, gTargX));
+    gTargY = Math.max(-.2,  Math.min(.2,  gTargY));
+  }
+  gX += (gTargX - gX) * .3;
+  gY += (gTargY - gY) * .3;
+  setDot(gX, gY);
+  setPipV(gY);
+  setPipH(gX);
+}, 100);
+
+// ── Elapsed timer ─
+setInterval(() => {
+  elapsedSec++;
+  elapsedEl.textContent = fmtTime(elapsedSec);
+  if (state === 'smooth'){
+    streak++;
+    const maxStreak = 60;
+    streakLbl.textContent = streak + ' sec clean';
+    streakFill.style.width = Math.min(100, streak / maxStreak * 100) + '%';
+    streakFill.style.background = '#6FB669';
+  }
+}, 1000);
+
+// ── Demo event cycle ─────────────────────────────────────────
+const events = [
+  { delay:4000,  type:'smooth' },
+  { delay:7000,  type:'brake',  label:'HARD BRAKE',       pts:'−3 pts', penScore:-3, gTx:0,   gTy:.85 },
+  { delay:9500,  type:'smooth' },
+  { delay:14000, type:'turn',   label:'SHARP CORNER',     pts:'−1 pt',  penScore:-1, gTx:.75, gTy:.1  },
+  { delay:16000, type:'smooth' },
+  { delay:20000, type:'accel',  label:'HARD ACCELERATION',pts:'−2 pts', penScore:-2, gTx:0,   gTy:-.8 },
+  { delay:22500, type:'smooth' },
+];
+
+let cycleStart = Date.now();
+function runCycle(){
+  const elapsed = Date.now() - cycleStart;
+  const totalCycle = 26000;
+  const t = elapsed % totalCycle;
+  for (const ev of events){
+    const window = 800;
+    if (Math.abs(t - ev.delay) < window / 2 && Math.abs(t - ev.delay) < window / 2){
+      triggerEvent(ev);
+    }
+  }
+}
+
+let lastTriggered = {};
+function triggerEvent(ev){
+  const key = ev.delay;
+  if (lastTriggered[key] && Date.now() - lastTriggered[key] < 3000) return;
+  lastTriggered[key] = Date.now();
+  if (ev.type === 'smooth'){
+    setStateUI('smooth');
+    gTargX = 0; gTargY = 0;
+    return;
+  }
+  // Event fires
+  setStateUI(ev.type);
+  gTargX = ev.gTx || 0;
+  gTargY = ev.gTy || 0;
+  showEvent(ev.label, ev.pts);
+  // Score dips
+  score += ev.penScore;
+  score = Math.max(0, score);
+  smoothPct = score;
+  scoreEl.textContent = score;
+  setSmooth(smoothPct);
+  scoreEl.classList.add('ding');
+  setTimeout(() => scoreEl.classList.remove('ding'), 200);
+  // Streak resets
+  streak = 0;
+  streakLbl.textContent = '0 sec clean';
+  streakFill.style.width = '0%';
+  streakFill.style.background = '#C93828';
+  // Speed varies
+  speed += Math.round((Math.random()-.3)*8);
+  speed = Math.max(18, Math.min(68, speed));
+  speedEl.textContent = speed;
+  // Return to smooth after 2s
+  setTimeout(() => { setStateUI('smooth'); gTargX=0; gTargY=0; }, 2000);
+}
+
+setInterval(runCycle, 200);
+
+// ── Speed variation ─
+setInterval(()=>{
+  if (state==='smooth'){
+    speed += Math.round((Math.random()-.5)*3);
+    speed = Math.max(22, Math.min(65, speed));
+    speedEl.textContent = speed;
+    avgSpeed = Math.round((avgSpeed * 0.98) + speed * 0.02);
+    avgEl.textContent = avgSpeed;
+  }
+}, 1200);
+
+// init
+setDot(0,0); setPipV(0); setPipH(0); setSmooth(88); setStateUI('smooth');
+</script>
+
+</body>
+</html>
