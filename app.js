@@ -63,6 +63,61 @@ const VEHICLE_TYPES = [
   { id:'electric',   label:'Electric',     icon:'⚡' },
 ];
 const MAX_STORED_DRIVES = 20;
+const ACTIVE_DRIVE_KEY  = 'smoothaf.active_drive';
+
+function persistActiveDrive(){
+  if (!state.recording || state.simulated) return;
+  try {
+    const dist = state.samples.reduce((s, p) => s + (p.distMeters || 0), 0);
+    const top  = state.samples.reduce((m, p) => Math.max(m, p.speed || 0), 0);
+    localStorage.setItem(ACTIVE_DRIVE_KEY, JSON.stringify({
+      startTs:    state.startTime,
+      startScore: state.driveStartScore,
+      events:     state.events,
+      sampleCount:state.samples.length,
+      distanceMeters: dist,
+      topSpeedMps:    top,
+      durationMs: Date.now() - state.startTime,
+      savedAt:    Date.now()
+    }));
+  } catch {}
+}
+
+function clearActiveDrive(){
+  try { localStorage.removeItem(ACTIVE_DRIVE_KEY); } catch {}
+}
+
+function checkRecoveredDrive(){
+  try {
+    const raw = localStorage.getItem(ACTIVE_DRIVE_KEY);
+    if (!raw) return;
+    localStorage.removeItem(ACTIVE_DRIVE_KEY);
+    const saved = JSON.parse(raw);
+    const age = Date.now() - (saved.savedAt || 0);
+    if (age > 4 * 60 * 60 * 1000) return; // ignore if >4h old
+    if ((saved.sampleCount || 0) < 20)    return; // too short to bother
+    const cfg   = { ...DEFAULTS };
+    const score = scoreFromEvents(saved.events || [], cfg, saved.sampleCount);
+    const drive = {
+      id:             'rec_' + saved.startTs,
+      score:          Math.round(score),
+      distanceMeters: saved.distanceMeters || 0,
+      durationMs:     saved.durationMs     || 0,
+      topSpeedMps:    saved.topSpeedMps    || 0,
+      events:         saved.events         || [],
+      samples:        [],
+      ts:             saved.startTs,
+      recovered:      true
+    };
+    const all = loadDrives();
+    if (all.find(d => d.id === drive.id)) return; // already saved
+    all.unshift(drive);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(0, MAX_STORED_DRIVES))); } catch {}
+    const newLifetime = saved.startScore * 0.85 + score * 0.15;
+    saveLifetimeScore(newLifetime);
+    renderDriveList();
+  } catch {}
+}
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL    = 'https://dbreetxubxdxogmektxc.supabase.co';
@@ -1182,6 +1237,13 @@ function onGpsUpdate(pos){
 }
 
 function updateLiveUI(){
+  // Persist every 30s so iOS reload can recover the drive
+  const now = Date.now();
+  if (!state._lastSave || now - state._lastSave > 30000){
+    state._lastSave = now;
+    persistActiveDrive();
+  }
+
   const last = state.samples[state.samples.length - 1];
   const mph = last ? mpsToMph(last.speed || 0) : 0;
   $('#live-speed').textContent = Math.round(mph);
@@ -1339,6 +1401,7 @@ function speakEvent(type){
 }
 
 function stopRecording(){
+  clearActiveDrive();
   if (state.gpsWatchId != null){
     navigator.geolocation.clearWatch(state.gpsWatchId);
     state.gpsWatchId = null;
@@ -2730,9 +2793,19 @@ function renderRecAvatar(){
 
 document.addEventListener('DOMContentLoaded', () => {
   migrateLifetimeScore();
+  checkRecoveredDrive();
   renderDriveList();
   syncPendingDrives();
   renderCarDisplay();
+
+  // Re-acquire wake lock whenever app returns to foreground during a drive
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && state.recording && 'wakeLock' in navigator){
+      navigator.wakeLock.request('screen')
+        .then(wl => { state.wakeLock = wl; })
+        .catch(() => {});
+    }
+  });
 
   wireStartButton('#btn-start');
   wireStartButton('#btn-new-drive');
