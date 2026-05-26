@@ -93,7 +93,7 @@ html,body{height:100%;background:#000;font-family:var(--sans);-webkit-font-smoot
 
 /* ══ SPEED — top left hero ═════════════════════════════════════ */
 .speed-hero{
-  position:absolute;left:22px;top:56px;z-index:20;
+  position:absolute;left:24px;top:56px;z-index:20;
 }
 .speed-num{
   font-family:var(--serif);font-style:italic;font-weight:700;
@@ -110,11 +110,12 @@ html,body{height:100%;background:#000;font-family:var(--sans);-webkit-font-smoot
 
 /* ══ SCORE — top right hero ════════════════════════════════════ */
 .score-hero{
-  position:absolute;right:22px;top:56px;z-index:20;text-align:right;
+  position:absolute;right:24px;top:56px;z-index:20;text-align:right;
 }
 .score-num{
   font-family:var(--serif);font-style:italic;font-weight:700;
   font-size:84px;line-height:.95;letter-spacing:-.04em;
+  padding-right:6px; /* italic overhang bleeds past bounding box */
   background:linear-gradient(135deg,#E8501A,#C49A28);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
@@ -223,7 +224,7 @@ html,body{height:100%;background:#000;font-family:var(--sans);-webkit-font-smoot
 
 /* ══ BOTTOM LEFT — State + streak ══════════════════════════════ */
 .state-panel{
-  position:absolute;left:22px;bottom:82px;z-index:20;
+  position:absolute;left:24px;bottom:82px;z-index:20;
 }
 .state-label{
   font-size:11px;letter-spacing:.28em;text-transform:uppercase;
@@ -252,7 +253,7 @@ html,body{height:100%;background:#000;font-family:var(--sans);-webkit-font-smoot
 
 /* ══ BOTTOM RIGHT — Corridor + rank ════════════════════════════ */
 .corridor-panel{
-  position:absolute;right:22px;bottom:82px;z-index:20;text-align:right;
+  position:absolute;right:24px;bottom:82px;z-index:20;text-align:right;
 }
 .corridor-name{
   font-size:10px;letter-spacing:.22em;text-transform:uppercase;
