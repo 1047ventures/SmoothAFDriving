@@ -35,9 +35,11 @@ function saveDriverName(n){ try { localStorage.setItem(DRIVER_NAME_KEY, n.trim()
 // Run once if no lifetime score saved yet — derive it from stored drives.
 // Most-recent drive carries the most weight (exponential decay factor 0.65).
 function migrateLifetimeScore(){
-  if (localStorage.getItem(LIFETIME_SCORE_KEY) !== null) return; // already set
+  const stored = localStorage.getItem(LIFETIME_SCORE_KEY);
+  // Re-derive if never set OR if corrupted to "0" but real drives exist
+  if (stored !== null && Number(stored) !== 0) return;
   const drives = loadDrives().filter(d => d.score != null);
-  if (!drives.length){ saveLifetimeScore(100); return; }
+  if (!drives.length){ if (stored === null) saveLifetimeScore(100); return; }
   // drives[0] is newest; apply decay so older drives matter less
   let weightedSum = 0, totalWeight = 0;
   drives.forEach((d, i) => {
@@ -110,11 +112,9 @@ function checkRecoveredDrive(){
       recovered:      true
     };
     const all = loadDrives();
-    if (all.find(d => d.id === drive.id)) return; // already saved
+    if (all.find(d => d.startTime === saved.startTs || d.id === drive.id)) return; // already saved
     all.unshift(drive);
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(0, MAX_STORED_DRIVES))); } catch {}
-    const newLifetime = saved.startScore * 0.85 + score * 0.15;
-    saveLifetimeScore(newLifetime);
     renderDriveList();
   } catch {}
 }
@@ -1401,6 +1401,7 @@ function speakEvent(type){
 }
 
 function stopRecording(){
+  state.recording = false;   // set immediately so persistActiveDrive can't re-save
   clearActiveDrive();
   if (state.gpsWatchId != null){
     navigator.geolocation.clearWatch(state.gpsWatchId);
