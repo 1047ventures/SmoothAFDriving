@@ -1,0 +1,17 @@
+  :root{
+    --bg:#0A0A0A;
+    --bg2:#151212;
+    --ink:#1A1414;
+    --cream:#F2E8D5;
+    --cream-dim:#C9BFAC;
+    --muted:#6B6258;
+    --tang:#E85D3A;
+    --ox:#4A1E2F;
+    --sage:#7D8F6F;
+    --gold:#C4A962;
+    --danger:#E03B2F;
+    --warn:#E8A03A;
+    --good:#6FB669;
+    --serif:'Playfair Display',"Georgia","Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+  }

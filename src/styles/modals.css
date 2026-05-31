@@ -1,0 +1,19 @@
+  /* ── remove.bg key modal ── */
+  .removebg-error{color:var(--danger);font-size:12px;min-height:16px;margin:0 0 10px;text-align:center}
+  .removebg-input{
+    width:100%;padding:12px 14px;border-radius:10px;margin-bottom:12px;
+    border:1px solid rgba(244,235,217,.18);background:rgba(244,235,217,.06);
+    color:var(--cream);font-size:14px;outline:none;font-family:var(--sans);
+  }
+  .removebg-input::placeholder{color:var(--muted)}
+  .removebg-link{font-size:12px;color:var(--cream-dim);text-align:center;display:block;margin-bottom:14px}
+
+  /* ============ SIGNUP MODAL ============ */
+  .signup-overlay{position:fixed;inset:0;z-index:900;background:rgba(4,2,2,.82);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .signup-card{background:#181010;border:1px solid rgba(244,235,217,.12);border-radius:22px;padding:28px 24px;width:100%;max-width:320px;animation:bdp-in .25s ease-out}
+  .signup-card-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;color:var(--cream);margin-bottom:6px}
+  .signup-card-sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.55}
+  .signup-input{width:100%;background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.14);border-radius:12px;padding:14px 16px;font-size:18px;color:var(--cream);font-family:var(--serif);font-style:italic;font-weight:700;letter-spacing:.02em;outline:none;-webkit-appearance:none;box-sizing:border-box;margin-bottom:14px}
+  .signup-input:focus{border-color:rgba(232,93,58,.5);box-shadow:0 0 0 3px rgba(232,93,58,.08)}
+  .signup-submit{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;padding:14px;border-radius:12px;margin-bottom:10px}
+  .signup-cancel{appearance:none;border:0;background:transparent;color:var(--muted);font-size:14px;width:100%;padding:8px;cursor:pointer}

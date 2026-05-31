@@ -1,0 +1,513 @@
+import { $, $$ } from '../utils/dom.js';
+import { showScreen } from './router.js';
+import { analyzeDrive, drivingStyleVerdict, driveCoaching } from '../services/scoring.js';
+import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
+import { forceSegmentColor, dimColor } from '../utils/color.js';
+import { DIM_DISPLAY } from '../constants.js';
+
+let mapInstance = null;
+let mapLayers = [];
+let reviewEventMarkers = { brake: [], accel: [], turn: [], stop: [] };
+let reviewDrive = null;
+
+export function renderReview(drive){
+  showScreen('review');
+  reviewDrive = drive;
+
+  const analysis = analyzeDrive(drive);
+
+  // ── Header ─────────────────────────────────────────────────────────────────
+  const when = new Date(drive.startTime);
+  $('#review-when').textContent =
+    when.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'}) +
+    ' · ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+
+  // ── Score ──────────────────────────────────────────────────────────────────
+  const scoreEl = $('#review-score');
+  scoreEl.textContent = analysis.score;
+  scoreEl.className = 'score-big ' + (analysis.score >= 85 ? 'good' : analysis.score >= 60 ? 'mid' : 'bad');
+
+  // ── Events — show all detected events in chips; only tier 2+ affect score ──
+  $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
+  $('#ev-accel').textContent = drive.events.filter(e => e.type === 'accel').length;
+  $('#ev-turn').textContent  = drive.events.filter(e => e.type === 'turn').length;
+  $('#ev-stop').textContent  = analysis.stopMarkers.length;
+
+  // ── Stat strip ─────────────────────────────────────────────────────────────
+  $('#r-distance').textContent = metersToMiles(drive.distanceMeters).toFixed(1);
+  $('#r-duration').textContent = fmtDuration(drive.durationMs);
+  $('#r-topspeed').textContent  = Math.round(mpsToMph(drive.topSpeedMps));
+  const roadEl = $('#r-road-quality');
+  if (roadEl && drive.samples.length){
+    const avgRough = drive.samples.reduce((s,x) => s + (x.roadRoughness || 0), 0) / drive.samples.length;
+    roadEl.textContent = avgRough < 0.15 ? 'Smooth' : avgRough < 0.5 ? 'Good' : avgRough < 1.0 ? 'Fair' : 'Rough';
+    roadEl.style.color = avgRough < 0.15 ? 'var(--good)' : avgRough < 0.5 ? 'var(--sage)' : avgRough < 1.0 ? 'var(--warn)' : 'var(--danger)';
+  }
+
+  // ── Force timeline chart (hidden, kept for analysis sheet) ───────────────
+  renderForceTimeline(drive);
+
+  // ── v2 What Happened + Hardest Moment ──────────────────────────────────────
+  {
+    const brakes   = drive.events.filter(e => e.type === 'brake').length;
+    const accels   = drive.events.filter(e => e.type === 'accel').length;
+    const turns    = drive.events.filter(e => e.type === 'turn').length;
+    const totalEvs = brakes + accels + turns;
+    const distMi   = metersToMiles(drive.distanceMeters || 0);
+
+    const smEl = document.getElementById('rv-smooth-main');
+    if (smEl) smEl.textContent = totalEvs === 0
+      ? 'Perfectly clean'
+      : `${Math.max(0, distMi - totalEvs * 0.15).toFixed(1)} mi smooth`;
+
+    const ssEl = document.getElementById('rv-smooth-sub');
+    if (ssEl && drive.samples.length){
+      const avgRough = drive.samples.reduce((s, x) => s + (x.roadRoughness || 0), 0) / drive.samples.length;
+      ssEl.textContent = 'Road: ' + (avgRough < 0.15 ? 'Smooth' : avgRough < 0.5 ? 'Good' : avgRough < 1.0 ? 'Fair' : 'Rough');
+    }
+
+    const emEl = document.getElementById('rv-events-main');
+    if (emEl) emEl.textContent = totalEvs === 0 ? 'None'
+      : brakes ? `${brakes} hard brake${brakes !== 1 ? 's' : ''}`
+      : accels ? `${accels} hard accel${accels !== 1 ? 's' : ''}`
+      : `${turns} sharp turn${turns !== 1 ? 's' : ''}`;
+
+    const esEl = document.getElementById('rv-events-sub');
+    if (esEl) esEl.textContent = (accels && brakes)
+      ? `${accels} accel · ${turns} turn${turns !== 1 ? 's' : ''}`
+      : (turns && (brakes || accels)) ? `${turns} turn${turns !== 1 ? 's' : ''}` : '';
+
+    const worst = drive.events
+      .filter(e => e.type === 'brake' || e.type === 'turn' || e.type === 'accel')
+      .sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
+
+    const worstEl    = document.getElementById('rv-worst-text');
+    const worstBlock = document.getElementById('rv-worst-block');
+    if (worstEl){
+      if (worst){
+        const lbl = worst.type === 'brake' ? 'Hard brake' : worst.type === 'accel' ? 'Hard accel' : 'Sharp turn';
+        worstEl.textContent = `${lbl} · ${fmtDuration(worst.t || 0)} in · ${worst.speedMph || 0} mph`;
+      } else {
+        worstEl.textContent = 'No harsh events — clean drive!';
+      }
+    }
+    if (worstBlock) worstBlock.style.display = totalEvs === 0 ? 'none' : '';
+  }
+
+  // ── Style verdict + analysis sheet ────────────────────────────────────────
+  const verdict = drivingStyleVerdict(analysis, drive);
+  const vColor  = dimColor(analysis.score);
+
+  // Verdict preview on score header
+  const verdictTag = document.getElementById('score-verdict-tag');
+  if (verdictTag) verdictTag.textContent = verdict.label;
+
+  // Populate analysis sheet
+  const asLabel = document.getElementById('as-verdict-label');
+  const asSub   = document.getElementById('as-verdict-sub');
+  if (asLabel) { asLabel.textContent = verdict.label; asLabel.style.color = vColor; }
+  if (asSub)   asSub.textContent = verdict.sub;
+
+  const asDims = document.getElementById('as-dims-list');
+  if (asDims){
+    const regularDims = DIM_DISPLAY.filter(d => d.key !== 'momentum');
+    const mVal  = analysis.dims.momentum || 0;
+    const mColor = dimColor(mVal);
+    const tiles = regularDims.map(({ key, label }) => {
+      const val   = analysis.dims[key] || 0;
+      const color = dimColor(val);
+      return `<div class="dim-tile" style="border-color:${color}44">
+        <div class="dim-tile-score" style="color:${color}">${val}</div>
+        <div class="dim-tile-label">${label}</div>
+      </div>`;
+    }).join('');
+    const momentum = `<div class="dim-tile momentum" id="dim-tile-momentum" style="border-color:${mColor}44">
+      <div class="momentum-left">
+        <div class="dim-tile-score" style="color:${mColor}">${mVal}</div>
+        <div class="dim-tile-label">Momentum</div>
+      </div>
+      <div class="momentum-right">
+        ${analysis.fullStops} full stop${analysis.fullStops !== 1 ? 's' : ''}<br>
+        ${analysis.stopsPerMile.toFixed(1)} per mile<br>
+        <div class="momentum-map-link" style="color:${mColor}">View on map →</div>
+      </div>
+    </div>`;
+    asDims.innerHTML = tiles + momentum;
+    document.getElementById('dim-tile-momentum')?.addEventListener('click', () => {
+      document.getElementById('analysis-sheet')?.classList.add('hidden');
+      enterMapFilter('stop');
+    });
+  }
+
+  // Wire score header tap
+  const scoreBtn = document.getElementById('score-header-btn');
+  if (scoreBtn){
+    scoreBtn.onclick = () => document.getElementById('analysis-sheet')?.classList.remove('hidden');
+  }
+  document.getElementById('as-close')?.addEventListener('click', () => {
+    document.getElementById('analysis-sheet')?.classList.add('hidden');
+  });
+
+  // ── Map ────────────────────────────────────────────────────────────────────
+  if (!mapInstance){
+    mapInstance = L.map('map', { zoomControl: true, attributionControl: true, preferCanvas: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20, attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd',
+    }).addTo(mapInstance);
+  } else {
+    mapLayers.forEach(l => mapInstance.removeLayer(l));
+    mapLayers = [];
+  }
+
+  if (drive.samples.length < 2) return;
+
+  const bounds = L.latLngBounds(drive.samples.map(s => [s.lat, s.lon]));
+  mapInstance.fitBounds(bounds, { padding: [40, 40] });
+
+  for (let i = 1; i < drive.samples.length; i++){
+    const a = drive.samples[i-1], b = drive.samples[i];
+    const la = ((a.la || 0) + (b.la || 0)) / 2;
+    const ra = ((a.ra || 0) + (b.ra || 0)) / 2;
+    const seg = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], {
+      color: forceSegmentColor(la, ra), weight: 6, opacity: .95, lineCap: 'round', lineJoin: 'round'
+    }).addTo(mapInstance);
+    mapLayers.push(seg);
+  }
+
+  // Direction-of-travel arrows — ~7 evenly spaced along the route
+  const smp = drive.samples;
+  const step = Math.max(1, Math.floor(smp.length / 7));
+  for (let i = step; i < smp.length - 1; i += step){
+    const a = smp[i], b = smp[i + 1];
+    const dy = b.lat - a.lat, dx = b.lon - a.lon;
+    if (Math.abs(dy) < 1e-6 && Math.abs(dx) < 1e-6) continue;
+    const deg = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+    const arrow = L.marker([a.lat, a.lon], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div class="route-arrow" style="transform:rotate(${deg}deg)">▲</div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7]
+      }),
+      interactive: false
+    }).addTo(mapInstance);
+    mapLayers.push(arrow);
+  }
+
+  const first = drive.samples[0], last = drive.samples[drive.samples.length-1];
+  [
+    L.marker([first.lat, first.lon], { icon: L.divIcon({ className:'', html:'<div class="start-marker"></div>', iconSize:[14,14], iconAnchor:[7,7] }) }).addTo(mapInstance).bindPopup('Start'),
+    L.marker([last.lat,  last.lon],  { icon: L.divIcon({ className:'', html:'<div class="end-marker"></div>',   iconSize:[14,14], iconAnchor:[7,7] }) }).addTo(mapInstance).bindPopup('End'),
+  ].forEach(m => mapLayers.push(m));
+
+  reviewEventMarkers = { brake: [], accel: [], turn: [], stop: [] };
+  for (const s of analysis.stopMarkers){
+    const secs = (s.durationMs / 1000).toFixed(s.durationMs < 10000 ? 1 : 0);
+    const m = L.marker([s.lat, s.lon], {
+      icon: L.divIcon({ className:'', html:`<div class="ev-marker stop-pill">${secs}s</div>`, iconSize:[52,24], iconAnchor:[26,12] })
+    }).addTo(mapInstance);
+    m.bindPopup(`<b>Full stop</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
+    mapLayers.push(m);
+    reviewEventMarkers.stop.push(m);
+  }
+  for (const e of drive.events){
+    if (e.type === 'shift') continue;
+    const tier  = e.tier || 2;
+    const label = e.type === 'brake' ? 'Brake' : e.type === 'accel' ? 'Accel' : 'Turn';
+    const raw   = e.la != null ? `${Math.abs(e.la).toFixed(2)} m/s² (${(Math.abs(e.la)/9.81).toFixed(3)}G)`
+                : e.ra != null ? `${Math.abs(e.ra).toFixed(2)} m/s² (${(Math.abs(e.ra)/9.81).toFixed(3)}G)`
+                : `sev ${(e.severity||1).toFixed(1)}×`;
+    const tierLabel = tier >= 3 ? 'Harsh' : tier >= 2 ? 'Moderate' : 'Mild';
+    let markerHtml, markerSize, markerAnchor;
+    if (tier >= 2){
+      const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
+      markerHtml   = `<div class="ev-marker ${e.type}">${glyph}</div>`;
+      markerSize   = [26, 26]; markerAnchor = [13, 13];
+    } else {
+      markerHtml   = `<div class="ev-marker-dot ${e.type}"></div>`;
+      markerSize   = [12, 12]; markerAnchor = [6, 6];
+    }
+    const m = L.marker([e.lat, e.lon], {
+      icon: L.divIcon({ className:'', html: markerHtml, iconSize: markerSize, iconAnchor: markerAnchor })
+    }).addTo(mapInstance);
+    if (e.type === 'brake'){
+      m.on('click', () => showBrakeProfile(e, drive));
+    } else {
+      m.bindPopup(`<b>${tierLabel} ${label}</b><br>${e.speedMph} mph · ${raw}<br><span style="color:#8A7B72">t+${fmtDuration(e.t)}</span>`);
+    }
+    mapLayers.push(m);
+    if (reviewEventMarkers[e.type]) reviewEventMarkers[e.type].push(m);
+  }
+
+  setTimeout(() => mapInstance.invalidateSize(), 80);
+}
+
+// -------------------------------------------------------------------------
+// Full-drive force timeline chart
+// -------------------------------------------------------------------------
+export function renderForceTimeline(drive){
+  const canvas = document.getElementById('force-timeline-canvas');
+  if (!canvas || !drive || drive.samples.length < 2) return;
+  requestAnimationFrame(() => {
+    const dpr   = window.devicePixelRatio || 1;
+    const W     = canvas.offsetWidth;
+    const H     = canvas.offsetHeight;
+    if (!W || !H) return;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const smp   = drive.samples;
+    const t0    = smp[0].t, tEnd = smp[smp.length-1].t;
+    const tSpan = tEnd - t0 || 1;
+
+    // Y: center = zero, positive la = accel (upward), negative la = brake (downward)
+    const allAbs  = smp.flatMap(s => [Math.abs(s.la || 0), Math.abs(s.ra || 0)]);
+    const maxForce = Math.max(1.2, ...allAbs);
+    const tx = t  => ((t - t0) / tSpan) * W;
+    const ty = v  => H * 0.5 * (1 - v / maxForce);
+    const zero = ty(0);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Subtle zone backgrounds
+    ctx.fillStyle = 'rgba(232,160,58,.05)';
+    ctx.fillRect(0, 0, W, zero);            // upper = accel zone
+    ctx.fillStyle = 'rgba(224,59,47,.05)';
+    ctx.fillRect(0, zero, W, H - zero);    // lower = brake zone
+
+    // Zero line
+    ctx.strokeStyle = 'rgba(244,235,217,.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, zero); ctx.lineTo(W, zero); ctx.stroke();
+
+    // ── Accel fill (la > 0, plots above center) ───────────────────────────
+    ctx.beginPath();
+    ctx.moveTo(tx(smp[0].t), zero);
+    smp.forEach(s => ctx.lineTo(tx(s.t), (s.la||0) > 0.05 ? ty(s.la) : zero));
+    ctx.lineTo(tx(smp[smp.length-1].t), zero);
+    ctx.closePath();
+    const aGrad = ctx.createLinearGradient(0, 0, 0, zero);
+    aGrad.addColorStop(0, 'rgba(232,160,58,.6)');
+    aGrad.addColorStop(1, 'rgba(232,160,58,.08)');
+    ctx.fillStyle = aGrad;
+    ctx.fill();
+
+    // ── Brake fill (la < 0, plots below center) ───────────────────────────
+    ctx.beginPath();
+    ctx.moveTo(tx(smp[0].t), zero);
+    smp.forEach(s => ctx.lineTo(tx(s.t), (s.la||0) < -0.05 ? ty(s.la) : zero));
+    ctx.lineTo(tx(smp[smp.length-1].t), zero);
+    ctx.closePath();
+    const bGrad = ctx.createLinearGradient(0, zero, 0, H);
+    bGrad.addColorStop(0, 'rgba(224,59,47,.08)');
+    bGrad.addColorStop(1, 'rgba(224,59,47,.6)');
+    ctx.fillStyle = bGrad;
+    ctx.fill();
+
+    // ── La main line ──────────────────────────────────────────────────────
+    ctx.beginPath();
+    smp.forEach((s, i) => {
+      const x = tx(s.t), y = ty(s.la || 0);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = 'rgba(244,235,217,.4)';
+    ctx.lineWidth   = 1.5;
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+
+    // ── Ra line (lateral / turning — gold) ───────────────────────────────
+    ctx.beginPath();
+    smp.forEach((s, i) => {
+      const x = tx(s.t), y = ty(s.ra || 0);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = 'rgba(196,169,98,.55)';
+    ctx.lineWidth   = 1;
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+
+    // Event tick marks for tier-2+ events (hairlines on timeline)
+    ctx.strokeStyle = 'rgba(224,59,47,.5)';
+    ctx.lineWidth   = 1;
+    drive.events.forEach(e => {
+      if ((e.tier || 2) < 2 || e.type === 'shift') return;
+      const x = tx(e.t);
+      const color = e.type === 'brake' ? 'rgba(224,59,47,.6)' : e.type === 'accel' ? 'rgba(232,160,58,.6)' : 'rgba(196,169,98,.6)';
+      ctx.strokeStyle = color;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H * 0.18); ctx.stroke();
+    });
+  });
+}
+
+// -------------------------------------------------------------------------
+// Brake event deceleration profile panel + sparkline
+// -------------------------------------------------------------------------
+export function showBrakeProfile(e, drive){
+  const existing = document.getElementById('brake-detail-panel');
+  if (existing) existing.remove();
+
+  const PRE_MS  = 4000;
+  const POST_MS = 6000;
+  const slice = drive.samples.filter(s => s.t >= e.t - PRE_MS && s.t <= e.t + POST_MS);
+  if (slice.length < 2) return;
+
+  const laVals  = slice.map(s => s.la || 0);
+  const minLa   = Math.min(-0.3, ...laVals);
+  const maxLa   = Math.max( 0.3, ...laVals);
+  const peakLa  = Math.min(...laVals);
+  const peakG   = (Math.abs(peakLa) / 9.81).toFixed(2);
+  const peakMs2 = Math.abs(peakLa).toFixed(1);
+
+  const brakePts = slice.filter(s => (s.la || 0) < -0.3);
+  const dur = brakePts.length >= 2
+    ? ((brakePts[brakePts.length-1].t - brakePts[0].t) / 1000).toFixed(1)
+    : brakePts.length === 1 ? '<1' : '—';
+
+  const qualLabel = peakG >= 0.4 ? 'Hard' : peakG >= 0.2 ? 'Moderate' : 'Light';
+  const qualColor = peakG >= 0.4 ? 'var(--danger)' : peakG >= 0.2 ? 'var(--warn)' : 'var(--good)';
+
+  const panel = document.createElement('div');
+  panel.id = 'brake-detail-panel';
+  panel.className = 'brake-detail-panel';
+  panel.innerHTML = `
+    <div class="bdp-header">
+      <span class="bdp-title" style="color:${qualColor}">${qualLabel} brake</span>
+      <span class="bdp-meta">${e.speedMph} mph entry · tier ${e.tier || 2}</span>
+      <button class="bdp-close" aria-label="Close">×</button>
+    </div>
+    <canvas class="brake-spark" id="brake-spark"></canvas>
+    <div class="bdp-stats">
+      <div class="bdp-stat">
+        <div class="bdp-stat-v" style="color:${qualColor}">${peakG}<span class="bdp-stat-u">G</span></div>
+        <div class="bdp-stat-l">Peak G</div>
+      </div>
+      <div class="bdp-stat">
+        <div class="bdp-stat-v">${peakMs2}<span class="bdp-stat-u">m/s²</span></div>
+        <div class="bdp-stat-l">Peak force</div>
+      </div>
+      <div class="bdp-stat">
+        <div class="bdp-stat-v">${dur}<span class="bdp-stat-u">s</span></div>
+        <div class="bdp-stat-l">Duration</div>
+      </div>
+      <div class="bdp-stat">
+        <div class="bdp-stat-v">${e.speedMph}<span class="bdp-stat-u">mph</span></div>
+        <div class="bdp-stat-l">Entry</div>
+      </div>
+    </div>`;
+
+  const mapBlock = document.querySelector('.review-map-block');
+  if (!mapBlock) return;
+  mapBlock.appendChild(panel);
+  panel.querySelector('.bdp-close').onclick = () => panel.remove();
+
+  requestAnimationFrame(() =>
+    drawBrakeSparkline(document.getElementById('brake-spark'), slice, e.t, minLa, maxLa)
+  );
+}
+
+function drawBrakeSparkline(canvas, slice, eventT, minLa, maxLa){
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.offsetWidth;
+  const H   = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const t0    = slice[0].t;
+  const tSpan = (slice[slice.length-1].t - t0) || 1;
+  const laRange = maxLa - minLa || 1;
+
+  const tx = t  => ((t - t0) / tSpan) * W;
+  const ty = la => H * (maxLa - la) / laRange;
+  const zero = ty(0);
+
+  // Zero baseline
+  ctx.strokeStyle = 'rgba(244,235,217,.14)';
+  ctx.lineWidth   = 1;
+  ctx.beginPath(); ctx.moveTo(0, zero); ctx.lineTo(W, zero); ctx.stroke();
+
+  // Event timestamp dashed line
+  const ex = tx(eventT);
+  if (ex >= 0 && ex <= W){
+    ctx.strokeStyle = 'rgba(224,59,47,.45)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(ex, 0); ctx.lineTo(ex, H); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const pts = slice.map(s => ({ x: tx(s.t), y: ty(s.la || 0) }));
+
+  // Filled area under the curve
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, zero);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, zero);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(224,59,47,.48)');
+  grad.addColorStop(1, 'rgba(224,59,47,.04)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Stroke line
+  ctx.beginPath();
+  pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+  ctx.strokeStyle = '#E03B2F';
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // Peak G label
+  const peakPt = pts.reduce((a, b) => b.y > a.y ? b : a); // highest y = most negative la
+  ctx.fillStyle = 'rgba(224,59,47,.9)';
+  ctx.font      = `bold ${9 * dpr / dpr}px var(--sans)`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${(Math.abs(Math.min(...slice.map(s=>s.la||0)))/9.81).toFixed(2)}G`, clamp(peakPt.x, 18, W-18), Math.max(10, peakPt.y - 6));
+}
+
+export function enterMapFilter(type){
+  if (!mapInstance) return;
+  const mapBlock = document.querySelector('.review-map-block');
+  const btn = document.getElementById('btn-map-expand');
+  if (mapBlock && !mapBlock.classList.contains('map-full')){
+    mapBlock.classList.add('map-full');
+    if (btn){ btn.textContent = '×'; btn.setAttribute('aria-label', 'Close map'); }
+    setTimeout(() => mapInstance.invalidateSize(), 100);
+  }
+  ['brake','accel','turn','stop'].forEach(t => {
+    reviewEventMarkers[t].forEach(m => {
+      if (t === type){ if (!mapInstance.hasLayer(m)) m.addTo(mapInstance); }
+      else           { if (mapInstance.hasLayer(m))  mapInstance.removeLayer(m); }
+    });
+  });
+  const pts = reviewEventMarkers[type].map(m => m.getLatLng());
+  if (pts.length) mapInstance.fitBounds(L.latLngBounds(pts), { padding:[60,60] });
+  const badge = document.getElementById('map-filter-badge');
+  const labelEl = document.getElementById('map-filter-label');
+  if (badge && labelEl){
+    const labels = { brake:'BRAKES', accel:'ACCELS', turn:'TURNS', stop:'FULL STOPS' };
+    labelEl.textContent = labels[type] || type.toUpperCase();
+    badge.classList.add('visible');
+  }
+}
+
+export function clearMapFilter(){
+  if (!mapInstance) return;
+  ['brake','accel','turn','stop'].forEach(t => {
+    reviewEventMarkers[t].forEach(m => { if (!mapInstance.hasLayer(m)) m.addTo(mapInstance); });
+  });
+  const badge = document.getElementById('map-filter-badge');
+  if (badge) badge.classList.remove('visible');
+  if (reviewDrive && reviewDrive.samples.length){
+    const bounds = L.latLngBounds(reviewDrive.samples.map(s => [s.lat, s.lon]));
+    mapInstance.fitBounds(bounds, { padding:[40,40] });
+  }
+}
+
+export { mapInstance };

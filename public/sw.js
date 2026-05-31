@@ -2,11 +2,10 @@
 // Network-first for app shell so updates land immediately when online.
 // Cache-first fallback for offline + opportunistic CDN caching.
 
-const CACHE = 'smoothaf-v75';
+const CACHE = 'smoothaf-v76';
 const SHELL = [
   './',
   './index.html',
-  './app.js',
   './manifest.json',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',

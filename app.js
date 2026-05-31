@@ -18,6 +18,8 @@
 const $ = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
 
+const APP_VERSION = 'v74';
+
 // -------------------------------------------------------------------------
 // Globals
 // -------------------------------------------------------------------------
@@ -2798,6 +2800,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDriveList();
   syncPendingDrives();
   renderCarDisplay();
+  const verEl = $('#app-version');
+  if (verEl) verEl.textContent = APP_VERSION;
 
   // Re-acquire wake lock whenever app returns to foreground during a drive
   document.addEventListener('visibilitychange', () => {
