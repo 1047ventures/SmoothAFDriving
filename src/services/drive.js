@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, DEFAULTS } from '../constants.js';
+import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, DEFAULTS, CFG } from '../constants.js';
 import {
   loadDrives,
   saveDrive,
@@ -117,7 +117,7 @@ export function finalizeAndReview(callbacks = {}){
     })),
     eventCount: events.length,
     simulated: state.simulated,
-    settingsSnapshot: { ...state.settingsSnapshot || {} },
+    settingsSnapshot: { ...CFG },
   };
 
   drive.score = analyzeDrive(drive).score;
