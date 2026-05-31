@@ -1,0 +1,57 @@
+  /* ── Garage sheet ── */
+  .garage-sheet{
+    position:fixed;inset:0;z-index:950;
+    background:rgba(10,8,8,.97);
+    display:flex;flex-direction:column;
+    animation:bdp-in .25s ease-out;
+    /* push all content below the Dynamic Island / notch */
+    padding-top:constant(safe-area-inset-top);
+    padding-top:env(safe-area-inset-top);
+  }
+  .gs-bar{
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
+    padding:20px 20px 12px;
+  }
+  .gs-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;color:var(--cream);line-height:1;flex:1}
+  .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
+  #garage-list-view{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0)+24px)}
+  .gs-empty{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:28px 0 8px;text-align:center}
+  .gs-card{
+    border:1px solid rgba(244,235,217,.1);border-radius:16px;
+    background:rgba(244,235,217,.04);padding:14px 16px;margin-bottom:10px;
+    display:flex;align-items:center;gap:12px;cursor:pointer;
+    transition:background .15s,border-color .15s;
+  }
+  .gs-card:active{background:rgba(244,235,217,.09)}
+  .gs-card.active-vehicle{border-color:var(--tang);background:rgba(232,93,58,.07)}
+  .gs-card-icon{font-size:34px;flex-shrink:0;line-height:1}
+  .gs-card-body{flex:1;min-width:0}
+  .gs-card-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:19px;color:var(--cream);line-height:1.1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gs-card-detail{font-size:11px;color:var(--muted);letter-spacing:.05em}
+  .gs-card-badge{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--tang);border:1px solid var(--tang);border-radius:999px;padding:3px 8px;flex-shrink:0}
+  .gs-card-edit{appearance:none;border:1px solid rgba(244,235,217,.15);background:transparent;color:var(--cream-dim);font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;flex-shrink:0}
+  .gs-card-edit:active{background:rgba(244,235,217,.08)}
+  .gs-add-btn{appearance:none;border:1px solid rgba(244,235,217,.18);background:transparent;cursor:pointer;width:100%;padding:16px;border-radius:16px;color:var(--cream-dim);font-size:14px;letter-spacing:.08em;transition:background .15s;margin-top:4px}
+  .gs-add-btn:active{background:rgba(244,235,217,.06)}
+  #garage-form-view{display:flex;flex-direction:column;flex:1;min-height:0}
+  .gs-form-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px calc(env(safe-area-inset-bottom,0)+32px)}
+  .gs-section-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .gs-section-label:first-child{margin-top:4px}
+  .gs-input{
+    width:100%;padding:13px 14px;border-radius:12px;margin-bottom:8px;
+    border:1px solid rgba(244,235,217,.14);background:rgba(244,235,217,.05);
+    color:var(--cream);font-size:15px;outline:none;font-family:var(--sans);
+    -webkit-appearance:none;display:block;
+  }
+  .gs-input::placeholder{color:var(--muted)}
+  .gs-input:focus{border-color:rgba(232,93,58,.5);background:rgba(244,235,217,.07)}
+  .gs-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:4px}
+  .gs-type-card{border:1px solid rgba(244,235,217,.1);border-radius:12px;background:rgba(244,235,217,.04);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:background .15s,border-color .15s;text-align:center}
+  .gs-type-card:active{background:rgba(244,235,217,.1)}
+  .gs-type-card.selected{border-color:var(--tang);background:rgba(232,93,58,.08)}
+  .gs-type-icon{font-size:26px;line-height:1}
+  .gs-type-label{font-size:8px;font-weight:700;color:var(--cream-dim);letter-spacing:.1em;text-transform:uppercase}
+  .gs-save-btn{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;padding:18px;border-radius:16px;margin-top:20px;box-shadow:0 8px 28px rgba(232,93,58,.3);transition:transform .1s ease}
+  .gs-save-btn:active{transform:scale(.985)}
+  .gs-delete-btn{appearance:none;border:1px solid rgba(224,59,47,.3);background:transparent;cursor:pointer;width:100%;padding:14px;border-radius:14px;margin-top:10px;color:var(--danger);font-size:14px;font-weight:600;transition:background .15s}
+  .gs-delete-btn:active{background:rgba(224,59,47,.1)}

@@ -3,15 +3,14 @@ import {
   TIER_MULT,
   CONFIDENCE_PRIOR,
   DIM_WEIGHTS,
-  DIM_DISPLAY,
-  EVENT_COOLDOWN_MS,
   STORAGE_KEY,
+  EVENT_COOLDOWN_MS,
 } from '../constants.js';
 import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles } from '../utils/math.js';
-import { loadDrives, saveDrives } from './storage.js';
+import { loadDrives } from './storage.js';
+import { detectEventWithThresh } from './sensors/gps.js';
 
-// ── detectEventWithThresh (imported by gps.js — re-exported here for rescoreDrive) ──
-export { detectEventWithThresh } from './sensors/gps.js';
+export { detectEventWithThresh };
 
 export function scoreFromEvents(events, cfg, sampleCount){
   cfg = cfg || CFG;
@@ -34,40 +33,6 @@ export function scoreFromEvents(events, cfg, sampleCount){
 
 // Re-score a stored drive using new CFG (uses pre-computed la/ra per sample)
 export function rescoreDrive(drive, cfg){
-  const { detectEventWithThresh: det } = require('./sensors/gps.js');
-  const events = [];
-  let lastEventT = -Infinity;
-  for (const s of drive.samples){
-    if ((s.t - lastEventT) < EVENT_COOLDOWN_MS) continue;
-    const evt = det(s.la || 0, s.ra || 0, cfg, 0, s.speed || 0);
-    if (evt){
-      events.push({
-        ...evt,
-        t: s.t, lat: s.lat, lon: s.lon,
-        speedMph: Math.round(mpsToMph(s.speed || 0)),
-      });
-      lastEventT = s.t;
-    }
-  }
-  return {
-    ...drive,
-    events,
-    eventCount: events.length,
-    score: scoreFromEvents(events, cfg, drive.samples.length),
-  };
-}
-
-export function rescoreAllDrives(){
-  const all = loadDrives();
-  const rescored = all.map(d => rescoreDriveInternal(d, CFG));
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(rescored)); } catch {}
-  return rescored;
-}
-
-// Internal version that avoids circular import by calling detectEventWithThresh inline
-function rescoreDriveInternal(drive, cfg){
-  // Import inline to avoid module-level circular reference
-  const { detectEventWithThresh } = require('./sensors/gps.js');
   const events = [];
   let lastEventT = -Infinity;
   for (const s of drive.samples){
@@ -90,12 +55,19 @@ function rescoreDriveInternal(drive, cfg){
   };
 }
 
+export function rescoreAllDrives(){
+  const all = loadDrives();
+  const rescored = all.map(d => rescoreDrive(d, CFG));
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(rescored)); } catch {}
+  return rescored;
+}
+
 export function analyzeDrive(drive){
   const smp = drive.samples || [];
   const n   = smp.length;
   if (n < 3){
     const dims = { peakHarshness:85, throttle:85, steering:85, braking:85, cornering:85, transitions:85, momentum:85 };
-    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0 };
+    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0, stopMarkers:[] };
   }
 
   const durationMin = (drive.durationMs || 0) / 60000;
