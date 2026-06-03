@@ -28,18 +28,18 @@ export function renderHomeStats(){
   const welcomeEl = document.getElementById('home-welcome-name');
   if (welcomeEl){
     const name = loadDriverName();
-    welcomeEl.textContent = name ? `Welcome back, ${name}!` : 'Hey, Driver';
+    welcomeEl.textContent = name ? `Back at it, ${name}` : 'Hey, Driver';
   }
 
   // Persona sentence — score number shown above, just describe the archetype here
   const sentenceEl = document.getElementById('home-score-sentence');
   if (sentenceEl){
     if (!all.length){
-      sentenceEl.innerHTML = 'Start driving to build your score.';
+      sentenceEl.innerHTML = 'First lap unscored. Tap <em>Start Drive</em> — it scores itself.';
     } else if (p){
       sentenceEl.innerHTML = `<em>${p.title}</em> — ${p.sub}`;
     } else {
-      sentenceEl.innerHTML = `${all.length} drive${all.length !== 1 ? 's' : ''} logged. Keep going.`;
+      sentenceEl.innerHTML = `${all.length} drive${all.length !== 1 ? 's' : ''} in the books. Keep stacking.`;
     }
   }
 
@@ -47,13 +47,16 @@ export function renderHomeStats(){
   const routesEl = document.getElementById('home-routes-text');
   if (routesEl){
     if (!all.length){
-      routesEl.textContent = 'Drive more to unlock corridor rankings.';
-    } else if (all.length < 5){
-      routesEl.textContent = `${all.length} drive${all.length !== 1 ? 's' : ''} logged. Keep going to unlock neighborhood rankings.`;
+      routesEl.textContent = 'Drive a route 3× to unlock your Corridor rank — and find out who owns your block.';
+    } else if (all.length < 3){
+      routesEl.textContent = `${3 - all.length} more drive${3 - all.length !== 1 ? 's' : ''} to unlock your first Corridor rank.`;
     } else {
-      routesEl.textContent = `${all.length} drives logged. Corridor rankings unlock at 10 drives.`;
+      routesEl.textContent = 'Corridor rankings active. Keep driving the same routes to move up.';
     }
   }
+
+  // Corridor teaser card
+  renderCorridorTeaser(all);
 
   const drivesEl = document.getElementById('home-drives-count');
   if (drivesEl) drivesEl.textContent = all.length;
@@ -77,13 +80,13 @@ export function renderHomeStats(){
     const rng  = max - min || 1;
     const pts  = vals.map((v, i) => {
       const x = Math.round(i / (vals.length - 1) * 342);
-      const y = Math.round(32 - ((v - min) / rng) * 24);
+      const y = Math.round(44 - ((v - min) / rng) * 36);
       return x + ',' + y;
     }).join(' ');
     sparkLine.setAttribute('points', pts);
     if (sparkDot){
       const lx = 342;
-      const ly = Math.round(32 - ((vals[vals.length - 1] - min) / rng) * 24);
+      const ly = Math.round(44 - ((vals[vals.length - 1] - min) / rng) * 36);
       sparkDot.setAttribute('cx', lx);
       sparkDot.setAttribute('cy', ly);
       sparkDot.setAttribute('r', '3');
@@ -94,17 +97,50 @@ export function renderHomeStats(){
   const unlockEl = document.getElementById('home-unlock-text');
   if (unlockEl){
     if (!all.length){
-      unlockEl.textContent = 'Start driving to earn rewards →';
+      unlockEl.textContent = 'Drive smooth to earn rewards →';
     } else if (all.length < 5){
       const n = 5 - all.length;
       unlockEl.textContent = `${n} more drive${n !== 1 ? 's' : ''} to unlock "Smooth Starter" badge →`;
     } else if (all.length < 10){
       const n = 10 - all.length;
-      unlockEl.textContent = `${n} more drive${n !== 1 ? 's' : ''} to unlock the 10-drive milestone →`;
+      unlockEl.textContent = `${n} more drive${n !== 1 ? 's' : ''} to hit the 10-drive milestone →`;
     } else {
-      unlockEl.textContent = 'Keep driving to climb your lifetime rank →';
+      unlockEl.textContent = 'Keep it silky to climb your lifetime rank →';
     }
   }
+}
+
+function renderCorridorTeaser(drives){
+  const card = document.getElementById('home-corridor-teaser');
+  if (!card) return;
+
+  if (!drives.length){
+    // Fresh install — show the generic teaser
+    const nameEl  = document.getElementById('hct-road-name');
+    const subEl   = document.getElementById('hct-road-sub');
+    const badgeEl = document.getElementById('hct-rank-badge');
+    const hintEl  = document.getElementById('hct-hint');
+    if (nameEl)  nameEl.textContent  = 'Your first corridor';
+    if (subEl)   subEl.textContent   = 'Drive a route 3× to unlock ranking';
+    if (badgeEl){ badgeEl.textContent = '?'; badgeEl.classList.remove('ranked'); }
+    if (hintEl)  hintEl.textContent  = 'Who\'s the Smoothest Operator on your block?';
+    card.style.display = 'block';
+    return;
+  }
+
+  // Find the "best" drive to tease as a corridor
+  const best = drives.reduce((a, b) => (b.score > a.score ? b : a), drives[0]);
+  const nameEl  = document.getElementById('hct-road-name');
+  const subEl   = document.getElementById('hct-road-sub');
+  const badgeEl = document.getElementById('hct-rank-badge');
+  const hintEl  = document.getElementById('hct-hint');
+  if (nameEl)  nameEl.textContent  = 'Your best drive';
+  if (subEl)   subEl.textContent   = `Score ${best.score} · Drive it again to lock in your rank`;
+  if (badgeEl){ badgeEl.textContent = best.score; badgeEl.classList.add('ranked'); }
+  if (hintEl)  hintEl.textContent  = drives.length >= 3
+    ? 'Corridor ranking unlocking soon…'
+    : `${3 - drives.length} more drive${3 - drives.length !== 1 ? 's' : ''} to unlock corridor ranking`;
+  card.style.display = 'block';
 }
 
 export function renderDriveList(){

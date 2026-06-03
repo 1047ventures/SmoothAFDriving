@@ -26,8 +26,12 @@
     <!-- Top bar -->
     <div class="home-topbar-v2">
       <span class="home-brand">Smooth AF</span>
-      <button class="home-settings-icon" id="btn-vehicle-type" aria-label="My Garage">
-        <span></span><span></span><span style="width:70%"></span>
+      <button class="home-garage-btn" id="btn-vehicle-type" aria-label="My Garage">
+        <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x=".75" y="4.25" width="11.5" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M3.5 4.25V3a3 3 0 016 0v1.25" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        Garage
       </button>
     </div>
 
@@ -49,10 +53,22 @@
       <div class="home-score-sentence" id="home-score-sentence">Start driving to build your score.</div>
     </div>
 
-    <!-- Top routes -->
+    <!-- Top routes / Corridor teaser -->
     <div class="home-routes">
-      <div class="home-routes-label">Your Top Routes</div>
+      <div class="home-routes-label">Your Corridors</div>
       <div class="home-routes-text" id="home-routes-text">Drive more to unlock corridor rankings.</div>
+    </div>
+
+    <!-- Corridor teaser card (shown when <3 corridor drives) -->
+    <div class="home-corridor-teaser" id="home-corridor-teaser">
+      <div class="hct-card">
+        <div class="hct-road-info">
+          <div class="hct-road-name" id="hct-road-name">Your first corridor</div>
+          <div class="hct-road-sub" id="hct-road-sub">Drive a route 3+ times to unlock ranking</div>
+        </div>
+        <div class="hct-rank-badge" id="hct-rank-badge">?</div>
+      </div>
+      <div class="hct-hint" id="hct-hint">Who's the Smoothest Operator on your block?</div>
     </div>
 
     <!-- Stats row -->
@@ -74,7 +90,7 @@
     <!-- 7-day sparkline -->
     <div class="home-sparkline">
       <div class="home-sparkline-label">Driving Trends</div>
-      <svg id="home-sparkline-svg" width="100%" height="36" viewBox="0 0 342 36" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <svg id="home-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
         <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#E8501A"/>
       </svg>
@@ -93,9 +109,18 @@
 
     <!-- Nav row -->
     <div class="home-nav-row">
-      <button class="home-nav-btn" id="btn-rivals">Rivals</button>
-      <button class="home-nav-btn" id="btn-rewards">Rewards</button>
-      <button class="home-nav-btn" id="btn-leaderboard">Leaderboard</button>
+      <button class="home-nav-btn" id="btn-rivals">
+        <span class="nav-icon">⚔</span>
+        <span class="nav-label">Rivals</span>
+      </button>
+      <button class="home-nav-btn" id="btn-rewards">
+        <span class="nav-icon">★</span>
+        <span class="nav-label">Rewards</span>
+      </button>
+      <button class="home-nav-btn" id="btn-leaderboard">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Board</span>
+      </button>
     </div>
 
     <!-- Hidden compat -->
@@ -108,10 +133,9 @@
     <!-- Spacer + Begin Drive CTA -->
     <div class="home-cta-spacer"></div>
     <button class="home-cta" id="btn-start">
-      <span class="home-cta-text">Begin Drive</span>
+      <span class="home-cta-text">Start Drive</span>
       <span class="home-cta-arrow">&#8594;</span>
     </button>
-
     <div id="app-version"></div>
 
   </section>
@@ -289,6 +313,18 @@
         </div>
       </div>
 
+      <!-- Coaching persona card -->
+      <div class="rv-coaching-card" id="rv-coaching-card" style="display:none">
+        <div class="rv-coaching-persona" id="rv-coaching-persona"></div>
+        <div class="rv-coaching-tip" id="rv-coaching-tip"></div>
+      </div>
+
+      <!-- Route history comparison -->
+      <div class="rv-route-history" id="rv-route-history" style="display:none">
+        <div class="rv-route-label">This Route</div>
+        <div class="rv-route-rows" id="rv-route-rows"></div>
+      </div>
+
       <!-- Drive stats -->
       <div class="rv-drive-stats">
         <div class="rv-stat-col">
@@ -408,33 +444,80 @@
   <section id="screen-leaderboard" class="screen">
     <div class="lb-topbar">
       <button class="back-btn" id="btn-lb-back" aria-label="Back">×</button>
-      <div class="lb-title">Leaderboard</div>
+      <div class="lb-title" id="lb-screen-title">Leaderboard</div>
     </div>
     <!-- Tab row -->
     <div class="lb-tabs">
       <button class="lb-tab active" data-tab="overall">Overall</button>
       <button class="lb-tab" data-tab="corridors">Corridors</button>
-      <button class="lb-tab" data-tab="friends">Friends</button>
+      <button class="lb-tab" data-tab="rivals">Rivals</button>
     </div>
-    <div class="lb-tagline">Smoothest drivers worldwide</div>
+    <div class="lb-tagline" id="lb-tagline">Who's the Smoothest Operator?</div>
     <div class="lb-body">
-      <!-- Your card -->
-      <div class="lb-my-card">
-        <div class="lb-my-rank" id="lb-my-rank">#--</div>
-        <div class="lb-my-info">
-          <div class="lb-my-name" id="lb-my-name-display">You</div>
-          <div class="lb-my-score-val" id="lb-my-score-val">--</div>
+
+      <!-- ── OVERALL tab ── -->
+      <div data-lb-content="overall">
+        <!-- Your card -->
+        <div class="lb-my-card">
+          <div class="lb-my-rank" id="lb-my-rank">#--</div>
+          <div class="lb-my-info">
+            <div class="lb-my-name" id="lb-my-name-display">You</div>
+            <div class="lb-my-score-val" id="lb-my-score-val">--</div>
+          </div>
+          <button class="lb-set-name-btn" id="btn-set-driver-name">Set name</button>
         </div>
-        <button class="lb-set-name-btn" id="btn-set-driver-name">Set name</button>
+        <div class="lb-section-lbl">Top Drivers</div>
+        <div id="lb-list"><div class="lb-empty">Loading…</div></div>
+        <div class="lb-join-cta" id="lb-join-cta" style="display:none">
+          <div class="lb-join-text">Set your driver name to appear on the global leaderboard</div>
+          <button class="lb-join-btn" id="btn-join-lb">Join leaderboard →</button>
+        </div>
       </div>
-      <!-- Rankings -->
-      <div class="lb-section-lbl">Top Drivers</div>
-      <div id="lb-list"><div class="lb-empty">Loading…</div></div>
-      <!-- Join CTA -->
-      <div class="lb-join-cta" id="lb-join-cta" style="display:none">
-        <div class="lb-join-text">Set your driver name to appear on the global leaderboard</div>
-        <button class="lb-join-btn" id="btn-join-lb">Join leaderboard →</button>
+
+      <!-- ── CORRIDORS tab ── -->
+      <div data-lb-content="corridors" style="display:none">
+        <div class="lb-corridors-intro">
+          <div class="lb-corridors-intro-title">Corridor Rankings</div>
+          <div class="lb-corridors-intro-sub">Drive a route 3+ times to claim your rank. Each corridor has its own leaderboard — dominate your block.</div>
+        </div>
+        <div class="lb-section-lbl">Your Corridors</div>
+        <div id="lb-corridors-list">
+          <div class="lb-corridor-placeholder">
+            <div class="lb-corridor-ph-icon">🛣</div>
+            <div class="lb-corridor-ph-text">No corridors yet. Drive the same route a few times and we'll detect it automatically.</div>
+          </div>
+        </div>
+        <div class="lb-section-lbl" style="margin-top:20px">Near You</div>
+        <div id="lb-nearby-corridors">
+          <div class="lb-corridor-card lb-corridor-ghost">
+            <div class="lb-corridor-header">
+              <div class="lb-corridor-road">Unlock with GPS</div>
+              <div class="lb-corridor-dist">-- mi</div>
+            </div>
+            <div class="lb-crown-row"><div class="lb-crown-type">Smoothest</div><div class="lb-crown-holder lb-ghost-text">–––––––</div><div class="lb-crown-indicator">👑</div></div>
+            <div class="lb-crown-row"><div class="lb-crown-type">Your Rank</div><div class="lb-crown-holder lb-ghost-text">Drive to unlock</div></div>
+          </div>
+        </div>
       </div>
+
+      <!-- ── RIVALS tab ── -->
+      <div data-lb-content="rivals" style="display:none">
+        <div class="lb-corridors-intro">
+          <div class="lb-corridors-intro-title">Your Rivals</div>
+          <div class="lb-corridors-intro-sub">Drivers within 5 points of your score on the same corridors. Beat them and climb the board.</div>
+        </div>
+        <div id="lb-rivals-list">
+          <div class="lb-corridor-placeholder">
+            <div class="lb-corridor-ph-icon">⚔</div>
+            <div class="lb-corridor-ph-text">Rivals appear once you have corridor scores. Start driving to find your competition.</div>
+          </div>
+        </div>
+        <div class="lb-join-cta" id="lb-rivals-join-cta" style="display:none">
+          <div class="lb-join-text">Set a driver name so rivals can see you coming</div>
+          <button class="lb-join-btn" id="btn-join-rivals">Join the competition →</button>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -500,6 +583,9 @@
       <button class="signup-cancel" id="signup-cancel-btn">Maybe later</button>
     </div>
   </div>
+
+  <!-- APP TOAST -->
+  <div id="app-toast" class="app-toast" aria-live="polite"></div>
 
   <!-- PERMISSION MODAL (iOS 13+) -->
   <div id="perm-modal" class="permission-hint hidden">

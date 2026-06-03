@@ -1,4 +1,5 @@
 import { $, $$ } from '../utils/dom.js';
+import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
 import { CFG, VOICE_LABELS } from '../constants.js';
 import { mpsToMph, fmtDuration, clamp } from '../utils/math.js';
@@ -193,6 +194,10 @@ export function updateLiveUI(){
 }
 
 export function startRecording(){
+  if (!navigator.geolocation){
+    showToast('No GPS on this device — try the Demo Drive instead', 'error');
+    return;
+  }
   resetState();
   state.recording = true;
   state.simulated = false;
@@ -219,11 +224,6 @@ export function startRecording(){
       .catch(() => {});
   }
 
-  if (!navigator.geolocation){
-    alert('No geolocation. Use replay demo instead.');
-    stopRecording();
-    return;
-  }
   state.gpsWatchId = navigator.geolocation.watchPosition(
     pos => onGpsUpdate(pos, {
       flashEvent,
@@ -234,7 +234,10 @@ export function startRecording(){
     err => {
       console.warn('GPS error', err);
       if (err.code === 1) {
-        alert('Location permission denied. Enable it in Settings to record a drive.');
+        showToast('Location denied — enable in iPhone Settings to record', 'error');
+        stopRecording();
+      } else if (err.code === 2) {
+        showToast('GPS unavailable — make sure Location is on', 'error');
         stopRecording();
       }
     },
