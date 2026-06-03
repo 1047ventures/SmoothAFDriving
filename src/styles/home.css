@@ -163,7 +163,7 @@
   .home-score-zone{padding:24px 24px 0;flex-shrink:0}
   .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:8px}
   .home-score-row{display:flex;align-items:flex-end;gap:14px}
-  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(80px,26vw,112px);line-height:.88;flex-shrink:0;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(80px,26vw,112px);line-height:1;flex-shrink:0;letter-spacing:-.04em;padding-bottom:6px;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .home-score-right{padding-bottom:10px}
   .home-score-delta{font-family:var(--sans);font-size:12px;color:#5A9E52}
   .home-score-rank{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.35);margin-top:3px}
