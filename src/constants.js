@@ -6,6 +6,10 @@ export const DEVICE_KEY         = 'smoothaf.device_id';
 export const SYNCED_KEY         = 'smoothaf.synced_ids';
 export const LIFETIME_SCORE_KEY = 'smoothaf.lifetime_score';
 export const DRIVER_NAME_KEY    = 'smoothaf.driver_name';
+export const USER_EMAIL_KEY     = 'smoothaf.user_email';
+export const ONBOARDED_KEY      = 'smoothaf.onboarded';
+export const PROFILE_SYNCED_KEY = 'smoothaf.profile_synced';
+export const CAR_PROMPTED_KEY   = 'smoothaf.car_prompted';
 export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 
