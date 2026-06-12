@@ -11,15 +11,19 @@ import { openLeaderboard, openSignupModal } from './ui/leaderboard.js';
 import { enterMapFilter, clearMapFilter, renderReview } from './ui/review.js';
 import { metersToMiles } from './utils/math.js';
 import { state } from './state.js';
+import { showOnboardingIfNeeded } from './ui/modals.js';
+import { syncUserProfile } from './services/supabase.js';
 
 // Export key init functions for DOMContentLoaded (wired below)
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
 
 document.addEventListener('DOMContentLoaded', () => {
   migrateLifetimeScore();
+  showOnboardingIfNeeded();
   checkRecoveredDrive({ onListUpdate: renderDriveList });
   renderDriveList();
   syncPendingDrives();
+  syncUserProfile();
   renderCarDisplay();
   const verEl = document.querySelector('#app-version');
   if (verEl) verEl.textContent = APP_VERSION;
