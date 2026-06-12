@@ -10,6 +10,7 @@ import { finalizeAndReview } from '../services/drive.js';
 import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
+import { showCarPromptIfNeeded } from './modals.js';
 
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
@@ -272,6 +273,7 @@ export function stopRecording(){
     onReview: renderReview,
     onListUpdate: renderDriveList,
   });
+  showCarPromptIfNeeded();
 }
 
 export function startSimulatedDrive(){
