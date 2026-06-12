@@ -28,6 +28,7 @@ function injectOnboardingModal() {
 
 export function showOnboardingIfNeeded() {
   if (localStorage.getItem(ONBOARDED_KEY)) return;
+  if (document.getElementById('onboard-modal')) return;
   injectOnboardingModal();
 
   const nameInput  = document.getElementById('onboard-name');
@@ -85,6 +86,7 @@ function injectCarPromptModal() {
 export function showCarPromptIfNeeded() {
   if (localStorage.getItem(CAR_PROMPTED_KEY)) return;
   if (loadDrives().length < 2) return;
+  if (document.getElementById('car-prompt-modal')) return;
 
   injectCarPromptModal();
 
