@@ -20,6 +20,23 @@ function saveGarage(vehicles){
   try { localStorage.setItem(GARAGE_KEY, JSON.stringify(vehicles)); } catch {}
 }
 
+export function addVehicleFromPrompt(make, model, year) {
+  const vehicles = loadGarage();
+  vehicles.forEach(v => { v.active = false; });
+  vehicles.push({
+    id:     generateId(),
+    type:   '',
+    make:   make  || '',
+    model:  model || '',
+    year:   year  || '',
+    color: '', licensePlate: '', vin: '',
+    insurance:    { provider: '', policyNumber: '', expiryDate: '', agentPhone: '' },
+    registration: { state: '', expiryDate: '' },
+    active: true,
+  });
+  saveGarage(vehicles);
+}
+
 function getActiveVehicle(){
   const g = loadGarage();
   return g.find(v => v.active) || g[0] || null;
