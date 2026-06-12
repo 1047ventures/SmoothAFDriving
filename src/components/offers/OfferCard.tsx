@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Check, X } from 'lucide-react';
 
+const PLATFORM_FEE_PERCENT = 0.12;
+
 interface OfferCardProps {
   offer: {
     id: string;
@@ -36,6 +38,10 @@ const paymentLabels: Record<string, string> = {
 };
 
 export default function OfferCard({ offer, isOwner, onAccept, onDecline }: OfferCardProps) {
+  const platformFee = offer.asking_price * PLATFORM_FEE_PERCENT;
+  const totalWithFee = offer.asking_price + platformFee;
+  const showFeeBreakdown = isOwner && offer.payment_preference === 'in_app' && offer.status === 'pending';
+
   return (
     <Card className="shadow-card border-0 overflow-hidden">
       <CardContent className="p-4">
@@ -72,13 +78,30 @@ export default function OfferCard({ offer, isOwner, onAccept, onDecline }: Offer
 
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="h-4 w-4 text-primary" />
-              <span className="font-semibold">${offer.asking_price}</span>
+              <span className="font-semibold">${offer.asking_price.toFixed(2)}</span>
               {offer.payment_preference && (
                 <Badge variant="outline" className="text-xs">
                   {paymentLabels[offer.payment_preference] || offer.payment_preference}
                 </Badge>
               )}
             </div>
+
+            {showFeeBreakdown && (
+              <div className="text-xs text-muted-foreground bg-muted/50 rounded-md p-2 mb-2 space-y-1">
+                <div className="flex justify-between">
+                  <span>Item</span>
+                  <span>${offer.asking_price.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Service fee (12%)</span>
+                  <span>${platformFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-medium text-foreground border-t pt-1">
+                  <span>Total charged</span>
+                  <span>${totalWithFee.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
 
             {offer.notes && (
               <p className="text-sm text-muted-foreground line-clamp-2">{offer.notes}</p>

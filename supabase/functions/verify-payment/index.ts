@@ -32,11 +32,11 @@ serve(async (req) => {
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
-    
+
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    
+
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
@@ -48,14 +48,14 @@ serve(async (req) => {
 
     // Initialize Stripe and retrieve session
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    
+
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['payment_intent']
     });
-    logStep("Session retrieved", { 
-      status: session.status, 
+    logStep("Session retrieved", {
+      status: session.status,
       paymentStatus: session.payment_status,
-      metadataOfferId: session.metadata?.offer_id 
+      metadataOfferId: session.metadata?.offer_id
     });
 
     // Verify payment was successful
@@ -71,7 +71,7 @@ serve(async (req) => {
     // Fetch the offer to verify user is the want owner (buyer)
     const { data: offer, error: offerError } = await supabaseClient
       .from("offers")
-      .select("*, wants(user_id)")
+      .select("*, wants(user_id, fulfillment)")
       .eq("id", offerId)
       .single();
 
@@ -102,11 +102,37 @@ serve(async (req) => {
     if (updateWantError) throw new Error(`Failed to update want: ${updateWantError.message}`);
     logStep("Want status updated to fulfilled");
 
+    // Record the transaction with platform fee for earnings tracking
+    const platformFeeCents = parseInt(session.metadata?.platform_fee_cents || '0');
+    const platformFeeAmount = platformFeeCents / 100;
+
+    const { error: transactionError } = await supabaseClient
+      .from("transactions")
+      .upsert(
+        {
+          offer_id: offerId,
+          buyer_id: user.id,
+          thrifter_id: offer.thrifter_id,
+          amount: offer.asking_price,
+          platform_fee_amount: platformFeeAmount,
+          stripe_session_id: sessionId,
+          fulfillment_method: offer.wants.fulfillment || "both",
+          status: "paid",
+        },
+        { onConflict: "offer_id" }
+      );
+
+    if (transactionError) {
+      logStep("WARNING: Failed to record transaction", { error: transactionError.message });
+    } else {
+      logStep("Transaction recorded", { amount: offer.asking_price, platformFeeAmount });
+    }
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Payment verified and status updated" 
-      }), 
+      JSON.stringify({
+        success: true,
+        message: "Payment verified and status updated",
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -116,7 +142,7 @@ serve(async (req) => {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
     return new Response(
-      JSON.stringify({ error: errorMessage }), 
+      JSON.stringify({ error: errorMessage }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

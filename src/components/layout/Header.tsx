@@ -8,7 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ShoppingBag, Plus, LayoutDashboard, User, LogOut, Menu } from 'lucide-react';
+import { ShoppingBag, Plus, LayoutDashboard, User, LogOut, Menu, TrendingUp } from 'lucide-react';
+
+const ADMIN_EMAIL = 'skellyslife@gmail.com';
 
 export default function Header() {
   const { user, signOut } = useAuth();
@@ -98,6 +100,14 @@ export default function Header() {
                       Profile
                     </Link>
                   </DropdownMenuItem>
+                  {user?.email === ADMIN_EMAIL && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/earnings" className="flex items-center">
+                        <TrendingUp className="mr-2 h-4 w-4" />
+                        Earnings
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="flex items-center">
                     <LogOut className="mr-2 h-4 w-4" />

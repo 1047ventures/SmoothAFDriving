@@ -13,6 +13,7 @@ import WantDetail from "./pages/WantDetail";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Earnings from "./pages/Earnings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/earnings" element={<Earnings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
