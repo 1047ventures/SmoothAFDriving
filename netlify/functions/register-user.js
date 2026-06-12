@@ -12,6 +12,14 @@ export default async (req) => {
   try { body = await req.json(); }
   catch { return new Response('Bad Request', { status: 400 }); }
 
+  if (!SB_URL || !SB_SERVICE_KEY) {
+    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY env vars');
+    return new Response(JSON.stringify({ ok: false, error: 'misconfigured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const { name = '', device_id = '' } = body;
   const email = (body.email || '').trim().toLowerCase();
 
@@ -21,7 +29,7 @@ export default async (req) => {
 
   // 1. Upsert to Supabase users table (service role key bypasses RLS)
   try {
-    await fetch(`${SB_URL}/rest/v1/users`, {
+    const sbRes = await fetch(`${SB_URL}/rest/v1/users`, {
       method: 'POST',
       headers: {
         'apikey':        SB_SERVICE_KEY,
@@ -36,8 +44,20 @@ export default async (req) => {
         updated_at: new Date().toISOString(),
       }),
     });
+    if (!sbRes.ok) {
+      const detail = await sbRes.text().catch(() => '');
+      console.error('Supabase upsert failed:', sbRes.status, detail);
+      return new Response(JSON.stringify({ ok: false, error: 'db_error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   } catch (err) {
     console.error('Supabase upsert error:', err.message);
+    return new Response(JSON.stringify({ ok: false, error: 'db_error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   // 2. Add/update Resend contact (idempotent — Resend deduplicates by email)

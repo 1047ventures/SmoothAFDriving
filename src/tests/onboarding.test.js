@@ -31,9 +31,12 @@ describe('registerUser', () => {
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-        body: expect.stringContaining('"alex@test.com"'),
       }),
     );
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody.email).toBe('alex@test.com');
+    expect(callBody.name).toBe('Alex');
+    expect(callBody.device_id).toBe('dev1');
   });
 
   it('sets PROFILE_SYNCED_KEY on HTTP 200', async () => {
