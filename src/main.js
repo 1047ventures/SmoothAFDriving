@@ -16,6 +16,31 @@ import { state } from './state.js';
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Show ad landing splash for first-time visitors arriving from ads
+  const urlParams = new URLSearchParams(location.search);
+  const utmSource = urlParams.get('utm_source');
+  const isFirstVisit = !localStorage.getItem('smoothaf_visited');
+  if (utmSource && isFirstVisit) {
+    const splash = document.getElementById('ad-splash');
+    if (splash) {
+      splash.classList.remove('hidden');
+      // Show iOS install hint on Safari (not already installed as PWA)
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isStandalone = ('standalone' in navigator && navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+      if (isIOS && !isStandalone) {
+        document.getElementById('ad-splash-install')?.style.setProperty('display', 'block');
+      }
+      const dismiss = () => {
+        splash.classList.add('hidden');
+        localStorage.setItem('smoothaf_visited', '1');
+      };
+      document.getElementById('ad-splash-cta')?.addEventListener('click', dismiss);
+      document.getElementById('ad-splash-skip')?.addEventListener('click', dismiss);
+    }
+  } else {
+    localStorage.setItem('smoothaf_visited', '1');
+  }
+
   migrateLifetimeScore();
   checkRecoveredDrive({ onListUpdate: renderDriveList });
   renderDriveList();
