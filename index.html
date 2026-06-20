@@ -1,29 +1,629 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <title>ReverseThrift</title>
-    <meta name="description" content="Post what you want, let thrifters find it for you" />
-    <meta name="author" content="Lovable" />
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Smooth AF">
+<meta name="theme-color" content="#0A0808">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<title>Smooth AF — Driving</title>
+<link rel="stylesheet" href="/src/styles/index.css">
+<style></style>
+</head>
+<body>
+<div id="app">
 
-    <meta property="og:title" content="ReverseThrift" />
-    <meta property="og:description" content="Post what you want, let thrifters find it for you" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
+  <section id="screen-home" class="screen active">
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+    <!-- Top bar -->
+    <div class="home-topbar-v2">
+      <span class="home-brand">Smooth AF</span>
+      <button class="home-garage-btn" id="btn-vehicle-type" aria-label="My Garage">
+        <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x=".75" y="4.25" width="11.5" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M3.5 4.25V3a3 3 0 016 0v1.25" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+        Garage
+      </button>
+    </div>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <!-- Score number — hero element -->
+    <div class="home-score-zone">
+      <div class="home-score-label">Lifetime Score</div>
+      <div class="home-score-row">
+        <div id="home-score-num" class="home-score-num">--</div>
+        <div class="home-score-right">
+          <div id="home-score-delta" class="home-score-delta"></div>
+          <div id="home-score-rank" class="home-score-rank"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Welcome name + persona sentence -->
+    <div class="home-welcome-block">
+      <div class="home-welcome-name" id="home-welcome-name">Hey, Driver</div>
+      <div class="home-score-sentence" id="home-score-sentence">Start driving to build your score.</div>
+    </div>
+
+    <!-- Top routes / Corridor teaser -->
+    <div class="home-routes">
+      <div class="home-routes-label">Your Corridors</div>
+      <div class="home-routes-text" id="home-routes-text">Drive more to unlock corridor rankings.</div>
+    </div>
+
+    <!-- Corridor teaser card (shown when <3 corridor drives) -->
+    <div class="home-corridor-teaser" id="home-corridor-teaser">
+      <div class="hct-card">
+        <div class="hct-road-info">
+          <div class="hct-road-name" id="hct-road-name">Your first corridor</div>
+          <div class="hct-road-sub" id="hct-road-sub">Drive a route 3+ times to unlock ranking</div>
+        </div>
+        <div class="hct-rank-badge" id="hct-rank-badge">?</div>
+      </div>
+      <div class="hct-hint" id="hct-hint">Who's the Smoothest Operator on your block?</div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="home-stats-row">
+      <div class="home-stat-col">
+        <div id="home-drives-count" class="home-stat-val">0</div>
+        <div class="home-stat-lbl">Drives</div>
+      </div>
+      <div class="home-stat-col">
+        <div id="home-total-miles" class="home-stat-val">0</div>
+        <div class="home-stat-lbl">Miles</div>
+      </div>
+      <div class="home-stat-col">
+        <div id="home-best-score" class="home-stat-val">--</div>
+        <div class="home-stat-lbl">Best</div>
+      </div>
+    </div>
+
+    <!-- 7-day sparkline -->
+    <div class="home-sparkline">
+      <div class="home-sparkline-label">Driving Trends</div>
+      <svg id="home-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#E8501A"/>
+      </svg>
+    </div>
+
+    <!-- Explore past drives -->
+    <div class="home-explore-row" id="btn-view-drives">
+      <span class="home-explore-label">Explore Past Drives</span>
+      <span class="home-explore-arrow">&#8594;</span>
+    </div>
+
+    <!-- Drives list (collapsible) -->
+    <div class="drives-list" id="drives-list-panel">
+      <div id="drives-container"></div>
+    </div>
+
+    <!-- Nav row -->
+    <div class="home-nav-row">
+      <button class="home-nav-btn" id="btn-rivals">
+        <span class="nav-icon">⚔</span>
+        <span class="nav-label">Rivals</span>
+      </button>
+      <button class="home-nav-btn" id="btn-rewards">
+        <span class="nav-icon">★</span>
+        <span class="nav-label">Rewards</span>
+      </button>
+      <button class="home-nav-btn" id="btn-leaderboard">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Board</span>
+      </button>
+    </div>
+
+    <!-- Hidden compat -->
+    <div id="persona-badge" style="display:none"></div>
+    <div id="car-display" style="display:none"></div>
+    <div id="home-unlock-text" style="display:none"></div>
+    <div id="home-persona-title" style="display:none"></div>
+    <div id="home-persona-sub" style="display:none"></div>
+
+    <!-- Spacer + Begin Drive CTA -->
+    <div class="home-cta-spacer"></div>
+    <button class="home-cta" id="btn-start">
+      <span class="home-cta-text">Start Drive</span>
+      <span class="home-cta-arrow">&#8594;</span>
+    </button>
+    <div id="app-version"></div>
+
+  </section>
+
+  <!-- ═══════════════════════════ RECORDING ═══════════════════════════ -->
+  <section id="screen-record" class="screen">
+
+    <!-- Car photo background (behind everything) -->
+    <div class="rec-bg" id="rec-bg"></div>
+
+    <!-- Road perspective lines -->
+    <svg class="rec-perspective" viewBox="0 0 390 844" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="195" y1="844" x2="60"  y2="440" stroke="rgba(242,232,213,.06)" stroke-width="1"/>
+      <line x1="195" y1="844" x2="330" y2="440" stroke="rgba(242,232,213,.06)" stroke-width="1"/>
+      <line x1="195" y1="844" x2="140" y2="440" stroke="rgba(242,232,213,.03)" stroke-width="0.5"/>
+      <line x1="195" y1="844" x2="250" y2="440" stroke="rgba(242,232,213,.03)" stroke-width="0.5"/>
+    </svg>
+
+    <!-- Vignette overlay -->
+    <div class="rec-overlay"></div>
+
+    <!-- REC indicator -->
+    <div class="rec-indicator">
+      <div class="rec-dot"></div>
+      <span class="rec-indicator-label" id="rec-source">REC</span>
+    </div>
+
+    <!-- Distance + time corners -->
+    <div class="rec-top-strip">
+      <div class="rec-stats-row">
+        <div class="rec-corner">
+          <div class="rec-corner-lbl">Distance</div>
+          <div class="rec-corner-val"><span id="live-distance">0.0</span><span class="rec-corner-unit"> mi</span></div>
+        </div>
+        <div class="rec-corner rec-corner--right">
+          <div class="rec-corner-lbl">Time</div>
+          <div class="rec-corner-val" id="live-time">0:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speed hero — top left -->
+    <div class="rec-speed-hero">
+      <div class="speed-big" id="live-speed">0</div>
+      <div class="rec-speed-unit">MPH</div>
+      <div class="rec-avg-label">AVG&nbsp;<span id="live-avg-speed">0</span>&nbsp;MPH</div>
+    </div>
+
+    <!-- Score — top right -->
+    <div class="rec-score-hero">
+      <div class="rec-score-label-sm">Score</div>
+      <div class="rec-score-num-big" id="live-score">--</div>
+      <div class="rec-elapsed" id="live-time-sub"></div>
+    </div>
+
+    <!-- Big G-force radar — centered -->
+    <div class="g-radar" id="g-radar">
+      <svg width="100%" height="100%" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="140" cy="140" r="138" stroke="rgba(242,232,213,.15)" stroke-width="1.5"/>
+        <circle cx="140" cy="140" r="70"  stroke="rgba(242,232,213,.07)" stroke-width="1"/>
+        <line x1="2"   y1="140" x2="278" y2="140" stroke="rgba(242,232,213,.06)" stroke-width="0.5"/>
+        <line x1="140" y1="2"   x2="140" y2="278" stroke="rgba(242,232,213,.06)" stroke-width="0.5"/>
+        <text x="140" y="16"  font-family="system-ui" font-size="8" fill="rgba(242,232,213,.3)" text-anchor="middle" letter-spacing="2">ACCEL</text>
+        <text x="140" y="272" font-family="system-ui" font-size="8" fill="rgba(242,232,213,.3)" text-anchor="middle" letter-spacing="2">BRAKE</text>
+        <!-- Ghost trail -->
+        <circle id="ghost-1" cx="140" cy="140" r="3" fill="rgba(242,232,213,.08)"/>
+        <circle id="ghost-2" cx="140" cy="140" r="3" fill="rgba(242,232,213,.12)"/>
+        <circle id="ghost-3" cx="140" cy="140" r="4" fill="rgba(242,232,213,.18)"/>
+        <circle id="ghost-4" cx="140" cy="140" r="4" fill="rgba(242,232,213,.25)"/>
+        <circle id="ghost-5" cx="140" cy="140" r="5" fill="rgba(242,232,213,.35)"/>
+        <circle id="ghost-6" cx="140" cy="140" r="6" fill="rgba(242,232,213,.5)"/>
+      </svg>
+      <!-- Live dot -->
+      <div class="g-radar-dot" id="g-radar-dot"></div>
+      <!-- Drive state label -->
+      <div class="rec-state-label">
+        <div class="rec-state-dot" id="rec-state-dot"></div>
+        <span class="rec-state-text" id="rec-state-text">Smooth</span>
+      </div>
+      <!-- Burst effects -->
+      <div class="burst b-brake" id="burst-brake"></div>
+      <div class="burst b-accel" id="burst-accel"></div>
+      <div class="burst b-left"  id="burst-left"></div>
+      <div class="burst b-right" id="burst-right"></div>
+    </div>
+
+    <!-- Waveform strip -->
+    <div class="rec-waveform">
+      <svg width="100%" height="60" viewBox="0 0 390 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="rec-waveform-path"
+          d="M 0,30 L 60,30 C 80,30 90,28 110,24 C 125,21 135,30 155,30 L 210,30 C 228,30 238,22 258,18 C 272,15 282,30 300,30 L 340,30 C 355,30 365,27 375,25 L 390,25"
+          stroke="rgba(232,80,26,.55)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="390" cy="25" r="3" fill="#E8501A"/>
+      </svg>
+    </div>
+
+    <!-- Corridor strip -->
+    <div class="rec-corridor">
+      <div class="rec-corridor-labels">
+        <div class="rec-corridor-name" id="rec-corridor-name">On Corridor</div>
+        <div class="rec-corridor-rank" id="rec-corridor-rank"></div>
+      </div>
+      <div class="rec-road-strip">
+        <div class="rec-road-dashes">
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+        </div>
+        <div class="rec-car-icon">
+          <svg width="28" height="14" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="2" width="26" height="10" rx="2.5" stroke="rgba(242,232,213,.9)" stroke-width="1.5"/>
+            <line x1="20" y1="2" x2="22" y2="12" stroke="rgba(242,232,213,.5)" stroke-width="1"/>
+            <line x1="6"  y1="2" x2="8"  y2="12" stroke="rgba(242,232,213,.5)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden elements for JS compat -->
+    <div class="smooth-ring-wrap"><div class="smooth-ring" id="smooth-ring"></div></div>
+    <div class="force-line fl-brake" id="fl-brake"></div>
+    <div class="force-line fl-accel" id="fl-accel"></div>
+    <div class="force-line fl-left"  id="fl-left"></div>
+    <div class="force-line fl-right" id="fl-right"></div>
+    <div class="live-g-bar"><div class="live-g-needle" id="live-g-needle"></div><div class="live-g-zero"></div></div>
+    <label style="display:none"><input type="file" accept="image/*" id="rec-photo-input"></label>
+    <div class="arc-gauge-wrap" aria-hidden="true">
+      <svg class="arc-svg" id="arc-svg" viewBox="0 0 300 215" width="300" height="215" xmlns="http://www.w3.org/2000/svg">
+        <path id="arc-track" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(244,235,217,.1)" stroke-width="2.5" stroke-linecap="round"/>
+        <path id="arc-progress" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(244,235,217,.9)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="499.2" stroke-dashoffset="0"/>
+      </svg>
+    </div>
+
+    <div class="event-ticker" id="event-ticker"></div>
+    <div id="calib-status" style="display:none;position:absolute;z-index:30;bottom:150px;left:50%;transform:translateX(-50%);font-size:12px;text-align:center;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.7);white-space:nowrap;color:var(--cream)"></div>
+    <button id="btn-stop" class="stop-btn">Stop Drive</button>
+
+  </section>
+
+  <!-- ═══════════════════════════ REVIEW ═══════════════════════════ -->
+  <section id="screen-review" class="screen">
+
+    <!-- Fixed-height map block with overlays -->
+    <div class="review-map-block">
+      <div id="map"></div>
+      <div class="review-top">
+        <button id="btn-back" class="back-btn" aria-label="Back">×</button>
+      </div>
+      <div class="legend">
+        <div class="lg-row"><div class="lg-sw" style="background:#6FB669"></div><span>Coast</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#E03B2F"></div><span>Brake</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#E8A03A"></div><span>Accel</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#C4A962"></div><span>Turn</span></div>
+      </div>
+      <button class="map-expand-btn" id="btn-map-expand" aria-label="Expand map">⤢</button>
+      <div class="map-filter-badge" id="map-filter-badge">
+        <span class="map-filter-label" id="map-filter-label">BRAKES</span>
+        <button class="map-filter-clear" id="map-filter-clear" aria-label="Clear filter">×</button>
+      </div>
+    </div>
+
+    <!-- v2 results body -->
+    <div class="rv-body">
+
+      <!-- Score hero (tap for analysis) -->
+      <div class="rv-score-row" id="score-header-btn">
+        <div id="review-score" class="rv-score-num">--</div>
+        <div class="rv-score-right">
+          <div class="rv-score-label">This Drive</div>
+          <div id="review-when" class="rv-when">—</div>
+          <div id="score-verdict-tag" class="rv-verdict-tag">—</div>
+          <div class="rv-analysis-hint">Tap for analysis ›</div>
+        </div>
+      </div>
+
+      <!-- Coaching persona card -->
+      <div class="rv-coaching-card" id="rv-coaching-card" style="display:none">
+        <div class="rv-coaching-persona" id="rv-coaching-persona"></div>
+        <div class="rv-coaching-tip" id="rv-coaching-tip"></div>
+      </div>
+
+      <!-- Route history comparison -->
+      <div class="rv-route-history" id="rv-route-history" style="display:none">
+        <div class="rv-route-label">This Route</div>
+        <div class="rv-route-rows" id="rv-route-rows"></div>
+      </div>
+
+      <!-- Drive stats -->
+      <div class="rv-drive-stats">
+        <div class="rv-stat-col">
+          <div class="rv-stat-val"><span id="r-distance">0.0</span></div>
+          <div class="rv-stat-label">Miles</div>
+        </div>
+        <div class="rv-stat-col">
+          <div class="rv-stat-val"><span id="r-duration">0:00</span></div>
+          <div class="rv-stat-label">Duration</div>
+        </div>
+        <div class="rv-stat-col">
+          <div class="rv-stat-val"><span id="r-topspeed">0</span></div>
+          <div class="rv-stat-label">Top MPH</div>
+        </div>
+      </div>
+
+      <!-- Hidden compat for what-happened (JS still populates) -->
+      <div style="display:none">
+        <span id="rv-smooth-main"></span><span id="rv-smooth-sub"></span>
+        <span id="rv-events-main"></span><span id="rv-events-sub"></span>
+      </div>
+
+      <!-- Hardest moment -->
+      <div class="rv-worst" id="rv-worst-block">
+        <div class="rv-worst-label">Hardest Moment</div>
+        <div class="rv-worst-text" id="rv-worst-text">—</div>
+      </div>
+
+      <!-- Hidden compat (JS still populates these) -->
+      <div style="display:none">
+        <canvas id="force-timeline-canvas"></canvas>
+        <span id="ev-brake">0</span><span id="ev-accel">0</span>
+        <span id="ev-turn">0</span><span id="ev-stop">0</span>
+        <span id="r-road-quality">—</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="rv-actions">
+        <button class="rv-btn-share" id="btn-share-drive">Share</button>
+        <button class="rv-btn-next" id="btn-new-drive">New Drive &#8594;</button>
+      </div>
+      <button id="btn-go-home" class="rv-home-link">&#8592; Return to Home</button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ANALYSIS SHEET (score tap deep-dive) -->
+  <div id="analysis-sheet" class="analysis-sheet hidden">
+    <div class="as-topbar">
+      <div class="as-verdict-label" id="as-verdict-label">—</div>
+      <button class="as-close" id="as-close">×</button>
+    </div>
+    <div class="as-verdict-sub" id="as-verdict-sub"></div>
+    <div class="dims-grid" id="as-dims-list" style="margin-top:20px"></div>
+  </div>
+
+  <!-- GARAGE SHEET -->
+  <div id="garage-sheet" class="garage-sheet hidden">
+    <!-- List view -->
+    <div id="garage-list-view">
+      <div class="gs-bar">
+        <div class="gs-title">My Garage</div>
+        <button class="gs-close" id="gs-close">×</button>
+      </div>
+      <div id="garage-list"></div>
+      <button id="gs-add-btn" class="gs-add-btn">+ Add vehicle</button>
+    </div>
+    <!-- Form view -->
+    <div id="garage-form-view" class="hidden">
+      <div class="gs-bar">
+        <button class="gs-back" id="gs-back">←</button>
+        <div class="gs-title" id="gs-form-title">Add vehicle</div>
+        <button class="gs-close" id="gs-form-close">×</button>
+      </div>
+      <div class="gs-form-scroll">
+        <div class="gs-section-label">Type</div>
+        <div class="gs-type-grid" id="gs-type-grid"></div>
+        <div class="gs-section-label">Details</div>
+        <input class="gs-input" id="gs-make" placeholder="Make (e.g. Porsche)" type="text" autocomplete="off">
+        <input class="gs-input" id="gs-model" placeholder="Model (e.g. Cayenne)" type="text" autocomplete="off">
+        <input class="gs-input" id="gs-year" placeholder="Year" type="number" inputmode="numeric">
+        <input class="gs-input" id="gs-color" placeholder="Color" type="text" autocomplete="off">
+        <input class="gs-input" id="gs-plate" placeholder="License plate" type="text" autocapitalize="characters">
+        <input class="gs-input" id="gs-vin" placeholder="VIN" type="text" autocapitalize="characters">
+        <div class="gs-section-label">Insurance</div>
+        <input class="gs-input" id="gs-ins-provider" placeholder="Provider (e.g. State Farm)" type="text" autocomplete="off">
+        <input class="gs-input" id="gs-ins-policy" placeholder="Policy number" type="text" autocomplete="off">
+        <input class="gs-input" id="gs-ins-expiry" placeholder="Expiry date" type="date">
+        <input class="gs-input" id="gs-ins-agent" placeholder="Agent phone" type="tel">
+        <div class="gs-section-label">Registration</div>
+        <input class="gs-input" id="gs-reg-state" placeholder="State (e.g. CA)" type="text" autocapitalize="characters">
+        <input class="gs-input" id="gs-reg-expiry" placeholder="Expiry date" type="date">
+        <button id="gs-save" class="gs-save-btn">Save vehicle</button>
+        <button id="gs-delete" class="gs-delete-btn hidden">Delete vehicle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMOVE.BG API KEY MODAL -->
+  <div id="removebg-modal" class="permission-hint hidden">
+    <div class="permission-card">
+      <p class="permission-title">Add your API key</p>
+      <p class="permission-body">We use remove.bg to cut your car from its background, then apply a cartoon effect. Get a free key at remove.bg — 50 photos/month free.</p>
+      <a class="removebg-link" href="https://www.remove.bg/api" target="_blank" rel="noopener">remove.bg/api →</a>
+      <p class="removebg-error"></p>
+      <input id="removebg-key-input" class="removebg-input" type="text" placeholder="Paste API key here" autocomplete="off" spellcheck="false">
+      <div class="perm-btn-row">
+        <button class="perm-skip" id="removebg-skip">Skip</button>
+        <button class="perm-allow" id="removebg-save">Save & Process</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ LEADERBOARD ══════════════════════════ -->
+  <section id="screen-leaderboard" class="screen">
+    <div class="lb-topbar">
+      <button class="back-btn" id="btn-lb-back" aria-label="Back">×</button>
+      <div class="lb-title" id="lb-screen-title">Leaderboard</div>
+    </div>
+    <!-- Tab row -->
+    <div class="lb-tabs">
+      <button class="lb-tab active" data-tab="overall">Overall</button>
+      <button class="lb-tab" data-tab="corridors">Corridors</button>
+      <button class="lb-tab" data-tab="rivals">Rivals</button>
+    </div>
+    <div class="lb-tagline" id="lb-tagline">Who's the Smoothest Operator?</div>
+    <div class="lb-body">
+
+      <!-- ── OVERALL tab ── -->
+      <div data-lb-content="overall">
+        <!-- Your card -->
+        <div class="lb-my-card">
+          <div class="lb-my-rank" id="lb-my-rank">#--</div>
+          <div class="lb-my-info">
+            <div class="lb-my-name" id="lb-my-name-display">You</div>
+            <div class="lb-my-score-val" id="lb-my-score-val">--</div>
+          </div>
+          <button class="lb-set-name-btn" id="btn-set-driver-name">Set name</button>
+        </div>
+        <div class="lb-section-lbl">Top Drivers</div>
+        <div id="lb-list"><div class="lb-empty">Loading…</div></div>
+        <div class="lb-join-cta" id="lb-join-cta" style="display:none">
+          <div class="lb-join-text">Set your driver name to appear on the global leaderboard</div>
+          <button class="lb-join-btn" id="btn-join-lb">Join leaderboard →</button>
+        </div>
+      </div>
+
+      <!-- ── CORRIDORS tab ── -->
+      <div data-lb-content="corridors" style="display:none">
+        <div class="lb-corridors-intro">
+          <div class="lb-corridors-intro-title">Corridor Rankings</div>
+          <div class="lb-corridors-intro-sub">Drive a route 3+ times to claim your rank. Each corridor has its own leaderboard — dominate your block.</div>
+        </div>
+        <div class="lb-section-lbl">Your Corridors</div>
+        <div id="lb-corridors-list">
+          <div class="lb-corridor-placeholder">
+            <div class="lb-corridor-ph-icon">🛣</div>
+            <div class="lb-corridor-ph-text">No corridors yet. Drive the same route a few times and we'll detect it automatically.</div>
+          </div>
+        </div>
+        <div class="lb-section-lbl" style="margin-top:20px">Near You</div>
+        <div id="lb-nearby-corridors">
+          <div class="lb-corridor-card lb-corridor-ghost">
+            <div class="lb-corridor-header">
+              <div class="lb-corridor-road">Unlock with GPS</div>
+              <div class="lb-corridor-dist">-- mi</div>
+            </div>
+            <div class="lb-crown-row"><div class="lb-crown-type">Smoothest</div><div class="lb-crown-holder lb-ghost-text">–––––––</div><div class="lb-crown-indicator">👑</div></div>
+            <div class="lb-crown-row"><div class="lb-crown-type">Your Rank</div><div class="lb-crown-holder lb-ghost-text">Drive to unlock</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RIVALS tab ── -->
+      <div data-lb-content="rivals" style="display:none">
+        <div class="lb-corridors-intro">
+          <div class="lb-corridors-intro-title">Your Rivals</div>
+          <div class="lb-corridors-intro-sub">Drivers within 5 points of your score on the same corridors. Beat them and climb the board.</div>
+        </div>
+        <div id="lb-rivals-list">
+          <div class="lb-corridor-placeholder">
+            <div class="lb-corridor-ph-icon">⚔</div>
+            <div class="lb-corridor-ph-text">Rivals appear once you have corridor scores. Start driving to find your competition.</div>
+          </div>
+        </div>
+        <div class="lb-join-cta" id="lb-rivals-join-cta" style="display:none">
+          <div class="lb-join-text">Set a driver name so rivals can see you coming</div>
+          <button class="lb-join-btn" id="btn-join-rivals">Join the competition →</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════ REWARDS ══════════════════════════ -->
+  <section id="screen-rewards" class="screen">
+
+    <div class="rw-topbar">
+      <button class="rw-back" id="btn-rw-back">&#8249;</button>
+      <span class="rw-title">Rewards</span>
+    </div>
+
+    <!-- Wallet hero -->
+    <div class="rw-wallet">
+      <div class="rw-wallet-label">Your Points</div>
+      <div class="rw-wallet-stats">
+        <div class="rw-wallet-col">
+          <div class="rw-wallet-num" id="rw-earned">0</div>
+          <div class="rw-wallet-col-label">Earned</div>
+        </div>
+        <div class="rw-wallet-col">
+          <div class="rw-wallet-num rw-spent" id="rw-spent">0</div>
+          <div class="rw-wallet-col-label">Spent</div>
+        </div>
+        <div class="rw-wallet-col">
+          <div class="rw-wallet-num rw-balance" id="rw-balance">0</div>
+          <div class="rw-wallet-col-label">Balance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next reward progress -->
+    <div class="rw-closest">
+      <div class="rw-closest-label" id="rw-closest-label">Drive more to earn rewards</div>
+      <div class="rw-closest-reward" id="rw-closest-reward">Keep driving smoothly</div>
+      <div class="rw-progress-track">
+        <div class="rw-progress-fill" id="rw-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="rw-body">
+      <div class="rw-section-label">Recent Activity</div>
+      <div class="rw-activity-list" id="rw-activity-list"></div>
+
+      <div class="rw-section-label">Drive History</div>
+      <div id="rw-history-list"></div>
+
+      <button class="rw-cta" id="btn-rw-explore">
+        <div class="rw-cta-main">Explore Rewards Universe &#8594;</div>
+        <div class="rw-cta-sub">Gas &middot; Insurance &middot; Coaching &middot; Merch</div>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- SIGNUP MODAL -->
+  <div class="signup-overlay" id="signup-modal" style="display:none">
+    <div class="signup-card">
+      <div class="signup-card-title">Driver name</div>
+      <div class="signup-card-sub">How you'll appear on the Smooth AF leaderboard. Pick something memorable.</div>
+      <input class="signup-input" id="signup-name-input" type="text" placeholder="Your name" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="signup-submit" id="signup-submit-btn">Save name →</button>
+      <button class="signup-cancel" id="signup-cancel-btn">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- APP TOAST -->
+  <div id="app-toast" class="app-toast" aria-live="polite"></div>
+
+  <!-- AD LANDING SPLASH (shown to first-time visitors from ads) -->
+  <div id="ad-splash" class="ad-splash hidden">
+    <div class="ad-splash-inner">
+      <div class="ad-splash-eyebrow">FREE APP</div>
+      <div class="ad-splash-headline">What's your<br>Smooth AF<br>driving score?</div>
+      <div class="ad-splash-sub">Real-time scoring on every brake, corner, and acceleration — rated like a race driver. Free forever.</div>
+      <div class="ad-splash-stats">
+        <div class="ad-splash-stat"><span class="ad-splash-stat-num">7</span><span class="ad-splash-stat-lbl">dimensions<br>scored</span></div>
+        <div class="ad-splash-stat-div"></div>
+        <div class="ad-splash-stat"><span class="ad-splash-stat-num">0–100</span><span class="ad-splash-stat-lbl">your<br>rating</span></div>
+        <div class="ad-splash-stat-div"></div>
+        <div class="ad-splash-stat"><span class="ad-splash-stat-num">Free</span><span class="ad-splash-stat-lbl">always</span></div>
+      </div>
+      <button class="ad-splash-cta" id="ad-splash-cta">Score my first drive →</button>
+      <div class="ad-splash-install" id="ad-splash-install" style="display:none">
+        <div class="ad-splash-install-text">📲 Add to home screen: tap <strong>Share</strong> → <strong>Add to Home Screen</strong></div>
+      </div>
+      <button class="ad-splash-skip" id="ad-splash-skip">Skip intro</button>
+    </div>
+  </div>
+
+  <!-- PERMISSION MODAL (iOS 13+) -->
+  <div id="perm-modal" class="permission-hint hidden">
+    <div class="permission-card">
+      <p class="permission-title">Let Smooth AF read motion</p>
+      <p class="permission-body">We need the phone's accelerometer and location to score your drive. Nothing leaves the device unless you share it.</p>
+      <div class="perm-btn-row">
+        <button class="perm-skip" id="perm-skip">Skip</button>
+        <button class="perm-allow" id="perm-allow">Allow</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script type="module" src="/src/main.js"></script>
+</body>
 </html>
