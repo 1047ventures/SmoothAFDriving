@@ -12,8 +12,11 @@ export const PROFILE_SYNCED_KEY = 'smoothaf.profile_synced';
 export const CAR_PROMPTED_KEY   = 'smoothaf.car_prompted';
 export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
+export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 
 export const MAX_STORED_DRIVES = 20;
+export const OSM_CACHE_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 days
+export const OSM_CACHE_MAX  = 500;                        // LRU eviction above this
 
 // ── Vehicle types ─────────────────────────────────────────────────────────────
 export const VEHICLE_TYPES = [
@@ -41,7 +44,7 @@ export const DEFAULTS = {
   penaltyBrake:  4.5,
   penaltyAccel:  3.2,
   penaltyTurn:   4.0,
-  // ── Tier multipliers: tier1 × 0.14, tier2 × 1.0, tier3 × 2.4 ───────────
+  // ── Tier multipliers: tier1×0.14, tier2×1.0, tier3×2.4, tier4×4.0 ──────
 };
 
 // Mutable singleton — can be tuned at runtime
@@ -55,8 +58,9 @@ export const CALIB_MIN_SPEED_MPS = 2;     // only pair samples when moving
 export const MOTION_BUF_SIZE     = 20;    // ring buffer depth (60Hz → ~330ms)
 
 // ── Scoring constants ─────────────────────────────────────────────────────────
-// Tier 1 fires at 55% of threshold · tier 2 moderate · tier 3 harsh (175%)
-export const TIER_MULT = { 1: 0.14, 2: 1.0, 3: 2.4 };
+// Tier 1 subtle (55%) · tier 2 moderate (100%) · tier 3 harsh (175%) · tier 4 extreme (260%)
+export const TIER_MULT   = { 1: 0.14, 2: 1.0, 3: 2.4, 4: 4.0 };
+export const TIER_THRESH = { 1: 0.55, 2: 1.0,  3: 1.75, 4: 2.6 };
 // Confidence weighting: blend raw score toward 100 for short drives.
 // CONFIDENCE_PRIOR = 120 GPS samples ≈ 2 minutes. At exactly 2 min of data,
 // the raw score is weighted 50% — prevents 30-second test drives showing 100.
