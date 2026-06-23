@@ -48,3 +48,43 @@ describe('upsertCorridorDrive', () => {
     expect(loadCorridors()[0].corridorId).toBe('n-wadsworth-blvd-denver');
   });
 });
+
+const { sampleGpsPoints, slugifyCorridorId } = await import('../services/corridors.js');
+
+describe('sampleGpsPoints', () => {
+  const makeSamples = (count, latStep = 0.001) =>
+    Array.from({ length: count }, (_, i) => ({ lat: 39.7 + i * latStep, lon: -104.9, speed: 10, t: i * 1000 }));
+
+  it('returns empty array for empty input', () => {
+    expect(sampleGpsPoints([], 25)).toEqual([]);
+  });
+  it('returns all points when drive is shorter than interval', () => {
+    // latStep=0.0001 ≈ 11m per step, 5 steps ≈ 55m total — well under 250m
+    const samples = makeSamples(5, 0.0001);
+    const result = sampleGpsPoints(samples, 25);
+    expect(result.length).toBeGreaterThanOrEqual(1);
+  });
+  it('samples one point per ~250m and caps at maxPoints', () => {
+    // latStep=0.003 ≈ 333m per step — should trigger sampling
+    const samples = makeSamples(100, 0.003);
+    const result = sampleGpsPoints(samples, 10);
+    expect(result.length).toBeLessThanOrEqual(10);
+    expect(result[0]).toEqual(samples[0]);
+  });
+  it('always includes the first sample', () => {
+    const samples = makeSamples(50, 0.002);
+    expect(sampleGpsPoints(samples, 25)[0]).toEqual(samples[0]);
+  });
+});
+
+describe('slugifyCorridorId', () => {
+  it('lowercases and replaces spaces with hyphens', () => {
+    expect(slugifyCorridorId('N Wadsworth Blvd', 'Denver')).toBe('n-wadsworth-blvd-denver');
+  });
+  it('removes special characters', () => {
+    expect(slugifyCorridorId('W. Colfax Ave.', 'Denver')).toBe('w-colfax-ave-denver');
+  });
+  it('strips leading and trailing hyphens', () => {
+    expect(slugifyCorridorId('Speer Blvd', 'Denver')).toBe('speer-blvd-denver');
+  });
+});
