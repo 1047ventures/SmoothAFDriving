@@ -95,4 +95,38 @@ describe('detectEventWithThresh', () => {
     expect(suburbanEvt).not.toBeNull();
     expect(highwayEvt).toBeNull();
   });
+
+  it('detects tier-4 extreme brake (2.6× threshold)', () => {
+    const evt = detectEventWithThresh(-cfg.hardBrake * 2.7, 0, cfg, 0, 10);
+    expect(evt).not.toBeNull();
+    expect(evt.type).toBe('brake');
+    expect(evt.tier).toBe(4);
+  });
+
+  it('tier-3 does NOT fire at tier-4 threshold', () => {
+    // 2.6× threshold → must be tier 4, not tier 3
+    const evt = detectEventWithThresh(-cfg.hardBrake * 2.7, 0, cfg, 0, 10);
+    expect(evt?.tier).not.toBe(3);
+  });
+
+  it('detects tier-4 extreme acceleration', () => {
+    const evt = detectEventWithThresh(cfg.hardAccel * 2.7, 0, cfg, 0, 10);
+    expect(evt?.tier).toBe(4);
+    expect(evt?.type).toBe('accel');
+  });
+
+  it('caps effective speed at posted limit × 1.1 for threshold scaling', () => {
+    // With a 30 mph (13.4 m/s) limit, driving at 60 mph should use city thresholds
+    state.currentSpeedLimitMps = 13.4; // 30 mph posted limit
+    // At effective speed 13.4*1.1=14.74 m/s → still suburban band (>13.4), longMult=1.15
+    // Without cap: actual speed 26.8 → highway longMult=1.35
+    // Force that clears suburban tier-1 but not highway tier-1:
+    const force = cfg.hardBrake * 1.15 * 0.58; // above suburban tier-1, below highway tier-1
+    const evtCapped   = detectEventWithThresh(-force, 0, cfg, 0, 26.8);
+    state.currentSpeedLimitMps = null;
+    const evtUncapped = detectEventWithThresh(-force, 0, cfg, 0, 26.8);
+    expect(evtCapped).not.toBeNull();   // capped to suburban — fires
+    expect(evtUncapped).toBeNull();     // uncapped highway — does not fire
+    state.currentSpeedLimitMps = null;
+  });
 });

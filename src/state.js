@@ -12,11 +12,14 @@ export let calib = {
   motionBuf: [],      // recent raw {x,y,z} at 60Hz
   gravBuf:   [],
   startTime: 0,
+  gyroAvail:  null,   // null=untested, true=available, false=unavailable/zero
+  gyroZeroTs: 0,      // timestamp when sustained-zero rotationRate was first noticed
 };
 
 export function resetCalib(){
   calib = { active:false, done:false, failed:false, pairs:[],
-            fwd:null, lat:null, up:null, motionBuf:[], gravBuf:[], startTime:0 };
+            fwd:null, lat:null, up:null, motionBuf:[], gravBuf:[], startTime:0,
+            gyroAvail:null, gyroZeroTs:0 };
 }
 
 export const state = {
@@ -50,6 +53,7 @@ export const state = {
   tickInterval: null,
   wakeLock: null,
   driveStartScore: 100,
+  currentSpeedLimitMps: null,  // posted speed limit from OSM cache; null = no data
 };
 
 export function resetState(){
@@ -70,6 +74,7 @@ export function resetState(){
   state.roughnessBuf = [];
   state.currentRoughness = 0;
   state.stabBuf = [];
+  state.currentSpeedLimitMps = null;
   state.driveStartScore = loadLifetimeScore();
   state.liveScore = state.driveStartScore;
   resetCalib();

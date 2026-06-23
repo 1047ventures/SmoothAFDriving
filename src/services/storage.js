@@ -6,6 +6,9 @@ import {
   DRIVER_NAME_KEY,
   MAX_STORED_DRIVES,
   ACTIVE_DRIVE_KEY,
+  OSM_SPEED_CACHE,
+  OSM_CACHE_TTL,
+  OSM_CACHE_MAX,
 } from '../constants.js';
 
 // ── Lifetime score ────────────────────────────────────────────────────────────
@@ -90,4 +93,40 @@ export function markSynced(driveId){
   const ids = getSyncedIds();
   ids.add(driveId);
   try { localStorage.setItem(SYNCED_KEY, JSON.stringify([...ids])); } catch {}
+}
+
+// ── OSM speed-limit cache ─────────────────────────────────────────────────────
+function osmCacheKey(lat, lon){
+  return `${lat.toFixed(3)}_${lon.toFixed(3)}`;
+}
+
+function loadOsmCache(){
+  try { return JSON.parse(localStorage.getItem(OSM_SPEED_CACHE) || '{}'); }
+  catch { return {}; }
+}
+
+function saveOsmCache(cache){
+  try { localStorage.setItem(OSM_SPEED_CACHE, JSON.stringify(cache)); } catch {}
+}
+
+export function getOsmLimit(lat, lon){
+  const cache = loadOsmCache();
+  const entry = cache[osmCacheKey(lat, lon)];
+  if (!entry) return null;
+  if (Date.now() - entry.ts > OSM_CACHE_TTL) return null;
+  return entry.limitMps;
+}
+
+export function setOsmLimit(lat, lon, limitMps){
+  const cache = loadOsmCache();
+  const key   = osmCacheKey(lat, lon);
+  cache[key]  = { limitMps, ts: Date.now() };
+  // LRU eviction: drop oldest entries when over cap
+  const keys  = Object.keys(cache);
+  if (keys.length > OSM_CACHE_MAX){
+    keys.sort((a, b) => cache[a].ts - cache[b].ts)
+        .slice(0, keys.length - OSM_CACHE_MAX)
+        .forEach(k => delete cache[k]);
+  }
+  saveOsmCache(cache);
 }

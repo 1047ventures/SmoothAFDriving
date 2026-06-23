@@ -60,10 +60,28 @@ export function createMotionHandler(callbacks = {}){
       }
     }
 
-    // ── Road roughness — vertical axis vibration ──────────────────────────
+    // ── Gyroscope availability tracking ──────────────────────────────────
+    const rr = ev.rotationRate;
+    const nowMs = Date.now();
+    if (!rr || rr.alpha == null) {
+      calib.gyroAvail = false;
+    } else if (rr.alpha === 0 && rr.beta === 0 && rr.gamma === 0) {
+      if (!calib.gyroZeroTs) calib.gyroZeroTs = nowMs;
+      else if (nowMs - calib.gyroZeroTs > 2000) calib.gyroAvail = false;
+    } else {
+      calib.gyroZeroTs = 0;
+      if (calib.gyroAvail !== false) calib.gyroAvail = true;
+    }
+
+    // ── Road roughness — vertical axis + gyro pitch enhancement ──────────────
     if (calib.up) {
       const vertAccel = dot3(calib.up, [mx, my, mz]);
       state.roughnessBuf.push(vertAccel);
+      // Pitch rate × speed gives fore-aft rocking m/s² — catches bumps on upright-mounted phones
+      if (calib.gyroAvail && rr && state.lastGpsPos) {
+        const pitchContrib = Math.abs(rr.beta || 0) * (Math.PI / 180) * (state.lastGpsPos.speed || 0) * 0.5;
+        state.roughnessBuf.push(pitchContrib);
+      }
       if (state.roughnessBuf.length > 360) state.roughnessBuf.shift(); // 6s
       if (state.roughnessBuf.length >= 60) {
         const mean = state.roughnessBuf.reduce((s,v)=>s+v,0)/state.roughnessBuf.length;
@@ -95,9 +113,19 @@ export function createMotionHandler(callbacks = {}){
       return;
     }
 
-    const alpha    = CFG.emaAlpha;
-    const longRaw  = dot3(calib.fwd, [mx, my, mz]);
-    const latRaw   = dot3(calib.lat, [mx, my, mz]);
+    const alpha   = CFG.emaAlpha;
+    const longRaw = dot3(calib.fwd, [mx, my, mz]);
+
+    // Gyro yaw-rate lateral G: project rotationRate onto vertical axis → true cornering force
+    // independent of phone mount angle. Falls back to accelerometer lateral when unavailable.
+    let latRaw;
+    if (calib.gyroAvail && rr && calib.up) {
+      const [ux, uy, uz] = calib.up;
+      const yawRateRads = (( rr.beta||0) * ux + (rr.gamma||0) * uy + (rr.alpha||0) * uz) * (Math.PI / 180);
+      latRaw = yawRateRads * (pos.speed || 0);
+    } else {
+      latRaw = dot3(calib.lat, [mx, my, mz]);
+    }
 
     // ── Peak-hold: track worst-case G in each axis this 500ms window ───────
     if (Math.abs(longRaw) > Math.abs(state.peakLong)) state.peakLong = longRaw;

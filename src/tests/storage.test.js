@@ -13,8 +13,9 @@ vi.stubGlobal('localStorage', localStorageMock);
 // Import after stubbing globals
 const { loadLifetimeScore, saveLifetimeScore, loadDrives, saveDrive, saveDrives,
         loadDriverName, saveDriverName, migrateLifetimeScore,
-        toggleFavoriteDrive, deleteDrive,
+        toggleFavoriteDrive, deleteDrive, getOsmLimit, setOsmLimit,
 } = await import('../services/storage.js');
+const { OSM_CACHE_TTL, OSM_SPEED_CACHE } = await import('../constants.js');
 
 beforeEach(() => localStorageMock.clear());
 
@@ -109,5 +110,28 @@ describe('deleteDrive', () => {
     deleteDrive(0, { onUpdate }); // removes newest (idx 0)
     expect(loadDrives()).toHaveLength(1);
     expect(onUpdate).toHaveBeenCalledOnce();
+  });
+});
+
+describe('OSM speed-limit cache', () => {
+  it('returns null when nothing cached', () => {
+    expect(getOsmLimit(37.421, -122.084)).toBeNull();
+  });
+
+  it('stores and retrieves a limit', () => {
+    setOsmLimit(37.421, -122.084, 13.4);
+    expect(getOsmLimit(37.421, -122.084)).toBeCloseTo(13.4);
+  });
+
+  it('rounds to 3 decimal places (same ~110m cell)', () => {
+    setOsmLimit(37.4211, -122.0841, 8.9);
+    // 37.4211 and 37.4214 both round to "37.421"; -122.0841 and -122.0844 both round to "-122.084"
+    expect(getOsmLimit(37.4214, -122.0844)).toBeCloseTo(8.9);
+  });
+
+  it('returns null for expired entries', () => {
+    const expiredCache = { '37.500_-122.000': { limitMps: 20, ts: Date.now() - OSM_CACHE_TTL - 1000 } };
+    store[OSM_SPEED_CACHE] = JSON.stringify(expiredCache);
+    expect(getOsmLimit(37.500, -122.000)).toBeNull();
   });
 });
