@@ -193,7 +193,9 @@
 
   /* ── Sparkline / trends ── */
   .home-sparkline{padding:24px 24px 0;flex-shrink:0}
-  .home-sparkline-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:12px}
+  .home-sparkline-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+  .home-sparkline-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  .home-sparkline-trend{font-family:var(--sans);font-size:12px;font-weight:500;color:rgba(242,232,213,.4);transition:color .3s}
 
   /* ── Explore row ── */
   .home-explore-row{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-top:1px solid rgba(242,232,213,.07);margin-top:16px;flex-shrink:0;cursor:pointer}

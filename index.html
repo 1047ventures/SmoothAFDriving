@@ -90,10 +90,13 @@
 
     <!-- 7-day sparkline -->
     <div class="home-sparkline">
-      <div class="home-sparkline-label">Driving Trends</div>
+      <div class="home-sparkline-header">
+        <div class="home-sparkline-label">Score Trend</div>
+        <div id="home-sparkline-trend" class="home-sparkline-trend"></div>
+      </div>
       <svg id="home-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-        <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#E8501A"/>
+        <g id="home-sparkline-dots"></g>
       </svg>
     </div>
 
