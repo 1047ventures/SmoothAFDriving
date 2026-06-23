@@ -29,19 +29,15 @@ export function saveDriverName(n){
 // Most-recent drive carries the most weight (exponential decay factor 0.65).
 export function migrateLifetimeScore(){
   const stored = localStorage.getItem(LIFETIME_SCORE_KEY);
-  // Re-derive if never set OR if corrupted to "0" but real drives exist
-  if (stored !== null && Number(stored) !== 0) return;
   const drives = loadDrives().filter(d => d.score != null);
   if (!drives.length){ if (stored === null) saveLifetimeScore(100); return; }
-  // drives[0] is newest; apply decay so older drives matter less
-  let weightedSum = 0, totalWeight = 0;
-  drives.forEach((d, i) => {
-    const w = Math.pow(0.65, i);
-    weightedSum += (d.score || 0) * w;
-    totalWeight += w;
-  });
-  const derived = Math.round(weightedSum / totalWeight);
-  saveLifetimeScore(derived);
+  // Re-derive if never set, corrupted to 0, or implausibly low vs actual drives
+  const storedVal = Number(stored);
+  const recentAvg = drives.slice(0, 5).reduce((s, d) => s + d.score, 0) / Math.min(drives.length, 5);
+  const implausible = stored === null || storedVal === 0 || storedVal < recentAvg - 30;
+  if (!implausible) return;
+  const recent = drives.slice(0, 10);
+  saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
 }
 
 // ── Drives ────────────────────────────────────────────────────────────────────
