@@ -43,4 +43,8 @@ describe('upsertCorridorDrive', () => {
     upsertCorridorDrive({ name: 'W Colfax Ave',     city: 'Denver', centerLat: 39.74, centerLon: -104.99, osmWayId: 456, score: 75, distanceMeters: 800,  drivenAt: 2000 });
     expect(loadCorridors()).toHaveLength(2);
   });
+  it('generates a stable slugified corridorId', () => {
+    upsertCorridorDrive({ name: 'N Wadsworth Blvd', city: 'Denver', centerLat: 39.74, centerLon: -105.07, osmWayId: 123, score: 82, distanceMeters: 1200, drivenAt: 1000 });
+    expect(loadCorridors()[0].corridorId).toBe('n-wadsworth-blvd-denver');
+  });
 });

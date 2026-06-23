@@ -5,6 +5,7 @@ import {
   LIFETIME_SCORE_KEY,
   DRIVER_NAME_KEY,
   MAX_STORED_DRIVES,
+  MAX_CORRIDOR_DRIVES,
   ACTIVE_DRIVE_KEY,
   OSM_SPEED_CACHE,
   OSM_CACHE_TTL,
@@ -157,6 +158,8 @@ export function upsertCorridorDrive({ name, city, centerLat, centerLon, osmWayId
     all.push({ corridorId: id, name, city, centerLat, centerLon, osmWayId: osmWayId || null, drives: [drive] });
   } else {
     all[idx].drives.push(drive);
+    if (all[idx].drives.length > MAX_CORRIDOR_DRIVES)
+      all[idx].drives = all[idx].drives.slice(-MAX_CORRIDOR_DRIVES);
   }
   saveCorridors(all);
 }
