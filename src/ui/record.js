@@ -35,10 +35,15 @@ export function motionPermGranted(){
   return false;
 }
 
-export function flashEvent(type, latAccel){
+export function flashEvent(type, latAccel, tier){
   const el = document.createElement('div');
-  el.className = 'event-flash' + (type === 'turn' ? ' warn' : '');
-  el.textContent = type === 'brake' ? 'Hard brake' : type === 'accel' ? 'Hard accel' : 'Sharp turn';
+  const isExtreme = (tier || 2) >= 4;
+  const turnCls = type === 'turn' ? ' turn-warn' : '';
+  el.className = 'event-flash' + turnCls + (isExtreme ? ' extreme' : '');
+  const labels = isExtreme
+    ? { brake: 'Extreme brake', accel: 'Extreme accel', turn: 'Extreme turn' }
+    : { brake: 'Hard brake',    accel: 'Hard accel',    turn: 'Sharp turn'   };
+  el.textContent = labels[type] || type;
   const ticker = $('#event-ticker');
   ticker.innerHTML = '';
   ticker.appendChild(el);
@@ -69,10 +74,12 @@ export function flashEvent(type, latAccel){
   }
 }
 
-export function speakEvent(type){
+export function speakEvent(type, tier){
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(VOICE_LABELS[type] || type);
+  const extremeLabels = { brake: 'Extreme braking!', accel: 'Extreme acceleration!', turn: 'Extreme cornering!' };
+  const text = ((tier || 2) >= 4 && extremeLabels[type]) ? extremeLabels[type] : (VOICE_LABELS[type] || type);
+  const u = new SpeechSynthesisUtterance(text);
   u.volume = 1; u.rate = 1.1; u.pitch = 1;
   window.speechSynthesis.speak(u);
 }
@@ -317,8 +324,8 @@ export function startSimulatedDrive(){
     const evt = detectEvent(s, s.t);
     if (evt){
       state.events.push({ ...evt, t: s.t, lat: s.lat, lon: s.lon, speedMph: mpsToMph(s.speed) });
-      flashEvent(evt.type, state.peakLat);
-      speakEvent(evt.type);
+      flashEvent(evt.type, state.peakLat, evt.tier);
+      speakEvent(evt.type, evt.tier);
     }
     state.lastMotionG = Math.min(2.5, s.harshness / 9.81);
     i += 1;

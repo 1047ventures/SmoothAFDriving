@@ -67,11 +67,15 @@ export function renderReview(drive){
       ssEl.textContent = 'Road: ' + (avgRough < 0.15 ? 'Smooth' : avgRough < 0.5 ? 'Good' : avgRough < 1.0 ? 'Fair' : 'Rough');
     }
 
+    const extremeBrakes = drive.events.filter(e => e.type === 'brake' && (e.tier || 2) >= 4).length;
+    const extremeAccels = drive.events.filter(e => e.type === 'accel' && (e.tier || 2) >= 4).length;
+    const extremeTurns  = drive.events.filter(e => e.type === 'turn'  && (e.tier || 2) >= 4).length;
+
     const emEl = document.getElementById('rv-events-main');
     if (emEl) emEl.textContent = totalEvs === 0 ? 'None'
-      : brakes ? `${brakes} hard brake${brakes !== 1 ? 's' : ''}`
-      : accels ? `${accels} hard accel${accels !== 1 ? 's' : ''}`
-      : `${turns} sharp turn${turns !== 1 ? 's' : ''}`;
+      : brakes ? (extremeBrakes ? `${extremeBrakes} extreme brake${extremeBrakes !== 1 ? 's' : ''}${brakes > extremeBrakes ? ` + ${brakes - extremeBrakes} hard` : ''}` : `${brakes} hard brake${brakes !== 1 ? 's' : ''}`)
+      : accels ? (extremeAccels ? `${extremeAccels} extreme accel${extremeAccels !== 1 ? 's' : ''}` : `${accels} hard accel${accels !== 1 ? 's' : ''}`)
+      : (extremeTurns ? `${extremeTurns} extreme turn${extremeTurns !== 1 ? 's' : ''}` : `${turns} sharp turn${turns !== 1 ? 's' : ''}`);
 
     const esEl = document.getElementById('rv-events-sub');
     if (esEl) esEl.textContent = (accels && brakes)
@@ -86,7 +90,10 @@ export function renderReview(drive){
     const worstBlock = document.getElementById('rv-worst-block');
     if (worstEl){
       if (worst){
-        const lbl = worst.type === 'brake' ? 'Hard brake' : worst.type === 'accel' ? 'Hard accel' : 'Sharp turn';
+        const isWorstExtreme = (worst.tier || 2) >= 4;
+        const lbl = isWorstExtreme
+          ? (worst.type === 'brake' ? 'Extreme brake' : worst.type === 'accel' ? 'Extreme accel' : 'Extreme turn')
+          : (worst.type === 'brake' ? 'Hard brake'    : worst.type === 'accel' ? 'Hard accel'    : 'Sharp turn');
         worstEl.textContent = `${lbl} · ${fmtDuration(worst.t || 0)} in · ${worst.speedMph || 0} mph`;
       } else {
         worstEl.textContent = 'No harsh events — clean drive!';
@@ -264,12 +271,16 @@ export function renderReview(drive){
     if (e.type === 'shift') continue;
     if ((e.tier || 2) < 3) continue; // only worst moments on map
     const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
-    const label = e.type === 'brake' ? 'Hard brake' : e.type === 'accel' ? 'Hard acceleration' : 'Sharp turn';
+    const isExtreme = (e.tier || 2) >= 4;
+    const label = isExtreme
+      ? (e.type === 'brake' ? 'Extreme brake' : e.type === 'accel' ? 'Extreme acceleration' : 'Extreme turn')
+      : (e.type === 'brake' ? 'Hard brake'    : e.type === 'accel' ? 'Hard acceleration'    : 'Sharp turn');
     const gVal  = e.la != null ? (Math.abs(e.la)/9.81).toFixed(2)
                 : e.ra != null ? (Math.abs(e.ra)/9.81).toFixed(2)
                 : (e.severity||1).toFixed(1);
+    const markerSize = isExtreme ? 30 : 26;
     const m = L.marker([e.lat, e.lon], {
-      icon: L.divIcon({ className:'', html:`<div class="ev-marker ${e.type}">${glyph}</div>`, iconSize:[26,26], iconAnchor:[13,13] })
+      icon: L.divIcon({ className:'', html:`<div class="ev-marker ${e.type}${isExtreme ? ' tier-4' : ''}">${glyph}</div>`, iconSize:[markerSize,markerSize], iconAnchor:[markerSize/2,markerSize/2] })
     }).addTo(mapInstance);
     if (e.type === 'brake'){
       m.on('click', () => showBrakeProfile(e, drive));
@@ -369,16 +380,19 @@ export function renderForceTimeline(drive){
     ctx.lineJoin    = 'round';
     ctx.stroke();
 
-    // Event tick marks for tier-2+ events (hairlines on timeline)
-    ctx.strokeStyle = 'rgba(224,59,47,.5)';
-    ctx.lineWidth   = 1;
+    // Event tick marks: tier 2+ hairlines, tier 4 taller + fully opaque
     drive.events.forEach(e => {
       if ((e.tier || 2) < 2 || e.type === 'shift') return;
-      const x = tx(e.t);
-      const color = e.type === 'brake' ? 'rgba(224,59,47,.6)' : e.type === 'accel' ? 'rgba(232,160,58,.6)' : 'rgba(196,169,98,.6)';
+      const isExtreme = (e.tier || 2) >= 4;
+      const x       = tx(e.t);
+      const opacity = isExtreme ? 1.0 : 0.6;
+      const tickH   = isExtreme ? H * 0.30 : H * 0.18;
+      const color   = e.type === 'brake' ? `rgba(224,59,47,${opacity})` : e.type === 'accel' ? `rgba(232,160,58,${opacity})` : `rgba(196,169,98,${opacity})`;
       ctx.strokeStyle = color;
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H * 0.18); ctx.stroke();
+      ctx.lineWidth   = isExtreme ? 1.5 : 1;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, tickH); ctx.stroke();
     });
+    ctx.lineWidth = 1;
   });
 }
 
@@ -553,3 +567,10 @@ export function clearMapFilter(){
 }
 
 export { mapInstance };
+
+export function fitRouteToMap(){
+  if (!mapInstance || !reviewDrive || !reviewDrive.samples || reviewDrive.samples.length < 2) return;
+  mapInstance.invalidateSize();
+  const bounds = L.latLngBounds(reviewDrive.samples.map(s => [s.lat, s.lon]));
+  mapInstance.fitBounds(bounds, { padding: [48, 48] });
+}

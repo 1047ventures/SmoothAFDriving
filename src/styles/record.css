@@ -90,6 +90,9 @@
   .event-flash{padding:6px 14px;border-radius:999px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;background:rgba(224,59,47,.14);color:var(--danger);border:1px solid rgba(224,59,47,.35);animation:flash-in .25s ease,flash-out .6s ease 1.8s forwards}
   .event-flash.warn{background:rgba(232,160,58,.14);color:var(--warn);border-color:rgba(232,160,58,.35)}
   .event-flash.turn-warn{background:rgba(196,169,98,.14);color:var(--gold);border-color:rgba(196,169,98,.35)}
+  .event-flash.extreme{background:rgba(180,20,20,.28);color:rgb(255,80,60);border-color:rgba(255,60,40,.75);font-size:12px;letter-spacing:.28em;animation:flash-in .15s ease,flash-out .6s ease 2.2s forwards}
+  .event-flash.extreme.warn{background:rgba(180,90,0,.28);color:rgb(255,150,40);border-color:rgba(255,130,20,.75)}
+  .event-flash.extreme.turn-warn{background:rgba(120,95,0,.28);color:rgb(220,185,60);border-color:rgba(200,165,40,.75)}
   @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
   /* Stop button */

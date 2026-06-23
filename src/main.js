@@ -8,7 +8,7 @@ import { showScreen } from './ui/router.js';
 import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record.js';
 import { renderRewards } from './ui/rewards.js';
 import { openLeaderboard, openSignupModal, switchLeaderboardTab } from './ui/leaderboard.js';
-import { enterMapFilter, clearMapFilter, renderReview } from './ui/review.js';
+import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap } from './ui/review.js';
 import { metersToMiles } from './utils/math.js';
 import { state } from './state.js';
 import { showOnboardingIfNeeded } from './ui/modals.js';
@@ -87,8 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const isFull = mapBlock.classList.toggle('map-full');
     btn.textContent = isFull ? '×' : '⤢';
     btn.setAttribute('aria-label', isFull ? 'Close map' : 'Expand map');
-    if (!isFull) clearMapFilter();
-    // Map resize handled in review.js invalidateSize
+    if (!isFull) { clearMapFilter(); return; }
+    // Expanding: give CSS transition a frame then refit the full route
+    setTimeout(fitRouteToMap, 120);
   });
 
   document.getElementById('map-filter-clear')?.addEventListener('click', clearMapFilter);
