@@ -138,19 +138,8 @@ function renderCorridorTeaser(drives){
     return;
   }
 
-  // Find the "best" drive to tease as a corridor
-  const best = drives.reduce((a, b) => (b.score > a.score ? b : a), drives[0]);
-  const nameEl  = document.getElementById('hct-road-name');
-  const subEl   = document.getElementById('hct-road-sub');
-  const badgeEl = document.getElementById('hct-rank-badge');
-  const hintEl  = document.getElementById('hct-hint');
-  if (nameEl)  nameEl.textContent  = 'Your best drive';
-  if (subEl)   subEl.textContent   = `Score ${best.score} · Drive it again to lock in your rank`;
-  if (badgeEl){ badgeEl.textContent = best.score; badgeEl.classList.add('ranked'); }
-  if (hintEl)  hintEl.textContent  = drives.length >= 3
-    ? 'Corridor ranking unlocking soon…'
-    : `${3 - drives.length} more drive${3 - drives.length !== 1 ? 's' : ''} to unlock corridor ranking`;
-  card.style.display = 'block';
+  // Has drives but no corridor unlocked yet — hide the teaser (Best stat is tappable)
+  card.style.display = 'none';
 }
 
 export function renderDriveList(){
