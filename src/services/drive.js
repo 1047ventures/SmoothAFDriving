@@ -124,8 +124,13 @@ export function finalizeAndReview(callbacks = {}){
   saveDrive(drive);
   pushDriveToSupabase(drive);
 
-  // Persist final score as new lifetime baseline
-  saveLifetimeScore(state.liveScore);
+  // Lifetime score = rolling average of the 10 most recent drives
+  // (includes this drive, which was just saved above)
+  const allDrives = loadDrives().filter(d => d.score != null);
+  if (allDrives.length > 0) {
+    const recent = allDrives.slice(0, 10);
+    saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
+  }
   const driverName = loadDriverName();
   if (driverName) syncToLeaderboard(driverName, state.liveScore).catch(() => {});
 
