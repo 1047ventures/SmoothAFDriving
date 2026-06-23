@@ -143,122 +143,116 @@
   </section>
 
   <!-- ═══════════════════════════ RECORDING ═══════════════════════════ -->
-  <section id="screen-record" class="screen">
+  <section id="screen-record" class="screen smooth">
 
-    <!-- Car photo background (behind everything) -->
-    <div class="rec-bg" id="rec-bg"></div>
+    <!-- Ambient state glow -->
+    <div class="rec-glow"></div>
 
-    <!-- Road perspective lines -->
-    <svg class="rec-perspective" viewBox="0 0 390 844" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <line x1="195" y1="844" x2="60"  y2="440" stroke="rgba(242,232,213,.06)" stroke-width="1"/>
-      <line x1="195" y1="844" x2="330" y2="440" stroke="rgba(242,232,213,.06)" stroke-width="1"/>
-      <line x1="195" y1="844" x2="140" y2="440" stroke="rgba(242,232,213,.03)" stroke-width="0.5"/>
-      <line x1="195" y1="844" x2="250" y2="440" stroke="rgba(242,232,213,.03)" stroke-width="0.5"/>
+    <!-- SVG crosshatch texture -->
+    <svg class="rec-texture" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <pattern id="rec-diag-gray" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="18" y2="18" stroke="rgba(244,235,217,.022)" stroke-width="0.5"/>
+          <line x1="18" y1="0" x2="0" y2="18" stroke="rgba(244,235,217,.022)" stroke-width="0.5"/>
+        </pattern>
+        <pattern id="rec-diag-green" x="0" y="0" width="126" height="126" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="126" y2="126" stroke="rgba(90,158,82,.20)" stroke-width="1"/>
+          <line x1="126" y1="0" x2="0" y2="126" stroke="rgba(90,158,82,.20)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="390" height="844" fill="url(#rec-diag-gray)"/>
+      <rect width="390" height="844" fill="url(#rec-diag-green)"/>
     </svg>
 
     <!-- Vignette overlay -->
     <div class="rec-overlay"></div>
 
-    <!-- REC indicator -->
-    <div class="rec-indicator">
-      <div class="rec-dot"></div>
-      <span class="rec-indicator-label" id="rec-source">REC</span>
-    </div>
-
-    <!-- Distance + time corners -->
-    <div class="rec-top-strip">
-      <div class="rec-stats-row">
-        <div class="rec-corner">
-          <div class="rec-corner-lbl">Distance</div>
-          <div class="rec-corner-val"><span id="live-distance">0.0</span><span class="rec-corner-unit"> mi</span></div>
-        </div>
-        <div class="rec-corner rec-corner--right">
-          <div class="rec-corner-lbl">Time</div>
-          <div class="rec-corner-val" id="live-time">0:00</div>
-        </div>
+    <!-- Top bar: REC indicator left, Time right -->
+    <div class="rec-topbar">
+      <div class="rec-indicator">
+        <div class="rec-dot"></div>
+        <span class="rec-source" id="rec-source">GPS + Motion</span>
+      </div>
+      <div class="rec-time-corner">
+        <div class="corner-lbl">Time</div>
+        <div class="corner-val" id="live-time">0:00</div>
       </div>
     </div>
 
-    <!-- Speed hero — top left -->
-    <div class="rec-speed-hero">
-      <div class="speed-big" id="live-speed">0</div>
-      <div class="rec-speed-unit">MPH</div>
-      <div class="rec-avg-label">AVG&nbsp;<span id="live-avg-speed">0</span>&nbsp;MPH</div>
-    </div>
-
-    <!-- Score — top right -->
-    <div class="rec-score-hero">
-      <div class="rec-score-label-sm">Score</div>
-      <div class="rec-score-num-big" id="live-score">--</div>
-      <div class="rec-elapsed" id="live-time-sub"></div>
-    </div>
-
-    <!-- Big G-force radar — centered -->
-    <div class="g-radar" id="g-radar">
-      <svg width="100%" height="100%" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="140" cy="140" r="138" stroke="rgba(242,232,213,.15)" stroke-width="1.5"/>
-        <circle cx="140" cy="140" r="70"  stroke="rgba(242,232,213,.07)" stroke-width="1"/>
-        <line x1="2"   y1="140" x2="278" y2="140" stroke="rgba(242,232,213,.06)" stroke-width="0.5"/>
-        <line x1="140" y1="2"   x2="140" y2="278" stroke="rgba(242,232,213,.06)" stroke-width="0.5"/>
-        <text x="140" y="16"  font-family="system-ui" font-size="8" fill="rgba(242,232,213,.3)" text-anchor="middle" letter-spacing="2">ACCEL</text>
-        <text x="140" y="272" font-family="system-ui" font-size="8" fill="rgba(242,232,213,.3)" text-anchor="middle" letter-spacing="2">BRAKE</text>
-        <!-- Ghost trail -->
-        <circle id="ghost-1" cx="140" cy="140" r="3" fill="rgba(242,232,213,.08)"/>
-        <circle id="ghost-2" cx="140" cy="140" r="3" fill="rgba(242,232,213,.12)"/>
-        <circle id="ghost-3" cx="140" cy="140" r="4" fill="rgba(242,232,213,.18)"/>
-        <circle id="ghost-4" cx="140" cy="140" r="4" fill="rgba(242,232,213,.25)"/>
-        <circle id="ghost-5" cx="140" cy="140" r="5" fill="rgba(242,232,213,.35)"/>
-        <circle id="ghost-6" cx="140" cy="140" r="6" fill="rgba(242,232,213,.5)"/>
-      </svg>
-      <!-- Live dot -->
-      <div class="g-radar-dot" id="g-radar-dot"></div>
-      <!-- Drive state label -->
-      <div class="rec-state-label">
-        <div class="rec-state-dot" id="rec-state-dot"></div>
-        <span class="rec-state-text" id="rec-state-text">Smooth</span>
+    <!-- Hero numbers: Speed / Score -->
+    <div class="rec-heroes">
+      <div class="hero-speed">
+        <div class="hero-num-speed" id="live-speed">0</div>
+        <div class="hero-speed-unit">mph</div>
       </div>
-      <!-- Burst effects -->
-      <div class="burst b-brake" id="burst-brake"></div>
-      <div class="burst b-accel" id="burst-accel"></div>
-      <div class="burst b-left"  id="burst-left"></div>
-      <div class="burst b-right" id="burst-right"></div>
-    </div>
-
-    <!-- Waveform strip -->
-    <div class="rec-waveform">
-      <svg width="100%" height="60" viewBox="0 0 390 60" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path id="rec-waveform-path"
-          d="M 0,30 L 60,30 C 80,30 90,28 110,24 C 125,21 135,30 155,30 L 210,30 C 228,30 238,22 258,18 C 272,15 282,30 300,30 L 340,30 C 355,30 365,27 375,25 L 390,25"
-          stroke="rgba(232,80,26,.55)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="390" cy="25" r="3" fill="#E8501A"/>
-      </svg>
-    </div>
-
-    <!-- Corridor strip -->
-    <div class="rec-corridor">
-      <div class="rec-corridor-labels">
-        <div class="rec-corridor-name" id="rec-corridor-name">On Corridor</div>
-        <div class="rec-corridor-rank" id="rec-corridor-rank"></div>
+      <div class="hero-slash">/</div>
+      <div class="hero-score">
+        <div class="hero-score-lbl">Score</div>
+        <div class="hero-num-score" id="live-score">--</div>
       </div>
-      <div class="rec-road-strip">
-        <div class="rec-road-dashes">
-          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
-          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
-          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
-          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
-          <div class="rec-road-dash"></div><div class="rec-road-dash"></div>
+    </div>
+
+    <!-- G-force radar: big, striking, state-colored -->
+    <div class="rec-radar">
+      <div class="radar-wrap" id="g-radar">
+        <svg width="268" height="268" viewBox="0 0 268 268" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="rzone-brake" cx="50%" cy="100%" r="60%"><stop offset="0%" stop-color="rgba(201,56,40,.07)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <radialGradient id="rzone-accel" cx="50%" cy="0%"   r="60%"><stop offset="0%" stop-color="rgba(90,158,82,.07)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <radialGradient id="rzone-left"  cx="0%"  cy="50%"  r="60%"><stop offset="0%" stop-color="rgba(196,169,98,.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <radialGradient id="rzone-right" cx="100%" cy="50%" r="60%"><stop offset="0%" stop-color="rgba(196,169,98,.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          </defs>
+          <circle cx="134" cy="134" r="132" fill="url(#rzone-brake)"/>
+          <circle cx="134" cy="134" r="132" fill="url(#rzone-accel)"/>
+          <circle cx="134" cy="134" r="132" fill="url(#rzone-left)"/>
+          <circle cx="134" cy="134" r="132" fill="url(#rzone-right)"/>
+          <circle cx="134" cy="134" r="132" stroke="rgba(90,158,82,.28)" stroke-width="1.5"/>
+          <circle cx="134" cy="134" r="88"  stroke="rgba(90,158,82,.13)" stroke-width="1"/>
+          <circle cx="134" cy="134" r="44"  stroke="rgba(90,158,82,.07)" stroke-width="1"/>
+          <line x1="4"   y1="134" x2="264" y2="134" stroke="rgba(242,232,213,.07)" stroke-width="0.5"/>
+          <line x1="134" y1="4"   x2="134" y2="264" stroke="rgba(242,232,213,.07)" stroke-width="0.5"/>
+          <text x="134" y="16"  font-family="system-ui" font-size="8" fill="rgba(90,158,82,.55)"  text-anchor="middle" letter-spacing="2">ACCEL</text>
+          <text x="134" y="260" font-family="system-ui" font-size="8" fill="rgba(201,56,40,.45)" text-anchor="middle" letter-spacing="2">BRAKE</text>
+          <text x="12"  y="138" font-family="system-ui" font-size="8" fill="rgba(196,169,98,.35)" text-anchor="middle" letter-spacing="1">L</text>
+          <text x="256" y="138" font-family="system-ui" font-size="8" fill="rgba(196,169,98,.35)" text-anchor="middle" letter-spacing="1">R</text>
+        </svg>
+        <div class="g-radar-dot" id="g-radar-dot"></div>
+        <div class="burst b-brake" id="burst-brake"></div>
+        <div class="burst b-accel" id="burst-accel"></div>
+        <div class="burst b-left"  id="burst-left"></div>
+        <div class="burst b-right" id="burst-right"></div>
+      </div>
+    </div>
+
+    <!-- Bottom stats: Miles | Avg Speed | Efficiency -->
+    <div class="rec-bottom">
+      <div class="bot-stat">
+        <div class="bot-lbl">Miles</div>
+        <div class="bot-val"><span id="live-distance">0.0</span><span class="bot-unit"> mi</span></div>
+      </div>
+      <div class="bot-stat bot-stat--center">
+        <div class="bot-lbl">Avg Speed</div>
+        <div class="bot-val"><span id="live-avg-speed">0</span><span class="bot-unit"> mph</span></div>
+      </div>
+      <div class="bot-stat bot-stat--right">
+        <div class="bot-lbl">Efficiency</div>
+        <div class="fuel-segs">
+          <div class="fuel-seg" id="fuel-seg-1"></div>
+          <div class="fuel-seg" id="fuel-seg-2"></div>
+          <div class="fuel-seg" id="fuel-seg-3"></div>
         </div>
-        <div class="rec-car-icon">
-          <svg width="28" height="14" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="2" width="26" height="10" rx="2.5" stroke="rgba(242,232,213,.9)" stroke-width="1.5"/>
-            <line x1="20" y1="2" x2="22" y2="12" stroke="rgba(242,232,213,.5)" stroke-width="1"/>
-            <line x1="6"  y1="2" x2="8"  y2="12" stroke="rgba(242,232,213,.5)" stroke-width="1"/>
-          </svg>
-        </div>
+        <div class="fuel-lbl" id="live-efficiency">Eco</div>
       </div>
     </div>
 
-    <!-- Hidden elements for JS compat -->
+    <!-- Event flash ticker -->
+    <div class="event-ticker" id="event-ticker"></div>
+
+    <!-- Calibration status toast -->
+    <div id="calib-status" style="display:none;position:absolute;z-index:30;bottom:150px;left:50%;transform:translateX(-50%);font-size:12px;text-align:center;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.7);white-space:nowrap;color:var(--cream)"></div>
+
+    <!-- Hidden compat: JS writes to these even if invisible -->
+    <div class="rec-bg" id="rec-bg" style="display:none"></div>
     <div class="smooth-ring-wrap"><div class="smooth-ring" id="smooth-ring"></div></div>
     <div class="force-line fl-brake" id="fl-brake"></div>
     <div class="force-line fl-accel" id="fl-accel"></div>
@@ -273,9 +267,7 @@
       </svg>
     </div>
 
-    <div class="event-ticker" id="event-ticker"></div>
-    <div id="calib-status" style="display:none;position:absolute;z-index:30;bottom:150px;left:50%;transform:translateX(-50%);font-size:12px;text-align:center;padding:4px 12px;border-radius:8px;background:rgba(0,0,0,.7);white-space:nowrap;color:var(--cream)"></div>
-    <button id="btn-stop" class="stop-btn">Stop Drive</button>
+    <button id="btn-stop" class="stop-btn">End Drive</button>
 
   </section>
 

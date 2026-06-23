@@ -159,15 +159,28 @@ export function updateLiveUI(){
     radar.classList.toggle('state-smooth', !isBrake && !isAccel);
   }
 
-  // Drive state label (rec-state-dot + rec-state-text)
-  const stateDot  = document.getElementById('rec-state-dot');
-  const stateText = document.getElementById('rec-state-text');
-  if (stateDot && stateText){
-    const stateColor = isBrake ? '#C93828' : isAccel ? '#E8501A' : '#5A9E52';
-    const stateLabel = isBrake ? 'Braking'  : isAccel ? 'Accelerating' : 'Smooth';
-    stateDot.style.background = stateColor;
-    stateText.textContent     = stateLabel;
-    stateText.style.color     = stateColor;
+  // Screen-level state class: drives glow, score color, efficiency color
+  {
+    const screenEl = document.getElementById('screen-record');
+    if (screenEl){
+      screenEl.classList.toggle('braking', isBrake);
+      screenEl.classList.toggle('accel',   !isBrake && isAccel);
+      screenEl.classList.toggle('smooth',  !isBrake && !isAccel);
+    }
+  }
+
+  // Efficiency bar — 3 segments, based on cumulative penalty weight
+  {
+    const penalty = state.events.filter(e => e.type !== 'shift')
+      .reduce((s, e) => s + (TIER_MULT[e.tier || 2] || 1) * (e.severity || 1), 0);
+    const segs  = penalty < 2 ? 3 : penalty < 6 ? 2 : penalty < 14 ? 1 : 0;
+    const label = segs === 3 ? 'Eco' : segs === 2 ? 'Normal' : 'Heavy';
+    for (let i = 1; i <= 3; i++){
+      const seg = document.getElementById('fuel-seg-' + i);
+      if (seg) seg.classList.toggle('on', i <= segs);
+    }
+    const effEl = document.getElementById('live-efficiency');
+    if (effEl) effEl.textContent = label;
   }
 
   // Off-screen needle — JS compat
