@@ -1,114 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smooth AF Driving — Install</title>
-  <meta name="description" content="Real-time driving smoothness tracker. Score your braking, cornering, and throttle. Free PWA — no App Store needed.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0A0808">
+  <title>Install Smooth AF — Free Driving Score App</title>
+  <meta name="description" content="Real-time driving score — every brake, turn, and acceleration rated across 7 dimensions. Free PWA, no App Store needed.">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:      #0A0A0A;
-      --bg2:     #151212;
-      --bg3:     #1C1818;
-      --cream:   #F2E8D5;
-      --cream-dim: #C9BFAC;
-      --muted:   #6B6258;
-      --tang:    #E85D3A;
-      --serif:   'Playfair Display', Georgia, serif;
-      --sans:    -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      --bg:        #0A0808;
+      --bg2:       #141010;
+      --bg3:       #1A1616;
+      --cream:     #F4EBD9;
+      --cream-dim: rgba(244,235,217,.65);
+      --tang:      #E8501A;
+      --muted:     rgba(244,235,217,.35);
+      --good:      #5A9E52;
+      --serif:     'Playfair Display', Georgia, 'Times New Roman', serif;
+      --sans:      -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
 
-    html, body {
-      min-height: 100%;
+    body {
       background: var(--bg);
       color: var(--cream);
       font-family: var(--sans);
       -webkit-font-smoothing: antialiased;
-    }
-
-    body {
+      min-height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 48px 20px 64px;
+      padding: calc(env(safe-area-inset-top,0) + 40px) 20px calc(env(safe-area-inset-bottom,0) + 56px);
     }
 
+    /* ── Wordmark ── */
     .wordmark {
       font-family: var(--serif);
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--cream);
+      letter-spacing: -0.02em;
       margin-bottom: 40px;
+      align-self: flex-start;
+      width: 100%;
+      max-width: 860px;
     }
+    .wordmark .af { color: var(--tang); }
 
-    /* ── Card shell ── */
+    /* ── Card ── */
     .card {
       width: 100%;
       max-width: 860px;
       background: var(--bg2);
-      border: 1px solid rgba(242,232,213,.07);
-      border-radius: 20px;
+      border: 1px solid rgba(244,235,217,.08);
+      border-radius: 22px;
       overflow: hidden;
     }
 
-    /* ── Top: hero + CTA (always full-width) ── */
-    .hero-section {
+    /* ── Hero ── */
+    .hero {
       padding: 36px 36px 32px;
-      border-bottom: 1px solid rgba(242,232,213,.06);
+      border-bottom: 1px solid rgba(244,235,217,.07);
     }
 
-    .hero-title {
+    .hero-eyebrow {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--tang);
+      margin-bottom: 12px;
+    }
+
+    .hero-headline {
       font-family: var(--serif);
-      font-size: clamp(28px, 5vw, 42px);
+      font-style: italic;
       font-weight: 700;
-      line-height: 1.15;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.1;
       color: var(--cream);
       margin-bottom: 14px;
     }
-    .hero-title span { color: var(--tang); }
 
     .hero-pitch {
       font-size: 15px;
       line-height: 1.7;
       color: var(--cream-dim);
-      max-width: 560px;
+      max-width: 520px;
       margin-bottom: 28px;
     }
 
-    .cta {
-      display: inline-block;
-      padding: 15px 32px;
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .pill {
+      background: rgba(244,235,217,.05);
+      border: 1px solid rgba(244,235,217,.1);
+      border-radius: 99px;
+      padding: 5px 13px;
+      font-size: 11px;
+      letter-spacing: .06em;
+      color: var(--cream-dim);
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 28px;
       background: var(--tang);
-      color: #fff;
-      font-family: var(--sans);
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      color: #080808;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -.01em;
       text-decoration: none;
       border-radius: 12px;
-      transition: opacity .15s, transform .1s;
+      transition: filter .1s, transform .1s;
       -webkit-tap-highlight-color: transparent;
+      border: 0;
+      cursor: pointer;
     }
-    .cta:active { opacity: .88; transform: scale(.98); }
+    .cta-btn:active { filter: brightness(.88); transform: scale(.98); }
+    .cta-arrow { font-family: var(--sans); font-style: normal; font-weight: 400; font-size: 18px; }
 
-    /* ── Bottom: split panel ── */
-    .split-section {
+    /* ── Already installed banner ── */
+    .installed-banner {
+      display: none;
+      background: rgba(90,158,82,.1);
+      border: 1px solid rgba(90,158,82,.25);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 22px;
+      font-size: 14px;
+      color: var(--good);
+    }
+
+    /* ── Safari warning ── */
+    .safari-warn {
+      display: none;
+      background: rgba(232,160,58,.07);
+      border: 1px solid rgba(232,160,58,.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: rgba(232,160,58,.9);
+      line-height: 1.55;
+    }
+    .safari-warn strong { font-weight: 600; }
+
+    /* ── Split panel ── */
+    .split {
       display: flex;
       flex-direction: column;
     }
-
     @media (min-width: 640px) {
-      .split-section { flex-direction: row; }
+      .split { flex-direction: row; }
     }
 
-    /* Left panel — QR (desktop) / hidden (mobile) */
+    /* QR panel — desktop only */
     .panel-qr {
       display: none;
       flex-direction: column;
@@ -117,21 +181,20 @@
       gap: 16px;
       padding: 36px 32px;
       background: var(--bg3);
-      border-right: 1px solid rgba(242,232,213,.06);
-      min-width: 240px;
+      border-right: 1px solid rgba(244,235,217,.07);
+      min-width: 232px;
     }
-
     @media (min-width: 640px) {
       .panel-qr { display: flex; }
     }
 
-    .qr-wrap {
+    .qr-frame {
       background: #fff;
       border-radius: 14px;
       padding: 12px;
       display: inline-flex;
     }
-    .qr-wrap canvas { display: block; border-radius: 4px; }
+    .qr-frame canvas { display: block; border-radius: 4px; }
 
     .qr-label {
       font-size: 12px;
@@ -140,44 +203,45 @@
       line-height: 1.6;
     }
 
-    /* Right panel — install steps */
+    /* Steps panel */
     .panel-steps {
       flex: 1;
       padding: 32px 36px 36px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 18px;
     }
 
     .panel-heading {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: .16em;
       text-transform: uppercase;
       color: var(--muted);
     }
 
-    .install-tabs {
+    .tabs {
       display: flex;
       gap: 8px;
     }
     .tab-btn {
       flex: 1;
-      padding: 9px 12px;
+      padding: 9px 10px;
       background: transparent;
-      border: 1px solid rgba(242,232,213,.12);
+      border: 1px solid rgba(244,235,217,.12);
       border-radius: 8px;
-      color: var(--cream-dim);
+      color: var(--muted);
       font-family: var(--sans);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
+      letter-spacing: .06em;
       cursor: pointer;
       transition: background .15s, color .15s, border-color .15s;
       -webkit-tap-highlight-color: transparent;
     }
     .tab-btn.active {
-      background: rgba(242,232,213,.07);
-      border-color: rgba(242,232,213,.22);
+      background: rgba(244,235,217,.07);
+      border-color: rgba(244,235,217,.22);
       color: var(--cream);
     }
 
@@ -187,68 +251,93 @@
     .steps {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 0;
     }
-
     .step {
       display: flex;
       gap: 14px;
       align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(244,235,217,.06);
     }
-
+    .step:last-child { border-bottom: none; }
     .step-num {
       flex-shrink: 0;
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      background: rgba(232,93,58,.15);
+      background: rgba(232,80,26,.14);
       color: var(--tang);
       font-size: 12px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-top: 2px;
     }
-
     .step-text {
       font-size: 14px;
       line-height: 1.6;
       color: var(--cream-dim);
-      padding-top: 4px;
+      padding-top: 2px;
     }
     .step-text strong { color: var(--cream); font-weight: 600; }
 
     /* ── Footer ── */
-    .footer-note {
+    .footer {
       margin-top: 20px;
       font-size: 11px;
-      color: var(--muted);
+      color: rgba(244,235,217,.2);
       text-align: center;
-      line-height: 1.6;
+      letter-spacing: .06em;
+      line-height: 1.8;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    @media (max-width: 480px) {
+      .hero { padding: 24px 20px 22px; }
+      .panel-steps { padding: 22px 20px 28px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="wordmark">Smooth AF Driving</div>
+  <div class="wordmark">Smooth <span class="af">AF</span></div>
 
   <div class="card">
 
     <!-- Hero -->
-    <div class="hero-section">
-      <h1 class="hero-title">Find out how<br><span>smooth you really are.</span></h1>
+    <div class="hero">
+      <div class="hero-eyebrow">Free Driving Score App</div>
+      <h1 class="hero-headline">Find out how smooth<br>you really are.</h1>
       <p class="hero-pitch">
-        Smooth AF scores every brake, turn, and throttle input in real time.
-        No app store. No account. Just open it, drive, and see the truth.
+        Smooth AF scores every brake, corner, and acceleration in real time —
+        rated across 7 dimensions. No app store, no account, free forever.
       </p>
-      <a class="cta" href="./index.html">Open the App</a>
+      <div class="hero-pills">
+        <span class="pill">7 dimensions scored</span>
+        <span class="pill">Live map</span>
+        <span class="pill">0–100 rating</span>
+        <span class="pill">No signup</span>
+        <span class="pill">Free forever</span>
+      </div>
+      <div class="installed-banner" id="installed-banner">
+        ✓ Already installed — open Smooth AF from your home screen
+      </div>
+      <div class="safari-warn" id="safari-warn">
+        <strong>Open this page in Safari to install.</strong> Chrome and other browsers on iPhone can't add apps to the home screen — copy the URL and open it in Safari.
+      </div>
+      <a class="cta-btn" href="/tracker" id="cta-btn">
+        Open the app <span class="cta-arrow">→</span>
+      </a>
     </div>
 
-    <!-- Split: QR left, steps right -->
-    <div class="split-section">
+    <!-- Split: QR (desktop) + install steps -->
+    <div class="split">
 
       <div class="panel-qr">
-        <div class="qr-wrap">
+        <div class="qr-frame">
           <canvas id="qr-canvas"></canvas>
         </div>
         <p class="qr-label">Scan with your phone camera<br>to open on mobile</p>
@@ -257,8 +346,8 @@
       <div class="panel-steps">
         <div class="panel-heading">Add to home screen</div>
 
-        <div class="install-tabs">
-          <button class="tab-btn active" data-tab="ios">iPhone</button>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="ios">iPhone / iPad</button>
           <button class="tab-btn" data-tab="android">Android</button>
         </div>
 
@@ -266,15 +355,15 @@
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
-              <div class="step-text">Tap the <strong>Share button</strong> ⎋ at the bottom of Safari</div>
+              <div class="step-text">Open this page in <strong>Safari</strong> — install requires Safari on iOS</div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
-              <div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+              <div class="step-text">Tap the <strong>Share button ⎙</strong> at the bottom of Safari (box with arrow pointing up)</div>
             </div>
             <div class="step">
               <div class="step-num">3</div>
-              <div class="step-text">Tap <strong>Add</strong> — the icon appears on your home screen instantly</div>
+              <div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong>, then tap <strong>Add</strong></div>
             </div>
           </div>
         </div>
@@ -283,15 +372,15 @@
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
-              <div class="step-text">Tap the <strong>menu ⋮</strong> in the top-right of Chrome</div>
+              <div class="step-text">Open this page in <strong>Chrome</strong></div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
-              <div class="step-text">Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></div>
+              <div class="step-text">Tap the <strong>three-dot menu ⋮</strong> in the top-right corner</div>
             </div>
             <div class="step">
               <div class="step-num">3</div>
-              <div class="step-text">Tap <strong>Install</strong> — launches just like a native app</div>
+              <div class="step-text">Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>, then confirm</div>
             </div>
           </div>
         </div>
@@ -301,36 +390,75 @@
 
   </div>
 
-  <p class="footer-note">
-    Alpha · No account required · Scores stay on your device · iOS Safari &amp; Android Chrome
+  <p class="footer">
+    smoothafdriving.com &nbsp;·&nbsp; iOS Safari &amp; Android Chrome &nbsp;·&nbsp; No account required
   </p>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+    integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSr9FzhbmFMuwPIFr8ff3SIALOYe3e3RIEfg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-      });
-    });
+    (function () {
+      var ua = navigator.userAgent || '';
+      var isIOS = /iphone|ipad|ipod/i.test(ua);
+      var isAndroid = /android/i.test(ua);
+      var isStandalone = (navigator.standalone === true) ||
+        window.matchMedia('(display-mode: standalone)').matches;
+      // Safari detection: has Safari but not Chrome/CriOS
+      var isSafari = /safari/i.test(ua) && !/chrome|crios|chromium|android/i.test(ua);
 
-    const appUrl = window.location.origin + window.location.pathname;
-    if (typeof QRCode !== 'undefined') {
-      new QRCode(document.getElementById('qr-canvas'), {
-        text: appUrl,
-        width: 180,
-        height: 180,
-        colorDark: '#0A0A0A',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M,
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+          document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+          btn.classList.add('active');
+          document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+        });
       });
-    }
 
-    if (/Android/i.test(navigator.userAgent || '')) {
-      document.querySelector('[data-tab="android"]').click();
-    }
+      // Auto-select Android tab
+      if (isAndroid) {
+        document.querySelector('[data-tab="android"]').click();
+      }
+
+      // Platform-specific UI
+      if (isStandalone) {
+        document.getElementById('installed-banner').style.display = 'block';
+        var cta = document.getElementById('cta-btn');
+        cta.innerHTML = 'Open Smooth AF <span class="cta-arrow">→</span>';
+      } else if (isIOS && !isSafari) {
+        document.getElementById('safari-warn').style.display = 'block';
+      }
+
+      // QR code (desktop only — hidden on mobile via CSS)
+      var qrEl = document.getElementById('qr-canvas');
+      if (qrEl && typeof QRCode !== 'undefined') {
+        new QRCode(qrEl, {
+          text: 'https://smoothafdriving.com/tracker',
+          width: 180,
+          height: 180,
+          colorDark: '#0A0808',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M,
+        });
+      }
+
+      // Android Chrome install prompt
+      var deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        var cta = document.getElementById('cta-btn');
+        cta.innerHTML = 'Install Smooth AF <span class="cta-arrow">↓</span>';
+        cta.addEventListener('click', function (ev) {
+          if (!deferredPrompt) return;
+          ev.preventDefault();
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+        }, { once: true });
+      });
+    })();
   </script>
 
 </body>

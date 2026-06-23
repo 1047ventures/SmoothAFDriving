@@ -1,5 +1,5 @@
 import { APP_VERSION, REMOVEBG_KEY } from './constants.js';
-import { migrateLifetimeScore } from './services/storage.js';
+import { migrateLifetimeScore, loadDrives, loadLifetimeScore, loadDriverName } from './services/storage.js';
 import { checkRecoveredDrive } from './services/drive.js';
 import { syncPendingDrives } from './services/supabase.js';
 import { renderDriveList } from './ui/home.js';
@@ -8,10 +8,10 @@ import { showScreen } from './ui/router.js';
 import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record.js';
 import { renderRewards } from './ui/rewards.js';
 import { openLeaderboard, openSignupModal, switchLeaderboardTab } from './ui/leaderboard.js';
-import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap } from './ui/review.js';
+import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap, reviewDrive, reviewAnalysis } from './ui/review.js';
+import { shareCurrentDrive, shareLifetimeScore } from './ui/share.js';
 import { metersToMiles } from './utils/math.js';
 import { state } from './state.js';
-import { showOnboardingIfNeeded } from './ui/modals.js';
 import { syncUserProfile } from './services/supabase.js';
 
 // Export key init functions for DOMContentLoaded (wired below)
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   migrateLifetimeScore();
-  showOnboardingIfNeeded();
   checkRecoveredDrive({ onListUpdate: renderDriveList });
   renderDriveList();
   syncPendingDrives();
@@ -149,13 +148,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navigator.share) navigator.share({ title: 'Smooth AF', text: 'Check out Smooth AF — the driving score app!' }).catch(() => {});
   });
 
-  // Share drive button — uses module-level reviewDrive from review.js
-  document.getElementById('btn-share-drive')?.addEventListener('click', async () => {
-    const { reviewDrive: rd } = await import('./ui/review.js');
-    if (navigator.share && rd){
-      const mi = metersToMiles(rd.distanceMeters || 0).toFixed(1);
-      navigator.share({ title: 'Smooth AF Drive', text: `I scored ${rd.score}/100 on a ${mi} mi drive!` }).catch(() => {});
-    }
+  // Share drive button
+  document.getElementById('btn-share-drive')?.addEventListener('click', () => {
+    shareCurrentDrive(reviewDrive, reviewAnalysis);
+  });
+
+  // Share lifetime score button (home screen)
+  document.getElementById('btn-share-lifetime')?.addEventListener('click', () => {
+    const drives = loadDrives().filter(d => d.score != null);
+    const score  = loadLifetimeScore();
+    const name   = loadDriverName();
+    const miles  = drives.reduce((s, d) => s + metersToMiles(d.distanceMeters || 0), 0);
+    shareLifetimeScore(score, name, drives.length, miles);
   });
 
   // Garage sheet
