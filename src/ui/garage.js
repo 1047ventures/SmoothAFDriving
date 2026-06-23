@@ -31,6 +31,18 @@ function setActiveVehicle(id){
   saveGarage(g);
 }
 
+export function addVehicleFromPrompt(make, model, year) {
+  const vehicles = loadGarage();
+  vehicles.forEach(v => { v.active = false; });
+  vehicles.push({
+    id: generateId(), type: '', make: make||'', model: model||'', year: year||'',
+    color:'', licensePlate:'', vin:'',
+    insurance:{provider:'',policyNumber:'',expiryDate:'',agentPhone:''},
+    registration:{state:'',expiryDate:''}, active:true,
+  });
+  saveGarage(vehicles);
+}
+
 function migrateFromOldVehicleKey(){
   if (loadGarage().length > 0) return;
   const oldType = localStorage.getItem(VEHICLE_KEY);

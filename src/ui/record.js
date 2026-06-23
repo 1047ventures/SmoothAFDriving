@@ -1,7 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, VOICE_LABELS } from '../constants.js';
+import { CFG, TIER_MULT, VOICE_LABELS } from '../constants.js';
 import { mpsToMph, fmtDuration, clamp } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -11,6 +11,7 @@ import { finalizeAndReview } from '../services/drive.js';
 import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
+import { showCarPromptIfNeeded } from './modals.js';
 
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
@@ -117,8 +118,9 @@ export function updateLiveUI(){
   {
     const durationMins = (Date.now() - state.startTime) / 60000;
     const penalty = state.events.reduce((s, e) => {
+      if (e.type === 'shift') return s;
       const w = e.type === 'brake' ? 5 : e.type === 'accel' ? 3 : 2;
-      return s + w * (e.magnitude || 1);
+      return s + w * (TIER_MULT[e.tier || 2] || 1) * (e.severity || 1);
     }, 0);
     const recovery = Math.min(durationMins * 1.5, 6);
     const score = Math.max(0, Math.min(100, Math.round(state.driveStartScore - penalty + recovery)));
@@ -194,10 +196,6 @@ export function updateLiveUI(){
 }
 
 export function startRecording(){
-  if (!navigator.geolocation){
-    showToast('No GPS on this device — try the Demo Drive instead', 'error');
-    return;
-  }
   resetState();
   state.recording = true;
   state.simulated = false;
@@ -224,6 +222,11 @@ export function startRecording(){
       .catch(() => {});
   }
 
+  if (!navigator.geolocation){
+    alert('No geolocation. Use replay demo instead.');
+    stopRecording();
+    return;
+  }
   state.gpsWatchId = navigator.geolocation.watchPosition(
     pos => onGpsUpdate(pos, {
       flashEvent,
@@ -234,10 +237,7 @@ export function startRecording(){
     err => {
       console.warn('GPS error', err);
       if (err.code === 1) {
-        showToast('Location denied — enable in iPhone Settings to record', 'error');
-        stopRecording();
-      } else if (err.code === 2) {
-        showToast('GPS unavailable — make sure Location is on', 'error');
+        alert('Location permission denied. Enable it in Settings to record a drive.');
         stopRecording();
       }
     },
@@ -275,6 +275,7 @@ export function stopRecording(){
     onReview: renderReview,
     onListUpdate: renderDriveList,
   });
+  showCarPromptIfNeeded();
 }
 
 export function startSimulatedDrive(){

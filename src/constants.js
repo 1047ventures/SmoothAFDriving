@@ -6,6 +6,10 @@ export const DEVICE_KEY         = 'smoothaf.device_id';
 export const SYNCED_KEY         = 'smoothaf.synced_ids';
 export const LIFETIME_SCORE_KEY = 'smoothaf.lifetime_score';
 export const DRIVER_NAME_KEY    = 'smoothaf.driver_name';
+export const USER_EMAIL_KEY     = 'smoothaf.user_email';
+export const ONBOARDED_KEY      = 'smoothaf.onboarded';
+export const PROFILE_SYNCED_KEY = 'smoothaf.profile_synced';
+export const CAR_PROMPTED_KEY   = 'smoothaf.car_prompted';
 export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 
@@ -26,11 +30,11 @@ export const VEHICLE_TYPES = [
 
 // ── Detection thresholds (tier-2 baseline) ────────────────────────────────────
 // Tier 1 fires at 55% of these, tier 3 at 175%.
-// Raised from previous values — GPS-derived lateral G has too much noise at low thresholds.
+// Raised again — real-world drives showed too many false positive tier-1 accel/brake events.
 export const DEFAULTS = {
-  hardBrake:     3.8,   // m/s²
-  hardAccel:     3.2,   // m/s²
-  sharpTurn:     3.8,   // m/s² lateral — GPS heading jitter was causing false highway events
+  hardBrake:     4.5,   // m/s² — tier-1 fires at 2.48; normal city braking rarely exceeds this
+  hardAccel:     4.0,   // m/s² — tier-1 fires at 2.20; normal on-ramp rarely triggers
+  sharpTurn:     4.5,   // m/s² lateral — GPS heading jitter was causing false highway events
   emaAlpha:      0.25,  // more smoothing vs 0.32 — filters single-sample GPS spikes
   jerkThreshold: 5.5,   // m/s³ — gear-change / abrupt transmission event
   // ── Tier-2 base penalties (multiplied by tier factor below) ─────────────

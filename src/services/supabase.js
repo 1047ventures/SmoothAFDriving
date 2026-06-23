@@ -1,4 +1,5 @@
 import { loadDrives, getDeviceId, getSyncedIds, markSynced } from './storage.js';
+import { DRIVER_NAME_KEY, USER_EMAIL_KEY, ONBOARDED_KEY, PROFILE_SYNCED_KEY } from '../constants.js';
 
 const SB_URL  = 'https://dbreetxubxdxogmektxc.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicmVldHh1YnhkeG9nbWVrdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjY5ODgsImV4cCI6MjA5MjkwMjk4OH0.hMeEhYpNNgZ67Nh9GnjwJvtSBbdQVhbdjiBBNNG5qe4';
@@ -63,4 +64,23 @@ export async function fetchLeaderboard(){
     if (!res.ok) return null;
     return await res.json();
   } catch { return null; }
+}
+
+export async function registerUser({ name, email, device_id }) {
+  try {
+    const res = await fetch('/.netlify/functions/register-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, device_id }),
+    });
+    if (res.ok) localStorage.setItem(PROFILE_SYNCED_KEY, '1');
+  } catch { /* offline — caller retries via syncUserProfile on next startup */ }
+}
+
+export async function syncUserProfile() {
+  if (!localStorage.getItem(ONBOARDED_KEY)) return;
+  if (localStorage.getItem(PROFILE_SYNCED_KEY)) return;
+  const name  = localStorage.getItem(DRIVER_NAME_KEY) || '';
+  const email = localStorage.getItem(USER_EMAIL_KEY)  || '';
+  await registerUser({ name, email, device_id: getDeviceId() });
 }
