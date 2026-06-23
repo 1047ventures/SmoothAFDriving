@@ -63,7 +63,8 @@ function assignRoadNames(points, roads){
       const d = haversine(p, road.center);
       if (d < bestDist){ bestDist = d; bestRoad = road; }
     }
-    return { ...p, roadName: bestDist < 1000 ? bestRoad?.tags?.name || null : null, osmWayId: bestRoad?.id || null, center: bestRoad?.center || null };
+    const inRange = bestDist < 1000 && bestRoad;
+    return { ...p, roadName: inRange ? bestRoad.tags.name : null, osmWayId: inRange ? bestRoad.id : null, center: inRange ? bestRoad.center : null };
   });
 }
 
