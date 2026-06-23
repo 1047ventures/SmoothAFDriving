@@ -233,7 +233,7 @@
   .hcl-score-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.3);margin-top:2px}
 
   .home-cta-spacer{display:none}
-  .home-cta{position:fixed;bottom:calc(env(safe-area-inset-bottom,0) + 8px);left:20px;right:20px;background:#E8501A;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:62px;border-radius:999px;flex-shrink:0;appearance:none;border:0;cursor:pointer;transition:filter .1s,transform .1s;z-index:10;box-shadow:0 8px 28px rgba(232,80,26,.32)}
+  .home-cta{position:fixed;bottom:calc(env(safe-area-inset-bottom,0) - 8px);left:20px;right:20px;background:#E8501A;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:62px;border-radius:999px;flex-shrink:0;appearance:none;border:0;cursor:pointer;transition:filter .1s,transform .1s;z-index:10;box-shadow:0 8px 28px rgba(232,80,26,.32)}
   .home-cta:active{filter:brightness(.88);transform:scale(.98)}
   .home-cta-text{font-family:var(--sans);font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:#080808;font-weight:600}
   .home-cta-arrow{font-size:22px;color:#080808;line-height:1}
