@@ -7,7 +7,7 @@ import { renderCarDisplay, renderRecAvatar, saveRecPhoto, showGarageSheet, hideG
 import { showScreen } from './ui/router.js';
 import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record.js';
 import { renderRewards } from './ui/rewards.js';
-import { openLeaderboard, openSignupModal } from './ui/leaderboard.js';
+import { openLeaderboard, openSignupModal, switchLeaderboardTab } from './ui/leaderboard.js';
 import { enterMapFilter, clearMapFilter, renderReview } from './ui/review.js';
 import { metersToMiles } from './utils/math.js';
 import { state } from './state.js';
@@ -18,6 +18,31 @@ import { syncUserProfile } from './services/supabase.js';
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Show ad landing splash for first-time visitors arriving from ads
+  const urlParams = new URLSearchParams(location.search);
+  const utmSource = urlParams.get('utm_source');
+  const isFirstVisit = !localStorage.getItem('smoothaf_visited');
+  if (utmSource && isFirstVisit) {
+    const splash = document.getElementById('ad-splash');
+    if (splash) {
+      splash.classList.remove('hidden');
+      // Show iOS install hint on Safari (not already installed as PWA)
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isStandalone = ('standalone' in navigator && navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+      if (isIOS && !isStandalone) {
+        document.getElementById('ad-splash-install')?.style.setProperty('display', 'block');
+      }
+      const dismiss = () => {
+        splash.classList.add('hidden');
+        localStorage.setItem('smoothaf_visited', '1');
+      };
+      document.getElementById('ad-splash-cta')?.addEventListener('click', dismiss);
+      document.getElementById('ad-splash-skip')?.addEventListener('click', dismiss);
+    }
+  } else {
+    localStorage.setItem('smoothaf_visited', '1');
+  }
+
   migrateLifetimeScore();
   showOnboardingIfNeeded();
   checkRecoveredDrive({ onListUpdate: renderDriveList });
@@ -104,18 +129,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Leaderboard / Rivals
-  document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard());
-  document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard());
+  document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard('rivals'));
+  document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard('overall'));
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
+  document.getElementById('btn-join-rivals')?.addEventListener('click', () => openSignupModal(() => openLeaderboard('rivals')));
 
-  // Leaderboard tabs (visual-only for now)
+  // Leaderboard tabs — functional switching
   document.querySelectorAll('.lb-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    });
+    tab.addEventListener('click', () => switchLeaderboardTab(tab.dataset.tab));
   });
 
   // Rewards

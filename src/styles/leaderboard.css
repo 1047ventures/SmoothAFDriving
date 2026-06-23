@@ -38,3 +38,15 @@
   .lb-join-cta{margin-top:8px;padding:18px 16px;background:rgba(244,235,217,.04);border:1px dashed rgba(244,235,217,.1);border-radius:14px;text-align:center}
   .lb-join-text{font-size:13px;color:var(--cream-dim);margin-bottom:14px;line-height:1.5}
   .lb-join-btn{appearance:none;border:0;cursor:pointer;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;padding:12px 32px;border-radius:12px}
+
+  /* ── Corridors / Rivals tabs ── */
+  .lb-corridors-intro{padding:16px 0 14px;border-bottom:1px solid rgba(244,235,217,.07);margin-bottom:16px}
+  .lb-corridors-intro-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);margin-bottom:6px}
+  .lb-corridors-intro-sub{font-size:12px;color:rgba(242,232,213,.5);line-height:1.55}
+  .lb-corridor-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 0;text-align:center}
+  .lb-corridor-ph-icon{font-size:32px;line-height:1}
+  .lb-corridor-ph-text{font-size:13px;color:rgba(242,232,213,.4);line-height:1.55;max-width:260px}
+  .lb-corridor-ghost .lb-crown-holder.lb-ghost-text{color:rgba(244,235,217,.2)}
+  .lb-corridor-ghost{opacity:.5}
+  .lb-row--ghost{opacity:.35;pointer-events:none}
+  .lb-row--ghost .lb-row-name::after{content:' ·  join to see your rank';font-size:10px;color:rgba(244,235,217,.25);}

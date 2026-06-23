@@ -1,8 +1,5 @@
 import { loadDrives, getDeviceId, getSyncedIds, markSynced } from './storage.js';
-import {
-  PROFILE_SYNCED_KEY, ONBOARDED_KEY,
-  USER_EMAIL_KEY, DRIVER_NAME_KEY,
-} from '../constants.js';
+import { DRIVER_NAME_KEY, USER_EMAIL_KEY, ONBOARDED_KEY, PROFILE_SYNCED_KEY } from '../constants.js';
 
 const SB_URL  = 'https://dbreetxubxdxogmektxc.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicmVldHh1YnhkeG9nbWVrdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjY5ODgsImV4cCI6MjA5MjkwMjk4OH0.hMeEhYpNNgZ67Nh9GnjwJvtSBbdQVhbdjiBBNNG5qe4';

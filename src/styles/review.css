@@ -182,5 +182,22 @@
   .rv-home-link{display:block;text-align:center;padding:10px 24px 14px;font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,232,213,.35);cursor:pointer;background:transparent;border:0;width:100%}
   .rv-home-link:active{color:var(--cream-dim)}
 
+  /* ── Coaching persona card ── */
+  .rv-coaching-card{margin:0 24px 0;padding:12px 14px;background:rgba(232,80,26,.06);border-left:3px solid #E8501A;flex-shrink:0}
+  .rv-coaching-persona{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream);margin-bottom:4px}
+  .rv-coaching-tip{font-family:var(--sans);font-size:12px;color:rgba(242,232,213,.55);line-height:1.5}
+
+  /* ── Route history comparison ── */
+  .rv-route-history{padding:14px 24px 0;flex-shrink:0}
+  .rv-route-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:10px}
+  .rv-route-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(242,232,213,.07)}
+  .rv-route-row:last-child{border-bottom:0}
+  .rv-route-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;min-width:44px}
+  .rv-route-meta{flex:1;font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4)}
+  .rv-route-delta{font-family:var(--sans);font-size:11px;font-weight:600}
+  .rv-route-delta.up{color:var(--good)}
+  .rv-route-delta.down{color:var(--danger)}
+  .rv-route-delta.same{color:rgba(242,232,213,.3)}
+
   /* ============ ANALYSIS SHEET ============ */
   .analysis-sheet{padding:calc(env(safe-area-inset-top,0) + 52px) 20px calc(env(safe-area-inset-bottom,0) + 28px)}

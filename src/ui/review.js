@@ -2,8 +2,9 @@ import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
-import { forceSegmentColor, dimColor } from '../utils/color.js';
+import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY } from '../constants.js';
+import { loadDrives } from '../services/storage.js';
 
 let mapInstance = null;
 let mapLayers = [];
@@ -25,7 +26,7 @@ export function renderReview(drive){
   // ── Score ──────────────────────────────────────────────────────────────────
   const scoreEl = $('#review-score');
   scoreEl.textContent = analysis.score;
-  scoreEl.className = 'score-big ' + (analysis.score >= 85 ? 'good' : analysis.score >= 60 ? 'mid' : 'bad');
+  scoreEl.className = 'rv-score-num';
 
   // ── Events — show all detected events in chips; only tier 2+ affect score ──
   $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
@@ -92,6 +93,56 @@ export function renderReview(drive){
       }
     }
     if (worstBlock) worstBlock.style.display = totalEvs === 0 ? 'none' : '';
+  }
+
+  // ── Coaching persona card ──────────────────────────────────────────────────
+  const coachingCard = document.getElementById('rv-coaching-card');
+  if (coachingCard){
+    const cards     = driveCoaching(analysis);
+    const topCard   = cards && cards[0];
+    const personaEl = document.getElementById('rv-coaching-persona');
+    const tipEl     = document.getElementById('rv-coaching-tip');
+    if (topCard){
+      if (personaEl) personaEl.textContent = topCard.title || '';
+      if (tipEl)     tipEl.textContent     = topCard.body  || '';
+      coachingCard.style.display = 'block';
+    } else {
+      coachingCard.style.display = 'none';
+    }
+  }
+
+  // ── Route history comparison ───────────────────────────────────────────────
+  const routeHistBlock = document.getElementById('rv-route-history');
+  const routeRows      = document.getElementById('rv-route-rows');
+  if (routeHistBlock && routeRows){
+    const allDrives = loadDrives().filter(d => d.score != null && d !== drive);
+    // Use drives with similar duration (±40%) as a rough "same route" proxy
+    const thisDur = drive.durationMs || 0;
+    const similar = allDrives
+      .filter(d => {
+        const dur = d.durationMs || 0;
+        return dur > 0 && Math.abs(dur - thisDur) / Math.max(thisDur, dur) < 0.4;
+      })
+      .sort((a, b) => b.startTime - a.startTime)
+      .slice(0, 4);
+
+    if (similar.length > 0){
+      routeRows.innerHTML = similar.map(d => {
+        const diff  = d.score - drive.score;
+        const delta = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '=';
+        const cls   = diff > 0 ? 'up' : diff < 0 ? 'down' : 'same';
+        const when  = new Date(d.startTime);
+        const label = when.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        return `<div class="rv-route-row">
+          <div class="rv-route-score" style="color:${scoreColor(d.score)}">${d.score}</div>
+          <div class="rv-route-meta">${label} · ${fmtDuration(d.durationMs)}</div>
+          <div class="rv-route-delta ${cls}">${delta}</div>
+        </div>`;
+      }).join('');
+      routeHistBlock.style.display = 'block';
+    } else {
+      routeHistBlock.style.display = 'none';
+    }
   }
 
   // ── Style verdict + analysis sheet ────────────────────────────────────────
