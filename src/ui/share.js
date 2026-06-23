@@ -270,7 +270,7 @@ export async function shareCurrentDrive(drive, analysis){
   const canvas = buildShareCanvas(drive, analysis);
   const mi = metersToMiles(drive.distanceMeters || 0).toFixed(1);
   const h = getDisplayHandle();
-  const text = `Scored ${analysis.score}/100 on a ${mi} mi drive${h ? ' ' + h : ''} 🚗 #SmoothAF`;
+  const text = `Scored ${analysis.score}/100 on a ${mi} mi drive${h ? ' ' + h : ''} 🚗 smoothafdriving.com/install #SmoothAF`;
   await doShare(canvas, 'My Smooth AF Drive', text);
 }
 
@@ -279,6 +279,6 @@ export async function shareLifetimeScore(score, driverName, totalDrives, totalMi
   await ensureFontLoaded();
   const canvas = buildLifetimeCanvas(score, driverName, totalDrives, totalMiles);
   const h = getDisplayHandle();
-  const text = `My lifetime Smooth AF driving score: ${Math.round(score)}/100${h ? ' ' + h : ''} 🚗 #SmoothAF`;
+  const text = `My lifetime Smooth AF driving score: ${Math.round(score)}/100${h ? ' ' + h : ''} 🚗 smoothafdriving.com/install #SmoothAF`;
   await doShare(canvas, 'My Smooth AF Lifetime Score', text);
 }
