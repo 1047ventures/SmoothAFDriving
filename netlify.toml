@@ -4,3 +4,13 @@
 
 [functions]
   node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/tracker"
+  to = "/"
+  status = 200
+
+[[redirects]]
+  from = "/install"
+  to = "/install.html"
+  status = 200
