@@ -30,11 +30,11 @@ export const VEHICLE_TYPES = [
 
 // ── Detection thresholds (tier-2 baseline) ────────────────────────────────────
 // Tier 1 fires at 55% of these, tier 3 at 175%.
-// Raised from previous values — GPS-derived lateral G has too much noise at low thresholds.
+// Raised again — real-world drives showed too many false positive tier-1 accel/brake events.
 export const DEFAULTS = {
-  hardBrake:     3.8,   // m/s²
-  hardAccel:     3.2,   // m/s²
-  sharpTurn:     3.8,   // m/s² lateral — GPS heading jitter was causing false highway events
+  hardBrake:     4.5,   // m/s² — tier-1 fires at 2.48; normal city braking rarely exceeds this
+  hardAccel:     4.0,   // m/s² — tier-1 fires at 2.20; normal on-ramp rarely triggers
+  sharpTurn:     4.5,   // m/s² lateral — GPS heading jitter was causing false highway events
   emaAlpha:      0.25,  // more smoothing vs 0.32 — filters single-sample GPS spikes
   jerkThreshold: 5.5,   // m/s³ — gear-change / abrupt transmission event
   // ── Tier-2 base penalties (multiplied by tier factor below) ─────────────

@@ -1,6 +1,6 @@
 import { $, $$ } from '../utils/dom.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, VOICE_LABELS } from '../constants.js';
+import { CFG, TIER_MULT, VOICE_LABELS } from '../constants.js';
 import { mpsToMph, fmtDuration, clamp } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -117,8 +117,9 @@ export function updateLiveUI(){
   {
     const durationMins = (Date.now() - state.startTime) / 60000;
     const penalty = state.events.reduce((s, e) => {
+      if (e.type === 'shift') return s;
       const w = e.type === 'brake' ? 5 : e.type === 'accel' ? 3 : 2;
-      return s + w * (e.magnitude || 1);
+      return s + w * (TIER_MULT[e.tier || 2] || 1) * (e.severity || 1);
     }, 0);
     const recovery = Math.min(durationMins * 1.5, 6);
     const score = Math.max(0, Math.min(100, Math.round(state.driveStartScore - penalty + recovery)));
