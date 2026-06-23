@@ -167,6 +167,8 @@
   .home-score-right{padding-bottom:10px}
   .home-score-delta{font-family:var(--sans);font-size:12px;color:#5A9E52}
   .home-score-rank{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.35);margin-top:3px}
+  .home-share-btn{appearance:none;border:1px solid rgba(244,235,217,.18);background:transparent;color:rgba(244,235,217,.4);font-size:16px;cursor:pointer;padding:5px 9px;border-radius:8px;margin-top:8px;line-height:1;display:block;transition:color .15s,background .15s}
+  .home-share-btn:active{color:var(--cream);background:rgba(244,235,217,.08)}
 
   /* ── Welcome / persona ── */
   .home-welcome-block{padding:16px 24px 0;flex-shrink:0}

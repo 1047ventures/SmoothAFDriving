@@ -43,6 +43,7 @@
         <div class="home-score-right">
           <div id="home-score-delta" class="home-score-delta"></div>
           <div id="home-score-rank" class="home-score-rank"></div>
+          <button class="home-share-btn" id="btn-share-lifetime" aria-label="Share lifetime score">&#8599;</button>
         </div>
       </div>
     </div>
@@ -627,6 +628,28 @@
         <div class="ad-splash-install-text">📲 Add to home screen: tap <strong>Share</strong> → <strong>Add to Home Screen</strong></div>
       </div>
       <button class="ad-splash-skip" id="ad-splash-skip">Skip intro</button>
+    </div>
+  </div>
+
+  <!-- SHARE SOCIALS MODAL -->
+  <div id="share-modal" class="share-overlay hidden">
+    <div class="share-card">
+      <div class="share-card-title">Add your handle</div>
+      <div class="share-card-sub">Your handle appears on drive cards you share. Enter any platform you use.</div>
+      <div class="share-platform-row">
+        <span class="share-platform-lbl">IG</span>
+        <input class="share-input" id="share-instagram" type="text" placeholder="Instagram handle" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="share-platform-row">
+        <span class="share-platform-lbl">𝕏</span>
+        <input class="share-input" id="share-twitter" type="text" placeholder="X / Twitter handle" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="share-platform-row">
+        <span class="share-platform-lbl">@</span>
+        <input class="share-input" id="share-threads" type="text" placeholder="Threads handle" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <button class="share-save-btn" id="share-save-btn">Save &amp; Share</button>
+      <button class="share-skip-btn" id="share-skip-btn">Share without handle</button>
     </div>
   </div>
 

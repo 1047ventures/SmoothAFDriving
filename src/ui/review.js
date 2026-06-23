@@ -9,13 +9,15 @@ import { loadDrives } from '../services/storage.js';
 let mapInstance = null;
 let mapLayers = [];
 let reviewEventMarkers = { brake: [], accel: [], turn: [], stop: [] };
-let reviewDrive = null;
+export let reviewDrive = null;
+export let reviewAnalysis = null;
 
 export function renderReview(drive){
   showScreen('review');
   reviewDrive = drive;
 
   const analysis = analyzeDrive(drive);
+  reviewAnalysis = analysis;
 
   // ── Header ─────────────────────────────────────────────────────────────────
   const when = new Date(drive.startTime);

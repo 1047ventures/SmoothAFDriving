@@ -38,3 +38,18 @@
   /* ── Onboarding modal extras ── */
   .onboard-error { color:var(--danger,#e84a2f); font-size:12px; min-height:16px; margin:-6px 0 10px; text-align:center; }
   .onboard-trust { font-size:12px; color:var(--muted); text-align:center; margin-top:4px; }
+
+  /* ── Share socials modal ── */
+  .share-overlay{position:fixed;inset:0;z-index:910;background:rgba(4,2,2,.88);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .share-overlay.hidden{display:none}
+  .share-card{background:#181010;border:1px solid rgba(244,235,217,.12);border-radius:22px;padding:28px 24px;width:100%;max-width:320px;animation:bdp-in .25s ease-out}
+  .share-card-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;color:var(--cream);margin-bottom:6px}
+  .share-card-sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.55}
+  .share-platform-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .share-platform-lbl{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--muted);width:24px;text-align:center;flex-shrink:0;letter-spacing:-.02em}
+  .share-input{flex:1;background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.14);border-radius:12px;padding:12px 14px;font-size:16px;color:var(--cream);outline:none;-webkit-appearance:none;font-family:var(--sans);box-sizing:border-box}
+  .share-input:focus{border-color:rgba(232,93,58,.5);box-shadow:0 0 0 3px rgba(232,93,58,.08)}
+  .share-input::placeholder{color:var(--muted)}
+  .share-save-btn{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;padding:14px;border-radius:12px;margin-top:12px;margin-bottom:10px}
+  .share-save-btn:active{filter:brightness(.88)}
+  .share-skip-btn{appearance:none;border:0;background:transparent;color:var(--muted);font-size:14px;width:100%;padding:8px;cursor:pointer}

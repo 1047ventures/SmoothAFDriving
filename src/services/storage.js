@@ -9,6 +9,7 @@ import {
   OSM_SPEED_CACHE,
   OSM_CACHE_TTL,
   OSM_CACHE_MAX,
+  SOCIAL_HANDLES_KEY,
 } from '../constants.js';
 
 // ── Lifetime score ────────────────────────────────────────────────────────────
@@ -93,6 +94,14 @@ export function markSynced(driveId){
   const ids = getSyncedIds();
   ids.add(driveId);
   try { localStorage.setItem(SYNCED_KEY, JSON.stringify([...ids])); } catch {}
+}
+
+// ── Social handles ────────────────────────────────────────────────────────────
+export function loadSocialHandles(){
+  try { return JSON.parse(localStorage.getItem(SOCIAL_HANDLES_KEY) || '{}'); } catch { return {}; }
+}
+export function saveSocialHandles(handles){
+  try { localStorage.setItem(SOCIAL_HANDLES_KEY, JSON.stringify(handles)); } catch {}
 }
 
 // ── OSM speed-limit cache ─────────────────────────────────────────────────────

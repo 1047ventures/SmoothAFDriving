@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v80';
+export const APP_VERSION = 'v81';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
@@ -13,6 +13,8 @@ export const CAR_PROMPTED_KEY   = 'smoothaf.car_prompted';
 export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
+export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
+export const SHARE_PROMPTED_KEY = 'smoothaf.share_prompted';
 
 export const MAX_STORED_DRIVES = 20;
 export const OSM_CACHE_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 days
