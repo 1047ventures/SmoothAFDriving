@@ -66,8 +66,6 @@ export function renderHomeStats(){
     ? Math.round(all.reduce((s, d) => s + metersToMiles(d.distanceMeters || 0), 0))
     : 0;
 
-  const bestEl = document.getElementById('home-best-score');
-  if (bestEl) bestEl.textContent = all.length ? Math.max(...all.map(d => d.score)) : '--';
 
   // 7-day sparkline (most-recent drives, oldest first)
   const now  = Date.now();
