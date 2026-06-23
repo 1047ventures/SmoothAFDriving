@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smooth AF Driving — Install</title>
+  <meta name="description" content="Real-time driving smoothness tracker. Score your braking, cornering, and throttle. Free PWA — no App Store needed.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:     #0A0A0A;
+      --bg2:    #151212;
+      --cream:  #F2E8D5;
+      --cream-dim: #C9BFAC;
+      --muted:  #6B6258;
+      --tang:   #E85D3A;
+      --serif:  'Playfair Display', Georgia, serif;
+      --sans:   -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 20px 64px;
+      gap: 0;
+    }
+
+    /* ── Wordmark ── */
+    .wordmark {
+      font-family: var(--serif);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    /* ── Hero card ── */
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg2);
+      border: 1px solid rgba(242,232,213,.07);
+      border-radius: 20px;
+      padding: 36px 32px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(28px, 7vw, 38px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--cream);
+    }
+
+    .hero-title span {
+      color: var(--tang);
+    }
+
+    .hero-pitch {
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--cream-dim);
+    }
+
+    /* ── CTA button ── */
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 16px 20px;
+      background: var(--tang);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cta:active { opacity: .88; transform: scale(.98); }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(242,232,213,.08);
+    }
+
+    /* ── Install steps ── */
+    .install-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 9px 12px;
+      background: transparent;
+      border: 1px solid rgba(242,232,213,.12);
+      border-radius: 8px;
+      color: var(--cream-dim);
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-btn.active {
+      background: rgba(242,232,213,.07);
+      border-color: rgba(242,232,213,.22);
+      color: var(--cream);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(232,93,58,.15);
+      color: var(--tang);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-text {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--cream-dim);
+      padding-top: 4px;
+    }
+    .step-text strong {
+      color: var(--cream);
+      font-weight: 600;
+    }
+    .step-icon {
+      display: inline-block;
+      font-style: normal;
+    }
+
+    /* ── QR code (desktop only) ── */
+    .qr-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding-top: 4px;
+    }
+    @media (min-width: 600px) {
+      .qr-section { display: flex; }
+      .install-section { display: none; }
+    }
+    .qr-wrap {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      display: inline-flex;
+    }
+    .qr-wrap canvas { display: block; border-radius: 4px; }
+    .qr-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    .footer-note {
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+      max-width: 360px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wordmark">Smooth AF Driving</div>
+
+  <div class="card">
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1 class="hero-title">Find out how<br><span>smooth you really are.</span></h1>
+      <p class="hero-pitch">
+        Smooth AF scores every brake, turn, and throttle input in real time.
+        No app store. No account. Just open it, drive, and see the truth.
+      </p>
+    </div>
+
+    <!-- CTA -->
+    <a class="cta" id="open-app" href="./index.html">Open the App</a>
+
+    <div class="divider">add to home screen</div>
+
+    <!-- Desktop: QR code -->
+    <div class="qr-section" id="qr-section">
+      <div class="qr-wrap">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+      <p class="qr-label">Scan with your phone camera<br>then follow the steps below</p>
+    </div>
+
+    <!-- Mobile: Install steps -->
+    <div class="install-section">
+      <div class="install-tabs">
+        <button class="tab-btn active" data-tab="ios">iPhone</button>
+        <button class="tab-btn" data-tab="android">Android</button>
+      </div>
+
+      <div class="tab-panel active" id="panel-ios">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Tap the <strong>Share</strong> button <em class="step-icon">⎋</em> at the bottom of Safari</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Tap <strong>Add</strong> — the app icon appears on your home screen</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-android">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Tap the <strong>menu</strong> <em class="step-icon">⋮</em> in the top-right of Chrome</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Tap <strong>Install</strong> — launches just like a native app</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer-note">
+    Alpha · No account required · Scores stay on your device<br>
+    Works on iOS Safari and Android Chrome
+  </p>
+
+  <!-- QRCode.js (small, self-contained, no deps) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    // ── Tab switching ──────────────────────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── QR code (desktop) ──────────────────────────────────────────────────────
+    // Point to the install page itself so the QR scan lands here on mobile,
+    // where the install instructions are shown.
+    const appUrl = window.location.origin + window.location.pathname;
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(document.getElementById('qr-canvas'), {
+        text: appUrl,
+        width: 180,
+        height: 180,
+        colorDark: '#0A0A0A',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+    }
+
+    // ── Auto-detect OS and pre-select the right tab ────────────────────────────
+    const ua = navigator.userAgent || '';
+    if (/Android/i.test(ua)) {
+      document.querySelector('[data-tab="android"]').click();
+    }
+  </script>
+
+</body>
+</html>
