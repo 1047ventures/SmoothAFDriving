@@ -66,6 +66,18 @@ export function renderHomeStats(){
     ? Math.round(all.reduce((s, d) => s + metersToMiles(d.distanceMeters || 0), 0))
     : 0;
 
+  const scored = all.filter(d => d.score != null);
+  const bestEl = document.getElementById('home-best-score');
+  if (bestEl) {
+    if (scored.length) {
+      const bestDrive = scored.reduce((a, b) => b.score > a.score ? b : a);
+      bestEl.textContent = bestDrive.score;
+      bestEl.onclick = () => renderReview(bestDrive);
+    } else {
+      bestEl.textContent = '--';
+      bestEl.onclick = null;
+    }
+  }
 
   // 7-day sparkline (most-recent drives, oldest first)
   const now  = Date.now();

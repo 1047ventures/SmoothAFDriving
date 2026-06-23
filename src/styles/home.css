@@ -187,6 +187,8 @@
   .home-stat-col:not(:first-child){border-left:1px solid rgba(242,232,213,.1);padding-left:16px}
   .home-stat-col:first-child{padding-left:0}
   .home-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;color:var(--cream);line-height:1}
+  .home-stat-tappable{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(242,232,213,.25);text-underline-offset:3px}
+  .home-stat-tappable:active{opacity:.7}
   .home-stat-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:5px}
 
   /* ── Sparkline / trends ── */
