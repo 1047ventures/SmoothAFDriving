@@ -13,8 +13,20 @@ import { clamp, mpsToMph } from '../../utils/math.js';
 export function detectEventWithThresh(la, ra, cfg, jerk, speed){
   jerk  = jerk  || 0;
   speed = speed || 0; // m/s
-  const b = cfg.hardBrake, a = cfg.hardAccel;
-  // Highway speed gate: above 30 mph (13.4 m/s), turn threshold doubled.
+
+  // Below ~4.5 mph: GPS speed noise is too high to reliably detect events.
+  if (speed < 2) return null;
+
+  // Speed-adaptive multiplier for accel/brake thresholds.
+  // Highway inputs that feel smooth to passengers still generate significant m/s²;
+  // raise the bar so minor throttle maintenance doesn't trigger false events.
+  const longMult = speed > 22.4 ? 1.35  // >50 mph — highway
+                 : speed > 13.4 ? 1.15  // >30 mph — suburban
+                 : 1.0;                  // city
+
+  const b = cfg.hardBrake * longMult;
+  const a = cfg.hardAccel * longMult;
+  // Highway speed gate: above 30 mph (13.4 m/s), turn threshold raised 2.5×.
   const t = cfg.sharpTurn * (speed > 13.4 ? 2.5 : 1.0);
 
   // ── Tier 3 — harsh ────────────────────────────────────────────────────────
