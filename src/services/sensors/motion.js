@@ -152,8 +152,8 @@ export function createMotionHandler(callbacks = {}){
             roadRoughness: state.currentRoughness,
           };
           state.events.push(full);
-          if (flashEvent) flashEvent(evt.type, state.peakLat);
-          if (speakEvent) speakEvent(evt.type);
+          if (flashEvent) flashEvent(evt.type, state.peakLat, evt.tier);
+          if (speakEvent) speakEvent(evt.type, evt.tier);
         }
       }
       // Reset peak-hold window regardless of whether an event fired

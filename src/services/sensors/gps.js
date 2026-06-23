@@ -213,8 +213,8 @@ export function onGpsUpdate(pos, callbacks = {}){
         roadRoughness: state.currentRoughness,
       };
       state.events.push(full);
-      if (flashEvent) flashEvent(evt.type, state.peakLat);
-      if (speakEvent) speakEvent(evt.type);
+      if (flashEvent) flashEvent(evt.type, state.peakLat, full.tier);
+      if (speakEvent) speakEvent(evt.type, full.tier);
     }
   }
 }
