@@ -82,10 +82,14 @@ export function finalizeAndReview(callbacks = {}){
     return;
   }
 
-  let distance = 0, topSpeed = 0;
+  let distance = 0, topSpeed = 0, topSpeedLat = null, topSpeedLon = null;
   for (let i = 1; i < samples.length; i++){
     distance += haversine(samples[i-1], samples[i]);
-    if (samples[i].speed > topSpeed) topSpeed = samples[i].speed;
+    if (samples[i].speed > topSpeed){
+      topSpeed = samples[i].speed;
+      topSpeedLat = samples[i].lat;
+      topSpeedLon = samples[i].lon;
+    }
   }
   const duration = samples[samples.length-1].t - samples[0].t;
   const events = [...state.events];
@@ -95,6 +99,9 @@ export function finalizeAndReview(callbacks = {}){
     durationMs: duration,
     distanceMeters: distance,
     topSpeedMps: topSpeed,
+    topSpeedLat: topSpeedLat != null ? +topSpeedLat.toFixed(6) : null,
+    topSpeedLon: topSpeedLon != null ? +topSpeedLon.toFixed(6) : null,
+    speedLimitMps: state.currentSpeedLimitMps || null,
     score: 0,  // computed below via analyzeDrive
     samples: samples.map(s => ({
       t:       s.t - state.startTime,
