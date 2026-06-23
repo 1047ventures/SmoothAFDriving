@@ -14,13 +14,14 @@ function injectOnboardingModal() {
   el.className = 'signup-overlay';
   el.innerHTML = `
     <div class="signup-card">
-      <div class="signup-card-title">Welcome to Smooth AF</div>
-      <div class="signup-card-sub">Track every drive. See how smooth you really are.</div>
+      <div class="signup-card-title">Save your score</div>
+      <div class="signup-card-sub">Add your name to appear on the leaderboard and sync your drives across devices.</div>
       <input id="onboard-name"  class="signup-input" type="text"  placeholder="Your name"      autocomplete="given-name">
       <input id="onboard-email" class="signup-input" type="email" placeholder="Email address"  autocomplete="email">
       <div id="onboard-error" class="onboard-error"></div>
-      <button id="onboard-submit" class="signup-submit">Get Started</button>
+      <button id="onboard-submit" class="signup-submit">Save &amp; join leaderboard</button>
       <div class="onboard-trust">No spam, no passwords. Just your driving score.</div>
+      <button id="onboard-skip" class="signup-cancel">Skip for now</button>
     </div>
   `;
   document.body.appendChild(el);
@@ -56,6 +57,12 @@ export function showOnboardingIfNeeded() {
     // Fire-and-forget — syncUserProfile will retry on next startup if this fails
     registerUser({ name, email, device_id: getDeviceId() });
   };
+
+  const skipBtn = document.getElementById('onboard-skip');
+  skipBtn?.addEventListener('click', () => {
+    localStorage.setItem(ONBOARDED_KEY, '1');
+    document.getElementById('onboard-modal')?.remove();
+  });
 
   submitBtn.addEventListener('click', handleSubmit);
   nameInput.addEventListener('keydown',  e => { if (e.key === 'Enter') emailInput.focus(); });

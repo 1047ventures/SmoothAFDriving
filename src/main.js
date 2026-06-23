@@ -12,7 +12,6 @@ import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap, reviewDriv
 import { shareCurrentDrive, shareLifetimeScore } from './ui/share.js';
 import { metersToMiles } from './utils/math.js';
 import { state } from './state.js';
-import { showOnboardingIfNeeded } from './ui/modals.js';
 import { syncUserProfile } from './services/supabase.js';
 
 // Export key init functions for DOMContentLoaded (wired below)
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   migrateLifetimeScore();
-  showOnboardingIfNeeded();
   checkRecoveredDrive({ onListUpdate: renderDriveList });
   renderDriveList();
   syncPendingDrives();
