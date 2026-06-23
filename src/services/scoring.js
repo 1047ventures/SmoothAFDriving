@@ -190,11 +190,105 @@ export function analyzeDrive(drive){
     Object.entries(DIM_WEIGHTS).reduce((s, [k,w]) => s + (dims[k] || 0) * w, 0)
   );
 
-  return { score, dims, fullStops, stopsPerMile: +stopsPerMile.toFixed(2),
-           stopMarkers,
-           longFlipsPerMin: +longFlipsPerMin.toFixed(1),
-           latFlipsPerMin:  +latFlipsPerMin.toFixed(1),
-           p90Harshness:    +p90H.toFixed(2) };
+  // ── Extended stats ─────────────────────────────────────────────────────────
+
+  // Peak + avg G per event type
+  function peakAvgG(evts, field){
+    if (!evts.length) return { peak: null, avg: null, peakEv: null };
+    const sorted = [...evts].sort((a,b) => Math.abs(b[field]||0) - Math.abs(a[field]||0));
+    const peak = +(Math.abs(sorted[0][field]||0) / 9.81).toFixed(2);
+    const avg  = +(evts.reduce((s,e) => s + Math.abs(e[field]||0), 0) / evts.length / 9.81).toFixed(2);
+    return { peak, avg, peakEv: sorted[0] };
+  }
+  const brakeEvs = drive.events.filter(e => e.type === 'brake' && e.la != null);
+  const accelEvs = drive.events.filter(e => e.type === 'accel' && e.la != null);
+  const turnEvs  = drive.events.filter(e => e.type === 'turn'  && e.ra != null);
+  const brakeG = peakAvgG(brakeEvs, 'la');
+  const accelG = peakAvgG(accelEvs, 'la');
+  const turnG  = peakAvgG(turnEvs,  'ra');
+
+  // Smoothness streak — longest gap between tier-2+ events (approx, using avg speed)
+  const avgSpeedMps = n > 0 ? smp.reduce((s,x) => s+(x.speed||0), 0) / n : 0;
+  const tier2Evs = drive.events
+    .filter(e => e.type !== 'shift' && (e.tier||2) >= 2)
+    .sort((a,b) => a.t - b.t);
+  const driveEndT = n > 0 ? smp[n-1].t : 0;
+  const checkpoints = [0, ...tier2Evs.map(e => e.t), driveEndT];
+  let maxStreakMs = 0;
+  for (let i = 1; i < checkpoints.length; i++) maxStreakMs = Math.max(maxStreakMs, checkpoints[i] - checkpoints[i-1]);
+  const smoothStreakMi = +metersToMiles(avgSpeedMps * maxStreakMs / 1000).toFixed(2);
+
+  // Harsh events per mile
+  const harshEvs   = tier2Evs.filter(e => e.type !== 'shift');
+  const harshPerMi = distanceMi > 0.1 ? +(harshEvs.length / distanceMi).toFixed(1) : null;
+
+  // Coasting ratio — moving samples where |la|<0.3 AND |ra|<0.4
+  let movingN = 0, coastN = 0;
+  for (const s of smp){
+    if ((s.speed||0) < 2) continue;
+    movingN++;
+    if (Math.abs(s.la||0) < 0.3 && Math.abs(s.ra||0) < 0.4) coastN++;
+  }
+  const coastPct = movingN > 0 ? Math.round(coastN / movingN * 100) : null;
+
+  // Speed stats (moving only)
+  const movingSpeeds = smp.filter(s => (s.speed||0) > 2).map(s => mpsToMph(s.speed));
+  const avgSpeedMph = movingSpeeds.length > 0
+    ? Math.round(movingSpeeds.reduce((a,b) => a+b, 0) / movingSpeeds.length) : 0;
+  const speedVariance = movingSpeeds.length > 1
+    ? movingSpeeds.reduce((s,v) => s + (v-avgSpeedMph)**2, 0) / movingSpeeds.length : 0;
+  const speedStdDevMph = +Math.sqrt(speedVariance).toFixed(1);
+
+  // Speed vs posted limit
+  const limitMps    = drive.speedLimitMps || null;
+  const limitMph    = limitMps ? Math.round(mpsToMph(limitMps)) : null;
+  const avgVsLimit  = limitMph != null ? +(avgSpeedMph - limitMph) : null;
+  let secAboveLimit = null;
+  if (limitMps != null){
+    let secs = 0;
+    for (let i = 1; i < n; i++){
+      if ((smp[i].speed||0) > limitMps * 1.05) secs += (smp[i].t - smp[i-1].t) / 1000;
+    }
+    secAboveLimit = Math.round(secs);
+  }
+
+  // Shift count
+  const shiftCount = drive.events.filter(e => e.type === 'shift').length;
+
+  // Hard-brake entry speed — avg speed when tier-2+ brake events occurred
+  const hardBrakes = brakeEvs.filter(e => (e.tier||2) >= 2);
+  const hardBrakeEntryMph = hardBrakes.length > 0
+    ? Math.round(hardBrakes.reduce((s,e) => s + (e.speedMph||0), 0) / hardBrakes.length) : null;
+
+  // Letter grade
+  const g = score;
+  const letterGrade = g >= 97 ? 'A+' : g >= 93 ? 'A' : g >= 90 ? 'A-'
+    : g >= 87 ? 'B+' : g >= 83 ? 'B' : g >= 80 ? 'B-'
+    : g >= 77 ? 'C+' : g >= 73 ? 'C' : g >= 70 ? 'C-'
+    : g >= 60 ? 'D' : 'F';
+
+  return {
+    score, dims, fullStops, stopsPerMile: +stopsPerMile.toFixed(2),
+    stopMarkers,
+    longFlipsPerMin: +longFlipsPerMin.toFixed(1),
+    latFlipsPerMin:  +latFlipsPerMin.toFixed(1),
+    p90Harshness:    +p90H.toFixed(2),
+    // extended
+    peakBrakeG: brakeG.peak,  avgBrakeG: brakeG.avg,  peakBrakeEv: brakeG.peakEv,
+    peakAccelG: accelG.peak,  avgAccelG: accelG.avg,  peakAccelEv: accelG.peakEv,
+    peakTurnG:  turnG.peak,   avgTurnG:  turnG.avg,   peakTurnEv:  turnG.peakEv,
+    smoothStreakMi,
+    harshPerMi,
+    coastPct,
+    avgSpeedMph,
+    speedStdDevMph,
+    limitMph,
+    avgVsLimit,
+    secAboveLimit,
+    shiftCount,
+    hardBrakeEntryMph,
+    letterGrade,
+  };
 }
 
 export function driveCoaching(analysis){

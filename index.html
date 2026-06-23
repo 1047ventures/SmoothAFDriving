@@ -295,14 +295,14 @@
     <!-- v2 results body -->
     <div class="rv-body">
 
-      <!-- Score hero (tap for analysis) -->
-      <div class="rv-score-row" id="score-header-btn">
-        <div id="review-score" class="rv-score-num">--</div>
+      <!-- Score hero (tap number for analysis) -->
+      <div class="rv-score-row">
+        <button id="score-header-btn" class="rv-score-num">--</button>
         <div class="rv-score-right">
           <div class="rv-score-label">This Drive</div>
           <div id="review-when" class="rv-when">—</div>
           <div id="score-verdict-tag" class="rv-verdict-tag">—</div>
-          <div class="rv-analysis-hint">Tap for analysis ›</div>
+          <div class="rv-analysis-hint">Tap score for analysis ›</div>
         </div>
       </div>
 
@@ -312,9 +312,12 @@
         <div class="rv-coaching-tip" id="rv-coaching-tip"></div>
       </div>
 
-      <!-- Route history comparison -->
+      <!-- Route history comparison (collapsed by default) -->
       <div class="rv-route-history" id="rv-route-history" style="display:none">
-        <div class="rv-route-label">This Route</div>
+        <button class="rv-route-toggle" id="rv-route-toggle">
+          <span id="rv-route-count">—</span>
+          <span class="rv-route-chevron" id="rv-route-chevron">›</span>
+        </button>
         <div class="rv-route-rows" id="rv-route-rows"></div>
       </div>
 
@@ -368,12 +371,38 @@
 
   <!-- ANALYSIS SHEET (score tap deep-dive) -->
   <div id="analysis-sheet" class="analysis-sheet hidden">
-    <div class="as-topbar">
-      <div class="as-verdict-label" id="as-verdict-label">—</div>
+    <div class="as-header">
+      <div class="as-header-left">
+        <div class="as-verdict" id="as-verdict-label">—</div>
+        <div class="as-verdict-sub" id="as-verdict-sub"></div>
+      </div>
       <button class="as-close" id="as-close">×</button>
     </div>
-    <div class="as-verdict-sub" id="as-verdict-sub"></div>
-    <div class="dims-grid" id="as-dims-list" style="margin-top:20px"></div>
+
+    <div class="as-section">
+      <div class="as-section-head">Peak Forces</div>
+      <div id="as-peaks"></div>
+    </div>
+
+    <div class="as-section">
+      <div class="as-section-head">Drive Scores</div>
+      <div class="as-dims-grid" id="as-dims-list"></div>
+    </div>
+
+    <div class="as-section">
+      <div class="as-section-head">Speed &amp; Flow</div>
+      <div id="as-speed"></div>
+    </div>
+
+    <div class="as-section">
+      <div class="as-section-head">Smoothness</div>
+      <div id="as-smooth"></div>
+    </div>
+
+    <div class="as-section">
+      <div class="as-section-head">Drive Context</div>
+      <div id="as-context"></div>
+    </div>
   </div>
 
   <!-- GARAGE SHEET -->

@@ -201,5 +201,55 @@
   .rv-route-delta.down{color:var(--danger)}
   .rv-route-delta.same{color:rgba(242,232,213,.3)}
 
+  /* ── Score button fix ── */
+  button.rv-score-num{appearance:none;border:0;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:var(--serif);font-style:italic;font-weight:700;font-size:72px;line-height:.9;letter-spacing:-.04em;padding:.04em 0 .1em;cursor:pointer;text-align:left;min-width:0;overflow:visible}
+
+  /* ── Route history collapse ── */
+  .rv-route-toggle{appearance:none;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 0;font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,232,213,.4)}
+  .rv-route-toggle:active{color:var(--cream-dim)}
+  .rv-route-chevron{font-size:14px;transition:transform .2s;display:inline-block}
+
   /* ============ ANALYSIS SHEET ============ */
   .analysis-sheet{padding:calc(env(safe-area-inset-top,0) + 52px) 20px calc(env(safe-area-inset-bottom,0) + 28px)}
+
+  /* Header */
+  .as-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+  .as-header-left{flex:1;min-width:0}
+  .as-verdict{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;line-height:1.1;margin-bottom:6px}
+  .as-verdict-sub{font-size:13px;color:rgba(242,232,213,.55);line-height:1.55;border-top:1px solid rgba(242,232,213,.08);padding-top:12px;margin-top:2px;margin-bottom:4px}
+
+  /* Sections */
+  .as-section{margin-top:18px}
+  .as-section-head{font-family:var(--sans);font-size:8px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.28);margin-bottom:8px}
+
+  /* Peak forces rows */
+  .as-peak-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid rgba(242,232,213,.06)}
+  .as-peak-row:last-child{border-bottom:0}
+  .as-peak-label{font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,232,213,.38);width:68px;flex-shrink:0}
+  .as-peak-nums{display:flex;align-items:baseline;gap:8px;flex:1}
+  .as-peak-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;line-height:1}
+  .as-peak-avg{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.35)}
+  .as-map-btn{appearance:none;border:1px solid rgba(232,80,26,.35);background:transparent;color:rgba(232,80,26,.8);font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:99px;cursor:pointer;flex-shrink:0}
+  .as-map-btn:active{background:rgba(232,80,26,.12)}
+
+  /* Dim score grid */
+  .as-dims-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .as-dim{background:rgba(242,232,213,.03);border-radius:10px;padding:10px 6px;text-align:center}
+  .as-dim-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:24px;line-height:1}
+  .as-dim-label{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:4px}
+
+  /* Stat cells */
+  .as-stats-2{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+  .as-stats-3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .as-stat{background:rgba(242,232,213,.03);border-radius:10px;padding:10px 8px}
+  .as-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1}
+  .as-stat-lbl{font-family:var(--sans);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:4px}
+  .as-stat-sub{font-family:var(--sans);font-size:10px;color:rgba(242,232,213,.4);margin-top:2px}
+  .as-stat.tappable{cursor:pointer}
+  .as-stat.tappable:active{background:rgba(242,232,213,.08)}
+
+  /* Grade block */
+  .as-grade-block{display:flex;align-items:center;gap:16px;padding:12px 14px;background:rgba(242,232,213,.04);border:1px solid rgba(242,232,213,.1);border-radius:12px}
+  .as-grade-letter{font-family:var(--serif);font-style:italic;font-weight:700;font-size:48px;line-height:1;flex-shrink:0}
+  .as-grade-meta{flex:1}
+  .as-grade-best{font-family:var(--sans);font-size:12px;color:rgba(242,232,213,.5);margin-top:4px}

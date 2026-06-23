@@ -24,9 +24,8 @@ export function renderReview(drive){
     ' · ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
 
   // ── Score ──────────────────────────────────────────────────────────────────
-  const scoreEl = $('#review-score');
-  scoreEl.textContent = analysis.score;
-  scoreEl.className = 'rv-score-num';
+  const scoreEl = document.getElementById('score-header-btn');
+  if (scoreEl) scoreEl.textContent = analysis.score;
 
   // ── Events — show all detected events in chips; only tier 2+ affect score ──
   $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
@@ -118,12 +117,14 @@ export function renderReview(drive){
     }
   }
 
-  // ── Route history comparison ───────────────────────────────────────────────
+  // ── Route history comparison (collapsed by default) ───────────────────────
   const routeHistBlock = document.getElementById('rv-route-history');
   const routeRows      = document.getElementById('rv-route-rows');
+  const routeToggle    = document.getElementById('rv-route-toggle');
+  const routeCountEl   = document.getElementById('rv-route-count');
+  const routeChevron   = document.getElementById('rv-route-chevron');
   if (routeHistBlock && routeRows){
-    const allDrives = loadDrives().filter(d => d.score != null && d !== drive);
-    // Use drives with similar duration (±40%) as a rough "same route" proxy
+    const allDrives = loadDrives().filter(d => d.score != null && d.startTime !== drive.startTime);
     const thisDur = drive.durationMs || 0;
     const similar = allDrives
       .filter(d => {
@@ -131,9 +132,10 @@ export function renderReview(drive){
         return dur > 0 && Math.abs(dur - thisDur) / Math.max(thisDur, dur) < 0.4;
       })
       .sort((a, b) => b.startTime - a.startTime)
-      .slice(0, 4);
+      .slice(0, 5);
 
     if (similar.length > 0){
+      if (routeCountEl) routeCountEl.textContent = `${similar.length} drive${similar.length !== 1 ? 's' : ''} on this route`;
       routeRows.innerHTML = similar.map(d => {
         const diff  = d.score - drive.score;
         const delta = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '=';
@@ -146,58 +148,43 @@ export function renderReview(drive){
           <div class="rv-route-delta ${cls}">${delta}</div>
         </div>`;
       }).join('');
+      routeRows.style.display = 'none'; // collapsed by default
       routeHistBlock.style.display = 'block';
+      if (routeToggle){
+        routeToggle.onclick = () => {
+          const open = routeRows.style.display !== 'none';
+          routeRows.style.display = open ? 'none' : 'block';
+          if (routeChevron) routeChevron.style.transform = open ? '' : 'rotate(90deg)';
+        };
+      }
     } else {
       routeHistBlock.style.display = 'none';
     }
   }
 
-  // ── Style verdict + analysis sheet ────────────────────────────────────────
+  // ── Verdict + analysis sheet ──────────────────────────────────────────────
   const verdict = drivingStyleVerdict(analysis, drive);
   const vColor  = dimColor(analysis.score);
 
-  // Verdict preview on score header
   const verdictTag = document.getElementById('score-verdict-tag');
   if (verdictTag) verdictTag.textContent = verdict.label;
 
-  // Populate analysis sheet
-  const asLabel = document.getElementById('as-verdict-label');
-  const asSub   = document.getElementById('as-verdict-sub');
-  if (asLabel) { asLabel.textContent = verdict.label; asLabel.style.color = vColor; }
-  if (asSub)   asSub.textContent = verdict.sub;
-
-  const asDims = document.getElementById('as-dims-list');
-  if (asDims){
-    const regularDims = DIM_DISPLAY.filter(d => d.key !== 'momentum');
-    const mVal  = analysis.dims.momentum || 0;
-    const mColor = dimColor(mVal);
-    const tiles = regularDims.map(({ key, label }) => {
-      const val   = analysis.dims[key] || 0;
-      const color = dimColor(val);
-      return `<div class="dim-tile" style="border-color:${color}44">
-        <div class="dim-tile-score" style="color:${color}">${val}</div>
-        <div class="dim-tile-label">${label}</div>
-      </div>`;
-    }).join('');
-    const momentum = `<div class="dim-tile momentum" id="dim-tile-momentum" style="border-color:${mColor}44">
-      <div class="momentum-left">
-        <div class="dim-tile-score" style="color:${mColor}">${mVal}</div>
-        <div class="dim-tile-label">Momentum</div>
-      </div>
-      <div class="momentum-right">
-        ${analysis.fullStops} full stop${analysis.fullStops !== 1 ? 's' : ''}<br>
-        ${analysis.stopsPerMile.toFixed(1)} per mile<br>
-        <div class="momentum-map-link" style="color:${mColor}">View on map →</div>
-      </div>
-    </div>`;
-    asDims.innerHTML = tiles + momentum;
-    document.getElementById('dim-tile-momentum')?.addEventListener('click', () => {
-      document.getElementById('analysis-sheet')?.classList.add('hidden');
-      enterMapFilter('stop');
+  // Personal best on this route (similar duration ±40%)
+  {
+    const allDrives = loadDrives().filter(d => d.score != null && d.startTime !== drive.startTime);
+    const thisDur = drive.durationMs || 0;
+    const similar = allDrives.filter(d => {
+      const dur = d.durationMs || 0;
+      return dur > 0 && Math.abs(dur - thisDur) / Math.max(thisDur, dur) < 0.4;
     });
+    analysis._personalBest = similar.length > 0 ? Math.max(...similar.map(d => d.score)) : null;
+    analysis._personalBestDate = similar.length > 0
+      ? similar.reduce((best, d) => d.score >= best.score ? d : best).startTime : null;
   }
 
-  // Wire score header tap
+  buildAnalysisSheet(drive, analysis, verdict, vColor);
+
+  // Wire score number tap → open analysis sheet
   const scoreBtn = document.getElementById('score-header-btn');
   if (scoreBtn){
     scoreBtn.onclick = () => document.getElementById('analysis-sheet')?.classList.remove('hidden');
@@ -295,8 +282,148 @@ export function renderReview(drive){
 }
 
 // -------------------------------------------------------------------------
-// Full-drive force timeline chart
+// Analysis sheet builder — all 20 stats
 // -------------------------------------------------------------------------
+function buildAnalysisSheet(drive, analysis, verdict, vColor){
+  const asVerdict = document.getElementById('as-verdict-label');
+  const asSub     = document.getElementById('as-verdict-sub');
+  if (asVerdict){ asVerdict.textContent = verdict.label; asVerdict.style.color = vColor; }
+  if (asSub) asSub.textContent = verdict.sub;
+
+  function flyTo(lat, lon){
+    document.getElementById('analysis-sheet')?.classList.add('hidden');
+    if (mapInstance) mapInstance.setView([lat, lon], 17, { animate: true });
+  }
+  function fmtSecs(s){ return s >= 60 ? `${Math.floor(s/60)}m ${s%60}s` : `${s}s`; }
+
+  // ── Peak Forces ───────────────────────────────────────────────────────────
+  const peaksEl = document.getElementById('as-peaks');
+  if (peaksEl){
+    const rows = [
+      { label:'Braking',   peak:analysis.peakBrakeG, avg:analysis.avgBrakeG, ev:analysis.peakBrakeEv, color:'var(--danger)' },
+      { label:'Cornering', peak:analysis.peakTurnG,  avg:analysis.avgTurnG,  ev:analysis.peakTurnEv,  color:'var(--gold)'   },
+      { label:'Accel',     peak:analysis.peakAccelG, avg:analysis.avgAccelG, ev:analysis.peakAccelEv, color:'var(--warn)'   },
+    ];
+    peaksEl.innerHTML = rows.map(r => {
+      const hasPeak = r.peak != null;
+      return `<div class="as-peak-row">
+        <div class="as-peak-label">${r.label}</div>
+        <div class="as-peak-nums">
+          <span class="as-peak-val" style="color:${hasPeak ? r.color : 'rgba(242,232,213,.2)'}">${hasPeak ? r.peak + 'G' : '—'}</span>
+          ${hasPeak && r.avg ? `<span class="as-peak-avg">avg ${r.avg}G</span>` : ''}
+        </div>
+        ${hasPeak && r.ev ? `<button class="as-map-btn" data-lat="${r.ev.lat}" data-lon="${r.ev.lon}">map ›</button>` : '<div></div>'}
+      </div>`;
+    }).join('');
+    peaksEl.querySelectorAll('.as-map-btn').forEach(btn => {
+      btn.onclick = () => flyTo(+btn.dataset.lat, +btn.dataset.lon);
+    });
+  }
+
+  // ── Drive Scores (7 dims) ─────────────────────────────────────────────────
+  const dimsEl = document.getElementById('as-dims-list');
+  if (dimsEl){
+    dimsEl.innerHTML = DIM_DISPLAY.map(({ key, label }) => {
+      const val   = analysis.dims[key] || 0;
+      const color = dimColor(val);
+      return `<div class="as-dim">
+        <div class="as-dim-score" style="color:${color}">${val}</div>
+        <div class="as-dim-label">${label}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Speed & Flow ──────────────────────────────────────────────────────────
+  const speedEl = document.getElementById('as-speed');
+  if (speedEl){
+    const topMph = Math.round(mpsToMph(drive.topSpeedMps || 0));
+    const vsStr = analysis.avgVsLimit == null ? null
+      : analysis.avgVsLimit > 0 ? `+${analysis.avgVsLimit} vs limit`
+      : analysis.avgVsLimit < 0 ? `${analysis.avgVsLimit} vs limit`
+      : 'at limit';
+    const aboveStr = analysis.secAboveLimit != null && analysis.secAboveLimit > 0
+      ? fmtSecs(analysis.secAboveLimit) + ' over' : null;
+    const limitLbl = analysis.limitMph != null ? `Above ${analysis.limitMph} mph` : 'Above Limit';
+    const cells = [
+      { val:`${topMph} mph`, lbl:'Top Speed', sub:null, tapLat:drive.topSpeedLat, tapLon:drive.topSpeedLon },
+      { val:`${analysis.avgSpeedMph || '—'} mph`, lbl:'Avg Speed', sub:vsStr, tapLat:null, tapLon:null },
+      { val:analysis.speedStdDevMph != null ? `±${analysis.speedStdDevMph} mph` : '—', lbl:'Consistency', sub:null, tapLat:null, tapLon:null },
+      { val:aboveStr || (analysis.limitMph != null ? '0s' : '—'), lbl:limitLbl, sub:null, tapLat:null, tapLon:null },
+    ];
+    speedEl.innerHTML = `<div class="as-stats-2">${cells.map(c => {
+      const tap = c.tapLat != null;
+      return `<div class="as-stat${tap ? ' tappable' : ''}"${tap ? ` data-lat="${c.tapLat}" data-lon="${c.tapLon}"` : ''}>
+        <div class="as-stat-val">${c.val}</div>
+        <div class="as-stat-lbl">${c.lbl}</div>
+        ${c.sub ? `<div class="as-stat-sub">${c.sub}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+    speedEl.querySelectorAll('.as-stat.tappable').forEach(el => {
+      el.onclick = () => flyTo(+el.dataset.lat, +el.dataset.lon);
+    });
+  }
+
+  // ── Smoothness ────────────────────────────────────────────────────────────
+  const smoothEl = document.getElementById('as-smooth');
+  if (smoothEl){
+    const cells = [
+      { val:analysis.smoothStreakMi != null ? `${analysis.smoothStreakMi} mi` : '—', lbl:'Clean Streak' },
+      { val:analysis.coastPct != null ? `${analysis.coastPct}%` : '—',              lbl:'Coasting'     },
+      { val:analysis.harshPerMi != null ? String(analysis.harshPerMi) : '—',        lbl:'Events / mi'  },
+      { val:analysis.hardBrakeEntryMph != null ? `${analysis.hardBrakeEntryMph} mph` : '—', lbl:'Hard-Brake Entry' },
+    ];
+    smoothEl.innerHTML = `<div class="as-stats-2">${cells.map(c =>
+      `<div class="as-stat">
+        <div class="as-stat-val">${c.val}</div>
+        <div class="as-stat-lbl">${c.lbl}</div>
+      </div>`
+    ).join('')}</div>`;
+  }
+
+  // ── Drive Context ─────────────────────────────────────────────────────────
+  const ctxEl = document.getElementById('as-context');
+  if (ctxEl){
+    const pb    = analysis._personalBest;
+    const pbDate = analysis._personalBestDate
+      ? new Date(analysis._personalBestDate).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
+    let bestLine = 'First drive on this route';
+    if (pb != null){
+      const diff = analysis.score - pb;
+      bestLine = diff > 0 ? 'New personal best ▲'
+               : diff < 0 ? `Best: ${pb} (${pbDate})`
+               : `Matched best: ${pb}`;
+    }
+    const grade = analysis.letterGrade || '—';
+    const gradeColor = analysis.score >= 90 ? 'var(--good)' : analysis.score >= 75 ? 'var(--warn)' : 'var(--danger)';
+
+    ctxEl.innerHTML = `
+      <div class="as-grade-block">
+        <span class="as-grade-letter" style="color:${gradeColor}">${grade}</span>
+        <div class="as-grade-meta">
+          <div class="as-stat-lbl">Drive Grade</div>
+          <div class="as-grade-best">${bestLine}</div>
+        </div>
+      </div>
+      <div class="as-stats-3" style="margin-top:8px">
+        <div class="as-stat">
+          <div class="as-stat-val">${analysis.shiftCount != null ? analysis.shiftCount : '—'}</div>
+          <div class="as-stat-lbl">Shifts</div>
+        </div>
+        <div class="as-stat">
+          <div class="as-stat-val">${analysis.fullStops}</div>
+          <div class="as-stat-lbl">Full Stops</div>
+          <div class="as-stat-sub">${analysis.stopsPerMile != null ? analysis.stopsPerMile.toFixed(1) + '/mi' : ''}</div>
+        </div>
+        <div class="as-stat">
+          <div class="as-stat-val">${analysis.dims.transitions || '—'}</div>
+          <div class="as-stat-lbl">Transitions</div>
+          <div class="as-stat-sub">jerk score</div>
+        </div>
+      </div>`;
+  }
+}
+
+
 export function renderForceTimeline(drive){
   const canvas = document.getElementById('force-timeline-canvas');
   if (!canvas || !drive || drive.samples.length < 2) return;
