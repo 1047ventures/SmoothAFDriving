@@ -129,7 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Leaderboard / Rivals
-  document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard('rivals'));
+  document.getElementById('btn-corridors')?.addEventListener('click', () => {
+    document.getElementById('home-corridors-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard('overall'));
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-corridor-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
