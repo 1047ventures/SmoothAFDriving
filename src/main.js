@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard('rivals'));
   document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard('overall'));
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
+  document.getElementById('btn-corridor-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-rivals')?.addEventListener('click', () => openSignupModal(() => openLeaderboard('rivals')));

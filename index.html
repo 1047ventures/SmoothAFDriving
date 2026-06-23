@@ -590,6 +590,48 @@
 
   </section>
 
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN: CORRIDOR DETAIL
+  ═══════════════════════════════════════════════════════════════ -->
+  <section id="screen-corridor">
+    <div class="corridor-topbar">
+      <button class="corridor-back-btn" id="btn-corridor-back" aria-label="Back">←</button>
+      <div class="corridor-header">
+        <div class="corridor-road-name" id="corridor-road-name">—</div>
+        <div class="corridor-city" id="corridor-city"></div>
+      </div>
+    </div>
+
+    <div class="corridor-stats-row">
+      <div class="corridor-stat">
+        <div class="corridor-stat-val" id="corridor-drives">—</div>
+        <div class="corridor-stat-lbl">Drives</div>
+      </div>
+      <div class="corridor-stat">
+        <div class="corridor-stat-val" id="corridor-avg">—</div>
+        <div class="corridor-stat-lbl">Avg Score</div>
+      </div>
+      <div class="corridor-stat">
+        <div class="corridor-stat-val" id="corridor-best">—</div>
+        <div class="corridor-stat-lbl">Best</div>
+      </div>
+    </div>
+
+    <div class="corridor-sparkline-wrap">
+      <div class="corridor-sparkline-hdr">
+        <span class="corridor-sparkline-lbl">Score Trend</span>
+        <span class="corridor-sparkline-trend" id="corridor-trend"></span>
+      </div>
+      <svg id="corridor-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none">
+        <polyline id="corridor-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <g id="corridor-sparkline-dots"></g>
+      </svg>
+    </div>
+
+    <div class="corridor-drives-label">Drive History</div>
+    <div class="corridor-drives-list" id="corridor-drives-list"></div>
+  </section>
+
   <!-- SIGNUP MODAL -->
   <div class="signup-overlay" id="signup-modal" style="display:none">
     <div class="signup-card">
