@@ -262,28 +262,19 @@ export function renderReview(drive){
   }
   for (const e of drive.events){
     if (e.type === 'shift') continue;
-    const tier  = e.tier || 2;
-    const label = e.type === 'brake' ? 'Brake' : e.type === 'accel' ? 'Accel' : 'Turn';
-    const raw   = e.la != null ? `${Math.abs(e.la).toFixed(2)} m/s² (${(Math.abs(e.la)/9.81).toFixed(3)}G)`
-                : e.ra != null ? `${Math.abs(e.ra).toFixed(2)} m/s² (${(Math.abs(e.ra)/9.81).toFixed(3)}G)`
-                : `sev ${(e.severity||1).toFixed(1)}×`;
-    const tierLabel = tier >= 3 ? 'Harsh' : tier >= 2 ? 'Moderate' : 'Mild';
-    let markerHtml, markerSize, markerAnchor;
-    if (tier >= 2){
-      const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
-      markerHtml   = `<div class="ev-marker ${e.type}">${glyph}</div>`;
-      markerSize   = [26, 26]; markerAnchor = [13, 13];
-    } else {
-      markerHtml   = `<div class="ev-marker-dot ${e.type}"></div>`;
-      markerSize   = [12, 12]; markerAnchor = [6, 6];
-    }
+    if ((e.tier || 2) < 3) continue; // only worst moments on map
+    const glyph = e.type === 'brake' ? 'B' : e.type === 'accel' ? 'A' : 'T';
+    const label = e.type === 'brake' ? 'Hard brake' : e.type === 'accel' ? 'Hard acceleration' : 'Sharp turn';
+    const gVal  = e.la != null ? (Math.abs(e.la)/9.81).toFixed(2)
+                : e.ra != null ? (Math.abs(e.ra)/9.81).toFixed(2)
+                : (e.severity||1).toFixed(1);
     const m = L.marker([e.lat, e.lon], {
-      icon: L.divIcon({ className:'', html: markerHtml, iconSize: markerSize, iconAnchor: markerAnchor })
+      icon: L.divIcon({ className:'', html:`<div class="ev-marker ${e.type}">${glyph}</div>`, iconSize:[26,26], iconAnchor:[13,13] })
     }).addTo(mapInstance);
     if (e.type === 'brake'){
       m.on('click', () => showBrakeProfile(e, drive));
     } else {
-      m.bindPopup(`<b>${tierLabel} ${label}</b><br>${e.speedMph} mph · ${raw}<br><span style="color:#8A7B72">t+${fmtDuration(e.t)}</span>`);
+      m.bindPopup(`<b>${label}</b><br>${e.speedMph} mph · ${gVal}G peak`);
     }
     mapLayers.push(m);
     if (reviewEventMarkers[e.type]) reviewEventMarkers[e.type].push(m);
