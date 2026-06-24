@@ -20,7 +20,7 @@ function saveGarage(vehicles){
   try { localStorage.setItem(GARAGE_KEY, JSON.stringify(vehicles)); } catch {}
 }
 
-function getActiveVehicle(){
+export function getActiveVehicle(){
   const g = loadGarage();
   return g.find(v => v.active) || g[0] || null;
 }

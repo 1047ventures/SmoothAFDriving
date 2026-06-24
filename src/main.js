@@ -165,14 +165,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // Garage sheet
   wireGarageButtons();
 
-  // Past drives toggle
-  document.getElementById('btn-view-drives')?.addEventListener('click', () => {
-    const panel = document.getElementById('drives-list-panel');
-    const btn = document.getElementById('btn-view-drives');
-    const opening = !panel.classList.contains('open');
-    panel.classList.toggle('open', opening);
-    btn.textContent = opening ? 'Hide drives' : 'Past drives';
-  });
+  // Swipe from left edge to go back
+  let swipeStartX = 0, swipeStartY = 0;
+  document.addEventListener('touchstart', e => {
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - swipeStartY);
+    if (swipeStartX > 30 || dx < 60 || dy > dx * 0.8) return;
+    const active = document.querySelector('.screen.active');
+    if (!active || active.id === 'screen-home' || active.id === 'screen-record') return;
+    const backBtnId = {
+      'screen-review':      'btn-back',
+      'screen-corridor':    'btn-corridor-back',
+      'screen-leaderboard': 'btn-lb-back',
+      'screen-rewards':     'btn-rw-back',
+    }[active.id];
+    const btn = backBtnId ? document.getElementById(backBtnId) : null;
+    if (btn) btn.click();
+    else { showScreen('home'); renderDriveList(); }
+  }, { passive: true });
 
   // Register service worker
   if ('serviceWorker' in navigator){

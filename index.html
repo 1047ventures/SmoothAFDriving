@@ -26,13 +26,6 @@
     <!-- Top bar -->
     <div class="home-topbar-v2">
       <span class="home-brand">Smooth AF</span>
-      <button class="home-garage-btn" id="btn-vehicle-type" aria-label="My Garage">
-        <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x=".75" y="4.25" width="11.5" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
-          <path d="M3.5 4.25V3a3 3 0 016 0v1.25" stroke="currentColor" stroke-width="1.2"/>
-        </svg>
-        Garage
-      </button>
     </div>
 
     <!-- Score number — hero element -->
@@ -41,8 +34,14 @@
       <div class="home-score-row">
         <div id="home-score-num" class="home-score-num">--</div>
         <div class="home-score-right">
-          <div id="home-score-delta" class="home-score-delta"></div>
-          <div id="home-score-rank" class="home-score-rank"></div>
+          <button class="home-garage-btn" id="btn-vehicle-type" aria-label="My Garage">
+            <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x=".75" y="4.25" width="11.5" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M3.5 4.25V3a3 3 0 016 0v1.25" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+            Garage
+          </button>
+          <div id="home-vehicle-name" class="home-vehicle-name"></div>
         </div>
       </div>
     </div>
@@ -59,8 +58,8 @@
 
     <!-- Stats row -->
     <div class="home-stats-row">
-      <div class="home-stat-col">
-        <div id="home-drives-count" class="home-stat-val">0</div>
+      <div class="home-stat-col home-stat-col-tappable" id="home-drives-col">
+        <div id="home-drives-count" class="home-stat-val home-stat-tappable">0</div>
         <div class="home-stat-lbl">Drives</div>
       </div>
       <div class="home-stat-col">
@@ -82,13 +81,7 @@
       </svg>
     </div>
 
-    <!-- Explore past drives -->
-    <div class="home-explore-row" id="btn-view-drives">
-      <span class="home-explore-label">Explore Past Drives</span>
-      <span class="home-explore-arrow">&#8594;</span>
-    </div>
-
-    <!-- Drives list (collapsible) -->
+    <!-- Drives list (collapsible, toggled by tapping Drives stat) -->
     <div class="drives-list" id="drives-list-panel">
       <div id="drives-container"></div>
     </div>
@@ -122,8 +115,6 @@
       <span class="home-cta-text">Start Drive</span>
       <span class="home-cta-arrow">&#8594;</span>
     </button>
-    <div id="app-version"></div>
-
     <div id="app-version"></div>
 
   </section>

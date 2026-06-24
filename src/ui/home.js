@@ -12,6 +12,7 @@ import { metersToMiles, fmtDuration } from '../utils/math.js';
 import { scoreColor, dimColor } from '../utils/color.js';
 import { DIM_DISPLAY } from '../constants.js';
 import { renderReview } from './review.js';
+import { getActiveVehicle } from './garage.js';
 
 export function renderHomeStats(){
   const all   = loadDrives().filter(d => d.score != null);
@@ -29,6 +30,14 @@ export function renderHomeStats(){
   const subEl   = document.getElementById('home-persona-sub');
   if (titleEl) titleEl.textContent = p ? p.title : '';
   if (subEl)   subEl.textContent   = p ? p.sub   : '';
+
+  // Vehicle name in score-right
+  const vehicleNameEl = document.getElementById('home-vehicle-name');
+  if (vehicleNameEl){
+    const v = getActiveVehicle();
+    const label = v ? [v.year, v.make, v.model].filter(Boolean).join(' ') : '';
+    vehicleNameEl.textContent = label ? `The ${v.model || v.make}` : '';
+  }
 
   // Welcome name
   const welcomeEl = document.getElementById('home-welcome-name');
@@ -53,6 +62,14 @@ export function renderHomeStats(){
 
   const drivesEl = document.getElementById('home-drives-count');
   if (drivesEl) drivesEl.textContent = all.length;
+
+  const drivesCol = document.getElementById('home-drives-col');
+  if (drivesCol){
+    drivesCol.onclick = () => {
+      const panel = document.getElementById('drives-list-panel');
+      if (panel) panel.classList.toggle('open');
+    };
+  }
 
   const milesEl = document.getElementById('home-total-miles');
   if (milesEl) milesEl.textContent = all.length
