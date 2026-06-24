@@ -160,21 +160,32 @@
   .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:0.85;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .2em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
   .home-score-right{padding-top:50px;display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
-  /* ── Garage card ── */
+  /* ── Garage HUD ── */
   .home-garage-card{
-    appearance:none;cursor:pointer;
-    border:1px solid rgba(232,80,26,.4);
-    background:rgba(232,80,26,.07);
-    border-radius:14px;
-    padding:12px 16px;
+    appearance:none;border:0;background:transparent;cursor:pointer;
     display:flex;flex-direction:column;align-items:flex-end;gap:5px;
-    min-width:108px;
-    box-shadow:0 0 24px rgba(232,80,26,.1),inset 0 1px 0 rgba(255,255,255,.04);
-    transition:background .15s,box-shadow .15s;
+    padding:0;min-width:100px;
+    transition:opacity .15s;
   }
-  .home-garage-card:active{background:rgba(232,80,26,.14);box-shadow:0 0 32px rgba(232,80,26,.22)}
-  .hgc-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1.1;text-align:right;letter-spacing:-.01em}
-  .hgc-label{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,80,26,.75)}
+  .home-garage-card:active{opacity:.5}
+  .hgc-name{
+    font-family:var(--serif);font-style:italic;font-weight:700;font-size:24px;
+    line-height:1;letter-spacing:-.03em;white-space:nowrap;
+    background:linear-gradient(135deg,#E8501A 0%,#C49A28 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .hgc-rule{
+    width:100%;height:1px;
+    background:linear-gradient(to left,rgba(232,80,26,.55) 0%,rgba(196,154,40,.25) 55%,transparent 100%);
+  }
+  .hgc-footer{display:flex;align-items:center;justify-content:flex-end;gap:5px}
+  .hgc-dot{
+    width:5px;height:5px;border-radius:50%;flex-shrink:0;
+    background:#E8501A;
+    box-shadow:0 0 6px rgba(232,80,26,.9);
+  }
+  .hgc-label{font-family:var(--sans);font-size:8px;letter-spacing:.26em;text-transform:uppercase;color:rgba(242,232,213,.38)}
+  .hgc-arrow{font-size:13px;color:rgba(232,80,26,.65);line-height:1}
   .home-flex-spacer{flex:1;min-height:20px}
 
   /* ── Welcome / persona ── */
