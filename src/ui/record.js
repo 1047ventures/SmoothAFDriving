@@ -12,6 +12,7 @@ import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { showCarPromptIfNeeded, showOnboardingIfNeeded } from './modals.js';
+import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
 
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
@@ -86,6 +87,14 @@ export function setCalibUI(phase){
 }
 
 function updateRoadUI(){ /* roughness tracked in state.currentRoughness; shown in review */ }
+
+function wireDebugPanel() {
+  const handle = document.getElementById('debug-handle');
+  const panel  = document.getElementById('debug-panel');
+  if (!handle || !panel || handle._debugWired) return;
+  handle._debugWired = true;
+  handle.addEventListener('click', () => panel.classList.toggle('open'));
+}
 
 export function updateLiveUI(){
   // Persist every 30s so iOS reload can recover the drive
@@ -203,6 +212,9 @@ export function updateLiveUI(){
   }
 
   updateRoadUI();
+  pushDebugSample(state);
+  renderDebugChart(document.getElementById('debug-canvas'));
+  updateDebugLegend(document.getElementById('debug-legend'));
 }
 
 export function startRecording(){
@@ -212,6 +224,8 @@ export function startRecording(){
   state.startTime = Date.now();
   $('#rec-source').textContent = 'GPS + Motion';
   showScreen('record');
+  clearDebugBuffers();
+  wireDebugPanel();
   renderRecAvatar();
 
   // ── Phase 0: detect if already moving (skip stability wait if so) ────────

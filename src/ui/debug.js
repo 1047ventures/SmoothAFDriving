@@ -38,8 +38,14 @@ const Y_RANGE = 6;
 
 export function renderDebugChart(canvas) {
   if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.offsetWidth;
+  const H   = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
   ctx.fillStyle = 'rgba(10,8,8,0.92)';
