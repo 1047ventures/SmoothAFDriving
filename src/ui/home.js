@@ -5,7 +5,6 @@ import {
   toggleFavoriteDrive,
   deleteDrive,
   loadDriverName,
-  loadCorridors,
 } from '../services/storage.js';
 import { getDriverPersona, analyzeDrive } from '../services/scoring.js';
 import { metersToMiles, fmtDuration } from '../utils/math.js';
@@ -57,8 +56,6 @@ export function renderHomeStats(){
       sentenceEl.innerHTML = `${all.length} drive${all.length !== 1 ? 's' : ''} in the books. Keep stacking.`;
     }
   }
-
-  renderCorridorCards();
 
   const drivesEl = document.getElementById('home-drives-count');
   if (drivesEl) drivesEl.textContent = all.length;
@@ -130,46 +127,6 @@ export function renderHomeStats(){
   }
 }
 
-function renderCorridorCards(){
-  const host = document.getElementById('home-corridors-list');
-  if (!host) return;
-  const corridors = loadCorridors();
-
-  if (!corridors.length){
-    host.innerHTML = `
-      <div class="hcl-empty">
-        <div class="hcl-empty-title">Your first corridor</div>
-        <div class="hcl-empty-sub">Drive a named road for 500m+ to unlock your corridor rank</div>
-      </div>`;
-    return;
-  }
-
-  const top = [...corridors]
-    .sort((a, b) => b.drives.length - a.drives.length)
-    .slice(0, 3);
-
-  host.innerHTML = top.map(c => {
-    const count     = c.drives.length;
-    const avgScore  = Math.round(c.drives.reduce((s, d) => s + d.score, 0) / count);
-    return `
-      <div class="hcl-card" data-corridor-id="${c.corridorId}">
-        <div class="hcl-road-info">
-          <div class="hcl-road-name">${c.name}</div>
-          <div class="hcl-road-meta">${c.city} · ${count} drive${count !== 1 ? 's' : ''}</div>
-        </div>
-        <div class="hcl-scores">
-          <div class="hcl-score-avg">${avgScore}</div>
-          <div class="hcl-score-lbl">avg</div>
-        </div>
-      </div>`;
-  }).join('');
-
-  host.querySelectorAll('.hcl-card').forEach(card => {
-    card.addEventListener('click', () => {
-      import('./corridor.js').then(m => m.renderCorridor(card.dataset.corridorId));
-    });
-  });
-}
 
 function renderLifetimeSheet(all){
   // Gather 7-dim scores — use stored dims if available, re-run analyzeDrive otherwise

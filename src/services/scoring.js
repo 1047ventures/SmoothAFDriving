@@ -387,34 +387,81 @@ export function getDriverPersona(drives){
   const isSmooth  = avgScore >= 85;
   const isRough   = avgScore < 65;
 
-  let title, sub;
+  const pick = (arr) => arr[drives.length % arr.length];
+  let title, subs;
+
   if (isHighway && isLong && isSmooth){
     title = 'Mile-Eater';
-    sub   = `Cruising ${Math.round(avgMi)} mi avg at highway pace. Clean, consistent, unfazed.`;
+    subs  = [
+      `${Math.round(avgMi)} mi avg, highway pace, barely a wobble. You make it look boring — and that's the compliment.`,
+      `Clean at speed, clean at distance. ${Math.round(totalMi)} mi logged and the score hasn't flinched.`,
+      `You eat interstates for breakfast. Smooth throttle, smooth exits, smooth everything. ${Math.round(avgMi)} mi per run.`,
+      `The long haul is your home turf. Consistent enough that your passengers forget they're moving.`,
+    ];
   } else if (isHighway && isLong && isRough){
     title = 'Highway Charger';
-    sub   = `Long hauls, fast pace, heavy inputs. Smooth it out and save on fuel.`;
+    subs  = [
+      `Long hauls, fast pace, heavy inputs. Back off the throttle 15% and watch the number climb.`,
+      `You've got the highway instinct — just needs a softer edge. ${Math.round(totalMi)} mi in, still room to sharpen.`,
+      `Speed is there. Smoothness is close. The gap between the two is one gear earlier and one brake later.`,
+      `Big miles, big energy. The score wants the same focus, just with a lighter touch.`,
+    ];
   } else if (isCity && isShort && isSmooth){
     title = 'Urban Ghost';
-    sub   = `Threading city blocks like water. ${Math.round(avgDurMin)} min trips, almost no drama.`;
+    subs  = [
+      `Threading city blocks like water. ${Math.round(avgDurMin)} min trips, almost no drama.`,
+      `Short runs, surgical lines. Every yellow light read two blocks early. That's the craft.`,
+      `You move through traffic like it isn't there. ${drives.length} trips and barely a harsh input to show for it.`,
+      `City grid, your rules. Anticipation doing the heavy lifting — brakes barely necessary.`,
+    ];
   } else if (isCity && isShort && isRough){
     title = 'Stop-Light Sprinter';
-    sub   = `Short hops, hard stops. Ease off the pedal and your score will climb.`;
+    subs  = [
+      `Short hops, hard stops. See the brake lights earlier and the score starts to follow.`,
+      `You've got quick reflexes — now use them one beat earlier. That gap is where the score lives.`,
+      `City hustle mode. The score wants slower eyes, earlier reads. You've got the instincts — trust them sooner.`,
+      `Every stop is a chance to recalibrate. Anticipate the light, not the bumper. It adds up fast.`,
+    ];
   } else if (isCity && isSmooth){
     title = 'City Glider';
-    sub   = `Reading traffic before it happens. Smooth across ${drives.length} city drives.`;
+    subs  = [
+      `Reading traffic before it happens. Smooth across ${drives.length} city drives.`,
+      `Momentum over muscle — you let the road come to you. The city doesn't rattle you.`,
+      `You've dialed in the rhythm. Float between the gaps, scrub speed early, arrive calm. It shows.`,
+      `${drives.length} city drives and the inputs stay clean. That takes patience most people skip.`,
+    ];
   } else if (isMixed && isSmooth){
     title = 'All-Roads Driver';
-    sub   = `Highways, surface streets — handles both clean. ${Math.round(totalMi)} mi logged.`;
+    subs  = [
+      `Every road type, same composure. Highway, side street, parking lot exit — same smooth energy. That's rare.`,
+      `You run it all — morning commute, open road, suburban maze. Nothing catches you off guard. ${Math.round(totalMi)} mi of proof.`,
+      `Highways, surface streets — handles both clean. The score doesn't care which road you're on. Neither do you.`,
+      `${Math.round(totalMi)} mi across every road type and the score holds. That's not talent, that's calibration.`,
+    ];
   } else if (isMixed && !isSmooth){
     title = 'Mixed-Bag Driver';
-    sub   = `All kinds of roads, all kinds of inputs. Consistency will push that score up.`;
+    subs  = [
+      `All kinds of roads, all kinds of inputs. The smooth patches are already in there — string them together.`,
+      `Mixed terrain, mixed results. You know what it feels like when it clicks. Chase that on every road.`,
+      `Every road type tested, scores still evening out. Consistency is the one unlock between you and a better number.`,
+      `The range is there. Pick one habit to clean up — early braking, steady throttle — and watch the floor rise.`,
+    ];
   } else if (isHighway){
     title = 'Open Road Cruiser';
-    sub   = `Happiest at speed. Avg ${Math.round(avgTop)} mph top, ${Math.round(avgMi)} mi per drive.`;
+    subs  = [
+      `Happiest at speed. Avg ${Math.round(avgTop)} mph, ${Math.round(avgMi)} mi per drive. The open road suits you.`,
+      `You belong at 75. Wide lanes, easy throttle, letting it breathe. The highway is your natural habitat.`,
+      `${Math.round(avgMi)} mi per run at ${Math.round(avgTop)} mph average. Clean lines, no drama. Just road.`,
+      `Fast, comfortable, unhurried. There's a version of this score that gets even cleaner — just ease into corners.`,
+    ];
   } else {
     title = 'Daily Driver';
-    sub   = `${drives.length} drives, ${Math.round(totalMi)} mi total. Avg score ${avgScore}.`;
+    subs  = [
+      `${drives.length} drives, ${Math.round(totalMi)} mi, avg score ${avgScore}. The pattern is building.`,
+      `${Math.round(totalMi)} miles on the board. Each drive sharpens the picture a little more.`,
+      `${drives.length} sessions logged. Score averaging ${avgScore}. The ceiling is higher than this.`,
+      `Consistent mileage, consistent effort. ${Math.round(totalMi)} mi in — the data starts talking now.`,
+    ];
   }
-  return {title, sub, avgScore, drives: drives.length, totalMi: Math.round(totalMi)};
+  return {title, sub: pick(subs), avgScore, drives: drives.length, totalMi: Math.round(totalMi)};
 }

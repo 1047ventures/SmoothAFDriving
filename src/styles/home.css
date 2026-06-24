@@ -162,11 +162,11 @@
   /* ── Score hero ── */
   .home-score-zone{padding:8px 24px 0;flex-shrink:0}
   .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:6px}
-  .home-score-row{display:flex;align-items:flex-start;gap:14px}
+  .home-score-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
   .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:1;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .08em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
-  .home-score-right{padding-top:4px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-  .home-vehicle-name{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4);letter-spacing:.06em;padding:0 2px}
+  .home-score-right{padding-top:20px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+  .home-vehicle-name{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4);letter-spacing:.06em;text-align:right}
 
   /* ── Welcome / persona ── */
   .home-welcome-block{padding:8px 24px 0;flex-shrink:0}
