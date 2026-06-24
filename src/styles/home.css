@@ -149,7 +149,7 @@
   /* ── HOME v3 ──*/
   .home-car-panel,.home-bottom-sheet,.wordmark-lg,.persona-badge,
   .home-next-unlock,.home-rival,.home-archetype-name,.home-archetype-desc,.home-rule{display:none!important}
-  #screen-home{background:#080808;padding:0;overflow:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-direction:column;padding-bottom:calc(130px + env(safe-area-inset-bottom,0))}
+  #screen-home{background:#080808;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-direction:column;min-height:100dvh;padding-bottom:calc(130px + env(safe-area-inset-bottom,0))}
   .home-topbar-v2{padding:calc(env(safe-area-inset-top,0) + 10px) 24px 0;display:flex;align-items:center;flex-shrink:0}
   .home-brand{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
   .home-garage-btn{
@@ -165,7 +165,8 @@
   .home-score-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
   .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:1;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .08em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
-  .home-score-right{padding-top:20px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+  .home-score-right{padding-top:44px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+  .home-flex-spacer{flex:1;min-height:12px}
   .home-vehicle-name{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4);letter-spacing:.06em;text-align:right}
 
   /* ── Welcome / persona ── */
