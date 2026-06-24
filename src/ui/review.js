@@ -18,6 +18,10 @@ export function renderReview(drive){
 
   const analysis = analyzeDrive(drive);
   reviewAnalysis = analysis;
+  const exportBtn = document.getElementById('rv-export-btn');
+  if (exportBtn) {
+    exportBtn.onclick = () => exportDrive(drive, analysis);
+  }
 
   // ── Header ─────────────────────────────────────────────────────────────────
   const when = new Date(drive.startTime);
@@ -720,6 +724,22 @@ export function buildExportData(drive, analysis) {
       roadRoughness: s.roadRoughness,
     })),
   };
+}
+
+export function exportDrive(drive, analysis) {
+  const data  = buildExportData(drive, analysis);
+  const when  = new Date(drive.startTime);
+  const pad   = n => String(n).padStart(2, '0');
+  const fname = `smoothaf-${when.getFullYear()}-${pad(when.getMonth()+1)}-${pad(when.getDate())}-${pad(when.getHours())}-${pad(when.getMinutes())}.json`;
+  const blob  = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url   = URL.createObjectURL(blob);
+  const a     = document.createElement('a');
+  a.href      = url;
+  a.download  = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 export { mapInstance };

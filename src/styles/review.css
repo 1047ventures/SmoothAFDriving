@@ -26,6 +26,7 @@
   .leaflet-control-attribution a{color:var(--cream-dim)!important}
   .review-top{position:absolute;top:0;left:0;right:0;z-index:600;padding:calc(env(safe-area-inset-top,0)+10px) 16px 10px;background:linear-gradient(180deg,rgba(10,10,10,.85) 0%,rgba(10,10,10,.3) 70%,transparent 100%);display:flex;justify-content:space-between;align-items:center;gap:12px}
   .back-btn{appearance:none;border:0;cursor:pointer;width:38px;height:38px;border-radius:50%;background:rgba(10,10,10,.8);color:var(--cream);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid rgba(244,235,217,.14)}
+  .rv-export-btn{font-size:16px;font-weight:700}
   .review-when{font-size:10px;letter-spacing:.2em;color:var(--cream-dim);text-transform:uppercase;text-align:right}
   .legend{position:absolute;left:12px;bottom:10px;z-index:600;background:rgba(10,10,10,.78);border:1px solid rgba(244,235,217,.1);border-radius:8px;padding:8px 10px;font-size:9px;letter-spacing:.12em;color:var(--cream-dim);text-transform:uppercase;display:flex;flex-direction:column;gap:5px;backdrop-filter:blur(6px)}
   .legend .lg-row{display:flex;align-items:center;gap:6px}
