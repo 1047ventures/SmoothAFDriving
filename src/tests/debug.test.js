@@ -72,3 +72,33 @@ describe('buildExportData', () => {
     expect(data.dims).toBeNull();
   });
 });
+
+const { pushDebugSample, getDebugBuffers, clearDebugBuffers } = await import('../ui/debug.js');
+
+describe('pushDebugSample', () => {
+  beforeEach(() => clearDebugBuffers());
+
+  it('appends one data point per push', () => {
+    pushDebugSample({ emaLongAccel: 1, emaLatAccel: -0.5, currentRoughness: 0.2, lastGpsPos: { speed: 8 } });
+    const bufs = getDebugBuffers();
+    expect(bufs.long).toHaveLength(1);
+    expect(bufs.long[0]).toBeCloseTo(1);
+    expect(bufs.lat[0]).toBeCloseTo(-0.5);
+    expect(bufs.roughness[0]).toBeCloseTo(0.2);
+    expect(bufs.speed[0]).toBeCloseTo(0.8); // speed / 10
+  });
+
+  it('caps all buffers at 300 points', () => {
+    for (let i = 0; i < 310; i++) {
+      pushDebugSample({ emaLongAccel: i, emaLatAccel: 0, currentRoughness: 0, lastGpsPos: { speed: 0 } });
+    }
+    const bufs = getDebugBuffers();
+    expect(bufs.long.length).toBe(300);
+    expect(bufs.long[bufs.long.length - 1]).toBeCloseTo(309); // newest is last
+  });
+
+  it('handles null lastGpsPos gracefully', () => {
+    pushDebugSample({ emaLongAccel: 0, emaLatAccel: 0, currentRoughness: 0, lastGpsPos: null });
+    expect(getDebugBuffers().speed[0]).toBe(0);
+  });
+});
