@@ -5,13 +5,11 @@ import {
   LIFETIME_SCORE_KEY,
   DRIVER_NAME_KEY,
   MAX_STORED_DRIVES,
-  MAX_CORRIDOR_DRIVES,
   ACTIVE_DRIVE_KEY,
   OSM_SPEED_CACHE,
   OSM_CACHE_TTL,
   OSM_CACHE_MAX,
   SOCIAL_HANDLES_KEY,
-  CORRIDORS_KEY,
 } from '../constants.js';
 
 // ── Lifetime score ────────────────────────────────────────────────────────────
@@ -140,26 +138,4 @@ export function setOsmLimit(lat, lon, limitMps){
         .forEach(k => delete cache[k]);
   }
   saveOsmCache(cache);
-}
-
-// ── Corridors ─────────────────────────────────────────────────────────────────
-export function loadCorridors(){
-  try { return JSON.parse(localStorage.getItem(CORRIDORS_KEY) || '[]'); } catch { return []; }
-}
-export function saveCorridors(corridors){
-  try { localStorage.setItem(CORRIDORS_KEY, JSON.stringify(corridors)); } catch {}
-}
-export function upsertCorridorDrive({ name, city, centerLat, centerLon, osmWayId, score, distanceMeters, drivenAt }){
-  const all = loadCorridors();
-  const id  = `${name}-${city}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const idx = all.findIndex(c => c.corridorId === id);
-  const drive = { score, distanceMeters, drivenAt };
-  if (idx === -1){
-    all.push({ corridorId: id, name, city, centerLat, centerLon, osmWayId: osmWayId || null, drives: [drive] });
-  } else {
-    all[idx].drives.push(drive);
-    if (all[idx].drives.length > MAX_CORRIDOR_DRIVES)
-      all[idx].drives = all[idx].drives.slice(-MAX_CORRIDOR_DRIVES);
-  }
-  saveCorridors(all);
 }

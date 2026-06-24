@@ -9,7 +9,6 @@ import {
 } from './storage.js';
 import { scoreFromEvents, analyzeDrive } from './scoring.js';
 import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
-import { detectCorridors } from './corridors.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
 
 export function persistActiveDrive(){
@@ -131,7 +130,6 @@ export function finalizeAndReview(callbacks = {}){
   drive.score = analyzeDrive(drive).score;
   saveDrive(drive);
   pushDriveToSupabase(drive);
-  detectCorridors(drive).catch(() => {});
 
   // Lifetime score = rolling average of the 10 most recent drives
   // (includes this drive, which was just saved above)

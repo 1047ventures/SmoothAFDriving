@@ -129,12 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Leaderboard / Rivals
-  document.getElementById('btn-corridors')?.addEventListener('click', () => {
-    document.getElementById('home-corridors-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard('rivals'));
   document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard('overall'));
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
-  document.getElementById('btn-corridor-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-rivals')?.addEventListener('click', () => openSignupModal(() => openLeaderboard('rivals')));
