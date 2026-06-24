@@ -11,21 +11,80 @@ function saveRecPos(p){ try { localStorage.setItem(REC_POS_KEY, JSON.stringify(p
 function loadRecPhoto(){ try { return localStorage.getItem(REC_PHOTO_KEY); } catch { return null; } }
 
 // ── Vehicle silhouette SVGs ────────────────────────────────────────────────────
+// Line-art approach: stroke outline + glass fill + wheel rings.
+// viewBox 0 0 200 80. Wheel center y=70. Body ground y=58.
+// Each type has distinct proportions: SUV boxy/tall, sports low/long-nose, truck cab+bed step, etc.
 function vehicleSvg(typeId){
-  const BG = '#0A0808';
-  const defs = {
-    sedan:      { p:'M14,54L14,42Q16,34 30,28L52,26Q62,8 80,7L120,7Q140,7 158,24L168,36Q174,44 176,52L176,54Z',                                fw:46,  rw:162, wr:12 },
-    crossover:  { p:'M12,54L12,36Q14,26 30,22L50,18Q60,5 80,4L122,4Q144,4 164,18L174,30Q180,42 180,52L180,54Z',                               fw:44,  rw:164, wr:13 },
-    suv:        { p:'M10,54L10,28Q12,16 28,12L58,8Q66,3 82,3L128,3Q152,3 166,12L182,24Q186,34 186,50L186,54Z',                                fw:44,  rw:170, wr:14 },
-    sports:     { p:'M16,54L16,48Q18,42 24,38L50,32Q66,14 90,12L116,12Q136,12 152,24L166,36Q172,46 174,52L174,54Z',                           fw:46,  rw:158, wr:11 },
-    convertible:{ p:'M16,54L16,48Q18,42 26,38L52,32Q64,18 80,14L86,14Q90,16 92,28L108,28Q110,16 116,14L134,14Q152,18 164,32L170,42Q174,48 174,54Z', fw:46, rw:158, wr:11 },
-    truck:      { p:'M10,54L10,28Q12,16 28,12L70,10Q78,10 84,16L84,36L170,36Q178,36 178,44L178,54Z',                                          fw:42,  rw:160, wr:13 },
-    hatchback:  { p:'M14,54L14,42Q16,32 32,28L52,26Q62,8 78,7L112,7Q134,7 154,18L168,34Q172,42 170,52L170,54Z',                               fw:46,  rw:154, wr:12 },
-    electric:   { p:'M16,54L16,44Q18,36 34,30L52,26Q60,8 82,7L118,7Q142,7 162,22L172,36Q178,44 178,52L178,54Z',                               fw:46,  rw:162, wr:12 },
+  // body: open path outline (no Z — floor implied by wheel circles)
+  // glass: window glass fill area
+  // fw/rw: front/rear wheel x center  wr: wheel radius
+  const C = {
+    sedan: {
+      // 3-box saloon: balanced hood, clear greenhouse, short trunk
+      body:  'M16,58 L16,46 Q18,36 30,30 L54,27 Q62,10 80,8 L120,8 Q140,8 157,23 L168,36 Q174,46 174,54 L174,58',
+      glass: 'M58,27 Q64,12 82,9 L118,9 Q137,9 153,24 L153,38 Q137,36 118,35 L82,35 Q64,36 58,38 Z',
+      fw:48, rw:160, wr:12,
+    },
+    crossover: {
+      // Raised, rounded, no distinct trunk — taller glasshouse than sedan
+      body:  'M14,58 L14,38 Q16,26 30,21 L50,17 Q60,5 80,4 L122,4 Q144,4 162,18 L173,32 Q178,44 178,54 L178,58',
+      glass: 'M54,18 Q62,6 82,5 L120,5 Q140,5 158,19 L158,34 Q140,32 120,31 L82,31 Q62,32 54,34 Z',
+      fw:46, rw:162, wr:13,
+    },
+    suv: {
+      // Boxy high-rider: near-vertical A+C pillars, flat long roof, big wheels, high clearance
+      body:  'M24,58 L24,36 Q26,22 38,17 L50,15 Q56,5 70,4 L140,4 Q156,4 166,16 L170,30 Q174,44 174,54 L174,58',
+      glass: 'M54,16 Q58,6 70,5 L140,5 Q154,5 162,17 L162,34 Q154,32 140,31 L70,31 Q58,32 54,34 Z',
+      fw:48, rw:158, wr:14,
+    },
+    sports: {
+      // Long low nose, steep windshield, fastback roof — Porsche/Ferrari proportions
+      body:  'M18,58 L18,52 Q20,46 26,42 L52,34 Q68,14 92,12 L116,12 Q134,12 152,26 L164,38 Q170,48 172,54 L172,58',
+      glass: 'M56,34 Q70,16 94,13 L114,13 Q132,13 148,27 L148,38 Q132,36 114,35 L94,35 Q70,36 56,38 Z',
+      fw:48, rw:156, wr:11,
+    },
+    convertible: {
+      // Open-top roadster: prominent windshield, bare door sills, rear deck rises for stowed roof
+      body:  'M18,58 L18,52 Q20,46 26,42 L52,34 Q62,20 78,14 L84,14 L84,44 L114,44 L114,20 L130,16 Q148,20 162,32 L170,44 Q174,50 174,58',
+      glass: null,
+      fw:48, rw:156, wr:11,
+    },
+    truck: {
+      // Pickup: tall cab with steep windshield, hard step down to flat bed
+      body:  'M14,58 L14,28 Q16,16 30,12 L72,10 Q80,10 86,17 L86,40 L168,40 Q178,40 178,48 L178,58',
+      glass: 'M34,14 Q38,11 70,11 Q78,11 84,18 L84,34 Q78,32 70,32 L38,32 Q32,32 28,26 Z',
+      fw:44, rw:158, wr:13,
+    },
+    hatchback: {
+      // 2-box: sedan front, rear window dives straight to tailgate
+      body:  'M16,58 L16,46 Q18,36 32,28 L52,26 Q62,8 78,7 L108,7 Q130,7 150,20 L164,36 Q168,46 166,54 L166,58',
+      glass: 'M56,26 Q64,9 80,8 L106,8 Q126,8 146,21 L146,40 Q126,38 106,37 L80,37 Q64,38 56,40 Z',
+      fw:48, rw:150, wr:12,
+    },
+    electric: {
+      // Aerodynamic EV: smooth tapering nose (frunk), sloped front, flush proportions
+      body:  'M20,58 L20,48 Q22,38 36,32 L52,28 Q60,9 84,8 L116,8 Q140,8 160,22 L170,36 Q176,46 176,54 L176,58',
+      glass: 'M56,28 Q62,11 86,9 L114,9 Q136,9 156,23 L156,38 Q136,36 114,35 L86,35 Q62,36 56,38 Z',
+      fw:48, rw:160, wr:12,
+    },
   };
-  const d = defs[typeId] || defs.sedan;
-  const hr = Math.round(d.wr * 0.42);
-  return `<svg viewBox="0 0 200 68" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="${d.p}" opacity=".72"/><circle cx="${d.fw}" cy="60" r="${d.wr}" fill="${BG}"/><circle cx="${d.rw}" cy="60" r="${d.wr}" fill="${BG}"/><circle cx="${d.fw}" cy="60" r="${d.wr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".48"/><circle cx="${d.fw}" cy="60" r="${hr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".28"/><circle cx="${d.rw}" cy="60" r="${d.wr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".48"/><circle cx="${d.rw}" cy="60" r="${hr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".28"/></svg>`;
+
+  const t = C[typeId] || C.sedan;
+  const hr = Math.round(t.wr * 0.42);
+  const wcy = 70; // wheel center y
+
+  const glassEl = t.glass
+    ? `<path d="${t.glass}" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width=".8" stroke-opacity=".2" stroke-linejoin="round"/>`
+    : '';
+
+  return `<svg viewBox="0 0 200 82" xmlns="http://www.w3.org/2000/svg">
+    <path d="${t.body}" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${glassEl}
+    <circle cx="${t.fw}" cy="${wcy}" r="${t.wr}" fill="none" stroke="currentColor" stroke-width="2" stroke-opacity=".65"/>
+    <circle cx="${t.fw}" cy="${wcy}" r="${hr}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-opacity=".3"/>
+    <circle cx="${t.rw}" cy="${wcy}" r="${t.wr}" fill="none" stroke="currentColor" stroke-width="2" stroke-opacity=".65"/>
+    <circle cx="${t.rw}" cy="${wcy}" r="${hr}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-opacity=".3"/>
+  </svg>`;
 }
 
 // ── Garage data helpers ────────────────────────────────────────────────────────
