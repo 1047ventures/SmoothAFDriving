@@ -53,23 +53,9 @@
       <div class="home-score-sentence" id="home-score-sentence">Start driving to build your score.</div>
     </div>
 
-    <!-- Top routes / Corridor teaser -->
-    <div class="home-routes">
-      <div class="home-routes-label">Your Corridors</div>
-      <div class="home-routes-text" id="home-routes-text">Drive more to unlock corridor rankings.</div>
-    </div>
-
-    <!-- Corridor teaser card (shown when <3 corridor drives) -->
-    <div class="home-corridor-teaser" id="home-corridor-teaser">
-      <div class="hct-card">
-        <div class="hct-road-info">
-          <div class="hct-road-name" id="hct-road-name">Your first corridor</div>
-          <div class="hct-road-sub" id="hct-road-sub">Drive a route 3+ times to unlock ranking</div>
-        </div>
-        <div class="hct-rank-badge" id="hct-rank-badge">?</div>
-      </div>
-      <div class="hct-hint" id="hct-hint">Who's the Smoothest Operator on your block?</div>
-    </div>
+    <!-- Corridor cards -->
+    <div class="home-corridors-label">Your Corridors</div>
+    <div class="home-corridors-list" id="home-corridors-list"></div>
 
     <!-- Stats row -->
     <div class="home-stats-row">
@@ -560,6 +546,50 @@
   </section>
 
   <!-- ══════════════════════════ REWARDS ══════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN: CORRIDOR DETAIL
+  ═══════════════════════════════════════════════════════════════ -->
+  <section id="screen-corridor" class="screen">
+
+    <div class="corridor-topbar">
+      <button class="corridor-back-btn" id="btn-corridor-back" aria-label="Back">&#8249;</button>
+      <div class="corridor-header">
+        <div class="corridor-road-name" id="corridor-road-name">—</div>
+        <div class="corridor-city" id="corridor-city"></div>
+      </div>
+    </div>
+
+    <div class="corridor-stats-row">
+      <div class="corridor-stat">
+        <div class="corridor-stat-val" id="corridor-drives">—</div>
+        <div class="corridor-stat-lbl">Drives</div>
+      </div>
+      <div class="corridor-stat">
+        <div class="corridor-stat-val" id="corridor-avg">—</div>
+        <div class="corridor-stat-lbl">Avg Score</div>
+      </div>
+      <div class="corridor-stat">
+        <div class="corridor-stat-val" id="corridor-best">—</div>
+        <div class="corridor-stat-lbl">Best</div>
+      </div>
+    </div>
+
+    <div class="corridor-sparkline-wrap">
+      <div class="corridor-sparkline-hdr">
+        <span class="corridor-sparkline-lbl">Score Trend</span>
+        <span class="corridor-sparkline-trend" id="corridor-trend"></span>
+      </div>
+      <svg id="corridor-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none">
+        <polyline id="corridor-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <g id="corridor-sparkline-dots"></g>
+      </svg>
+    </div>
+
+    <div class="corridor-drives-label">Drive History</div>
+    <div class="corridor-drives-list" id="corridor-drives-list"></div>
+
+  </section>
+
   <section id="screen-rewards" class="screen">
 
     <div class="rw-topbar">

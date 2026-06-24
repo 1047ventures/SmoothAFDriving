@@ -15,6 +15,7 @@ export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
 export const SHARE_PROMPTED_KEY = 'smoothaf.share_prompted';
+export const CORRIDORS_KEY      = 'smoothaf.corridors';
 
 export const MAX_STORED_DRIVES = 20;
 export const OSM_CACHE_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 days

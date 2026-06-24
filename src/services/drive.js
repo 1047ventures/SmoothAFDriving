@@ -10,6 +10,7 @@ import {
 import { scoreFromEvents, analyzeDrive } from './scoring.js';
 import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
+import { detectCorridors } from './corridors.js';
 
 export function persistActiveDrive(){
   if (!state.recording || state.simulated) return;
@@ -132,6 +133,8 @@ export function finalizeAndReview(callbacks = {}){
   drive.dims  = analysis.dims;
   saveDrive(drive);
   pushDriveToSupabase(drive);
+  // Non-blocking — corridor detection runs after review renders
+  detectCorridors(drive).catch(() => {});
 
   // Lifetime score = rolling average of the 10 most recent drives
   // (includes this drive, which was just saved above)

@@ -5,6 +5,7 @@ import {
   toggleFavoriteDrive,
   deleteDrive,
   loadDriverName,
+  loadCorridors,
 } from '../services/storage.js';
 import { getDriverPersona, analyzeDrive } from '../services/scoring.js';
 import { metersToMiles, fmtDuration } from '../utils/math.js';
@@ -48,20 +49,7 @@ export function renderHomeStats(){
     }
   }
 
-  // Routes text
-  const routesEl = document.getElementById('home-routes-text');
-  if (routesEl){
-    if (!all.length){
-      routesEl.textContent = 'Drive a route 3× to unlock your Corridor rank — and find out who owns your block.';
-    } else if (all.length < 3){
-      routesEl.textContent = `${3 - all.length} more drive${3 - all.length !== 1 ? 's' : ''} to unlock your first Corridor rank.`;
-    } else {
-      routesEl.textContent = 'Corridor rankings active. Keep driving the same routes to move up.';
-    }
-  }
-
-  // Corridor teaser card
-  renderCorridorTeaser(all);
+  renderCorridorCards();
 
   const drivesEl = document.getElementById('home-drives-count');
   if (drivesEl) drivesEl.textContent = all.length;
@@ -125,26 +113,45 @@ export function renderHomeStats(){
   }
 }
 
-function renderCorridorTeaser(drives){
-  const card = document.getElementById('home-corridor-teaser');
-  if (!card) return;
+function renderCorridorCards(){
+  const host = document.getElementById('home-corridors-list');
+  if (!host) return;
+  const corridors = loadCorridors();
 
-  if (!drives.length){
-    // Fresh install — show the generic teaser
-    const nameEl  = document.getElementById('hct-road-name');
-    const subEl   = document.getElementById('hct-road-sub');
-    const badgeEl = document.getElementById('hct-rank-badge');
-    const hintEl  = document.getElementById('hct-hint');
-    if (nameEl)  nameEl.textContent  = 'Your first corridor';
-    if (subEl)   subEl.textContent   = 'Drive a route 3× to unlock ranking';
-    if (badgeEl){ badgeEl.textContent = '?'; badgeEl.classList.remove('ranked'); }
-    if (hintEl)  hintEl.textContent  = 'Who\'s the Smoothest Operator on your block?';
-    card.style.display = 'block';
+  if (!corridors.length){
+    host.innerHTML = `
+      <div class="hcl-empty">
+        <div class="hcl-empty-title">Your first corridor</div>
+        <div class="hcl-empty-sub">Drive a named road for 500m+ to unlock your corridor rank</div>
+      </div>`;
     return;
   }
 
-  // Has drives but no corridor unlocked yet — hide the teaser (Best stat is tappable)
-  card.style.display = 'none';
+  const top = [...corridors]
+    .sort((a, b) => b.drives.length - a.drives.length)
+    .slice(0, 3);
+
+  host.innerHTML = top.map(c => {
+    const count     = c.drives.length;
+    const avgScore  = Math.round(c.drives.reduce((s, d) => s + d.score, 0) / count);
+    return `
+      <div class="hcl-card" data-corridor-id="${c.corridorId}">
+        <div class="hcl-road-info">
+          <div class="hcl-road-name">${c.name}</div>
+          <div class="hcl-road-meta">${c.city} · ${count} drive${count !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="hcl-scores">
+          <div class="hcl-score-avg">${avgScore}</div>
+          <div class="hcl-score-lbl">avg</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  host.querySelectorAll('.hcl-card').forEach(card => {
+    card.addEventListener('click', () => {
+      import('./corridor.js').then(m => m.renderCorridor(card.dataset.corridorId));
+    });
+  });
 }
 
 function renderLifetimeSheet(all){
