@@ -144,10 +144,10 @@ export function detectEvent(s, nowT){
 
 /**
  * onGpsUpdate — called from startRecording's watchPosition callback.
- * callbacks = { flashEvent, speakEvent, setCalibUI, calibrateAxes }
+ * callbacks = { flashEvent, setCalibUI, calibrateAxes }
  */
 export function onGpsUpdate(pos, callbacks = {}){
-  const { flashEvent, speakEvent, setCalibUI, calibrateAxes } = callbacks;
+  const { flashEvent, setCalibUI, calibrateAxes } = callbacks;
   if (!state.recording) return;
   const c = pos.coords;
   const prev = state.samples[state.samples.length - 1];
@@ -214,7 +214,6 @@ export function onGpsUpdate(pos, callbacks = {}){
       };
       state.events.push(full);
       if (flashEvent) flashEvent(evt.type, state.peakLat, full.tier);
-      if (speakEvent) speakEvent(evt.type, full.tier);
     }
   }
 }

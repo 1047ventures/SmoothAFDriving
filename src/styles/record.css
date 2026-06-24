@@ -174,6 +174,13 @@
   #g-radar.state-smooth{filter:drop-shadow(0 0 28px rgba(90,158,82,.45))}
   #g-radar.state-accel {filter:drop-shadow(0 0 28px rgba(232,160,58,.45))}
   #g-radar.state-brake {filter:drop-shadow(0 0 32px rgba(201,56,40,.55))}
+  /* Event blast — snaps in fast, fades out slowly via .35s transition on .radar-wrap */
+  #g-radar.radar-blast-brake  {filter:drop-shadow(0 0 14px rgba(224,59,47,1)) drop-shadow(0 0 44px rgba(224,59,47,.8)) drop-shadow(0 0 90px rgba(224,59,47,.5));transition:filter .07s}
+  #g-radar.radar-blast-accel  {filter:drop-shadow(0 0 14px rgba(232,160,58,1)) drop-shadow(0 0 44px rgba(232,160,58,.8)) drop-shadow(0 0 80px rgba(232,160,58,.5));transition:filter .07s}
+  #g-radar.radar-blast-turn   {filter:drop-shadow(0 0 14px rgba(196,169,98,1)) drop-shadow(0 0 40px rgba(196,169,98,.8)) drop-shadow(0 0 75px rgba(196,169,98,.5));transition:filter .07s}
+  #g-radar.radar-blast-brake-x{filter:drop-shadow(0 0 20px rgba(224,59,47,1)) drop-shadow(0 0 65px rgba(224,59,47,.9)) drop-shadow(0 0 120px rgba(224,59,47,.65));transition:filter .04s}
+  #g-radar.radar-blast-accel-x{filter:drop-shadow(0 0 20px rgba(232,160,58,1)) drop-shadow(0 0 65px rgba(232,160,58,.9)) drop-shadow(0 0 110px rgba(232,160,58,.65));transition:filter .04s}
+  #g-radar.radar-blast-turn-x {filter:drop-shadow(0 0 20px rgba(196,169,98,1)) drop-shadow(0 0 60px rgba(196,169,98,.9)) drop-shadow(0 0 100px rgba(196,169,98,.65));transition:filter .04s}
   .g-radar-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(244,235,217,.95);top:50%;left:50%;transform:translate(-50%,-50%);transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s;box-shadow:0 0 12px rgba(244,235,217,.65);z-index:15}
 
   /* bottom stats */

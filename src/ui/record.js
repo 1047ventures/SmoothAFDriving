@@ -1,7 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, TIER_MULT, VOICE_LABELS } from '../constants.js';
+import { CFG, TIER_MULT } from '../constants.js';
 import { mpsToMph, fmtDuration, clamp } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -36,26 +36,26 @@ export function motionPermGranted(){
 }
 
 export function flashEvent(type, latAccel, tier){
-  const el = document.createElement('div');
   const isExtreme = (tier || 2) >= 4;
-  const turnCls = type === 'turn' ? ' turn-warn' : '';
-  el.className = 'event-flash' + turnCls + (isExtreme ? ' extreme' : '');
-  const labels = isExtreme
-    ? { brake: 'Extreme brake', accel: 'Extreme accel', turn: 'Extreme turn' }
-    : { brake: 'Hard brake',    accel: 'Hard accel',    turn: 'Sharp turn'   };
-  el.textContent = labels[type] || type;
-  const ticker = $('#event-ticker');
-  ticker.innerHTML = '';
-  ticker.appendChild(el);
-  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
+
+  // Radar ring blast — bright glow pulse in event color
+  const radar = document.getElementById('g-radar');
+  if (radar){
+    const blastClass = isExtreme ? `radar-blast-${type}-x` : `radar-blast-${type}`;
+    radar.classList.remove('radar-blast-brake','radar-blast-accel','radar-blast-turn',
+                           'radar-blast-brake-x','radar-blast-accel-x','radar-blast-turn-x');
+    void radar.offsetWidth;
+    radar.classList.add(blastClass);
+    setTimeout(() => radar.classList.remove(blastClass), 950);
+  }
 
   // Flash arc color on event (lock briefly so G update doesn't override)
   const arcProg = document.getElementById('arc-progress');
   const arcSvgEl = document.getElementById('arc-svg');
   if (arcProg && arcSvgEl){
     arcProg._eventLock = true;
-    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(111,182,105,.95)' : 'rgba(196,169,98,.95)';
-    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(111,182,105,.65)' : 'rgba(196,169,98,.55)';
+    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(232,160,58,.95)' : 'rgba(196,169,98,.95)';
+    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(232,160,58,.65)' : 'rgba(196,169,98,.55)';
     arcProg.setAttribute('stroke', eColor);
     arcSvgEl.style.filter = `drop-shadow(0 0 16px ${eGlow})`;
     setTimeout(() => { arcProg._eventLock = false; }, 1200);
@@ -72,16 +72,6 @@ export function flashEvent(type, latAccel, tier){
     burst.classList.add('fire');
     setTimeout(() => burst.classList.remove('fire'), 800);
   }
-}
-
-export function speakEvent(type, tier){
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const extremeLabels = { brake: 'Extreme braking!', accel: 'Extreme acceleration!', turn: 'Extreme cornering!' };
-  const text = ((tier || 2) >= 4 && extremeLabels[type]) ? extremeLabels[type] : (VOICE_LABELS[type] || type);
-  const u = new SpeechSynthesisUtterance(text);
-  u.volume = 1; u.rate = 1.1; u.pitch = 1;
-  window.speechSynthesis.speak(u);
 }
 
 export function setCalibUI(phase){
@@ -250,7 +240,6 @@ export function startRecording(){
   state.gpsWatchId = navigator.geolocation.watchPosition(
     pos => onGpsUpdate(pos, {
       flashEvent,
-      speakEvent,
       setCalibUI,
       calibrateAxes,
     }),
@@ -272,7 +261,7 @@ export function startRecording(){
   calib.startTime = Date.now();
   setCalibUI('calibrating');
 
-  state.motionHandler = createMotionHandler({ flashEvent, speakEvent });
+  state.motionHandler = createMotionHandler({ flashEvent });
   window.addEventListener('devicemotion', state.motionHandler);
 }
 

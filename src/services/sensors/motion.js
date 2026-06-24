@@ -31,10 +31,10 @@ export function calibrateAxes(){
 
 /**
  * Factory: returns the devicemotion handler function.
- * Accepts callbacks = { flashEvent, speakEvent } for UI feedback.
+ * Accepts callbacks = { flashEvent } for UI feedback.
  */
 export function createMotionHandler(callbacks = {}){
-  const { flashEvent, speakEvent } = callbacks;
+  const { flashEvent } = callbacks;
   return function motionHandler(ev){
     if (!state.recording) return;
 
@@ -153,7 +153,6 @@ export function createMotionHandler(callbacks = {}){
           };
           state.events.push(full);
           if (flashEvent) flashEvent(evt.type, state.peakLat, evt.tier);
-          if (speakEvent) speakEvent(evt.type, evt.tier);
         }
       }
       // Reset peak-hold window regardless of whether an event fired
