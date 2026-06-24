@@ -3,23 +3,29 @@
   display: none;
   flex-direction: column;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--bg);
-  min-height: 100dvh;
-  padding: calc(env(safe-area-inset-top,0) + 56px) 20px calc(env(safe-area-inset-bottom,0) + 100px);
+  padding-bottom: calc(env(safe-area-inset-bottom,0) + 40px);
 }
 #screen-corridor.active { display: flex; }
 
 .corridor-topbar {
-  position: fixed;
-  top: env(safe-area-inset-top, 0);
-  left: 0; right: 0;
+  position: sticky;
+  top: 0;
   z-index: 10;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px 10px;
-  background: rgba(10,8,8,.9);
+  padding: calc(env(safe-area-inset-top,0) + 12px) 16px 12px;
+  background: rgba(10,8,8,.95);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+
+.corridor-content {
+  padding: 20px 20px 0;
+  flex: 1;
 }
 .corridor-back-btn {
   appearance: none; border: none; background: none;
