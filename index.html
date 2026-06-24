@@ -421,6 +421,7 @@
         <div class="gs-section-label">Type</div>
         <div class="gs-type-grid" id="gs-type-grid"></div>
         <div class="gs-section-label">Details</div>
+        <button type="button" id="gs-find-icon-btn" class="gs-find-icon-btn hidden">Add vehicle icon</button>
         <input class="gs-input" id="gs-make" placeholder="Make (e.g. Porsche)" type="text" autocomplete="off">
         <input class="gs-input" id="gs-model" placeholder="Model (e.g. Cayenne)" type="text" autocomplete="off">
         <input class="gs-input" id="gs-year" placeholder="Year" type="number" inputmode="numeric">
@@ -438,6 +439,25 @@
         <button id="gs-save" class="gs-save-btn">Save vehicle</button>
         <button id="gs-delete" class="gs-delete-btn hidden">Delete vehicle</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ICON PICKER SHEET -->
+  <div id="icon-picker-sheet" class="icon-picker-sheet hidden">
+    <div class="gs-bar">
+      <button class="gs-close" id="ip-close">×</button>
+      <div class="gs-title">Find Icon</div>
+    </div>
+    <div class="ip-search-row">
+      <input type="text" id="ip-query" class="ip-query-input" placeholder="BMW X3 SUV…" autocomplete="off">
+      <button id="ip-search-btn" class="ip-search-btn">Search</button>
+    </div>
+    <div id="ip-results" class="ip-results">
+      <div class="ip-hint">Enter a search term above</div>
+    </div>
+    <div class="ip-upload-row">
+      <label class="ip-upload-label" for="ip-file-input">↑ Upload your own SVG or image</label>
+      <input type="file" id="ip-file-input" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" style="display:none">
     </div>
   </div>
 

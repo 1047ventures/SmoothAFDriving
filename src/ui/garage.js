@@ -10,6 +10,89 @@ function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)
 function saveRecPos(p){ try { localStorage.setItem(REC_POS_KEY, JSON.stringify(p)); } catch {} }
 function loadRecPhoto(){ try { return localStorage.getItem(REC_PHOTO_KEY); } catch { return null; } }
 
+// ── Per-vehicle icon storage ───────────────────────────────────────────────────
+const VI_PREFIX = 'smoothaf.vi.';
+
+function loadVehicleIcon(vehicleId){
+  try { return localStorage.getItem(VI_PREFIX + vehicleId) || null; } catch { return null; }
+}
+function saveVehicleIcon(vehicleId, dataUrl){
+  try { localStorage.setItem(VI_PREFIX + vehicleId, dataUrl); } catch {}
+}
+function removeVehicleIcon(vehicleId){
+  try { localStorage.removeItem(VI_PREFIX + vehicleId); } catch {}
+}
+
+// ── Icon picker ────────────────────────────────────────────────────────────────
+let _ipVehicleId = null;
+
+export function showIconPicker(vehicleId){
+  _ipVehicleId = vehicleId;
+  const sheet = document.getElementById('icon-picker-sheet');
+  if (!sheet) return;
+  const v = loadGarage().find(x => x.id === vehicleId);
+  const vt = v ? (VEHICLE_TYPES.find(t => t.id === v.type) || {}) : {};
+  const q = [v?.make, v?.model, vt.label].filter(Boolean).join(' ');
+  const input = document.getElementById('ip-query');
+  if (input) input.value = q;
+  sheet.classList.remove('hidden');
+  if (q) _doIconSearch(q);
+}
+
+function _hideIconPicker(){ document.getElementById('icon-picker-sheet')?.classList.add('hidden'); }
+
+async function _fetchToDataUrl(url){
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
+async function _doIconSearch(query){
+  const grid = document.getElementById('ip-results');
+  if (!grid) return;
+  grid.innerHTML = '<div class="ip-hint">Searching…</div>';
+  try {
+    const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=280&format=json&origin=*`;
+    const data = await fetch(apiUrl).then(r => r.json());
+    const pages = Object.values(data.query?.pages || {})
+      .filter(p => p.imageinfo?.[0]?.thumburl);
+    if (!pages.length){
+      grid.innerHTML = '<div class="ip-hint">No results — try a different search.</div>';
+      return;
+    }
+    grid.innerHTML = pages.map(p => {
+      const ii = p.imageinfo[0];
+      return `<div class="ip-thumb" data-thumb="${ii.thumburl}"><img src="${ii.thumburl}" loading="lazy" alt=""></div>`;
+    }).join('');
+    grid.querySelectorAll('.ip-thumb').forEach(el => {
+      el.addEventListener('click', async () => {
+        el.classList.add('ip-thumb--loading');
+        try {
+          const dataUrl = await _fetchToDataUrl(el.dataset.thumb);
+          saveVehicleIcon(_ipVehicleId, dataUrl);
+          _hideIconPicker();
+          renderGarageList();
+          _refreshIconBtn(_ipVehicleId);
+        } catch {
+          el.classList.remove('ip-thumb--loading');
+        }
+      });
+    });
+  } catch {
+    grid.innerHTML = '<div class="ip-hint">Search failed — check connection.</div>';
+  }
+}
+
+function _refreshIconBtn(vehicleId){
+  const btn = document.getElementById('gs-find-icon-btn');
+  if (btn && vehicleId) btn.textContent = loadVehicleIcon(vehicleId) ? 'Change vehicle icon' : 'Add vehicle icon';
+}
+
 // ── Vehicle silhouette SVGs ────────────────────────────────────────────────────
 // Line-art approach: stroke outline + glass fill + wheel rings.
 // viewBox 0 0 200 80. Wheel center y=70. Body ground y=58.
@@ -198,7 +281,7 @@ function renderGarageList(){
             ? '<span class="gs-card-badge">Active</span>'
             : (yearStr ? `<span class="gs-card-year">${yearStr}</span>` : '')}
         </div>
-        <div class="gs-card-silhouette">${vehicleSvg(v.type)}</div>
+        <div class="gs-card-silhouette">${loadVehicleIcon(v.id) ? `<img src="${loadVehicleIcon(v.id)}" class="gs-card-img" alt="${makeModel}">` : vehicleSvg(v.type)}</div>
         <div class="gs-card-name">${makeModel}</div>
         ${detail ? `<div class="gs-card-detail">${detail}</div>` : ''}
         <div class="gs-card-footer">
@@ -249,6 +332,11 @@ function openVehicleForm(vehicleId){
   document.getElementById('gs-reg-expiry').value     = v?.registration?.expiryDate || '';
 
   document.getElementById('gs-delete')?.classList.toggle('hidden', !v);
+  const iconBtn = document.getElementById('gs-find-icon-btn');
+  if (iconBtn){
+    iconBtn.classList.toggle('hidden', !vehicleId);
+    if (vehicleId) iconBtn.textContent = loadVehicleIcon(vehicleId) ? 'Change vehicle icon' : 'Add vehicle icon';
+  }
   showGarageView('form');
 }
 
@@ -595,5 +683,30 @@ export function wireGarageButtons(){
   document.getElementById('gs-delete')?.addEventListener('click', () => {
     if (!_editingVehicleId) return;
     if (confirm('Delete this vehicle?')) deleteVehicle(_editingVehicleId);
+  });
+
+  // Icon picker wiring
+  document.getElementById('gs-find-icon-btn')?.addEventListener('click', () => {
+    if (_editingVehicleId) showIconPicker(_editingVehicleId);
+  });
+  document.getElementById('ip-close')?.addEventListener('click', _hideIconPicker);
+  document.getElementById('ip-search-btn')?.addEventListener('click', () => {
+    const q = document.getElementById('ip-query')?.value.trim();
+    if (q) _doIconSearch(q);
+  });
+  document.getElementById('ip-query')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ const q = e.target.value.trim(); if (q) _doIconSearch(q); }
+  });
+  document.getElementById('ip-file-input')?.addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (!file || !_ipVehicleId) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      saveVehicleIcon(_ipVehicleId, ev.target.result);
+      _hideIconPicker();
+      renderGarageList();
+      _refreshIconBtn(_ipVehicleId);
+    };
+    reader.readAsDataURL(file);
   });
 }
