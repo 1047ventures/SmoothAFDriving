@@ -17,19 +17,29 @@
   #garage-list-view{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0)+24px)}
   .gs-empty{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:28px 0 8px;text-align:center}
   .gs-card{
-    border:1px solid rgba(244,235,217,.1);border-radius:16px;
-    background:rgba(244,235,217,.04);padding:14px 16px;margin-bottom:10px;
-    display:flex;align-items:center;gap:12px;cursor:pointer;
+    border:1px solid rgba(244,235,217,.1);border-radius:18px;
+    background:rgba(244,235,217,.04);padding:16px;margin-bottom:12px;
+    display:flex;flex-direction:column;gap:0;cursor:pointer;
     transition:background .15s,border-color .15s;
   }
-  .gs-card:active{background:rgba(244,235,217,.09)}
-  .gs-card.active-vehicle{border-color:var(--tang);background:rgba(232,93,58,.07)}
-  .gs-card-icon{font-size:34px;flex-shrink:0;line-height:1}
-  .gs-card-body{flex:1;min-width:0}
-  .gs-card-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:19px;color:var(--cream);line-height:1.1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .gs-card-detail{font-size:11px;color:var(--muted);letter-spacing:.05em}
-  .gs-card-badge{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--tang);border:1px solid var(--tang);border-radius:999px;padding:3px 8px;flex-shrink:0}
-  .gs-card-edit{appearance:none;border:1px solid rgba(244,235,217,.15);background:transparent;color:var(--cream-dim);font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;flex-shrink:0}
+  .gs-card:active{background:rgba(244,235,217,.08)}
+  .gs-card.active-vehicle{border-color:rgba(232,93,58,.55);background:rgba(232,93,58,.06)}
+  .gs-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .gs-card-type-lbl{font-family:var(--sans);font-size:8px;letter-spacing:.32em;text-transform:uppercase;color:rgba(244,235,217,.35)}
+  .gs-card-badge{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--tang);border:1px solid rgba(232,93,58,.45);border-radius:999px;padding:2px 9px}
+  .gs-card-year{font-family:var(--sans);font-size:9px;letter-spacing:.14em;color:rgba(244,235,217,.32)}
+  .gs-card-silhouette{width:100%;margin-bottom:10px;color:rgba(244,235,217,.52)}
+  .active-vehicle .gs-card-silhouette{color:rgba(232,110,58,.72)}
+  .gs-card-silhouette svg{width:100%;height:auto;display:block}
+  .gs-card-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);line-height:1.1;margin-bottom:4px}
+  .gs-card-detail{font-size:11px;color:var(--muted);letter-spacing:.04em;margin-bottom:0}
+  .gs-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,235,217,.07)}
+  .gs-card-stats{display:flex;gap:18px}
+  .gs-stat{display:flex;flex-direction:column;gap:2px}
+  .gs-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1;letter-spacing:-.02em}
+  .gs-stat-lbl{font-family:var(--sans);font-size:7px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,235,217,.32)}
+  .gs-card-inactive-hint{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,235,217,.24)}
+  .gs-card-edit{appearance:none;border:1px solid rgba(244,235,217,.14);background:transparent;color:var(--cream-dim);font-size:11px;padding:6px 13px;border-radius:10px;cursor:pointer;flex-shrink:0}
   .gs-card-edit:active{background:rgba(244,235,217,.08)}
   .gs-add-btn{appearance:none;border:1px solid rgba(244,235,217,.18);background:transparent;cursor:pointer;width:100%;padding:16px;border-radius:16px;color:var(--cream-dim);font-size:14px;letter-spacing:.08em;transition:background .15s;margin-top:4px}
   .gs-add-btn:active{background:rgba(244,235,217,.06)}

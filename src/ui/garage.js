@@ -1,4 +1,5 @@
 import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, REMOVEBG_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY } from '../constants.js';
+import { loadDrives } from '../services/storage.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
@@ -8,6 +9,24 @@ function saveCarPos(p){ try { localStorage.setItem(CAR_POS_KEY, JSON.stringify(p
 function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)) || {x:50,y:42}; } catch { return {x:50,y:42}; } }
 function saveRecPos(p){ try { localStorage.setItem(REC_POS_KEY, JSON.stringify(p)); } catch {} }
 function loadRecPhoto(){ try { return localStorage.getItem(REC_PHOTO_KEY); } catch { return null; } }
+
+// ── Vehicle silhouette SVGs ────────────────────────────────────────────────────
+function vehicleSvg(typeId){
+  const BG = '#0A0808';
+  const defs = {
+    sedan:      { p:'M14,54L14,42Q16,34 30,28L52,26Q62,8 80,7L120,7Q140,7 158,24L168,36Q174,44 176,52L176,54Z',                                fw:46,  rw:162, wr:12 },
+    crossover:  { p:'M12,54L12,36Q14,26 30,22L50,18Q60,5 80,4L122,4Q144,4 164,18L174,30Q180,42 180,52L180,54Z',                               fw:44,  rw:164, wr:13 },
+    suv:        { p:'M10,54L10,28Q12,16 28,12L58,8Q66,3 82,3L128,3Q152,3 166,12L182,24Q186,34 186,50L186,54Z',                                fw:44,  rw:170, wr:14 },
+    sports:     { p:'M16,54L16,48Q18,42 24,38L50,32Q66,14 90,12L116,12Q136,12 152,24L166,36Q172,46 174,52L174,54Z',                           fw:46,  rw:158, wr:11 },
+    convertible:{ p:'M16,54L16,48Q18,42 26,38L52,32Q64,18 80,14L86,14Q90,16 92,28L108,28Q110,16 116,14L134,14Q152,18 164,32L170,42Q174,48 174,54Z', fw:46, rw:158, wr:11 },
+    truck:      { p:'M10,54L10,28Q12,16 28,12L70,10Q78,10 84,16L84,36L170,36Q178,36 178,44L178,54Z',                                          fw:42,  rw:160, wr:13 },
+    hatchback:  { p:'M14,54L14,42Q16,32 32,28L52,26Q62,8 78,7L112,7Q134,7 154,18L168,34Q172,42 170,52L170,54Z',                               fw:46,  rw:154, wr:12 },
+    electric:   { p:'M16,54L16,44Q18,36 34,30L52,26Q60,8 82,7L118,7Q142,7 162,22L172,36Q178,44 178,52L178,54Z',                               fw:46,  rw:162, wr:12 },
+  };
+  const d = defs[typeId] || defs.sedan;
+  const hr = Math.round(d.wr * 0.42);
+  return `<svg viewBox="0 0 200 68" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="${d.p}" opacity=".72"/><circle cx="${d.fw}" cy="60" r="${d.wr}" fill="${BG}"/><circle cx="${d.rw}" cy="60" r="${d.wr}" fill="${BG}"/><circle cx="${d.fw}" cy="60" r="${d.wr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".48"/><circle cx="${d.fw}" cy="60" r="${hr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".28"/><circle cx="${d.rw}" cy="60" r="${d.wr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".48"/><circle cx="${d.rw}" cy="60" r="${hr}" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".28"/></svg>`;
+}
 
 // ── Garage data helpers ────────────────────────────────────────────────────────
 function generateId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -100,19 +119,39 @@ function renderGarageList(){
     container.innerHTML = '<div class="gs-empty">No vehicles yet. Add one below.</div>';
     return;
   }
+
+  const drives = loadDrives();
+  const scored = drives.filter(d => d.score > 0);
+  const driveCount = drives.length;
+  const avgScore = scored.length ? Math.round(scored.reduce((s,d) => s+d.score, 0) / scored.length) : '--';
+  const bestScore = scored.length ? Math.max(...scored.map(d => d.score)) : '--';
+
   container.innerHTML = vehicles.map(v => {
-    const vt = VEHICLE_TYPES.find(t => t.id === v.type) || { icon:'🚗', label:'Vehicle' };
-    const nameLine = [v.year, v.make, v.model].filter(Boolean).join(' ') || vt.label;
+    const vt = VEHICLE_TYPES.find(t => t.id === v.type) || { label:'Vehicle' };
+    const makeModel = [v.make, v.model].filter(Boolean).join(' ') || vt.label;
     const detail = [v.color, v.licensePlate].filter(Boolean).join(' · ');
+    const yearStr = v.year || '';
     return `
       <div class="gs-card${v.active ? ' active-vehicle' : ''}" data-id="${v.id}">
-        <div class="gs-card-icon">${vt.icon}</div>
-        <div class="gs-card-body">
-          <div class="gs-card-name">${nameLine}</div>
-          ${detail ? `<div class="gs-card-detail">${detail}</div>` : ''}
+        <div class="gs-card-header">
+          <span class="gs-card-type-lbl">${vt.label}</span>
+          ${v.active
+            ? '<span class="gs-card-badge">Active</span>'
+            : (yearStr ? `<span class="gs-card-year">${yearStr}</span>` : '')}
         </div>
-        ${v.active ? '<div class="gs-card-badge">Driving today</div>' : ''}
-        <button class="gs-card-edit" data-edit="${v.id}">Edit</button>
+        <div class="gs-card-silhouette">${vehicleSvg(v.type)}</div>
+        <div class="gs-card-name">${makeModel}</div>
+        ${detail ? `<div class="gs-card-detail">${detail}</div>` : ''}
+        <div class="gs-card-footer">
+          ${v.active ? `
+            <div class="gs-card-stats">
+              <div class="gs-stat"><span class="gs-stat-val">${driveCount}</span><span class="gs-stat-lbl">drives</span></div>
+              <div class="gs-stat"><span class="gs-stat-val">${avgScore}</span><span class="gs-stat-lbl">avg</span></div>
+              <div class="gs-stat"><span class="gs-stat-val">${bestScore}</span><span class="gs-stat-lbl">best</span></div>
+            </div>
+          ` : `<span class="gs-card-inactive-hint">Tap to set active</span>`}
+          <button class="gs-card-edit" data-edit="${v.id}">Edit</button>
+        </div>
       </div>`;
   }).join('');
 
