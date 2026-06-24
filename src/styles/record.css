@@ -210,3 +210,31 @@
   .calib-overlay{position:absolute;inset:0;z-index:50;background:rgba(6,4,4,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px}
   .calib-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);text-align:center}
   .calib-sub{font-size:13px;color:var(--cream-dim);text-align:center;line-height:1.5;max-width:280px}
+
+  /* ── Debug sensor chart panel ── */
+  .debug-handle{
+    position:absolute;left:50%;transform:translateX(-50%);
+    bottom:72px;width:36px;height:4px;border-radius:2px;
+    background:rgba(244,235,217,.22);cursor:pointer;z-index:40;
+    transition:background .15s;
+  }
+  .debug-handle:active{background:rgba(244,235,217,.5)}
+  .debug-panel{
+    position:absolute;left:0;right:0;bottom:0;
+    height:45%;
+    background:rgba(10,8,8,.93);
+    border-top:1px solid rgba(244,235,217,.1);
+    display:flex;flex-direction:column;
+    padding:10px 12px calc(env(safe-area-inset-bottom,0)+8px);
+    transform:translateY(100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    z-index:38;
+    pointer-events:none;
+  }
+  .debug-panel.open{transform:translateY(0);pointer-events:auto}
+  .debug-legend{
+    display:flex;gap:14px;flex-shrink:0;margin-bottom:6px;
+    font-family:var(--sans);font-size:10px;letter-spacing:.04em;
+  }
+  .debug-legend b{font-weight:700}
+  .debug-canvas{flex:1;min-height:0;width:100%;border-radius:6px}
