@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v92';
+export const APP_VERSION = 'v93';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';

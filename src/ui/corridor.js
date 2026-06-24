@@ -2,6 +2,48 @@ import { loadCorridors } from '../services/storage.js';
 import { showScreen } from './router.js';
 import { metersToMiles } from '../utils/math.js';
 
+export function renderCorridorsList(){
+  showScreen('corridors');
+  const body = document.getElementById('corridors-list-body');
+  if (!body) return;
+
+  const all = loadCorridors();
+  if (!all.length){
+    body.innerHTML = `
+      <div class="cor-empty">
+        <div class="cor-empty-icon">⊙</div>
+        <div class="cor-empty-title">No routes yet</div>
+        <div class="cor-empty-sub">Drive the same roads a few times and we'll automatically detect your corridors.</div>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...all].sort((a, b) => {
+    const lastA = Math.max(...a.drives.map(d => d.drivenAt));
+    const lastB = Math.max(...b.drives.map(d => d.drivenAt));
+    return lastB - lastA;
+  });
+
+  body.innerHTML = sorted.map(c => {
+    const avg  = Math.round(c.drives.reduce((s, d) => s + d.score, 0) / c.drives.length);
+    return `
+      <div class="cor-card" data-id="${c.corridorId}">
+        <div class="cor-card-left">
+          <div class="cor-card-name">${c.name}</div>
+          <div class="cor-card-meta">${c.city} · ${c.drives.length} drive${c.drives.length !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="cor-card-right">
+          <div class="cor-card-score">${avg}</div>
+          <div class="cor-card-lbl">avg</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  body.querySelectorAll('.cor-card').forEach(card => {
+    card.addEventListener('click', () => renderCorridor(card.dataset.id));
+  });
+}
+
 export function renderCorridor(corridorId){
   const all      = loadCorridors();
   const corridor = all.find(c => c.corridorId === corridorId);

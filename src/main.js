@@ -4,6 +4,7 @@ import { checkRecoveredDrive } from './services/drive.js';
 import { syncPendingDrives } from './services/supabase.js';
 import { renderDriveList } from './ui/home.js';
 import { renderCarDisplay, renderRecAvatar, saveRecPhoto, showGarageSheet, hideGarageSheet, processCarPhoto, wireGarageButtons } from './ui/garage.js';
+import { renderCorridorsList } from './ui/corridor.js';
 import { showScreen } from './ui/router.js';
 import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record.js';
 import { renderRewards } from './ui/rewards.js';
@@ -127,8 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDriveList();
   });
 
-  // Leaderboard / Rivals
-  document.getElementById('btn-rivals')?.addEventListener('click', () => openLeaderboard('rivals'));
+  // Corridors list
+  document.getElementById('btn-corridors')?.addEventListener('click', () => renderCorridorsList());
+
+  // Leaderboard
   document.getElementById('btn-leaderboard')?.addEventListener('click', () => openLeaderboard('overall'));
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
@@ -157,10 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lifetime-sheet')?.classList.add('hidden');
   });
 
+  // Corridors list back
+  document.getElementById('btn-corridors-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
+
   // Corridor detail back
-  document.getElementById('btn-corridor-back')?.addEventListener('click', () => {
-    showScreen('home');
-  });
+  document.getElementById('btn-corridor-back')?.addEventListener('click', () => renderCorridorsList());
 
   // Garage sheet
   wireGarageButtons();
@@ -179,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!active || active.id === 'screen-home' || active.id === 'screen-record') return;
     const backBtnId = {
       'screen-review':      'btn-back',
+      'screen-corridors':   'btn-corridors-back',
       'screen-corridor':    'btn-corridor-back',
       'screen-leaderboard': 'btn-lb-back',
       'screen-rewards':     'btn-rw-back',
