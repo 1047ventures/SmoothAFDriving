@@ -3,7 +3,7 @@ import { showScreen } from './router.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
-import { DIM_DISPLAY } from '../constants.js';
+import { DIM_DISPLAY, APP_VERSION } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 
 let mapInstance = null;
@@ -693,6 +693,33 @@ export function clearMapFilter(){
     const bounds = L.latLngBounds(reviewDrive.samples.map(s => [s.lat, s.lon]));
     mapInstance.fitBounds(bounds, { padding:[40,40] });
   }
+}
+
+export function buildExportData(drive, analysis) {
+  return {
+    meta: {
+      exportedAt:    Date.now(),
+      appVersion:    APP_VERSION,
+      score:         drive.score,
+      distanceMiles: parseFloat(metersToMiles(drive.distanceMeters || 0).toFixed(2)),
+      durationSecs:  Math.round((drive.durationMs || 0) / 1000),
+      startTime:     drive.startTime,
+    },
+    dims:    analysis ? analysis.dims : null,
+    events:  drive.events || [],
+    samples: (drive.samples || []).map(s => ({
+      t:             s.t,
+      lat:           s.lat,
+      lon:           s.lon,
+      speed:         s.speed,
+      heading:       s.heading,
+      longAccel:     s.longAccel,
+      latAccel:      s.latAccel,
+      jerk:          s.jerk,
+      harshness:     s.harshness,
+      roadRoughness: s.roadRoughness,
+    })),
+  };
 }
 
 export { mapInstance };
