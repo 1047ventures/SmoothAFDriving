@@ -153,7 +153,7 @@
   .home-topbar-v2{padding:calc(env(safe-area-inset-top,0) + 10px) 24px 0;display:flex;align-items:center;flex-shrink:0}
   .home-brand{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
   /* ── Score hero ── */
-  .home-score-zone{padding:8px 24px 30px;flex-shrink:0}
+  .home-score-zone{padding:8px 24px 20px;flex-shrink:0}
   .home-score-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
   .home-score-left{display:flex;flex-direction:column;overflow:visible;flex-shrink:0}
   .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
