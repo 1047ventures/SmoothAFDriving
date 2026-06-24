@@ -166,11 +166,11 @@
   .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:1;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .08em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
   .home-score-right{padding-top:44px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
-  .home-flex-spacer{flex:1;min-height:12px}
+  .home-flex-spacer{flex:1;min-height:20px}
   .home-vehicle-name{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4);letter-spacing:.06em;text-align:right}
 
   /* ── Welcome / persona ── */
-  .home-welcome-block{padding:8px 24px 0;flex-shrink:0}
+  .home-welcome-block{padding:8px 24px 12px;flex-shrink:0}
   .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.4);margin-bottom:6px}
   .home-score-sentence{font-family:var(--sans);font-size:14px;color:rgba(242,232,213,.85);line-height:1.65}
   .home-score-sentence em{color:#E8501A;font-style:normal;font-weight:600}
@@ -181,7 +181,7 @@
   .home-routes-text{font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.5}
 
   /* ── Stats row ── */
-  .home-stats-row{display:flex;height:64px;flex-shrink:0;margin:10px 24px 0;border-top:1px solid rgba(242,232,213,.1);border-bottom:1px solid rgba(242,232,213,.1)}
+  .home-stats-row{display:flex;height:72px;flex-shrink:0;margin:0 24px;border-top:1px solid rgba(242,232,213,.1);border-bottom:1px solid rgba(242,232,213,.1)}
   .home-stat-col-tappable{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .home-stat-col-tappable:active{opacity:.7}
   .home-stat-col{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-left:4px}
@@ -193,7 +193,7 @@
   .home-stat-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:5px}
 
   /* ── Sparkline / trends ── */
-  .home-sparkline{padding:12px 24px 0;flex-shrink:0}
+  .home-sparkline{padding:20px 24px 8px;flex-shrink:0}
   .home-sparkline-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:12px}
 
   /* ── Explore row ── */
