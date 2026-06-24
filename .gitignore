@@ -5,3 +5,4 @@ dist/
 *.log
 .claude/settings.local.json
 coverage/
+.superpowers/
