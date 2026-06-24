@@ -152,22 +152,30 @@
   #screen-home{background:#080808;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-direction:column;min-height:100dvh;padding-bottom:calc(130px + env(safe-area-inset-bottom,0))}
   .home-topbar-v2{padding:calc(env(safe-area-inset-top,0) + 10px) 24px 0;display:flex;align-items:center;flex-shrink:0}
   .home-brand{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
-  .home-garage-btn{
-    appearance:none;border:1px solid rgba(244,235,217,.2);background:rgba(244,235,217,.05);
-    color:rgba(242,232,213,.65);cursor:pointer;border-radius:99px;
-    display:flex;align-items:center;gap:6px;
-    padding:6px 13px;font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  }
-  .home-garage-btn:active{background:rgba(244,235,217,.12)}
   /* ── Score hero ── */
   .home-score-zone{padding:8px 24px 30px;flex-shrink:0}
-  .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:6px}
   .home-score-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:1;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .08em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
+  .home-score-left{display:flex;flex-direction:column;overflow:visible;flex-shrink:0}
+  .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:2px}
+  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:1;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .18em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
-  .home-score-right{padding-top:44px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+  .home-score-right{padding-top:2px;display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
+  /* ── Garage card ── */
+  .home-garage-card{
+    appearance:none;cursor:pointer;
+    border:1px solid rgba(232,80,26,.4);
+    background:rgba(232,80,26,.07);
+    border-radius:14px;
+    padding:12px 16px;
+    display:flex;flex-direction:column;align-items:flex-end;gap:5px;
+    min-width:108px;
+    box-shadow:0 0 24px rgba(232,80,26,.1),inset 0 1px 0 rgba(255,255,255,.04);
+    transition:background .15s,box-shadow .15s;
+  }
+  .home-garage-card:active{background:rgba(232,80,26,.14);box-shadow:0 0 32px rgba(232,80,26,.22)}
+  .hgc-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1.1;text-align:right;letter-spacing:-.01em}
+  .hgc-label{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,80,26,.75)}
   .home-flex-spacer{flex:1;min-height:20px}
-  .home-vehicle-name{font-family:var(--sans);font-size:13px;color:#00E5FF;letter-spacing:.06em;text-align:center;align-self:stretch}
 
   /* ── Welcome / persona ── */
   .home-welcome-block{padding:24px 24px 12px;flex-shrink:0}

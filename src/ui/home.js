@@ -34,8 +34,7 @@ export function renderHomeStats(){
   const vehicleNameEl = document.getElementById('home-vehicle-name');
   if (vehicleNameEl){
     const v = getActiveVehicle();
-    const label = v ? [v.year, v.make, v.model].filter(Boolean).join(' ') : '';
-    vehicleNameEl.textContent = label ? `The ${v.model || v.make}` : '';
+    vehicleNameEl.textContent = v ? (v.model || v.make || 'My Car') : 'Add Vehicle';
   }
 
   // Welcome name

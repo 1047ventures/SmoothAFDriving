@@ -30,18 +30,16 @@
 
     <!-- Score number — hero element -->
     <div class="home-score-zone">
-      <div class="home-score-label">Lifetime Score</div>
       <div class="home-score-row">
-        <div id="home-score-num" class="home-score-num">--</div>
+        <div class="home-score-left">
+          <div class="home-score-label">Lifetime Score</div>
+          <div id="home-score-num" class="home-score-num">--</div>
+        </div>
         <div class="home-score-right">
-          <button class="home-garage-btn" id="btn-vehicle-type" aria-label="My Garage">
-            <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect x=".75" y="4.25" width="11.5" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
-              <path d="M3.5 4.25V3a3 3 0 016 0v1.25" stroke="currentColor" stroke-width="1.2"/>
-            </svg>
-            Garage
+          <button class="home-garage-card" id="btn-vehicle-type" aria-label="My Garage">
+            <div id="home-vehicle-name" class="hgc-name">--</div>
+            <div class="hgc-label">My Garage</div>
           </button>
-          <div id="home-vehicle-name" class="home-vehicle-name"></div>
         </div>
       </div>
     </div>
