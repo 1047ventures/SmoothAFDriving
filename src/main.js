@@ -157,6 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lifetime-sheet')?.classList.add('hidden');
   });
 
+  // Corridor detail back
+  document.getElementById('btn-corridor-back')?.addEventListener('click', () => {
+    showScreen('home');
+  });
+
   // Garage sheet
   wireGarageButtons();
 
