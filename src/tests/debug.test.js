@@ -5,6 +5,7 @@ vi.stubGlobal('localStorage', {
   getItem: () => null, setItem: () => {}, removeItem: () => {}, clear: () => {},
 });
 
+const { APP_VERSION } = await import('../constants.js');
 const { buildExportData } = await import('../ui/review.js');
 
 const DRIVE = {
@@ -41,7 +42,7 @@ describe('buildExportData', () => {
     expect(meta.durationSecs).toBe(420);
     expect(meta.distanceMiles).toBeCloseTo(2.4, 0);
     expect(typeof meta.exportedAt).toBe('number');
-    expect(typeof meta.appVersion).toBe('string');
+    expect(meta.appVersion).toBe(APP_VERSION);
   });
 
   it('dims are passed through from analysis', () => {
