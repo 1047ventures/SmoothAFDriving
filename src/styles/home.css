@@ -157,7 +157,7 @@
   .home-score-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
   .home-score-left{display:flex;flex-direction:column;overflow:visible;flex-shrink:0}
   .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
-  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:0.85;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0 .2em;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
+  .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:0.85;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0.12em .2em 0;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
   .home-score-right{padding-top:50px;display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
   /* ── Garage HUD ── */
