@@ -170,7 +170,7 @@
   .home-vehicle-name{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4);letter-spacing:.06em;text-align:right}
 
   /* ── Welcome / persona ── */
-  .home-welcome-block{padding:8px 24px 12px;flex-shrink:0}
+  .home-welcome-block{padding:24px 24px 12px;flex-shrink:0}
   .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.4);margin-bottom:6px}
   .home-score-sentence{font-family:var(--sans);font-size:14px;color:rgba(242,232,213,.85);line-height:1.65}
   .home-score-sentence em{color:#E8501A;font-style:normal;font-weight:600}
