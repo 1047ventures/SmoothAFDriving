@@ -127,7 +127,9 @@ export function finalizeAndReview(callbacks = {}){
     settingsSnapshot: { ...CFG },
   };
 
-  drive.score = analyzeDrive(drive).score;
+  const analysis = analyzeDrive(drive);
+  drive.score = analysis.score;
+  drive.dims  = analysis.dims;
   saveDrive(drive);
   pushDriveToSupabase(drive);
 

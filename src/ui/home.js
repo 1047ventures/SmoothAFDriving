@@ -6,9 +6,10 @@ import {
   deleteDrive,
   loadDriverName,
 } from '../services/storage.js';
-import { getDriverPersona } from '../services/scoring.js';
+import { getDriverPersona, analyzeDrive } from '../services/scoring.js';
 import { metersToMiles, fmtDuration } from '../utils/math.js';
-import { scoreColor } from '../utils/color.js';
+import { scoreColor, dimColor } from '../utils/color.js';
+import { DIM_DISPLAY } from '../constants.js';
 import { renderReview } from './review.js';
 
 export function renderHomeStats(){
@@ -16,7 +17,11 @@ export function renderHomeStats(){
   const score = loadLifetimeScore();
 
   const scoreEl = document.getElementById('home-score-num');
-  if (scoreEl) scoreEl.textContent = all.length ? Math.round(score) : '--';
+  if (scoreEl) {
+    scoreEl.textContent = all.length ? Math.round(score) : '--';
+    scoreEl.style.cursor = all.length ? 'pointer' : '';
+    scoreEl.onclick = all.length ? () => renderLifetimeSheet(all) : null;
+  }
 
   const p = getDriverPersona(all);
   const titleEl = document.getElementById('home-persona-title');
@@ -140,6 +145,50 @@ function renderCorridorTeaser(drives){
 
   // Has drives but no corridor unlocked yet — hide the teaser (Best stat is tappable)
   card.style.display = 'none';
+}
+
+function renderLifetimeSheet(all){
+  // Gather 7-dim scores — use stored dims if available, re-run analyzeDrive otherwise
+  const dimSets = [];
+  for (const d of all){
+    if (d.dims){
+      dimSets.push(d.dims);
+    } else if (d.samples && d.samples.length >= 3){
+      dimSets.push(analyzeDrive(d).dims);
+    }
+  }
+
+  const statsEl = document.getElementById('lt-stats');
+  if (statsEl){
+    const totalMiles = Math.round(all.reduce((s, d) => s + metersToMiles(d.distanceMeters || 0), 0));
+    const avgScore   = Math.round(all.reduce((s, d) => s + d.score, 0) / all.length);
+    const bestScore  = Math.max(...all.map(d => d.score));
+    statsEl.innerHTML = `<div class="as-stats-2">
+      <div class="as-stat"><div class="as-stat-val">${all.length}</div><div class="as-stat-lbl">Drives</div></div>
+      <div class="as-stat"><div class="as-stat-val">${avgScore}</div><div class="as-stat-lbl">Avg Score</div></div>
+      <div class="as-stat"><div class="as-stat-val">${bestScore}</div><div class="as-stat-lbl">Best Score</div></div>
+      <div class="as-stat"><div class="as-stat-val">${totalMiles}</div><div class="as-stat-lbl">Total Miles</div></div>
+    </div>`;
+  }
+
+  const dimsEl = document.getElementById('lt-dims');
+  if (dimsEl){
+    if (dimSets.length){
+      const avg = {};
+      for (const key of Object.keys(dimSets[0])){
+        avg[key] = Math.round(dimSets.reduce((s, d) => s + (d[key] || 0), 0) / dimSets.length);
+      }
+      dimsEl.innerHTML = DIM_DISPLAY.map(({ key, label }) => `
+        <div class="as-dim">
+          <div class="as-dim-score" style="color:${dimColor(avg[key] || 0)}">${avg[key] || 0}</div>
+          <div class="as-dim-label">${label}</div>
+        </div>`).join('');
+    } else {
+      dimsEl.innerHTML = '<div style="color:rgba(242,232,213,.35);font-size:13px;padding:8px 0">Drive more to unlock dimension data</div>';
+    }
+  }
+
+  document.getElementById('lifetime-sheet')?.classList.remove('hidden');
 }
 
 export function renderDriveList(){

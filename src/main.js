@@ -1,5 +1,5 @@
 import { APP_VERSION, REMOVEBG_KEY } from './constants.js';
-import { migrateLifetimeScore, loadDrives, loadLifetimeScore, loadDriverName } from './services/storage.js';
+import { migrateLifetimeScore } from './services/storage.js';
 import { checkRecoveredDrive } from './services/drive.js';
 import { syncPendingDrives } from './services/supabase.js';
 import { renderDriveList } from './ui/home.js';
@@ -9,8 +9,7 @@ import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record
 import { renderRewards } from './ui/rewards.js';
 import { openLeaderboard, openSignupModal, switchLeaderboardTab } from './ui/leaderboard.js';
 import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap, reviewDrive, reviewAnalysis } from './ui/review.js';
-import { shareCurrentDrive, shareLifetimeScore } from './ui/share.js';
-import { metersToMiles } from './utils/math.js';
+import { shareCurrentDrive } from './ui/share.js';
 import { state } from './state.js';
 import { syncUserProfile } from './services/supabase.js';
 
@@ -153,13 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
     shareCurrentDrive(reviewDrive, reviewAnalysis);
   });
 
-  // Share lifetime score button (home screen)
-  document.getElementById('btn-share-lifetime')?.addEventListener('click', () => {
-    const drives = loadDrives().filter(d => d.score != null);
-    const score  = loadLifetimeScore();
-    const name   = loadDriverName();
-    const miles  = drives.reduce((s, d) => s + metersToMiles(d.distanceMeters || 0), 0);
-    shareLifetimeScore(score, name, drives.length, miles);
+  // Lifetime analysis sheet
+  document.getElementById('lifetime-close')?.addEventListener('click', () => {
+    document.getElementById('lifetime-sheet')?.classList.add('hidden');
   });
 
   // Garage sheet

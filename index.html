@@ -43,7 +43,6 @@
         <div class="home-score-right">
           <div id="home-score-delta" class="home-score-delta"></div>
           <div id="home-score-rank" class="home-score-rank"></div>
-          <button class="home-share-btn" id="btn-share-lifetime" aria-label="Share lifetime score">&#8599;</button>
         </div>
       </div>
     </div>
@@ -369,6 +368,22 @@
 
   </section>
 
+
+  <!-- LIFETIME ANALYSIS SHEET (home score tap) -->
+  <div id="lifetime-sheet" class="analysis-sheet hidden">
+    <div class="as-topbar">
+      <div class="as-verdict-label">Lifetime Profile</div>
+      <button class="as-close" id="lifetime-close">×</button>
+    </div>
+    <div class="as-section">
+      <div class="as-section-head">Your Stats</div>
+      <div id="lt-stats"></div>
+    </div>
+    <div class="as-section">
+      <div class="as-section-head">Dimension Averages — all drives</div>
+      <div class="as-dims-grid" id="lt-dims"></div>
+    </div>
+  </div>
 
   <!-- ANALYSIS SHEET (score tap deep-dive) -->
   <div id="analysis-sheet" class="analysis-sheet hidden">
