@@ -214,8 +214,8 @@
   /* ── Debug sensor chart panel ── */
   .debug-handle{
     position:absolute;left:50%;transform:translateX(-50%);
-    bottom:72px;width:36px;height:4px;border-radius:2px;
-    background:rgba(244,235,217,.22);cursor:pointer;z-index:40;
+    bottom:calc(env(safe-area-inset-bottom,0) + 78px);width:44px;height:5px;border-radius:3px;
+    background:rgba(244,235,217,.35);cursor:pointer;z-index:40;
     transition:background .15s;
   }
   .debug-handle:active{background:rgba(244,235,217,.5)}
