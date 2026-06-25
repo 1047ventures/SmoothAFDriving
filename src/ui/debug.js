@@ -1,12 +1,10 @@
 const MAX_POINTS = 300;
 
-const bufs = { long: [], lat: [], roughness: [], speed: [] };
+const bufs = { ax: [], ay: [], az: [], gAlpha: [], gBeta: [], gGamma: [], speed: [] };
+const BUF_KEYS = ['ax', 'ay', 'az', 'gAlpha', 'gBeta', 'gGamma', 'speed'];
 
 export function clearDebugBuffers() {
-  bufs.long      = [];
-  bufs.lat       = [];
-  bufs.roughness = [];
-  bufs.speed     = [];
+  BUF_KEYS.forEach(k => { bufs[k] = []; });
 }
 
 export function getDebugBuffers() {
@@ -15,23 +13,26 @@ export function getDebugBuffers() {
 
 export function pushDebugSample(state) {
   const spd = state.lastGpsPos ? (state.lastGpsPos.speed || 0) : 0;
-  bufs.long.push(state.emaLongAccel || 0);
-  bufs.lat.push(state.emaLatAccel   || 0);
-  bufs.roughness.push(state.currentRoughness || 0);
+  const ra  = state.rawAccel || { x: 0, y: 0, z: 0 };
+  const rg  = state.rawGyro  || { alpha: 0, beta: 0, gamma: 0 };
+  bufs.ax.push(ra.x);
+  bufs.ay.push(ra.y);
+  bufs.az.push(ra.z);
+  bufs.gAlpha.push((rg.alpha || 0) / 50);
+  bufs.gBeta.push( (rg.beta  || 0) / 50);
+  bufs.gGamma.push((rg.gamma || 0) / 50);
   bufs.speed.push(spd / 10);
-  if (bufs.long.length > MAX_POINTS) {
-    bufs.long.shift();
-    bufs.lat.shift();
-    bufs.roughness.shift();
-    bufs.speed.shift();
-  }
+  if (bufs.ax.length > MAX_POINTS) BUF_KEYS.forEach(k => bufs[k].shift());
 }
 
 const STREAMS = [
-  { key: 'long',      color: '#E8501A', label: 'Long' },
-  { key: 'lat',       color: '#4A9EE8', label: 'Lat'  },
-  { key: 'roughness', color: '#C49A28', label: 'Rgh'  },
-  { key: 'speed',     color: '#5DBF7A', label: 'Spd÷10' },
+  { key: 'ax',     color: '#E8501A', label: 'aX'     },
+  { key: 'ay',     color: '#4A9EE8', label: 'aY'     },
+  { key: 'az',     color: '#C49A28', label: 'aZ'     },
+  { key: 'gAlpha', color: '#5DBF7A', label: 'gYaw'   },
+  { key: 'gBeta',  color: '#B06BF5', label: 'gPitch' },
+  { key: 'gGamma', color: '#F07070', label: 'gRoll'  },
+  { key: 'speed',  color: '#888888', label: 'Spd÷10' },
 ];
 
 const Y_RANGE = 6;
@@ -59,7 +60,7 @@ export function renderDebugChart(canvas) {
   ctx.lineTo(W, midY);
   ctx.stroke();
 
-  const pts = bufs.long.length;
+  const pts = bufs.ax.length;
   if (pts < 2) return;
 
   STREAMS.forEach(({ key, color }) => {

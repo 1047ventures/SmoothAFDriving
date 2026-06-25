@@ -54,6 +54,8 @@ export const state = {
   wakeLock: null,
   driveStartScore: 100,
   currentSpeedLimitMps: null,  // posted speed limit from OSM cache; null = no data
+  rawAccel: { x: 0, y: 0, z: 0 },      // latest DeviceMotion accelerometer sample (phone frame)
+  rawGyro:  { alpha: 0, beta: 0, gamma: 0 }, // latest rotationRate deg/s
 };
 
 export function resetState(){
@@ -75,6 +77,8 @@ export function resetState(){
   state.currentRoughness = 0;
   state.stabBuf = [];
   state.currentSpeedLimitMps = null;
+  state.rawAccel = { x: 0, y: 0, z: 0 };
+  state.rawGyro  = { alpha: 0, beta: 0, gamma: 0 };
   state.driveStartScore = loadLifetimeScore();
   state.liveScore = state.driveStartScore;
   resetCalib();

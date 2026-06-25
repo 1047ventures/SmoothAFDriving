@@ -62,6 +62,8 @@ export function createMotionHandler(callbacks = {}){
 
     // ── Gyroscope availability tracking ──────────────────────────────────
     const rr = ev.rotationRate;
+    state.rawAccel = { x: mx, y: my, z: mz };
+    state.rawGyro  = { alpha: rr ? (rr.alpha||0) : 0, beta: rr ? (rr.beta||0) : 0, gamma: rr ? (rr.gamma||0) : 0 };
     const nowMs = Date.now();
     if (!rr || rr.alpha == null) {
       calib.gyroAvail = false;

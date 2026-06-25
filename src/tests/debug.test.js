@@ -78,27 +78,30 @@ const { pushDebugSample, getDebugBuffers, clearDebugBuffers } = await import('..
 describe('pushDebugSample', () => {
   beforeEach(() => clearDebugBuffers());
 
-  it('appends one data point per push', () => {
-    pushDebugSample({ emaLongAccel: 1, emaLatAccel: -0.5, currentRoughness: 0.2, lastGpsPos: { speed: 8 } });
+  it('appends one data point per push with raw IMU values', () => {
+    pushDebugSample({ rawAccel: { x: 1.5, y: -0.5, z: 9.2 }, rawGyro: { alpha: 90, beta: 45, gamma: -30 }, lastGpsPos: { speed: 8 } });
     const bufs = getDebugBuffers();
-    expect(bufs.long).toHaveLength(1);
-    expect(bufs.long[0]).toBeCloseTo(1);
-    expect(bufs.lat[0]).toBeCloseTo(-0.5);
-    expect(bufs.roughness[0]).toBeCloseTo(0.2);
+    expect(bufs.ax).toHaveLength(1);
+    expect(bufs.ax[0]).toBeCloseTo(1.5);
+    expect(bufs.ay[0]).toBeCloseTo(-0.5);
+    expect(bufs.az[0]).toBeCloseTo(9.2);
+    expect(bufs.gAlpha[0]).toBeCloseTo(90 / 50);
+    expect(bufs.gBeta[0]).toBeCloseTo(45 / 50);
+    expect(bufs.gGamma[0]).toBeCloseTo(-30 / 50);
     expect(bufs.speed[0]).toBeCloseTo(0.8); // speed / 10
   });
 
   it('caps all buffers at 300 points', () => {
     for (let i = 0; i < 310; i++) {
-      pushDebugSample({ emaLongAccel: i, emaLatAccel: 0, currentRoughness: 0, lastGpsPos: { speed: 0 } });
+      pushDebugSample({ rawAccel: { x: i, y: 0, z: 0 }, rawGyro: { alpha: 0, beta: 0, gamma: 0 }, lastGpsPos: { speed: 0 } });
     }
     const bufs = getDebugBuffers();
-    expect(bufs.long.length).toBe(300);
-    expect(bufs.long[bufs.long.length - 1]).toBeCloseTo(309); // newest is last
+    expect(bufs.ax.length).toBe(300);
+    expect(bufs.ax[bufs.ax.length - 1]).toBeCloseTo(309); // newest is last
   });
 
   it('handles null lastGpsPos gracefully', () => {
-    pushDebugSample({ emaLongAccel: 0, emaLatAccel: 0, currentRoughness: 0, lastGpsPos: null });
+    pushDebugSample({ rawAccel: { x: 0, y: 0, z: 0 }, rawGyro: { alpha: 0, beta: 0, gamma: 0 }, lastGpsPos: null });
     expect(getDebugBuffers().speed[0]).toBe(0);
   });
 });
