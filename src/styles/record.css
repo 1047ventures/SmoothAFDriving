@@ -212,13 +212,17 @@
   .calib-sub{font-size:13px;color:var(--cream-dim);text-align:center;line-height:1.5;max-width:280px}
 
   /* ── Debug sensor chart panel ── */
+  /* Lifted well clear of the full-width End Drive button (whose top edge sits
+     ~70px above the safe area) so tapping to open the panel can't misfire the
+     stop. Visible bar stays small; padding gives a generous tap target. */
   .debug-handle{
     position:absolute;left:50%;transform:translateX(-50%);
-    bottom:calc(env(safe-area-inset-bottom,0) + 78px);width:44px;height:5px;border-radius:3px;
-    background:rgba(244,235,217,.35);cursor:pointer;z-index:40;
-    transition:background .15s;
+    bottom:calc(env(safe-area-inset-bottom,0) + 132px);
+    box-sizing:content-box;width:56px;height:6px;padding:14px 16px;border-radius:4px;
+    background:rgba(244,235,217,.4);background-clip:content-box;
+    cursor:pointer;z-index:40;transition:background .15s;
   }
-  .debug-handle:active{background:rgba(244,235,217,.5)}
+  .debug-handle:active{background-color:rgba(244,235,217,.6)}
   .debug-panel{
     position:absolute;left:0;right:0;bottom:0;
     height:45%;
