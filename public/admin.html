@@ -57,6 +57,8 @@
     const PW_KEY = 'saf_admin_pw';
     const fmtDate = (ms) => ms == null ? '—' : new Date(ms).toLocaleDateString();
     const shortId = (id) => id.slice(0, 8);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     async function call(view, extra = {}) {
       const password = sessionStorage.getItem(PW_KEY) || '';
@@ -101,9 +103,9 @@
     function renderRows(rows) {
       $('rows').innerHTML = rows.map(r => {
         const who = r.isAnonymous
-          ? `<span class="anon">Anonymous · ${shortId(r.deviceId)}</span>`
-          : `${r.name || '—'}<br><span class="anon">${r.email || ''}</span>`;
-        return `<tr class="user-row" data-device="${r.deviceId}">
+          ? `<span class="anon">Anonymous · ${esc(shortId(r.deviceId))}</span>`
+          : `${r.name ? esc(r.name) : '—'}<br><span class="anon">${esc(r.email || '')}</span>`;
+        return `<tr class="user-row" data-device="${esc(r.deviceId)}">
           <td>${who}</td><td>${r.driveCount}</td><td>${r.avgScore ?? '—'}</td>
           <td>${r.totalMiles}</td><td>${fmtDate(r.firstSeen)}</td><td>${fmtDate(r.lastSeen)}</td></tr>`;
       }).join('');
