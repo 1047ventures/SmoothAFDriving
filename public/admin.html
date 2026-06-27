@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>SmoothAF · Admin</title>
+  <style>
+    :root { --bg:#0a0808; --cream:#f4ebd9; --dim:rgba(244,235,217,.55); --line:rgba(244,235,217,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--cream);
+           font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; padding:24px; }
+    h1 { font-size:18px; letter-spacing:.04em; margin:0 0 16px; }
+    .hidden { display:none !important; }
+    input { font:inherit; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+            background:#000; color:var(--cream); }
+    button { font:inherit; padding:10px 16px; border-radius:8px; border:0; cursor:pointer;
+             background:var(--cream); color:#080808; font-weight:600; }
+    .err { color:#e8501a; font-size:13px; margin-top:8px; min-height:16px; }
+    .tiles { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0 24px; }
+    .tile { flex:1 1 130px; background:#120f0f; border:1px solid var(--line); border-radius:12px; padding:14px; }
+    .tile .v { font-size:26px; font-weight:700; }
+    .tile .l { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; margin-top:4px; }
+    svg { display:block; margin:8px 0 24px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+    th { color:var(--dim); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+    tr.user-row { cursor:pointer; }
+    tr.user-row:hover { background:#161212; }
+    .anon { color:var(--dim); font-style:italic; }
+    .drilldown td { background:#0f0c0c; font-size:12px; color:var(--dim); }
+  </style>
+</head>
+<body>
+  <h1>SmoothAF · Operator Dashboard</h1>
+
+  <div id="gate">
+    <input id="pw" type="password" placeholder="Admin password" autocomplete="current-password">
+    <button id="unlock">Unlock</button>
+    <div id="gate-err" class="err"></div>
+  </div>
+
+  <div id="dash" class="hidden">
+    <div id="tiles" class="tiles"></div>
+    <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="none"></svg>
+    <table>
+      <thead>
+        <tr><th>User</th><th>Drives</th><th>Avg</th><th>Miles</th><th>First seen</th><th>Last seen</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="dash-err" class="err"></div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const PW_KEY = 'saf_admin_pw';
+    const fmtDate = (ms) => ms == null ? '—' : new Date(ms).toLocaleDateString();
+    const shortId = (id) => id.slice(0, 8);
+
+    async function call(view, extra = {}) {
+      const password = sessionStorage.getItem(PW_KEY) || '';
+      const res = await fetch('/.netlify/functions/admin-stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, view, ...extra }),
+      });
+      if (res.status === 401) { sessionStorage.removeItem(PW_KEY); showGate('Wrong password.'); throw new Error('unauthorized'); }
+      if (!res.ok) throw new Error('request failed (' + res.status + ')');
+      return res.json();
+    }
+
+    function showGate(msg) {
+      $('dash').classList.add('hidden');
+      $('gate').classList.remove('hidden');
+      $('gate-err').textContent = msg || '';
+    }
+
+    function renderTiles(o) {
+      const tiles = [
+        ['Users', o.totalUsers], ['Devices', o.totalDevices], ['Drives', o.totalDrives],
+        ['Avg score', o.avgScore ?? '—'], ['Miles', o.totalMiles],
+        ['Active 7d', o.activeUsers7d], ['Active 30d', o.activeUsers30d], ['Returning', o.returningUsers],
+      ];
+      $('tiles').innerHTML = tiles.map(([l, v]) =>
+        `<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+    }
+
+    function renderInstalls(byDay) {
+      const svg = $('installs');
+      if (!byDay.length) { svg.innerHTML = ''; return; }
+      const max = Math.max(...byDay.map(d => d.count), 1);
+      const w = 600, h = 80, bw = w / byDay.length;
+      svg.innerHTML = byDay.map((d, i) => {
+        const bh = (d.count / max) * (h - 16);
+        return `<rect x="${i * bw + 1}" y="${h - bh}" width="${Math.max(1, bw - 2)}" height="${bh}" fill="#c4a962"></rect>` +
+               `<title>${d.day}: ${d.count}</title>`;
+      }).join('');
+    }
+
+    function renderRows(rows) {
+      $('rows').innerHTML = rows.map(r => {
+        const who = r.isAnonymous
+          ? `<span class="anon">Anonymous · ${shortId(r.deviceId)}</span>`
+          : `${r.name || '—'}<br><span class="anon">${r.email || ''}</span>`;
+        return `<tr class="user-row" data-device="${r.deviceId}">
+          <td>${who}</td><td>${r.driveCount}</td><td>${r.avgScore ?? '—'}</td>
+          <td>${r.totalMiles}</td><td>${fmtDate(r.firstSeen)}</td><td>${fmtDate(r.lastSeen)}</td></tr>`;
+      }).join('');
+      document.querySelectorAll('.user-row').forEach(tr =>
+        tr.addEventListener('click', () => toggleDrill(tr)));
+    }
+
+    async function toggleDrill(tr) {
+      const next = tr.nextElementSibling;
+      if (next && next.classList.contains('drilldown')) { next.remove(); return; }
+      const data = await call('user', { device_id: tr.dataset.device });
+      const list = data.drives.map(d =>
+        `${fmtDate(d.start_time)} · score ${d.score ?? '—'} · ${(d.distance_meters / 1609.34).toFixed(1)} mi · ${Math.round((d.duration_ms || 0) / 60000)} min`
+      ).join('<br>') || 'No drives.';
+      const row = document.createElement('tr');
+      row.className = 'drilldown';
+      row.innerHTML = `<td colspan="6">${list}</td>`;
+      tr.after(row);
+    }
+
+    async function load() {
+      try {
+        const data = await call('overview');
+        $('gate').classList.add('hidden');
+        $('dash').classList.remove('hidden');
+        renderTiles(data.overview);
+        renderInstalls(data.overview.installsByDay);
+        renderRows(data.users);
+      } catch (e) {
+        if (e.message !== 'unauthorized') $('dash-err').textContent = e.message;
+      }
+    }
+
+    $('unlock').addEventListener('click', () => {
+      sessionStorage.setItem(PW_KEY, $('pw').value);
+      load();
+    });
+    $('pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('unlock').click(); });
+
+    if (sessionStorage.getItem(PW_KEY)) load(); else showGate('');
+  </script>
+</body>
+</html>
