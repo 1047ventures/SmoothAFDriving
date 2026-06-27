@@ -70,19 +70,13 @@ export function checkRecoveredDrive(callbacks = {}){
 }
 
 /**
- * Finalize the current recording into a drive object, save it, push to Supabase,
- * and hand off to UI via callbacks.
- * callbacks.onReview(drive) — called with the completed drive object
- * callbacks.onListUpdate()  — called to refresh the drive list
+ * Build a finalized drive object from the current recording state.
+ * Pure-ish (reads `state`, no I/O); `score`/`dims` are filled in by the caller
+ * via analyzeDrive. Used by both finalizeAndReview (on stop) and the live gauge
+ * (every ~1s) so the in-drive score and the stored score share one engine.
  */
-export function finalizeAndReview(callbacks = {}){
-  const { onReview, onListUpdate } = callbacks;
+export function buildDriveFromState(){
   const samples = state.samples;
-  if (samples.length < 2){
-    if (onListUpdate) onListUpdate();
-    return;
-  }
-
   let distance = 0, topSpeed = 0, topSpeedLat = null, topSpeedLon = null;
   for (let i = 1; i < samples.length; i++){
     distance += haversine(samples[i-1], samples[i]);
@@ -92,10 +86,10 @@ export function finalizeAndReview(callbacks = {}){
       topSpeedLon = samples[i].lon;
     }
   }
-  const duration = samples[samples.length-1].t - samples[0].t;
+  const duration = samples.length ? samples[samples.length-1].t - samples[0].t : 0;
   const events = [...state.events];
 
-  const drive = {
+  return {
     startTime: state.startTime,
     durationMs: duration,
     distanceMeters: distance,
@@ -103,7 +97,7 @@ export function finalizeAndReview(callbacks = {}){
     topSpeedLat: topSpeedLat != null ? +topSpeedLat.toFixed(6) : null,
     topSpeedLon: topSpeedLon != null ? +topSpeedLon.toFixed(6) : null,
     speedLimitMps: state.currentSpeedLimitMps || null,
-    score: 0,  // computed below via analyzeDrive
+    score: 0,  // filled in by caller via analyzeDrive
     samples: samples.map(s => ({
       t:       s.t - state.startTime,
       lat:     +s.lat.toFixed(6),
@@ -127,7 +121,22 @@ export function finalizeAndReview(callbacks = {}){
     simulated: state.simulated,
     settingsSnapshot: { ...CFG },
   };
+}
 
+/**
+ * Finalize the current recording into a drive object, save it, push to Supabase,
+ * and hand off to UI via callbacks.
+ * callbacks.onReview(drive) — called with the completed drive object
+ * callbacks.onListUpdate()  — called to refresh the drive list
+ */
+export function finalizeAndReview(callbacks = {}){
+  const { onReview, onListUpdate } = callbacks;
+  if (state.samples.length < 2){
+    if (onListUpdate) onListUpdate();
+    return;
+  }
+
+  const drive = buildDriveFromState();
   const analysis = analyzeDrive(drive);
   drive.score = analysis.score;
   drive.dims  = analysis.dims;
@@ -143,8 +152,9 @@ export function finalizeAndReview(callbacks = {}){
     const recent = allDrives.slice(0, 10);
     saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
   }
+  // Leaderboard gets the real stored score, NOT the (now-defunct) live gauge value.
   const driverName = loadDriverName();
-  if (driverName) syncToLeaderboard(driverName, state.liveScore).catch(() => {});
+  if (driverName) syncToLeaderboard(driverName, drive.score).catch(() => {});
 
   if (onReview) onReview(drive);
   if (onListUpdate) onListUpdate();

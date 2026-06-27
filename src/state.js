@@ -81,5 +81,6 @@ export function resetState(){
   state.rawGyro  = { alpha: 0, beta: 0, gamma: 0 };
   state.driveStartScore = loadLifetimeScore();
   state.liveScore = state.driveStartScore;
+  state._lastLiveScoreT = 0;
   resetCalib();
 }
