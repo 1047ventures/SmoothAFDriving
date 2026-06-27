@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeOverview } from '../../netlify/functions/_lib/adminStats.mjs';
+import { computeOverview, computeUserRows } from '../../netlify/functions/_lib/adminStats.mjs';
 
 const DAY = 864e5;
 const NOW = 1_700_000_000_000;            // fixed "now" for deterministic windows
@@ -47,5 +47,46 @@ describe('computeOverview', () => {
       { day: day(NOW - 10 * DAY),  count: 1 },
       { day: day(NOW - 2 * DAY),   count: 1 },
     ]);
+  });
+});
+
+describe('computeUserRows', () => {
+  const rows = computeUserRows(USERS, DRIVES);
+
+  it('returns one row per device (union of users and real drives)', () => {
+    expect(rows.length).toBe(4); // A, B, C, D
+  });
+
+  it('sorts by lastSeen descending', () => {
+    expect(rows.map(r => r.deviceId)).toEqual(['dev-A', 'dev-D', 'dev-B', 'dev-C']);
+  });
+
+  it('aggregates a known user correctly', () => {
+    const a = rows.find(r => r.deviceId === 'dev-A');
+    expect(a.name).toBe('Alice');
+    expect(a.isAnonymous).toBe(false);
+    expect(a.driveCount).toBe(2);
+    expect(a.avgScore).toBe(85);
+    expect(a.totalMiles).toBe(3);
+    expect(a.firstSeen).toBe(NOW - 2 * DAY);
+    expect(a.lastSeen).toBe(NOW - 1 * DAY);
+  });
+
+  it('flags devices with drives but no user row as anonymous', () => {
+    const c = rows.find(r => r.deviceId === 'dev-C');
+    expect(c.isAnonymous).toBe(true);
+    expect(c.name).toBeNull();
+    expect(c.email).toBeNull();
+    expect(c.driveCount).toBe(1);
+    expect(c.avgScore).toBe(50);
+  });
+
+  it('includes users who never drove (zero drives, null scores)', () => {
+    const d = rows.find(r => r.deviceId === 'dev-D');
+    expect(d.driveCount).toBe(0);
+    expect(d.avgScore).toBeNull();
+    expect(d.firstSeen).toBeNull();
+    expect(d.totalMiles).toBe(0);
+    expect(d.lastSeen).toBe(Date.parse('2023-11-10T00:00:00Z'));
   });
 });

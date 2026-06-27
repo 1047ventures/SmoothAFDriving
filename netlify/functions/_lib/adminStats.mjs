@@ -65,3 +65,44 @@ export function computeOverview(users, drives, nowMs) {
     installsByDay,
   };
 }
+
+export function computeUserRows(users, drives) {
+  const real = realDrives(drives);
+  const usersByDevice = new Map((users || []).map(u => [u.device_id, u]));
+
+  const drivesByDevice = new Map();
+  for (const d of real) {
+    let arr = drivesByDevice.get(d.device_id);
+    if (!arr) { arr = []; drivesByDevice.set(d.device_id, arr); }
+    arr.push(d);
+  }
+
+  const deviceIds = new Set([...usersByDevice.keys(), ...drivesByDevice.keys()]);
+  const rows = [];
+
+  for (const deviceId of deviceIds) {
+    const u = usersByDevice.get(deviceId) || null;
+    const ds = drivesByDevice.get(deviceId) || [];
+    const starts = ds.map(d => d.start_time);
+    const firstSeen = ds.length ? Math.min(...starts) : null;
+    let lastSeen = ds.length ? Math.max(...starts) : null;
+    if (lastSeen == null && u && u.updated_at) {
+      const parsed = Date.parse(u.updated_at);
+      lastSeen = Number.isNaN(parsed) ? null : parsed;
+    }
+    rows.push({
+      deviceId,
+      name: u ? (u.name || null) : null,
+      email: u ? (u.email || null) : null,
+      isAnonymous: !u,
+      driveCount: ds.length,
+      firstSeen,
+      lastSeen,
+      avgScore: mean(ds.map(d => d.score).filter(s => s != null)),
+      totalMiles: miles(ds.reduce((s, d) => s + (d.distance_meters || 0), 0)),
+    });
+  }
+
+  rows.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+  return rows;
+}
