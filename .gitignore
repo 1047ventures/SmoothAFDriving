@@ -6,3 +6,17 @@ dist/
 .claude/settings.local.json
 coverage/
 .superpowers/
+
+# Capacitor native build artifacts (the native projects are committed;
+# these generated/heavy outputs are not)
+ios/App/Pods/
+ios/App/App/public/
+ios/App/build/
+ios/DerivedData/
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/public/
+android/local.properties
+android/.idea/
+*.xcuserstate
