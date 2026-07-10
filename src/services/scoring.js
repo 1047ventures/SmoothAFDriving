@@ -5,6 +5,8 @@ import {
   DIM_WEIGHTS,
   STORAGE_KEY,
   EVENT_COOLDOWN_MS,
+  ETA_BUFFER,
+  PACE_PENALTY,
 } from '../constants.js';
 import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles } from '../utils/math.js';
 import { loadDrives } from './storage.js';
@@ -464,4 +466,28 @@ export function getDriverPersona(drives){
     ];
   }
   return {title, sub: pick(subs), avgScore, drives: drives.length, totalMi: Math.round(totalMi)};
+}
+
+// Effectiveness (0..100): how the actual drive time compares to the locked ETA.
+// On time or faster (after the ETA buffer) = 100; lateness decays linearly.
+// Returns null for invalid input. Never rewards beating the ETA further — the
+// speed/smoothness trade-off is captured by the separate Efficiency score.
+export function effectivenessScore(rawEtaSec, actualSec){
+  if (!(rawEtaSec > 0) || !(actualSec > 0)) return null;
+  const targetSec = rawEtaSec * ETA_BUFFER;
+  const overFrac = Math.max(0, (actualSec - targetSec) / targetSec);
+  return Math.round(Math.max(0, Math.min(100, 100 - overFrac * PACE_PENALTY)));
+}
+
+// Combined shareable tier from the two axes. effectiveness/efficiency are 0..100.
+export function destinationTier(effectiveness, efficiency){
+  if (effectiveness == null || efficiency == null) return null;
+  const timeBand = effectiveness >= 100 ? 0 : effectiveness >= 65 ? 1 : 2; // on-time / close / late
+  const effBand  = efficiency   >= 90  ? 0 : efficiency   >= 75 ? 1 : 2;   // high / mid / low smoothness
+  const GRID = [
+    ['S', 'A', 'B'], // efficiency >= 90
+    ['A', 'B', 'C'], // 75..89
+    ['B', 'C', 'D'], // < 75
+  ];
+  return GRID[effBand][timeBand];
 }

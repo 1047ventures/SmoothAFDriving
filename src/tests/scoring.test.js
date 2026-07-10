@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { scoreFromEvents, analyzeDrive, getDriverPersona } from '../services/scoring.js';
+import { effectivenessScore, destinationTier } from '../services/scoring.js';
 import { DEFAULTS } from '../constants.js';
 
 const cfg = { ...DEFAULTS };
@@ -88,5 +89,43 @@ describe('getDriverPersona', () => {
     expect(persona).not.toBeNull();
     expect(typeof persona.title).toBe('string');
     expect(typeof persona.sub).toBe('string');
+  });
+});
+
+describe('effectivenessScore', () => {
+  it('is 100 when on time or faster', () => {
+    expect(effectivenessScore(600, 720)).toBe(100);
+    expect(effectivenessScore(600, 500)).toBe(100);
+  });
+  it('decays when late (PACE_PENALTY 180)', () => {
+    expect(effectivenessScore(600, 864)).toBe(64);
+    expect(effectivenessScore(600, 720 * 1.6)).toBe(0);
+  });
+  it('guards invalid input with null', () => {
+    expect(effectivenessScore(0, 500)).toBeNull();
+    expect(effectivenessScore(600, 0)).toBeNull();
+    expect(effectivenessScore(-1, 500)).toBeNull();
+  });
+});
+
+describe('destinationTier', () => {
+  it('maps the on-time column', () => {
+    expect(destinationTier(100, 95)).toBe('S');
+    expect(destinationTier(100, 80)).toBe('A');
+    expect(destinationTier(100, 70)).toBe('B');
+  });
+  it('maps the close-late column (65..99)', () => {
+    expect(destinationTier(70, 95)).toBe('A');
+    expect(destinationTier(70, 80)).toBe('B');
+    expect(destinationTier(70, 70)).toBe('C');
+  });
+  it('maps the late column (<65)', () => {
+    expect(destinationTier(40, 95)).toBe('B');
+    expect(destinationTier(40, 80)).toBe('C');
+    expect(destinationTier(40, 70)).toBe('D');
+  });
+  it('returns null when either axis is null', () => {
+    expect(destinationTier(null, 90)).toBeNull();
+    expect(destinationTier(100, null)).toBeNull();
   });
 });
