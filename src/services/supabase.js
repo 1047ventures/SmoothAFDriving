@@ -21,6 +21,12 @@ export async function pushDriveToSupabase(drive){
       settings:        drive.settingsSnapshot || null,
       samples:         drive.samples,
       events:          drive.events,
+      dest_label:       drive.destination?.label ?? null,
+      dest_lat:         drive.destination?.lat ?? null,
+      dest_lng:         drive.destination?.lng ?? null,
+      route_distance_m: drive.routeDistanceM ?? null,
+      target_eta_sec:   drive.targetEtaSec ?? null,
+      effectiveness:    drive.effectiveness ?? null,
     };
     const res = await fetch(`${SB_URL}/rest/v1/drives`, {
       method: 'POST',
