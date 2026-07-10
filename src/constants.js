@@ -100,3 +100,11 @@ export const CAR_POS_KEY   = 'smoothaf.car_pos';
 export const REC_PHOTO_KEY = 'smoothaf.rec_photo';
 export const REC_POS_KEY   = 'smoothaf.rec_pos';
 export const GARAGE_KEY    = 'smoothaf.garage';
+
+// ── Destination Drive (routing + effectiveness) ───────────────────────────────
+export const ROUTING_PROVIDER = 'osm';   // 'osm' (Nominatim+OSRM) | future: 'google' | 'mapbox'
+export const NOMINATIM_BASE   = 'https://nominatim.openstreetmap.org';
+export const OSRM_BASE        = 'https://router.project-osrm.org';
+export const ETA_BUFFER       = 1.2;      // OSRM durations run optimistic (no lights/traffic);
+                                          // trends to ~1.0 once a traffic-aware provider is wired in
+export const PACE_PENALTY     = 180;      // effectiveness points lost per unit of over-fraction
