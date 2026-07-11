@@ -187,6 +187,14 @@
   .rv-home-link{display:block;text-align:center;padding:10px 24px 14px;font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,232,213,.35);cursor:pointer;background:transparent;border:0;width:100%}
   .rv-home-link:active{color:var(--cream-dim)}
 
+  /* ── Destination Drive two-axis result ── */
+  .dest-result{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 24px 0;padding:14px 16px;background:rgba(242,232,213,.03);border:1px solid rgba(242,232,213,.1);border-radius:12px;flex-shrink:0}
+  .dest-axis{flex:1;text-align:center;min-width:0}
+  .dest-axis-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;line-height:1;color:var(--cream)}
+  .dest-axis-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:5px}
+  .dest-axis-sub{font-family:var(--sans);font-size:10px;color:rgba(242,232,213,.45);margin-top:3px}
+  .dest-tier{flex-shrink:0;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-weight:700;font-size:24px;color:#080808;background:linear-gradient(135deg,#E8501A,#C49A28);margin:0 6px}
+
   /* ── Coaching persona card ── */
   .rv-coaching-card{margin:0 24px 0;padding:12px 14px;background:rgba(232,80,26,.06);border-left:3px solid #E8501A;flex-shrink:0}
   .rv-coaching-persona{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream);margin-bottom:4px}
