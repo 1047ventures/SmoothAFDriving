@@ -111,6 +111,13 @@
     <div id="home-persona-title" style="display:none"></div>
     <div id="home-persona-sub" style="display:none"></div>
 
+    <!-- Destination Drive: set-destination trigger + selected chip -->
+    <button class="dest-btn" id="btn-set-dest">📍 Set destination</button>
+    <div class="dest-chip hidden" id="dest-chip">
+      <span class="dest-chip-text" id="dest-chip-text"></span>
+      <button class="dest-chip-clear" id="dest-clear" aria-label="Clear destination">×</button>
+    </div>
+
     <!-- Spacer + Begin Drive CTA -->
     <div class="home-cta-spacer"></div>
     <button class="home-cta" id="btn-start">
@@ -481,6 +488,21 @@
         <button class="perm-skip" id="removebg-skip">Skip</button>
         <button class="perm-allow" id="removebg-save">Save & Process</button>
       </div>
+    </div>
+  </div>
+
+  <!-- DESTINATION SHEET -->
+  <div id="dest-sheet" class="garage-sheet hidden">
+    <div class="gs-bar">
+      <div class="gs-title">Set destination</div>
+      <button class="gs-close" id="dest-close">×</button>
+    </div>
+    <div class="dest-sheet-body">
+      <div class="dest-search-row">
+        <input type="text" id="dest-input" class="gs-input dest-input" placeholder="Search address or place…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button id="dest-search" class="dest-search-btn">Search</button>
+      </div>
+      <div id="dest-results" class="dest-results"></div>
     </div>
   </div>
 

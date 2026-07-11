@@ -14,6 +14,7 @@ import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { showCarPromptIfNeeded, showOnboardingIfNeeded } from './modals.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
+import { getPendingDestination } from './destination.js';
 
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
@@ -220,6 +221,18 @@ export function updateLiveUI(){
 
 export function startRecording(){
   resetState();
+
+  // Destination Drive: apply the pending pick (held outside `state` since
+  // resetState() just nulled state.destination/targetEtaSec/etc.) now that
+  // the reset is done.
+  const { picked, route } = getPendingDestination();
+  if (picked){
+    state.destination    = picked;
+    state.targetEtaSec   = route?.durationSec ?? null;
+    state.routeDistanceM = route?.distanceM ?? null;
+    state.routeGeometry  = route?.geometry ?? null;
+  }
+
   state.recording = true;
   state.simulated = false;
   state.startTime = Date.now();

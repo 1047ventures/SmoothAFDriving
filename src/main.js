@@ -11,6 +11,7 @@ import { renderRewards } from './ui/rewards.js';
 import { openLeaderboard, openSignupModal, switchLeaderboardTab } from './ui/leaderboard.js';
 import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap, reviewDrive, reviewAnalysis } from './ui/review.js';
 import { shareCurrentDrive } from './ui/share.js';
+import { wireDestination } from './ui/destination.js';
 import { state } from './state.js';
 import { syncUserProfile } from './services/supabase.js';
 
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   wireStartButton('#btn-start');
   wireStartButton('#btn-new-drive');
+  wireDestination();
 
   document.querySelector('#btn-stop')?.addEventListener('click', () => stopRecording());
 
