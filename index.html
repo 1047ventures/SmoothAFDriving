@@ -111,6 +111,13 @@
     <div id="home-persona-title" style="display:none"></div>
     <div id="home-persona-sub" style="display:none"></div>
 
+    <!-- Destination Drive: set-destination trigger + selected chip -->
+    <button class="dest-btn" id="btn-set-dest">📍 Set destination</button>
+    <div class="dest-chip hidden" id="dest-chip">
+      <span class="dest-chip-text" id="dest-chip-text"></span>
+      <button class="dest-chip-clear" id="dest-clear" aria-label="Clear destination">×</button>
+    </div>
+
     <!-- Spacer + Begin Drive CTA -->
     <div class="home-cta-spacer"></div>
     <button class="home-cta" id="btn-start">
@@ -156,6 +163,12 @@
         <div class="corner-lbl">Time</div>
         <div class="corner-val" id="live-time">0:00</div>
       </div>
+    </div>
+
+    <!-- Destination Drive: live pace strip (hidden unless a target ETA is set) -->
+    <div id="pace-strip" class="pace-strip hidden">
+      <span class="pace-target">Target <span id="pace-target-time">—</span></span>
+      <span id="pace-delta" class="pace-delta">—</span>
     </div>
 
     <!-- Hero numbers: Speed / Score -->
@@ -288,6 +301,21 @@
           <div id="review-when" class="rv-when">—</div>
           <div id="score-verdict-tag" class="rv-verdict-tag">—</div>
           <div class="rv-analysis-hint">Tap score for analysis ›</div>
+        </div>
+      </div>
+
+      <!-- Destination Drive two-axis result -->
+      <div id="dest-result" class="dest-result hidden">
+        <div class="dest-axis">
+          <div class="dest-axis-val" id="dest-eff-val">—</div>
+          <div class="dest-axis-lbl">Effectiveness</div>
+          <div class="dest-axis-sub" id="dest-eff-sub">—</div>
+        </div>
+        <div class="dest-tier" id="dest-tier">—</div>
+        <div class="dest-axis">
+          <div class="dest-axis-val" id="dest-epc-val">—</div>
+          <div class="dest-axis-lbl">Efficiency</div>
+          <div class="dest-axis-sub">smoothness</div>
         </div>
       </div>
 
@@ -481,6 +509,21 @@
         <button class="perm-skip" id="removebg-skip">Skip</button>
         <button class="perm-allow" id="removebg-save">Save & Process</button>
       </div>
+    </div>
+  </div>
+
+  <!-- DESTINATION SHEET -->
+  <div id="dest-sheet" class="garage-sheet hidden">
+    <div class="gs-bar">
+      <div class="gs-title">Set destination</div>
+      <button class="gs-close" id="dest-close">×</button>
+    </div>
+    <div class="dest-sheet-body">
+      <div class="dest-search-row">
+        <input type="text" id="dest-input" class="gs-input dest-input" placeholder="Search address or place…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button id="dest-search" class="dest-search-btn">Search</button>
+      </div>
+      <div id="dest-results" class="dest-results"></div>
     </div>
   </div>
 

@@ -1,9 +1,9 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
-import { analyzeDrive, drivingStyleVerdict, driveCoaching } from '../services/scoring.js';
+import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
-import { DIM_DISPLAY, APP_VERSION } from '../constants.js';
+import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 
 let mapInstance = null;
@@ -32,6 +32,33 @@ export function renderReview(drive){
   // ── Score ──────────────────────────────────────────────────────────────────
   const scoreEl = document.getElementById('score-header-btn');
   if (scoreEl) scoreEl.textContent = analysis.score;
+
+  // ── Destination Drive two-axis result ───────────────────────────────────────
+  {
+    const dr = document.getElementById('dest-result');
+    if (drive.effectiveness != null) {
+      dr?.classList.remove('hidden');
+      const effEl = document.getElementById('dest-eff-val');
+      if (effEl) effEl.textContent = drive.effectiveness;
+      const epcEl = document.getElementById('dest-epc-val');
+      if (epcEl) epcEl.textContent = drive.score;
+      const tierEl = document.getElementById('dest-tier');
+      if (tierEl) tierEl.textContent = destinationTier(drive.effectiveness, drive.score) ?? '—';
+      // On-time / late delta vs buffered target
+      const targetMs = drive.targetEtaSec ? drive.targetEtaSec * ETA_BUFFER * 1000 : null;
+      const sub = document.getElementById('dest-eff-sub');
+      if (sub) {
+        if (targetMs) {
+          const diff = drive.durationMs - targetMs;   // + late, - early
+          sub.textContent = diff <= 0 ? `on time · ${fmtDuration(-diff)} to spare` : `${fmtDuration(diff)} late`;
+        } else {
+          sub.textContent = '';
+        }
+      }
+    } else {
+      dr?.classList.add('hidden');
+    }
+  }
 
   // ── Events — show all detected events in chips; only tier 2+ affect score ──
   $('#ev-brake').textContent = drive.events.filter(e => e.type === 'brake').length;
@@ -212,8 +239,20 @@ export function renderReview(drive){
 
   if (drive.samples.length < 2) return;
 
-  const bounds = L.latLngBounds(drive.samples.map(s => [s.lat, s.lon]));
+  const hasPlannedRoute = Array.isArray(drive.routeGeometry) && drive.routeGeometry.length > 0;
+
+  const boundsPts = drive.samples.map(s => [s.lat, s.lon]);
+  if (hasPlannedRoute) boundsPts.push(...drive.routeGeometry);
+  const bounds = L.latLngBounds(boundsPts);
   mapInstance.fitBounds(bounds, { padding: [40, 40] });
+
+  // Planned route overlay — drawn first so it sits below the actual GPS track
+  if (hasPlannedRoute){
+    const plannedRoute = L.polyline(drive.routeGeometry, {
+      color: '#8ab4f8', weight: 3, opacity: .5, dashArray: '6 8'
+    }).addTo(mapInstance);
+    mapLayers.push(plannedRoute);
+  }
 
   for (let i = 1; i < drive.samples.length; i++){
     const a = drive.samples[i-1], b = drive.samples[i];

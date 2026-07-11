@@ -56,6 +56,11 @@ export const state = {
   currentSpeedLimitMps: null,  // posted speed limit from OSM cache; null = no data
   rawAccel: { x: 0, y: 0, z: 0 },      // latest DeviceMotion accelerometer sample (phone frame)
   rawGyro:  { alpha: 0, beta: 0, gamma: 0 }, // latest rotationRate deg/s
+  // Destination Drive
+  destination: null,     // { label, lat, lng }
+  targetEtaSec: null,    // raw OSRM duration (seconds), locked at drive start
+  routeDistanceM: null,
+  routeGeometry: null,   // [[lat,lng], ...] for the review map
 };
 
 export function resetState(){
@@ -82,5 +87,9 @@ export function resetState(){
   state.driveStartScore = loadLifetimeScore();
   state.liveScore = state.driveStartScore;
   state._lastLiveScoreT = 0;
+  state.destination = null;
+  state.targetEtaSec = null;
+  state.routeDistanceM = null;
+  state.routeGeometry = null;
   resetCalib();
 }

@@ -1,8 +1,8 @@
 import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, TIER_MULT } from '../constants.js';
-import { mpsToMph, fmtDuration, clamp } from '../utils/math.js';
+import { CFG, TIER_MULT, ETA_BUFFER } from '../constants.js';
+import { mpsToMph, fmtDuration, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
 import { renderReview } from './review.js';
@@ -14,6 +14,7 @@ import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { showCarPromptIfNeeded, showOnboardingIfNeeded } from './modals.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
+import { getPendingDestination } from './destination.js';
 
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
@@ -197,6 +198,37 @@ export function updateLiveUI(){
   // Duration
   $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
 
+  // Destination Drive: live pace strip — locked target clock time + a rough
+  // ahead/behind estimate based on straight-line distance remaining vs. the
+  // buffered ETA. Hidden entirely for normal (no-destination) drives.
+  {
+    const paceStrip = document.getElementById('pace-strip');
+    if (state.targetEtaSec){
+      paceStrip?.classList.remove('hidden');
+      const bufferedEta = state.targetEtaSec * ETA_BUFFER; // seconds
+      const targetClock = new Date(state.startTime + bufferedEta * 1000);
+      const targetEl = document.getElementById('pace-target-time');
+      if (targetEl){
+        targetEl.textContent = targetClock.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      }
+
+      let deltaText = '—';
+      if (last && state.routeDistanceM > 0){
+        const remain = haversine({ lat: last.lat, lon: last.lon }, { lat: state.destination.lat, lon: state.destination.lng });
+        const fracDone = clamp(1 - remain / state.routeDistanceM, 0, 1);
+        const elapsedSec = (last.t - state.startTime) / 1000;
+        const expectedElapsed = fracDone * bufferedEta;
+        const delta = elapsedSec - expectedElapsed; // + behind, - ahead
+        const mag = fmtDuration(Math.abs(delta) * 1000);
+        deltaText = delta <= 0 ? `▲ ${mag} ahead` : `▼ ${mag} behind`;
+      }
+      const deltaEl = document.getElementById('pace-delta');
+      if (deltaEl) deltaEl.textContent = deltaText;
+    } else {
+      paceStrip?.classList.add('hidden');
+    }
+  }
+
   // Avg speed
   const avgMph = state.samples.length
     ? Math.round(state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length * 2.23694)
@@ -220,6 +252,18 @@ export function updateLiveUI(){
 
 export function startRecording(){
   resetState();
+
+  // Destination Drive: apply the pending pick (held outside `state` since
+  // resetState() just nulled state.destination/targetEtaSec/etc.) now that
+  // the reset is done.
+  const { picked, route } = getPendingDestination();
+  if (picked){
+    state.destination    = picked;
+    state.targetEtaSec   = route?.durationSec ?? null;
+    state.routeDistanceM = route?.distanceM ?? null;
+    state.routeGeometry  = route?.geometry ?? null;
+  }
+
   state.recording = true;
   state.simulated = false;
   state.startTime = Date.now();

@@ -7,7 +7,7 @@ import {
   loadDriverName,
   getSyncedIds,
 } from './storage.js';
-import { scoreFromEvents, analyzeDrive } from './scoring.js';
+import { scoreFromEvents, analyzeDrive, effectivenessScore } from './scoring.js';
 import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
 import { detectCorridors } from './corridors.js';
@@ -25,7 +25,10 @@ export function persistActiveDrive(){
       distanceMeters: dist,
       topSpeedMps:    top,
       durationMs: Date.now() - state.startTime,
-      savedAt:    Date.now()
+      savedAt:    Date.now(),
+      destination:    state.destination || null,
+      targetEtaSec:   state.targetEtaSec || null,
+      routeDistanceM: state.routeDistanceM || null,
     }));
   } catch {}
 }
@@ -59,7 +62,13 @@ export function checkRecoveredDrive(callbacks = {}){
       events:         saved.events         || [],
       samples:        [],
       ts:             saved.startTs,
-      recovered:      true
+      recovered:      true,
+      destination:    saved.destination || null,
+      targetEtaSec:   saved.targetEtaSec || null,
+      routeDistanceM: saved.routeDistanceM || null,
+      effectiveness:  saved.targetEtaSec
+        ? effectivenessScore(saved.targetEtaSec, Math.round((saved.durationMs || 0) / 1000))
+        : null,
     };
     const all = loadDrives();
     if (all.find(d => d.startTime === saved.startTs || d.id === drive.id)) return; // already saved
@@ -120,6 +129,10 @@ export function buildDriveFromState(){
     eventCount: events.length,
     simulated: state.simulated,
     settingsSnapshot: { ...CFG },
+    destination:    state.destination || null,
+    targetEtaSec:   state.targetEtaSec || null,
+    routeDistanceM: state.routeDistanceM || null,
+    routeGeometry:  state.routeGeometry || null,
   };
 }
 
@@ -140,6 +153,10 @@ export function finalizeAndReview(callbacks = {}){
   const analysis = analyzeDrive(drive);
   drive.score = analysis.score;
   drive.dims  = analysis.dims;
+  // Destination Drive: score arrival time vs the locked ETA (null if no destination)
+  drive.effectiveness = drive.targetEtaSec
+    ? effectivenessScore(drive.targetEtaSec, Math.round(drive.durationMs / 1000))
+    : null;
   saveDrive(drive);
   pushDriveToSupabase(drive);
   // Non-blocking — corridor detection runs after review renders
