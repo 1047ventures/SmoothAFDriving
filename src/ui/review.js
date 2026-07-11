@@ -38,9 +38,12 @@ export function renderReview(drive){
     const dr = document.getElementById('dest-result');
     if (drive.effectiveness != null) {
       dr?.classList.remove('hidden');
-      document.getElementById('dest-eff-val').textContent = drive.effectiveness;
-      document.getElementById('dest-epc-val').textContent = drive.score;
-      document.getElementById('dest-tier').textContent = destinationTier(drive.effectiveness, drive.score) ?? '—';
+      const effEl = document.getElementById('dest-eff-val');
+      if (effEl) effEl.textContent = drive.effectiveness;
+      const epcEl = document.getElementById('dest-epc-val');
+      if (epcEl) epcEl.textContent = drive.score;
+      const tierEl = document.getElementById('dest-tier');
+      if (tierEl) tierEl.textContent = destinationTier(drive.effectiveness, drive.score) ?? '—';
       // On-time / late delta vs buffered target
       const targetMs = drive.targetEtaSec ? drive.targetEtaSec * ETA_BUFFER * 1000 : null;
       const sub = document.getElementById('dest-eff-sub');
