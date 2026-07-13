@@ -15,7 +15,7 @@
   .gs-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;color:var(--cream);line-height:1;flex:1}
   .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
   #garage-list-view{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0)+24px)}
-  .gs-empty{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:28px 0 8px;text-align:center}
+  .gs-empty{font-family:var(--serif);font-style:italic;color:var(--cream-dim);font-size:14px;padding:28px 0 8px;text-align:center}
   .gs-card{
     border:1px solid rgba(244,235,217,.1);border-radius:18px;
     background:rgba(244,235,217,.04);padding:16px;margin-bottom:12px;
@@ -25,27 +25,27 @@
   .gs-card:active{background:rgba(244,235,217,.08)}
   .gs-card.active-vehicle{border-color:rgba(232,93,58,.55);background:rgba(232,93,58,.06)}
   .gs-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .gs-card-type-lbl{font-family:var(--sans);font-size:8px;letter-spacing:.32em;text-transform:uppercase;color:rgba(244,235,217,.35)}
+  .gs-card-type-lbl{font-family:var(--sans);font-size:8px;letter-spacing:.32em;text-transform:uppercase;color:rgba(244,235,217,.86)}
   .gs-card-badge{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--tang);border:1px solid rgba(232,93,58,.45);border-radius:999px;padding:2px 9px}
-  .gs-card-year{font-family:var(--sans);font-size:9px;letter-spacing:.14em;color:rgba(244,235,217,.32)}
+  .gs-card-year{font-family:var(--sans);font-size:9px;letter-spacing:.14em;color:rgba(244,235,217,.86)}
   .gs-card-silhouette{width:100%;margin-bottom:10px;color:rgba(244,235,217,.52)}
   .active-vehicle .gs-card-silhouette{color:rgba(232,110,58,.72)}
   .gs-card-silhouette svg{width:100%;height:auto;display:block}
   .gs-card-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);line-height:1.1;margin-bottom:4px}
-  .gs-card-detail{font-size:11px;color:var(--muted);letter-spacing:.04em;margin-bottom:0}
+  .gs-card-detail{font-size:11px;color:var(--cream-dim);letter-spacing:.04em;margin-bottom:0}
   .gs-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,235,217,.07)}
   .gs-card-stats{display:flex;gap:18px}
   .gs-stat{display:flex;flex-direction:column;gap:2px}
   .gs-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1;letter-spacing:-.02em}
-  .gs-stat-lbl{font-family:var(--sans);font-size:7px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,235,217,.32)}
-  .gs-card-inactive-hint{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,235,217,.24)}
+  .gs-stat-lbl{font-family:var(--sans);font-size:7px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,235,217,.86)}
+  .gs-card-inactive-hint{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,235,217,.86)}
   .gs-card-edit{appearance:none;border:1px solid rgba(244,235,217,.14);background:transparent;color:var(--cream-dim);font-size:11px;padding:6px 13px;border-radius:10px;cursor:pointer;flex-shrink:0}
   .gs-card-edit:active{background:rgba(244,235,217,.08)}
   .gs-add-btn{appearance:none;border:1px solid rgba(244,235,217,.18);background:transparent;cursor:pointer;width:100%;padding:16px;border-radius:16px;color:var(--cream-dim);font-size:14px;letter-spacing:.08em;transition:background .15s;margin-top:4px}
   .gs-add-btn:active{background:rgba(244,235,217,.06)}
   #garage-form-view{display:flex;flex-direction:column;flex:1;min-height:0}
   .gs-form-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px calc(env(safe-area-inset-bottom,0)+32px)}
-  .gs-section-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .gs-section-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream-dim);margin:16px 0 8px}
   .gs-section-label:first-child{margin-top:4px}
   .gs-input{
     width:100%;padding:13px 14px;border-radius:12px;margin-bottom:8px;
@@ -53,7 +53,7 @@
     color:var(--cream);font-size:15px;outline:none;font-family:var(--sans);
     -webkit-appearance:none;display:block;
   }
-  .gs-input::placeholder{color:var(--muted)}
+  .gs-input::placeholder{color:var(--cream-dim)}
   .gs-input:focus{border-color:rgba(232,93,58,.5);background:rgba(244,235,217,.07)}
   .gs-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:4px}
   .gs-type-card{border:1px solid rgba(244,235,217,.1);border-radius:12px;background:rgba(244,235,217,.04);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:background .15s,border-color .15s;text-align:center}
@@ -110,7 +110,7 @@
     padding:6px 12px calc(env(safe-area-inset-bottom,0) + 80px);
     display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start;
   }
-  .ip-hint{grid-column:1/-1;padding:40px 0;text-align:center;font-size:13px;color:var(--muted);font-family:var(--sans)}
+  .ip-hint{grid-column:1/-1;padding:40px 0;text-align:center;font-size:13px;color:var(--cream-dim);font-family:var(--sans)}
   .ip-thumb{
     border-radius:10px;overflow:hidden;
     background:rgba(244,235,217,.04);border:1px solid rgba(244,235,217,.08);
@@ -128,5 +128,5 @@
   }
   .ip-upload-label{
     font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-    color:rgba(244,235,217,.45);cursor:pointer;pointer-events:all;padding:8px 16px;
+    color:rgba(244,235,217,.86);cursor:pointer;pointer-events:all;padding:8px 16px;
   }
