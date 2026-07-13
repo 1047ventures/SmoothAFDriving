@@ -232,14 +232,20 @@
   /* Lifted well clear of the full-width End Drive button (whose top edge sits
      ~70px above the safe area) so tapping to open the panel can't misfire the
      stop. Visible bar stays small; padding gives a generous tap target. */
+  /* Intentional labeled pill (not a bare floating line), lifted clear of the
+     full-width End Drive button so tapping it can't misfire the stop. */
   .debug-handle{
     position:absolute;left:50%;transform:translateX(-50%);
-    bottom:calc(env(safe-area-inset-bottom,0) + 132px);
-    box-sizing:content-box;width:56px;height:6px;padding:14px 16px;border-radius:4px;
-    background:rgba(244,235,217,.4);background-clip:content-box;
-    cursor:pointer;z-index:40;transition:background .15s;
+    bottom:calc(env(safe-area-inset-bottom,0) + 128px);
+    display:flex;align-items:center;gap:6px;
+    appearance:none;border:1px solid rgba(244,235,217,.22);
+    background:rgba(244,235,217,.08);color:rgba(244,235,217,.82);
+    padding:7px 15px;border-radius:999px;
+    font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+    cursor:pointer;z-index:40;transition:background .15s,border-color .15s;
+    -webkit-tap-highlight-color:transparent;
   }
-  .debug-handle:active{background-color:rgba(244,235,217,.6)}
+  .debug-handle:active{background:rgba(244,235,217,.18);border-color:rgba(244,235,217,.4)}
   .debug-panel{
     position:absolute;left:0;right:0;bottom:0;
     height:45%;
