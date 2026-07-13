@@ -6,6 +6,7 @@
 // cache via getPendingDestination() AFTER resetState() to apply it.
 import { geocode, fetchRoute } from '../services/routing.js';
 import { ETA_BUFFER } from '../constants.js';
+import { showToast } from '../utils/toast.js';
 
 let picked = null; // { label, lat, lng } | null
 let route  = null; // { distanceM, durationSec, geometry } | null
@@ -84,19 +85,31 @@ function selectResult(r){
   renderChip();
   closeSheet();
 
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation){
+    showToast('Couldn\'t get your location — recording without an ETA target.', 'error');
+    return;
+  }
   navigator.geolocation.getCurrentPosition(
     pos => {
       const from = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       fetchRoute(from, newPicked)
         .then(rt => {
-          if (!rt || picked !== newPicked) return; // stale response / destination changed meanwhile
+          if (picked !== newPicked) return; // stale response — destination changed meanwhile
+          if (!rt){
+            showToast('Couldn\'t fetch a route — recording without an ETA target.', 'error');
+            return;
+          }
           route = rt;
           renderChip();
         })
-        .catch(() => {});
+        .catch(() => {
+          if (picked === newPicked){
+            showToast('Couldn\'t fetch a route — recording without an ETA target.', 'error');
+          }
+        });
     },
-    () => { /* denied/unavailable — keep the pick, leave route null */ },
+    // denied/unavailable — keep the pick, leave route null, but say so
+    () => { showToast('Couldn\'t get your location — recording without an ETA target.', 'error'); },
     { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
   );
 }
@@ -124,7 +137,7 @@ export function wireDestination(){
     renderResultsLoading();
     const results = await geocode(q);
     if (!results || !results.length){
-      renderResultsMessage('No results found. Try a different search.');
+      renderResultsMessage('No matches — check the address or your connection.');
       return;
     }
     renderResultsList(results);

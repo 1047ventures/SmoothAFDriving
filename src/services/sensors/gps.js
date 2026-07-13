@@ -144,12 +144,15 @@ export function detectEvent(s, nowT){
 
 /**
  * onGpsUpdate — called from startRecording's watchPosition callback.
- * callbacks = { flashEvent, setCalibUI, calibrateAxes }
+ * callbacks = { flashEvent, setCalibUI, calibrateAxes, onFirstSample }
+ * onFirstSample() fires once, when the very first GPS sample of the drive is
+ * pushed — used by the UI to clear the "Acquiring GPS…" indicator (Fix 1).
  */
 export function onGpsUpdate(pos, callbacks = {}){
-  const { flashEvent, setCalibUI, calibrateAxes } = callbacks;
+  const { flashEvent, setCalibUI, calibrateAxes, onFirstSample } = callbacks;
   if (!state.recording) return;
   const c = pos.coords;
+  const wasFirstSample = state.samples.length === 0;
   const prev = state.samples[state.samples.length - 1];
   let heading = c.heading;
   if ((heading == null || Number.isNaN(heading)) && prev){
@@ -163,6 +166,7 @@ export function onGpsUpdate(pos, callbacks = {}){
   const speed = c.speed != null && !Number.isNaN(c.speed) ? Math.max(0, c.speed) : (prev ? prev.speed : 0);
   const s = processSample({ t: Date.now(), lat: c.latitude, lon: c.longitude, speed, heading }, prev);
   state.samples.push(s);
+  if (wasFirstSample && onFirstSample) onFirstSample();
 
   // Always track latest GPS position so motion events can be geo-tagged
   state.lastGpsPos = { lat: s.lat, lon: s.lon, speed: s.speed };

@@ -16,6 +16,13 @@ import { showCarPromptIfNeeded, showOnboardingIfNeeded } from './modals.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
 import { getPendingDestination } from './destination.js';
 
+// Whether the motion sensor is actively contributing to this drive's scoring.
+// Defaults true (most Android/desktop browsers fire devicemotion with no
+// permission prompt at all); set explicitly by wireStartButton() on iOS based
+// on the permission outcome. Read by markGpsAcquired() to pick the correct
+// #rec-source label once GPS is live (Fix 1 + Fix 5).
+let motionActive = true;
+
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
       typeof DeviceMotionEvent.requestPermission === 'function'){
@@ -89,6 +96,15 @@ export function setCalibUI(phase){
 }
 
 function updateRoadUI(){ /* roughness tracked in state.currentRoughness; shown in review */ }
+
+// Fix 1 + Fix 5: called once the first real GPS sample lands. Swaps the
+// "Acquiring GPS…" state back to the normal source label (which depends on
+// whether motion permission was granted this drive) and hides the indicator.
+function markGpsAcquired(){
+  const srcEl = document.getElementById('rec-source');
+  if (srcEl) srcEl.textContent = motionActive ? 'GPS + Motion' : 'GPS only';
+  document.getElementById('gps-acquiring')?.classList.add('hidden');
+}
 
 function wireDebugPanel() {
   const handle = document.getElementById('debug-handle');
@@ -267,7 +283,10 @@ export function startRecording(){
   state.recording = true;
   state.simulated = false;
   state.startTime = Date.now();
-  $('#rec-source').textContent = 'GPS + Motion';
+  // Fix 1: show an explicit "acquiring" state instead of a silent 0/--/ticking
+  // clock until the first real GPS sample arrives (see markGpsAcquired above).
+  $('#rec-source').textContent = 'Acquiring GPS…';
+  document.getElementById('gps-acquiring')?.classList.remove('hidden');
   showScreen('record');
   clearDebugBuffers();
   wireDebugPanel();
@@ -292,7 +311,7 @@ export function startRecording(){
   }
 
   if (!navigator.geolocation){
-    alert('No geolocation. Use replay demo instead.');
+    showToast('No geolocation available — try the replay demo instead.', 'error');
     stopRecording();
     return;
   }
@@ -301,11 +320,12 @@ export function startRecording(){
       flashEvent,
       setCalibUI,
       calibrateAxes,
+      onFirstSample: markGpsAcquired,
     }),
     err => {
       console.warn('GPS error', err);
       if (err.code === 1) {
-        alert('Location permission denied. Enable it in Settings to record a drive.');
+        showToast('Location permission denied. Enable it in Settings to record a drive.', 'error');
         stopRecording();
       }
     },
@@ -342,6 +362,12 @@ export function stopRecording(){
   finalizeAndReview({
     onReview: renderReview,
     onListUpdate: renderDriveList,
+    // Fix 2: too-short drives used to strand the user on the record screen
+    // with no feedback (finalizeAndReview returned early, silently).
+    onTooShort: () => {
+      showScreen('home');
+      showToast('Drive too short to score', 'error');
+    },
   });
   showCarPromptIfNeeded();
   setTimeout(() => showOnboardingIfNeeded(), 800);
@@ -353,6 +379,7 @@ export function startSimulatedDrive(){
   state.simulated = true;
   state.startTime = Date.now();
   $('#rec-source').textContent = 'Demo drive';
+  document.getElementById('gps-acquiring')?.classList.add('hidden');
   showScreen('record');
 
   state.tickInterval = setInterval(updateLiveUI, 200);
@@ -374,7 +401,8 @@ export function startSimulatedDrive(){
     if (evt){
       state.events.push({ ...evt, t: s.t, lat: s.lat, lon: s.lon, speedMph: mpsToMph(s.speed) });
       flashEvent(evt.type, state.peakLat, evt.tier);
-      speakEvent(evt.type, evt.tier);
+      // Note: speakEvent() is not defined anywhere in the codebase — this used
+      // to throw a ReferenceError whenever a simulated drive hit an event.
     }
     state.lastMotionG = Math.min(2.5, s.harshness / 9.81);
     i += 1;
@@ -426,6 +454,7 @@ export function wireStartButton(btnId){
     if (needsPermission){
       // Already granted before — call silently (iOS returns cached result)
       if (motionPermGranted()){
+        motionActive = true;
         await requestMotionPermissionIfNeeded();
         startRecording();
         return;
@@ -433,15 +462,23 @@ export function wireStartButton(btnId){
       $('#perm-modal').classList.remove('hidden');
       $('#perm-allow').onclick = async () => {
         $('#perm-modal').classList.add('hidden');
-        await requestMotionPermissionIfNeeded();
+        const granted = await requestMotionPermissionIfNeeded();
+        motionActive = !!granted;
+        // Fix 5: denial still proceeds (never block recording) but the user
+        // should know scoring degrades to GPS-only.
+        if (!motionActive) showToast('Motion sensor off — scoring from GPS only.', '');
         startRecording();
       };
       $('#perm-skip').onclick = () => {
         $('#perm-modal').classList.add('hidden');
+        motionActive = false;
+        showToast('Motion sensor off — scoring from GPS only.', '');
         startRecording();
       };
       return;
     }
+    // No permission prompt needed on this platform — devicemotion just works.
+    motionActive = true;
     startRecording();
   });
 }

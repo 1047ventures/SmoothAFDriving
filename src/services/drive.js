@@ -139,12 +139,16 @@ export function buildDriveFromState(){
 /**
  * Finalize the current recording into a drive object, save it, push to Supabase,
  * and hand off to UI via callbacks.
- * callbacks.onReview(drive) — called with the completed drive object
- * callbacks.onListUpdate()  — called to refresh the drive list
+ * callbacks.onReview(drive)   — called with the completed drive object
+ * callbacks.onListUpdate()    — called to refresh the drive list
+ * callbacks.onTooShort()      — called instead of onReview when the drive had
+ *                               < 2 samples (nothing to score); UI should surface
+ *                               this rather than leaving the user on a dead screen
  */
 export function finalizeAndReview(callbacks = {}){
-  const { onReview, onListUpdate } = callbacks;
+  const { onReview, onListUpdate, onTooShort } = callbacks;
   if (state.samples.length < 2){
+    if (onTooShort) onTooShort();
     if (onListUpdate) onListUpdate();
     return;
   }
