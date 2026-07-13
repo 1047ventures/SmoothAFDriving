@@ -162,6 +162,16 @@
   .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.75);font-weight:600}
   .pace-delta{color:rgba(244,235,217,.75);font-weight:600}
 
+  /* Fix 1: "Acquiring GPS…" — subtle pill sitting just under the Score hero
+     number, cleared by markGpsAcquired() once the first GPS sample lands */
+  .gps-acquiring{
+    position:absolute;top:calc(env(safe-area-inset-top,0) + 76px + 92px);right:20px;z-index:11;
+    padding:4px 11px;border-radius:999px;
+    background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.14);
+    font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(244,235,217,.5);white-space:nowrap;
+  }
+
   /* hero numbers */
   .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 20px;gap:4px}
   .hero-speed{display:flex;flex-direction:column;flex:1 1 0;min-width:0}

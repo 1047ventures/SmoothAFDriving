@@ -184,6 +184,10 @@
       </div>
     </div>
 
+    <!-- Fix 1: visible "waiting for GPS fix" state — shown from startRecording()
+         until the first real GPS sample lands (see markGpsAcquired in record.js) -->
+    <div id="gps-acquiring" class="gps-acquiring hidden">Acquiring GPS…</div>
+
     <!-- G-force radar: big, striking, state-colored -->
     <div class="rec-radar">
       <div class="radar-wrap" id="g-radar">
