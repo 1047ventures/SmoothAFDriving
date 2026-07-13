@@ -25,17 +25,25 @@ export function pushDebugSample(state) {
   if (bufs.ax.length > MAX_POINTS) BUF_KEYS.forEach(k => bufs[k].shift());
 }
 
-const STREAMS = [
-  { key: 'ax',     color: '#E8501A', label: 'aX'     },
-  { key: 'ay',     color: '#4A9EE8', label: 'aY'     },
-  { key: 'az',     color: '#C49A28', label: 'aZ'     },
-  { key: 'gAlpha', color: '#5DBF7A', label: 'gYaw'   },
-  { key: 'gBeta',  color: '#B06BF5', label: 'gPitch' },
-  { key: 'gGamma', color: '#F07070', label: 'gRoll'  },
-  { key: 'speed',  color: '#888888', label: 'Spd÷10' },
+// Small-multiples: each signal gets its own horizontal lane with its own zero
+// baseline. A flat trace = steady input; a wiggly trace = varying input —
+// readable per-axis, instead of 7 signals tangled on one shared axis.
+const ACCEL = [
+  { key: 'ax',     color: '#E8501A', label: 'aX'    },
+  { key: 'ay',     color: '#4A9EE8', label: 'aY'    },
+  { key: 'az',     color: '#C49A28', label: 'aZ'    },
 ];
+const GYRO = [
+  { key: 'gAlpha', color: '#5DBF7A', label: 'yaw'   },
+  { key: 'gBeta',  color: '#B06BF5', label: 'pitch' },
+  { key: 'gGamma', color: '#F07070', label: 'roll'  },
+];
+const LANES  = [...ACCEL, ...GYRO];
+const LEGEND = [...LANES, { key: 'speed', color: '#888888', label: 'Spd÷10' }];
 
-const Y_RANGE = 6;
+// ± full-scale mapped to each lane's half-height (gyro is pre-scaled ÷50 in
+// pushDebugSample, so both accel m/s² and gyro land in a comparable range).
+const LANE_HALF_RANGE = 3;
 
 export function renderDebugChart(canvas) {
   if (!canvas) return;
@@ -52,37 +60,58 @@ export function renderDebugChart(canvas) {
   ctx.fillStyle = 'rgba(10,8,8,0.92)';
   ctx.fillRect(0, 0, W, H);
 
-  const midY = H / 2;
-  ctx.strokeStyle = 'rgba(244,235,217,0.15)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, midY);
-  ctx.lineTo(W, midY);
-  ctx.stroke();
+  const pts   = bufs.ax.length;
+  const laneH = H / LANES.length;
 
-  const pts = bufs.ax.length;
-  if (pts < 2) return;
+  LANES.forEach((s, li) => {
+    const top = li * laneH;
+    const mid = top + laneH / 2;
 
-  STREAMS.forEach(({ key, color }) => {
-    const data = bufs[key];
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.85;
+    // lane divider (between lanes) + faint zero baseline
+    if (li > 0) {
+      ctx.strokeStyle = 'rgba(244,235,217,0.10)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, top); ctx.lineTo(W, top); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(244,235,217,0.14)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+
+    // per-lane label + current value (top-left of the lane)
+    const data = bufs[s.key] || [];
+    const cur  = data.length ? data[data.length - 1] : null;
+    ctx.font = '9px ui-sans-serif, system-ui, sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = s.color;
+    ctx.globalAlpha = 0.95;
+    ctx.fillText(`${s.label}${cur != null ? '  ' + cur.toFixed(2) : ''}`, 5, top + 3);
+    ctx.globalAlpha = 1;
+
+    if (pts < 2) return;
+
+    // trace, clamped inside its lane
+    const half = laneH / 2 - 3;
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 1.3;
+    ctx.globalAlpha = 0.9;
     ctx.beginPath();
     data.forEach((v, i) => {
       const x = (i / (MAX_POINTS - 1)) * W;
-      const y = midY - (v / Y_RANGE) * midY;
+      let y = mid - (v / LANE_HALF_RANGE) * half;
+      if (y < top + 2) y = top + 2;
+      else if (y > top + laneH - 2) y = top + laneH - 2;
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.stroke();
+    ctx.globalAlpha = 1;
   });
-  ctx.globalAlpha = 1;
 }
 
 export function updateDebugLegend(legendEl) {
   if (!legendEl) return;
-  legendEl.innerHTML = STREAMS.map(({ key, color, label }) => {
-    const val = bufs[key].length ? bufs[key][bufs[key].length - 1].toFixed(2) : '—';
+  legendEl.innerHTML = LEGEND.map(({ key, color, label }) => {
+    const b = bufs[key];
+    const val = b && b.length ? b[b.length - 1].toFixed(2) : '—';
     return `<span style="color:${color}">${label} <b>${val}</b></span>`;
   }).join('');
 }
