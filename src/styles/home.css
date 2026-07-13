@@ -21,7 +21,7 @@
   }
   .car-upload-icon{font-size:38px}
   .car-upload-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;color:var(--cream);text-align:center}
-  .car-upload-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;text-align:center;padding:0 16px}
+  .car-upload-sub{font-size:11px;color:var(--cream-dim);letter-spacing:.08em;text-align:center;padding:0 16px}
 
   /* Change / Reposition buttons — bottom of car panel */
   .car-action-row{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:5}
@@ -65,7 +65,7 @@
   .home-link-btn{
     appearance:none;border:0;background:transparent;cursor:pointer;
     display:block;width:100%;text-align:center;margin-top:10px;
-    font-size:13px;letter-spacing:.1em;color:var(--muted);padding:12px 0;
+    font-size:13px;letter-spacing:.1em;color:var(--cream-dim);padding:12px 0;
   }
   .home-link-btn:active{color:var(--cream-dim)}
 
@@ -80,7 +80,7 @@
     appearance:none;border:0;background:transparent;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
     width:100%;text-align:center;
-    font-size:11px;letter-spacing:.14em;color:var(--muted);
+    font-size:11px;letter-spacing:.14em;color:var(--cream-dim);
     text-transform:uppercase;padding:14px 4px;min-height:48px;
   }
   .view-drives-link:active{color:var(--cream-dim)}
@@ -107,7 +107,7 @@
   .primary-btn .arrow{font-family:var(--sans);font-style:normal;font-weight:500}
 
   /* ── Recent drives ── */
-  .drives-head{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin:0 0 10px;padding:0 4px}
+  .drives-head{font-size:11px;letter-spacing:.3em;color:var(--cream-dim);text-transform:uppercase;margin:0 0 10px;padding:0 4px}
   .drive-row{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:14px 16px;border-radius:12px;
@@ -118,16 +118,16 @@
   .drive-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;min-width:56px}
   .drive-meta{flex:1;min-width:0}
   .drive-when{font-size:13px;color:var(--cream-dim)}
-  .drive-stats{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
-  .drive-chev{color:var(--muted);font-size:22px}
+  .drive-stats{font-size:11px;color:var(--cream-dim);margin-top:2px;letter-spacing:.04em}
+  .drive-chev{color:var(--cream-dim);font-size:22px}
   .drive-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
-  .drive-star-btn{appearance:none;border:0;background:transparent;font-size:19px;cursor:pointer;padding:4px 6px;color:var(--muted);line-height:1;transition:color .15s}
+  .drive-star-btn{appearance:none;border:0;background:transparent;font-size:19px;cursor:pointer;padding:4px 6px;color:var(--cream-dim);line-height:1;transition:color .15s}
   .drive-star-btn.starred{color:var(--gold)}
   .drive-star-btn:active{opacity:.6}
-  .drive-del-btn{appearance:none;border:0;background:transparent;font-size:19px;cursor:pointer;padding:4px 6px;color:var(--muted);line-height:1;transition:color .15s,background .15s;border-radius:8px}
+  .drive-del-btn{appearance:none;border:0;background:transparent;font-size:19px;cursor:pointer;padding:4px 6px;color:var(--cream-dim);line-height:1;transition:color .15s,background .15s;border-radius:8px}
   .drive-del-btn.confirming{font-size:11px;letter-spacing:.05em;color:var(--danger);background:rgba(224,59,47,.12);padding:4px 8px}
   .drive-del-btn:active{color:var(--danger)}
-  .empty-drives{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;padding:18px 4px}
+  .empty-drives{font-family:var(--serif);font-style:italic;color:var(--cream-dim);font-size:14px;padding:18px 4px}
   /* ── Driver persona badge ── */
   .persona-badge{
     padding:12px 14px 10px;border-radius:14px;margin-bottom:14px;
@@ -144,19 +144,19 @@
   .new-drive-btn:active{transform:scale(.985)}
 
   /* ── Version badge (v3/recording era) ── */
-  #app-version{font-size:10px;letter-spacing:.18em;color:rgba(244,235,217,.18);font-family:var(--sans);align-self:flex-end;padding-bottom:8px}
+  #app-version{font-size:10px;letter-spacing:.18em;color:rgba(244,235,217,.86);font-family:var(--sans);align-self:flex-end;padding-bottom:8px}
 
   /* ── HOME v3 ──*/
   .home-car-panel,.home-bottom-sheet,.wordmark-lg,.persona-badge,
   .home-next-unlock,.home-rival,.home-archetype-name,.home-archetype-desc,.home-rule{display:none!important}
   #screen-home{background:#080808;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-direction:column;min-height:100dvh;padding-bottom:calc(130px + env(safe-area-inset-bottom,0))}
   .home-topbar-v2{padding:calc(env(safe-area-inset-top,0) + 10px) 24px 0;display:flex;align-items:center;flex-shrink:0}
-  .home-brand{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35)}
+  .home-brand{font-family:var(--sans);font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86)}
   /* ── Score hero ── */
   .home-score-zone{padding:8px 24px 20px;flex-shrink:0}
   .home-score-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
   .home-score-left{display:flex;flex-direction:column;overflow:visible;flex-shrink:0}
-  .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .home-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:4px}
   .home-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(96px,31vw,134px);line-height:0.85;flex-shrink:0;letter-spacing:-.04em;padding:.04em 0.12em .2em 0;overflow:visible;display:block;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:opacity .1s}
   .home-score-num:active{opacity:.7}
   .home-score-right{padding-top:50px;display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
@@ -184,19 +184,19 @@
     background:#E8501A;
     box-shadow:0 0 6px rgba(232,80,26,.9);
   }
-  .hgc-label{font-family:var(--sans);font-size:8px;letter-spacing:.26em;text-transform:uppercase;color:rgba(242,232,213,.38)}
+  .hgc-label{font-family:var(--sans);font-size:8px;letter-spacing:.26em;text-transform:uppercase;color:rgba(242,232,213,.86)}
   .hgc-arrow{font-size:13px;color:rgba(232,80,26,.65);line-height:1}
   .home-flex-spacer{flex:1;min-height:20px}
 
   /* ── Welcome / persona ── */
   .home-welcome-block{padding:24px 24px 12px;flex-shrink:0}
-  .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.4);margin-bottom:6px}
+  .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:6px}
   .home-score-sentence{font-family:var(--sans);font-size:14px;color:rgba(242,232,213,.85);line-height:1.65}
   .home-score-sentence em{color:#E8501A;font-style:normal;font-weight:600}
 
   /* ── Corridors section ── */
   .home-routes{margin:20px 24px 0;border-left:3px solid rgba(242,232,213,.15);background:rgba(242,232,213,.03);padding:10px 14px;flex-shrink:0}
-  .home-routes-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:4px}
+  .home-routes-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:4px}
   .home-routes-text{font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.5}
 
   /* ── Stats row ── */
@@ -209,21 +209,21 @@
   .home-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;color:var(--cream);line-height:1}
   .home-stat-tappable{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(242,232,213,.25);text-underline-offset:3px}
   .home-stat-tappable:active{opacity:.7}
-  .home-stat-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-top:5px}
+  .home-stat-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-top:5px}
 
   /* ── Sparkline / trends ── */
   .home-sparkline{padding:20px 24px 8px;flex-shrink:0}
-  .home-sparkline-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);margin-bottom:12px}
+  .home-sparkline-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:12px}
 
   /* ── Explore row ── */
   .home-explore-row{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-top:1px solid rgba(242,232,213,.07);margin-top:16px;flex-shrink:0;cursor:pointer}
   .home-explore-row:active{background:rgba(242,232,213,.03)}
-  .home-explore-label{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.4)}
-  .home-explore-arrow{font-size:16px;color:rgba(242,232,213,.25)}
+  .home-explore-label{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.86)}
+  .home-explore-arrow{font-size:16px;color:rgba(242,232,213,.86)}
   .drives-list{display:none;padding:0 20px 8px}
   .drives-list.open{display:block}
   .home-nav-row{display:flex;border-top:1px solid rgba(242,232,213,.07);flex-shrink:0}
-  .home-nav-btn{appearance:none;border:0;background:transparent;cursor:pointer;flex:1;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:rgba(242,232,213,.4);text-transform:uppercase;padding:12px 4px;min-height:52px;transition:color .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .home-nav-btn{appearance:none;border:0;background:transparent;cursor:pointer;flex:1;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:rgba(242,232,213,.86);text-transform:uppercase;padding:12px 4px;min-height:52px;transition:color .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
   .home-nav-btn:not(:first-child){border-left:1px solid rgba(242,232,213,.07)}
   .home-nav-btn:active{color:var(--cream-dim)}
   .nav-icon{font-size:15px;line-height:1;display:block}
@@ -232,10 +232,10 @@
   .home-corridor-teaser{margin:10px 24px 0;flex-shrink:0}
   .hct-card{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(232,80,26,.05);border:1px solid rgba(232,80,26,.18);border-radius:12px;gap:12px}
   .hct-road-name{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--cream);margin-bottom:2px}
-  .hct-road-sub{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.4);line-height:1.4}
+  .hct-road-sub{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.86);line-height:1.4}
   .hct-rank-badge{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;color:rgba(232,80,26,.5);flex-shrink:0;min-width:32px;text-align:center}
   .hct-rank-badge.ranked{color:#E8501A}
-  .hct-hint{font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:rgba(242,232,213,.25);text-align:center;padding:8px 0 4px;text-transform:uppercase}
+  .hct-hint{font-family:var(--sans);font-size:10px;letter-spacing:.12em;color:rgba(242,232,213,.86);text-align:center;padding:8px 0 4px;text-transform:uppercase}
 
   .home-cta-spacer{display:none}
   .home-cta{position:fixed;bottom:calc(env(safe-area-inset-bottom,0) + 8px);left:20px;right:20px;background:#E8501A;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:62px;border-radius:999px;flex-shrink:0;appearance:none;border:0;cursor:pointer;transition:filter .1s,transform .1s;z-index:10;box-shadow:0 8px 28px rgba(232,80,26,.32)}
@@ -275,15 +275,15 @@
   .dest-chip-clear:active{background:rgba(244,235,217,.2)}
 
   /* ── Corridor cards ── */
-  .home-corridors-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.35);padding:10px 24px 6px;flex-shrink:0}
+  .home-corridors-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);padding:10px 24px 6px;flex-shrink:0}
   .home-corridors-list{padding:0 20px;display:flex;flex-direction:column;gap:8px;margin-bottom:4px;flex-shrink:0}
   .hcl-empty{padding:4px 0 4px}
-  .hcl-empty-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:rgba(242,232,213,.4);margin-bottom:4px}
-  .hcl-empty-sub{font-size:11px;color:rgba(242,232,213,.25);line-height:1.5}
+  .hcl-empty-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:rgba(242,232,213,.86);margin-bottom:4px}
+  .hcl-empty-sub{font-size:11px;color:rgba(242,232,213,.86);line-height:1.5}
   .hcl-card{display:flex;align-items:center;justify-content:space-between;background:rgba(242,232,213,.04);border:1px solid rgba(242,232,213,.08);border-radius:12px;padding:12px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
   .hcl-card:active{background:rgba(242,232,213,.08)}
   .hcl-road-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream);line-height:1.2}
-  .hcl-road-meta{font-size:11px;color:rgba(242,232,213,.35);margin-top:3px;letter-spacing:.04em}
+  .hcl-road-meta{font-size:11px;color:rgba(242,232,213,.86);margin-top:3px;letter-spacing:.04em}
   .hcl-scores{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
   .hcl-score-avg{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);line-height:1}
-  .hcl-score-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.3);margin-top:2px}
+  .hcl-score-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-top:2px}

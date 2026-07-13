@@ -20,20 +20,20 @@
   font-family: var(--serif); font-style: italic; font-weight: 700;
   font-size: 18px; color: var(--cream); line-height: 1.2;
 }
-.cor-card-meta { font-size: 11px; color: rgba(242,232,213,.35); margin-top: 3px; letter-spacing: .04em; }
+.cor-card-meta { font-size: 11px; color: rgba(242,232,213,.86); margin-top: 3px; letter-spacing: .04em; }
 .cor-card-right { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-left: 12px; }
 .cor-card-score {
   font-family: var(--serif); font-style: italic; font-weight: 700;
   font-size: 28px; color: var(--cream); line-height: 1;
 }
-.cor-card-lbl { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(242,232,213,.3); margin-top: 2px; }
+.cor-card-lbl { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(242,232,213,.86); margin-top: 2px; }
 .cor-empty { text-align: center; padding: 60px 24px 24px; }
 .cor-empty-icon { font-size: 40px; margin-bottom: 16px; }
 .cor-empty-title {
   font-family: var(--serif); font-style: italic; font-weight: 700;
-  font-size: 22px; color: rgba(242,232,213,.5); margin-bottom: 10px;
+  font-size: 22px; color: rgba(242,232,213,.86); margin-bottom: 10px;
 }
-.cor-empty-sub { font-size: 13px; color: rgba(242,232,213,.3); line-height: 1.6; }
+.cor-empty-sub { font-size: 13px; color: rgba(242,232,213,.86); line-height: 1.6; }
 
 /* ── Corridor detail screen ──────────────────────────────────────────────── */
 #screen-corridor {
@@ -59,7 +59,7 @@
 }
 .corridor-back-btn {
   appearance: none; border: none; background: none;
-  color: rgba(242,232,213,.6); font-size: 26px; cursor: pointer;
+  color: rgba(242,232,213,.86); font-size: 26px; cursor: pointer;
   padding: 4px 8px 4px 0; flex-shrink: 0; line-height: 1;
 }
 .corridor-road-name {
@@ -67,7 +67,7 @@
   font-size: 20px; color: var(--cream); line-height: 1.15;
 }
 .corridor-city {
-  font-size: 11px; letter-spacing: .1em; color: rgba(242,232,213,.35); margin-top: 2px;
+  font-size: 11px; letter-spacing: .1em; color: rgba(242,232,213,.86); margin-top: 2px;
 }
 
 .corridor-stats-row {
@@ -87,7 +87,7 @@
 }
 .corridor-stat-lbl {
   font-size: 9px; letter-spacing: .38em; text-transform: uppercase;
-  color: rgba(242,232,213,.35); margin-top: 5px;
+  color: rgba(242,232,213,.86); margin-top: 5px;
 }
 
 .corridor-sparkline-wrap { padding: 0 0 24px; }
@@ -95,13 +95,13 @@
   display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px;
 }
 .corridor-sparkline-lbl {
-  font-size: 9px; letter-spacing: .38em; text-transform: uppercase; color: rgba(242,232,213,.35);
+  font-size: 9px; letter-spacing: .38em; text-transform: uppercase; color: rgba(242,232,213,.86);
 }
-.corridor-sparkline-trend { font-size: 12px; font-weight: 500; color: rgba(242,232,213,.4); }
+.corridor-sparkline-trend { font-size: 12px; font-weight: 500; color: rgba(242,232,213,.86); }
 
 .corridor-drives-label {
   font-size: 9px; letter-spacing: .38em; text-transform: uppercase;
-  color: rgba(242,232,213,.35); margin-bottom: 12px;
+  color: rgba(242,232,213,.86); margin-bottom: 12px;
 }
 .corridor-drives-list { display: flex; flex-direction: column; gap: 8px; }
 .corridor-drive-row {
@@ -116,4 +116,4 @@
 }
 .corridor-drive-meta { flex: 1; padding: 0 12px; }
 .corridor-drive-date { font-size: 13px; color: rgba(242,232,213,.7); }
-.corridor-drive-dist { font-size: 11px; color: rgba(242,232,213,.35); margin-top: 2px; }
+.corridor-drive-dist { font-size: 11px; color: rgba(242,232,213,.86); margin-top: 2px; }
