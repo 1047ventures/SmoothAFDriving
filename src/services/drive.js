@@ -7,7 +7,7 @@ import {
   loadDriverName,
   getSyncedIds,
 } from './storage.js';
-import { scoreFromEvents, analyzeDrive, effectivenessScore } from './scoring.js';
+import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore } from './scoring.js';
 import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
 import { ARRIVAL_RADIUS_M } from '../constants.js';
@@ -169,15 +169,19 @@ export function finalizeAndReview(callbacks = {}){
 
   const drive = buildDriveFromState();
   const analysis = analyzeDrive(drive);
-  drive.score = analysis.score;
   drive.dims  = analysis.dims;
   // Destination Drive: only score effectiveness if you actually REACHED the
   // destination — otherwise ending short of it looks like arriving early. No
   // arrival → unfinished (renders like a normal drive, no effectiveness).
+  // Store smoothness separately; the drive's headline score is the composite
+  // (smoothness + clock), which flows into lifetime + leaderboard.
+  drive.efficiency = analysis.score;
   drive.arrived = arrivedAtDestination(drive);
   drive.effectiveness = (drive.targetEtaSec && drive.arrived)
     ? effectivenessScore(drive.targetEtaSec, Math.round(drive.durationMs / 1000))
     : null;
+  drive.score = compositeScore(analysis.score, drive.targetEtaSec, Math.round(drive.durationMs / 1000),
+    { arrived: drive.arrived, allowPenalty: false }); // penalty ships with the live traffic-aware ETA
   saveDrive(drive);
   pushDriveToSupabase(drive);
   // Non-blocking — corridor detection runs after review renders

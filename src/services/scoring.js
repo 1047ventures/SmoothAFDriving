@@ -7,6 +7,10 @@ import {
   EVENT_COOLDOWN_MS,
   ETA_BUFFER,
   PACE_PENALTY,
+  CLOCK_MAX_SWING,
+  CLOCK_BEAT_FULL,
+  CLOCK_LATE_FULL,
+  SCORE_MAX,
 } from '../constants.js';
 import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles } from '../utils/math.js';
 import { loadDrives } from './storage.js';
@@ -490,4 +494,28 @@ export function destinationTier(effectiveness, efficiency){
     ['B', 'C', 'D'], // < 75
   ];
   return GRID[effBand][timeBand];
+}
+
+// Signed clock modifier in points. Positive (beat the ETA) is smoothness-gated so
+// only smooth drivers approach the max and can break 100; negative (late) applies
+// only when allowPenalty (which ships with the live traffic-aware ETA).
+export function clockModifier(rawEtaSec, actualSec, efficiency, allowPenalty = false){
+  if (!(rawEtaSec > 0) || !(actualSec > 0)) return 0;
+  const target = rawEtaSec * ETA_BUFFER;
+  const margin = (target - actualSec) / target; // >0 beat it, <0 late
+  if (margin >= 0){
+    const pace = Math.min(1, margin / CLOCK_BEAT_FULL);
+    return CLOCK_MAX_SWING * pace * (clamp(efficiency, 0, 100) / 100);
+  }
+  if (!allowPenalty) return 0;
+  const pace = Math.min(1, (-margin) / CLOCK_LATE_FULL);
+  return -CLOCK_MAX_SWING * pace;
+}
+
+// Final composite drive score (rounded). Efficiency-only unless the driver
+// actually arrived at a destination with a known ETA. Can exceed 100 (rare).
+export function compositeScore(efficiency, rawEtaSec, actualSec, { arrived = false, allowPenalty = false } = {}){
+  const base = clamp(efficiency, 0, 100);
+  if (!arrived || !(rawEtaSec > 0) || !(actualSec > 0)) return Math.round(base);
+  return Math.round(clamp(base + clockModifier(rawEtaSec, actualSec, base, allowPenalty), 0, SCORE_MAX));
 }
