@@ -110,7 +110,8 @@ export const MAPBOX_TOKEN     = import.meta.env?.VITE_MAPBOX_TOKEN || '';
 export const MAPBOX_BASE      = 'https://api.mapbox.com';
 export const NOMINATIM_BASE   = 'https://nominatim.openstreetmap.org';
 export const OSRM_BASE        = 'https://router.project-osrm.org';
-export const ETA_BUFFER       = 1.2;      // OSRM durations run optimistic (no lights/traffic);
-                                          // set to ~1.0 automatically when Mapbox traffic is active (see routing.js)
+export const ETA_BUFFER       = 1.2;      // absorbs OSRM optimism (no lights/traffic). With Mapbox
+                                          // traffic active this could trend to ~1.0 — tune when the
+                                          // dynamic-ETA work lands (routing.isTrafficAware() exposes the mode).
 export const PACE_PENALTY     = 180;      // effectiveness points lost per unit of over-fraction
 export const ARRIVAL_RADIUS_M = 200;      // must end within this of the destination for effectiveness to count
