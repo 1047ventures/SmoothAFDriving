@@ -527,8 +527,22 @@
         <input type="text" id="dest-input" class="gs-input dest-input" placeholder="Search address or place…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button id="dest-search" class="dest-search-btn">Search</button>
       </div>
+      <button id="dest-map-btn" class="dest-map-btn" type="button">📍 Find on map</button>
       <div id="dest-results" class="dest-results"></div>
     </div>
+  </div>
+
+  <!-- Drop-a-pin destination picker -->
+  <div id="dest-map-picker" class="dest-map-picker hidden">
+    <div class="gs-bar">
+      <div class="gs-title">Drop a pin</div>
+      <button class="gs-close" id="dest-map-close" aria-label="Close map">×</button>
+    </div>
+    <div class="dest-map-wrap">
+      <div id="dest-map" class="dest-map"></div>
+      <div class="dest-map-pin" aria-hidden="true"></div>
+    </div>
+    <button id="dest-map-confirm" class="dest-map-confirm" type="button">Set destination here</button>
   </div>
 
   <!-- ══════════════════════════ LEADERBOARD ══════════════════════════ -->
