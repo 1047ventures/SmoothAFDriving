@@ -54,6 +54,36 @@
   }
   .dest-result-item:active{background:rgba(244,235,217,.09)}
 
+  /* ── Find on map (drop-a-pin) ── */
+  .dest-map-btn{
+    appearance:none;cursor:pointer;width:100%;margin-bottom:14px;
+    background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.18);
+    color:var(--cream);font-family:var(--sans);font-size:13px;font-weight:600;
+    padding:12px 14px;border-radius:12px;transition:background .15s;
+  }
+  .dest-map-btn:active{background:rgba(244,235,217,.14)}
+  .dest-map-picker{
+    position:fixed;inset:0;z-index:960;background:var(--bg);
+    display:flex;flex-direction:column;
+  }
+  .dest-map-wrap{position:relative;flex:1;min-height:0}
+  .dest-map{position:absolute;inset:0;background:var(--bg2)}
+  /* Fixed centre pin — the map pans beneath it; tip marks the chosen point */
+  .dest-map-pin{position:absolute;left:50%;top:50%;width:24px;height:24px;
+    transform:translate(-50%,-100%);pointer-events:none;z-index:500;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55))}
+  .dest-map-pin::before{content:'';position:absolute;left:50%;top:0;
+    transform:translateX(-50%) rotate(45deg);width:20px;height:20px;
+    background:var(--tang);border-radius:50% 50% 50% 0}
+  .dest-map-pin::after{content:'';position:absolute;left:50%;top:6px;
+    transform:translateX(-50%);width:7px;height:7px;background:var(--bg);border-radius:50%}
+  .dest-map-confirm{
+    appearance:none;border:0;cursor:pointer;flex-shrink:0;
+    margin:12px 16px calc(env(safe-area-inset-bottom,0)+14px);
+    background:var(--tang);color:var(--bg);font-family:var(--sans);font-weight:700;
+    font-size:15px;padding:15px;border-radius:14px;
+  }
+  .dest-map-confirm:active{filter:brightness(.88)}
+
   /* ── Onboarding modal extras ── */
   .onboard-error { color:var(--danger,#e84a2f); font-size:12px; min-height:16px; margin:-6px 0 10px; text-align:center; }
   .onboard-trust { font-size:12px; color:var(--cream-dim); text-align:center; margin-top:4px; }

@@ -23,6 +23,21 @@ export async function geocode(query){
   }
 }
 
+// lat,lng -> { label, lat, lng } | null. Turns a map-picked point into a
+// human-readable place name (for the "find on map" destination flow).
+export async function reverseGeocode(lat, lng){
+  try {
+    const url = `${NOMINATIM_BASE}/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || !data.display_name) return null;
+    return { label: data.display_name, lat: +data.lat, lng: +data.lon };
+  } catch {
+    return null;
+  }
+}
+
 // from/to are { lat, lng } -> { distanceM, durationSec, geometry:[[lat,lng]] } | null
 export async function fetchRoute(from, to){
   try {
