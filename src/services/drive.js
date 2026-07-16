@@ -10,6 +10,20 @@ import {
 import { scoreFromEvents, analyzeDrive, effectivenessScore } from './scoring.js';
 import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
+import { ARRIVAL_RADIUS_M } from '../constants.js';
+
+// Did the drive actually end at the destination? Effectiveness must NOT be
+// awarded otherwise — ending short (e.g. a gas stop halfway) would look like
+// arriving impossibly early. Needs GPS samples to verify (recovered drives can't).
+function arrivedAtDestination(drive){
+  if (!drive.destination || !drive.samples || !drive.samples.length) return false;
+  const last = drive.samples[drive.samples.length - 1];
+  const d = haversine(
+    { lat: last.lat, lon: last.lon },
+    { lat: drive.destination.lat, lon: drive.destination.lng }
+  );
+  return d <= ARRIVAL_RADIUS_M;
+}
 import { detectCorridors } from './corridors.js';
 
 export function persistActiveDrive(){
@@ -66,9 +80,9 @@ export function checkRecoveredDrive(callbacks = {}){
       destination:    saved.destination || null,
       targetEtaSec:   saved.targetEtaSec || null,
       routeDistanceM: saved.routeDistanceM || null,
-      effectiveness:  saved.targetEtaSec
-        ? effectivenessScore(saved.targetEtaSec, Math.round((saved.durationMs || 0) / 1000))
-        : null,
+      // Recovered drives keep no GPS samples, so arrival can't be verified —
+      // don't award effectiveness we can't stand behind.
+      effectiveness:  null,
     };
     const all = loadDrives();
     if (all.find(d => d.startTime === saved.startTs || d.id === drive.id)) return; // already saved
@@ -157,8 +171,11 @@ export function finalizeAndReview(callbacks = {}){
   const analysis = analyzeDrive(drive);
   drive.score = analysis.score;
   drive.dims  = analysis.dims;
-  // Destination Drive: score arrival time vs the locked ETA (null if no destination)
-  drive.effectiveness = drive.targetEtaSec
+  // Destination Drive: only score effectiveness if you actually REACHED the
+  // destination — otherwise ending short of it looks like arriving early. No
+  // arrival → unfinished (renders like a normal drive, no effectiveness).
+  drive.arrived = arrivedAtDestination(drive);
+  drive.effectiveness = (drive.targetEtaSec && drive.arrived)
     ? effectivenessScore(drive.targetEtaSec, Math.round(drive.durationMs / 1000))
     : null;
   saveDrive(drive);

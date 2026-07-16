@@ -102,9 +102,15 @@ export const REC_POS_KEY   = 'smoothaf.rec_pos';
 export const GARAGE_KEY    = 'smoothaf.garage';
 
 // ── Destination Drive (routing + effectiveness) ───────────────────────────────
-export const ROUTING_PROVIDER = 'osm';   // 'osm' (Nominatim+OSRM) | future: 'google' | 'mapbox'
+// 'mapbox' uses Mapbox (traffic-aware) when a token is present, else falls back
+// to 'osm' (free Nominatim+OSRM, no live traffic). So the app works before the
+// key is set and goes traffic-aware automatically once VITE_MAPBOX_TOKEN exists.
+export const ROUTING_PROVIDER = 'mapbox';
+export const MAPBOX_TOKEN     = import.meta.env?.VITE_MAPBOX_TOKEN || '';
+export const MAPBOX_BASE      = 'https://api.mapbox.com';
 export const NOMINATIM_BASE   = 'https://nominatim.openstreetmap.org';
 export const OSRM_BASE        = 'https://router.project-osrm.org';
 export const ETA_BUFFER       = 1.2;      // OSRM durations run optimistic (no lights/traffic);
-                                          // trends to ~1.0 once a traffic-aware provider is wired in
+                                          // set to ~1.0 automatically when Mapbox traffic is active (see routing.js)
 export const PACE_PENALTY     = 180;      // effectiveness points lost per unit of over-fraction
+export const ARRIVAL_RADIUS_M = 200;      // must end within this of the destination for effectiveness to count
