@@ -31,7 +31,9 @@ export function renderReview(drive){
 
   // ── Score ──────────────────────────────────────────────────────────────────
   const scoreEl = document.getElementById('score-header-btn');
-  if (scoreEl) scoreEl.textContent = analysis.score;
+  // Headline is the composite (smoothness + clock bonus). Falls back to the
+  // freshly analyzed smoothness for old drives with no stored composite.
+  if (scoreEl) scoreEl.textContent = drive.score ?? analysis.score;
 
   // ── Destination Drive two-axis result ───────────────────────────────────────
   {
