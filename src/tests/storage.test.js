@@ -15,7 +15,7 @@ const { loadLifetimeScore, saveLifetimeScore, loadDrives, saveDrive, saveDrives,
         loadDriverName, saveDriverName, migrateLifetimeScore,
         toggleFavoriteDrive, deleteDrive, getOsmLimit, setOsmLimit,
 } = await import('../services/storage.js');
-const { OSM_CACHE_TTL, OSM_SPEED_CACHE } = await import('../constants.js');
+const { OSM_CACHE_TTL, OSM_SPEED_CACHE, OSM_CACHE_MAX } = await import('../constants.js');
 
 beforeEach(() => localStorageMock.clear());
 
@@ -133,5 +133,27 @@ describe('OSM speed-limit cache', () => {
     const expiredCache = { '37.500_-122.000': { limitMps: 20, ts: Date.now() - OSM_CACHE_TTL - 1000 } };
     store[OSM_SPEED_CACHE] = JSON.stringify(expiredCache);
     expect(getOsmLimit(37.500, -122.000)).toBeNull();
+  });
+
+  it('evicts the oldest entry when cache exceeds max size', () => {
+    // Pre-populate exactly OSM_CACHE_MAX entries with staggered timestamps (1s apart)
+    const cache = {};
+    const baseTs = Date.now() - OSM_CACHE_MAX * 1000;
+    for (let i = 0; i < OSM_CACHE_MAX; i++) {
+      // lat rounds to e.g. "51.000" … "51.499" — well clear of test coords elsewhere
+      const lat = (51 + i * 0.001).toFixed(3);
+      cache[`${lat}_0.000`] = { limitMps: 10, ts: baseTs + i * 1000 };
+    }
+    store[OSM_SPEED_CACHE] = JSON.stringify(cache);
+
+    // Adding one more entry (501st) should trigger eviction of the oldest
+    setOsmLimit(52.000, 0.000, 20);
+
+    const after = JSON.parse(store[OSM_SPEED_CACHE]);
+    expect(Object.keys(after).length).toBeLessThanOrEqual(OSM_CACHE_MAX);
+    // "51.000_0.000" was the oldest (ts = baseTs) and should be gone
+    expect(after['51.000_0.000']).toBeUndefined();
+    // The newly added entry should survive
+    expect(after['52.000_0.000']).toBeDefined();
   });
 });
