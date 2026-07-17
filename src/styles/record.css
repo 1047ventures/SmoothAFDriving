@@ -151,16 +151,17 @@
   .rec-indicator{position:static;display:flex;align-items:center;gap:7px}
   .rec-dot{width:8px;height:8px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 8px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
-  .rec-source{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.86)}
-  .corner-lbl{font-family:var(--sans);font-size:8px;letter-spacing:.38em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:1px;text-align:right}
-  .corner-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream);letter-spacing:-.01em;line-height:1;text-align:right}
+  .rec-source{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.86)}
+  .corner-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.34em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:2px;text-align:right}
+  .corner-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);letter-spacing:-.01em;line-height:1;text-align:right}
 
   /* destination drive: live pace strip */
-  .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0) + 52px);left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:10px;padding:5px 14px;border-radius:999px;background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.12);font-family:var(--sans);font-size:10px;letter-spacing:.04em;color:rgba(244,235,217,.86);white-space:nowrap}
+  /* Big, translucent, glanceable countdown — floats over the drive, taps pass through */
+  .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0) + 44px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
   .pace-strip.hidden{display:none}
-  .pace-target{color:rgba(244,235,217,.86)}
-  .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.75);font-weight:600}
-  .pace-delta{color:rgba(244,235,217,.75);font-weight:600}
+  .pace-target{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5)}
+  .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.62);font-weight:600}
+  .pace-delta{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(30px,9vw,44px);line-height:1.04;letter-spacing:-.02em;color:rgba(244,235,217,.55)}
 
   /* Fix 1: "Acquiring GPS…" — subtle pill sitting just under the Score hero
      number, cleared by markGpsAcquired() once the first GPS sample lands */
@@ -176,10 +177,10 @@
   .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 20px;gap:4px}
   .hero-speed{display:flex;flex-direction:column;flex:1 1 0;min-width:0}
   .hero-num-speed{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(88px,36vw,144px);line-height:.86;letter-spacing:-.05em;color:var(--cream)}
-  .hero-speed-unit{font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,235,217,.86);margin-top:7px;align-self:flex-end}
+  .hero-speed-unit{font-family:var(--sans);font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,235,217,.86);margin-top:7px;align-self:flex-end}
   .hero-slash{font-family:var(--serif);font-style:italic;font-weight:200;font-size:clamp(80px,33vw,130px);line-height:1;color:rgba(244,235,217,.10);align-self:center;margin-top:20px;flex-shrink:0}
   .hero-score{display:flex;flex-direction:column;align-items:flex-end;margin-top:44px;flex:1 1 0;min-width:0}
-  .hero-score-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.38em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:2px}
+  .hero-score-lbl{font-family:var(--sans);font-size:11px;letter-spacing:.34em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:3px}
   .hero-num-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(66px,28vw,110px);line-height:.86;letter-spacing:-.04em;transition:color .25s}
   #screen-record.smooth  .hero-num-score{color:rgba(125,196,118,.95)}
   #screen-record.braking .hero-num-score{color:rgba(224,96,80,.95)}
@@ -205,9 +206,9 @@
   .bot-stat{display:flex;flex-direction:column}
   .bot-stat--center{align-items:center}
   .bot-stat--right{align-items:flex-end}
-  .bot-lbl{font-family:var(--sans);font-size:8px;letter-spacing:.38em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:3px}
-  .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:24px;color:var(--cream);letter-spacing:-.02em;line-height:1}
-  .bot-unit{font-family:var(--sans);font-style:normal;font-size:11px;color:rgba(244,235,217,.86)}
+  .bot-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
+  .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);letter-spacing:-.02em;line-height:1}
+  .bot-unit{font-family:var(--sans);font-style:normal;font-size:13px;color:rgba(244,235,217,.86)}
   .fuel-segs{display:flex;gap:5px;align-items:center;margin-top:5px}
   .fuel-seg{height:5px;width:24px;border-radius:3px;background:rgba(244,235,217,.12)}
   #screen-record.smooth  .fuel-seg.on{background:var(--good)}
