@@ -1,5 +1,24 @@
 # Smooth AF Driving — Developer Guide
 
+## ⚠️ UI/UX changes — ALWAYS visually verify (operating rule)
+
+Any change that affects the rendered UI (CSS, HTML/markup, layout, or JS that
+changes what's on screen) MUST be **visually reviewed before it's called done** —
+never ship UI on "build passes / tests green" alone.
+
+The required step: dispatch a **UI/UX-expert subagent** that actually *renders*
+the affected screen(s) and critiques them. It should drive Playwright (Chromium
+is preinstalled at `/opt/pw-browsers`; `PLAYWRIGHT_BROWSERS_PATH` is set) against
+the deploy-preview URL or a local `npm run preview`, at a phone viewport, then:
+- navigate to the changed screen(s) (mock geolocation/permissions to reach
+  in-drive screens; or toggle DOM state via `page.evaluate` to force a state like
+  the pace strip visible), take **screenshots**, and read them back,
+- critique layout, legibility, spacing, overlap, alignment, and overall feel,
+- report concrete fixes.
+
+Then fix what it finds and re-verify. This applies to every UI change, every PR —
+no exceptions, even for "one-liner" tweaks.
+
 ## Architecture Overview
 
 Vanilla JS PWA. No framework. Vite for bundling + Vitest for tests.
