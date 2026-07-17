@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v109';
+export const APP_VERSION = 'v110';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
@@ -115,3 +115,7 @@ export const ETA_BUFFER       = 1.2;      // absorbs OSRM optimism (no lights/tr
                                           // dynamic-ETA work lands (routing.isTrafficAware() exposes the mode).
 export const PACE_PENALTY     = 180;      // effectiveness points lost per unit of over-fraction
 export const ARRIVAL_RADIUS_M = 200;      // must end within this of the destination for effectiveness to count
+export const CLOCK_MAX_SWING = 15;   // max ± points the clock can move the score
+export const CLOCK_BEAT_FULL = 0.20; // beating the (buffered) ETA by 20% = full +bonus
+export const CLOCK_LATE_FULL = 0.20; // 20% over the (buffered) ETA = full -penalty
+export const SCORE_MAX        = 100 + CLOCK_MAX_SWING; // drives can break 100 (rare)
