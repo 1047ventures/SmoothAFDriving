@@ -8,7 +8,7 @@ vi.stubGlobal('localStorage', {
   clear:      () => Object.keys(store).forEach(k => delete store[k]),
 });
 
-const { loadCorridors, saveCorridors, upsertCorridorDrive } = await import('../services/storage.js');
+const { loadCorridors, saveCorridors, upsertCorridorDrive, mergeDuplicateCorridors } = await import('../services/storage.js');
 const { sampleGpsPoints, slugifyCorridorId } = await import('../services/corridors.js');
 
 beforeEach(() => { Object.keys(store).forEach(k => delete store[k]); });
@@ -44,6 +44,48 @@ describe('upsertCorridorDrive', () => {
     upsertCorridorDrive({ name: 'W Colfax Ave',     city: 'Denver', centerLat: 39.74, centerLon: -104.99, osmWayId: 456, score: 75, distanceMeters: 800,  drivenAt: 2000 });
     expect(loadCorridors()).toHaveLength(2);
   });
+  it('keys corridors by road name only, so the same road entered from a different start city merges into one entry', () => {
+    upsertCorridorDrive({ name: 'Denver-Boulder Turnpike', city: 'Denver',    centerLat: 39.8, centerLon: -105.1, osmWayId: 111, score: 80, distanceMeters: 5000, drivenAt: 1000 });
+    upsertCorridorDrive({ name: 'Denver-Boulder Turnpike', city: 'Broomfield', centerLat: 39.9, centerLon: -105.1, osmWayId: 111, score: 88, distanceMeters: 5200, drivenAt: 2000 });
+    const all = loadCorridors();
+    expect(all).toHaveLength(1);
+    expect(all[0].drives).toHaveLength(2);
+    // Display city refreshes to the most recent drive's city.
+    expect(all[0].city).toBe('Broomfield');
+  });
+});
+
+describe('mergeDuplicateCorridors', () => {
+  it('is a no-op (returns the same reference) when every entry already has its canonical name-only id', () => {
+    const corridors = [
+      { corridorId: slugifyCorridorId('N Wadsworth Blvd'), name: 'N Wadsworth Blvd', city: 'Denver', drives: [{ score: 82, distanceMeters: 1200, drivenAt: 1000 }] },
+    ];
+    expect(mergeDuplicateCorridors(corridors)).toBe(corridors);
+  });
+  it('merges legacy name+city duplicates for the same road into a single entry', () => {
+    const legacy = [
+      { corridorId: 'denver-boulder-turnpike-denver',    name: 'Denver-Boulder Turnpike', city: 'Denver',    centerLat: 39.8, centerLon: -105.1, osmWayId: 111, drives: [{ score: 80, distanceMeters: 5000, drivenAt: 1000 }] },
+      { corridorId: 'denver-boulder-turnpike-broomfield', name: 'Denver-Boulder Turnpike', city: 'Broomfield', centerLat: 39.9, centerLon: -105.1, osmWayId: 111, drives: [{ score: 88, distanceMeters: 5200, drivenAt: 2000 }] },
+      { corridorId: 'denver-boulder-turnpike-boulder',    name: 'Denver-Boulder Turnpike', city: 'Boulder',    centerLat: 40.0, centerLon: -105.2, osmWayId: 111, drives: [{ score: 70, distanceMeters: 4800, drivenAt: 500  }] },
+    ];
+    const merged = mergeDuplicateCorridors(legacy);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].corridorId).toBe(slugifyCorridorId('Denver-Boulder Turnpike'));
+    expect(merged[0].drives).toHaveLength(3);
+    expect(merged[0].drives.map(d => d.score).sort()).toEqual([70, 80, 88]);
+    // City comes from the entry with the most recent drive (drivenAt: 2000 → Broomfield).
+    expect(merged[0].city).toBe('Broomfield');
+  });
+  it('is idempotent — running it again on its own output changes nothing', () => {
+    const legacy = [
+      { corridorId: 'a-denver', name: 'A St', city: 'Denver', drives: [{ score: 80, distanceMeters: 100, drivenAt: 1 }] },
+      { corridorId: 'a-boulder', name: 'A St', city: 'Boulder', drives: [{ score: 60, distanceMeters: 200, drivenAt: 2 }] },
+    ];
+    const once  = mergeDuplicateCorridors(legacy);
+    const twice = mergeDuplicateCorridors(once);
+    expect(twice).toBe(once);
+    expect(twice).toEqual(once);
+  });
 });
 
 describe('sampleGpsPoints', () => {
@@ -72,12 +114,16 @@ describe('sampleGpsPoints', () => {
 
 describe('slugifyCorridorId', () => {
   it('lowercases and replaces spaces with hyphens', () => {
-    expect(slugifyCorridorId('N Wadsworth Blvd', 'Denver')).toBe('n-wadsworth-blvd-denver');
+    expect(slugifyCorridorId('N Wadsworth Blvd')).toBe('n-wadsworth-blvd');
   });
   it('removes special characters', () => {
-    expect(slugifyCorridorId('W. Colfax Ave.', 'Denver')).toBe('w-colfax-ave-denver');
+    expect(slugifyCorridorId('W. Colfax Ave.')).toBe('w-colfax-ave');
   });
   it('strips leading and trailing hyphens', () => {
-    expect(slugifyCorridorId('Speer Blvd', 'Denver')).toBe('speer-blvd-denver');
+    expect(slugifyCorridorId('Speer Blvd')).toBe('speer-blvd');
+  });
+  it('is name-only — city is not part of the id, so the same road from different start cities shares one id', () => {
+    expect(slugifyCorridorId('Denver-Boulder Turnpike')).toBe(slugifyCorridorId('Denver-Boulder Turnpike'));
+    expect(slugifyCorridorId('Denver-Boulder Turnpike')).toBe('denver-boulder-turnpike');
   });
 });

@@ -12,6 +12,7 @@ import {
   SOCIAL_HANDLES_KEY,
   CORRIDORS_KEY,
 } from '../constants.js';
+import { slugifyCorridorId } from './corridors.js';
 
 // ── Lifetime score ────────────────────────────────────────────────────────────
 export function loadLifetimeScore(){
@@ -142,20 +143,96 @@ export function setOsmLimit(lat, lon, limitMps){
 }
 
 // ── Corridors ─────────────────────────────────────────────────────────────────
+
+/** Latest drivenAt timestamp within a corridor entry's drive list (guards missing/legacy fields). */
+function lastDrivenAt(entry){
+  const drives = entry?.drives || [];
+  return drives.reduce((max, d) => Math.max(max, d?.drivenAt || 0), -Infinity);
+}
+
+/**
+ * One-time, idempotent merge of corridor entries that were previously keyed by
+ * name+city into the current name-only identity. Groups all stored corridors by
+ * `slugifyCorridorId(name)`; when more than one legacy entry maps to the same
+ * canonical id, they're combined into a single corridor — drive histories are
+ * concatenated (so drive counts, score history and distance totals are all
+ * preserved, keeping both the best and the most recent drives), and the
+ * display fields (city, center, osmWayId) are taken from whichever legacy
+ * entry has the most recent drive.
+ *
+ * Safe to call on every load: once every entry's corridorId already matches
+ * its canonical name-only id (the common case after the first run), this is a
+ * no-op and returns the input untouched.
+ */
+export function mergeDuplicateCorridors(corridors){
+  if (!Array.isArray(corridors) || !corridors.length) return corridors;
+
+  const groups = new Map(); // canonicalId -> legacy entries[]
+  for (const entry of corridors){
+    if (!entry || !entry.name) continue;
+    const canonicalId = slugifyCorridorId(entry.name);
+    if (!groups.has(canonicalId)) groups.set(canonicalId, []);
+    groups.get(canonicalId).push(entry);
+  }
+
+  // No-op fast path: every entry is already its own group under the correct id.
+  const alreadyMerged = groups.size === corridors.length
+    && corridors.every(entry => entry?.corridorId === slugifyCorridorId(entry?.name || ''));
+  if (alreadyMerged) return corridors;
+
+  const merged = [];
+  for (const [canonicalId, entries] of groups){
+    if (entries.length === 1){
+      const [only] = entries;
+      merged.push(only.corridorId === canonicalId ? only : { ...only, corridorId: canonicalId });
+      continue;
+    }
+    // Multiple legacy (name+city) entries for the same road — combine them.
+    let mostRecent = entries[0], mostRecentTs = lastDrivenAt(entries[0]);
+    for (let i = 1; i < entries.length; i++){
+      const ts = lastDrivenAt(entries[i]);
+      if (ts > mostRecentTs){ mostRecent = entries[i]; mostRecentTs = ts; }
+    }
+    const combinedDrives = entries
+      .flatMap(e => e.drives || [])
+      .sort((a, b) => (a?.drivenAt || 0) - (b?.drivenAt || 0));
+    merged.push({
+      corridorId: canonicalId,
+      name:       mostRecent.name,
+      city:       mostRecent.city,
+      centerLat:  mostRecent.centerLat,
+      centerLon:  mostRecent.centerLon,
+      osmWayId:   mostRecent.osmWayId ?? null,
+      drives:     combinedDrives,
+    });
+  }
+  return merged;
+}
+
 export function loadCorridors(){
-  try { return JSON.parse(localStorage.getItem(CORRIDORS_KEY) || '[]'); } catch { return []; }
+  let corridors;
+  try { corridors = JSON.parse(localStorage.getItem(CORRIDORS_KEY) || '[]'); } catch { return []; }
+  const merged = mergeDuplicateCorridors(corridors);
+  if (merged !== corridors) saveCorridors(merged);
+  return merged;
 }
 export function saveCorridors(corridors){
   try { localStorage.setItem(CORRIDORS_KEY, JSON.stringify(corridors)); } catch {}
 }
 export function upsertCorridorDrive({ name, city, centerLat, centerLon, osmWayId, score, distanceMeters, drivenAt }){
   const all = loadCorridors();
-  const id  = `${name}-${city}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const id  = slugifyCorridorId(name);
   const idx = all.findIndex(c => c.corridorId === id);
   const drive = { score, distanceMeters, drivenAt };
   if (idx === -1){
     all.push({ corridorId: id, name, city, centerLat, centerLon, osmWayId: osmWayId || null, drives: [drive] });
   } else {
+    // Refresh display fields to the latest drive's city/road-name metadata,
+    // and keep combining the drive history (count, scores, distance, timestamps).
+    all[idx].city      = city;
+    all[idx].centerLat  = centerLat;
+    all[idx].centerLon  = centerLon;
+    all[idx].osmWayId   = osmWayId || all[idx].osmWayId || null;
     all[idx].drives.push(drive);
   }
   saveCorridors(all);

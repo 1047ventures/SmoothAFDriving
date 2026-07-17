@@ -7,8 +7,16 @@ const MIN_SEGMENT_METERS = 500;
 
 // ── Pure helpers (exported for tests) ────────────────────────────────────────
 
-export function slugifyCorridorId(name, city){
-  return `${name}-${city}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// Corridor identity is the road NAME ONLY — not name+city. The same road driven
+// from different entrances/start-cities (e.g. "Denver-Boulder Turnpike" entered
+// from Denver vs Broomfield vs Boulder) must resolve to ONE corridor. `city` is
+// kept as a display/metadata field (see upsertCorridorDrive), not part of the id.
+//
+// Known limitation (acceptable for v1): two genuinely different roads that
+// happen to share a name in different areas will now merge into one corridor.
+// A future refinement could add a region/route-ref qualifier to disambiguate.
+export function slugifyCorridorId(name){
+  return `${name}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 /** Sample one GPS point per ~250m of cumulative distance, capped at maxPoints. */
