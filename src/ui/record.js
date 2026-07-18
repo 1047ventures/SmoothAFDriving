@@ -229,6 +229,7 @@ export function updateLiveUI(){
       }
 
       let deltaText = '—';
+      let deltaCls = '';   // '' | 'ahead' | 'behind' — drives the colour
       if (last && state.routeDistanceM > 0){
         const remain = haversine({ lat: last.lat, lon: last.lon }, { lat: state.destination.lat, lon: state.destination.lng });
         const fracDone = clamp(1 - remain / state.routeDistanceM, 0, 1);
@@ -236,10 +237,17 @@ export function updateLiveUI(){
         const expectedElapsed = fracDone * bufferedEta;
         const delta = elapsedSec - expectedElapsed; // + behind, - ahead
         const mag = fmtDuration(Math.abs(delta) * 1000);
-        deltaText = delta <= 0 ? `▲ ${mag} ahead` : `▼ ${mag} behind`;
+        // Ahead/behind is shown by the glyph + colour (see .pace-delta.ahead/.behind),
+        // so the big number stays just the clock delta.
+        deltaText = delta <= 0 ? `▲ ${mag}` : `▼ ${mag}`;
+        deltaCls  = delta <= 0 ? 'ahead' : 'behind';
       }
       const deltaEl = document.getElementById('pace-delta');
-      if (deltaEl) deltaEl.textContent = deltaText;
+      if (deltaEl){
+        deltaEl.textContent = deltaText;
+        deltaEl.classList.remove('ahead', 'behind');
+        if (deltaCls) deltaEl.classList.add(deltaCls);
+      }
     } else {
       paceStrip?.classList.add('hidden');
     }

@@ -161,7 +161,11 @@
   .pace-strip.hidden{display:none}
   .pace-target{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5)}
   .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.62);font-weight:600}
-  .pace-delta{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(30px,9vw,44px);line-height:1.04;letter-spacing:-.02em;color:rgba(244,235,217,.55)}
+  .pace-delta{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(30px,9vw,44px);line-height:1.04;letter-spacing:-.02em;color:rgba(244,235,217,.55);transition:color .25s}
+  /* Ahead/behind is carried by colour (+ the ▲/▼ glyph) so the big number stays
+     just the clock delta — no "ahead"/"behind" words to overflow the strip. */
+  .pace-delta.ahead {color:rgba(125,196,118,.72)}
+  .pace-delta.behind{color:rgba(232,160,58,.72)}
 
   /* Fix 1: "Acquiring GPS…" — subtle pill sitting just under the Score hero
      number, cleared by markGpsAcquired() once the first GPS sample lands */
@@ -237,7 +241,7 @@
      full-width End Drive button so tapping it can't misfire the stop. */
   .debug-handle{
     position:absolute;left:50%;transform:translateX(-50%);
-    bottom:calc(env(safe-area-inset-bottom,0) + 128px);
+    bottom:calc(env(safe-area-inset-bottom,0) + 176px);
     display:flex;align-items:center;gap:6px;
     appearance:none;border:1px solid rgba(244,235,217,.22);
     background:rgba(244,235,217,.08);color:rgba(244,235,217,.82);
