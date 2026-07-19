@@ -134,6 +134,14 @@
     <!-- Ambient state glow -->
     <div class="rec-glow"></div>
 
+    <!-- Directional G-force edge glows: top=brake, bottom=accel, sides=turns.
+         Colour ramps green→amber→red with the current force magnitude (driven
+         from updateLiveUI). Pointer-events off; sit behind the HUD numbers. -->
+    <div class="eg eg-top"    id="eg-top"></div>
+    <div class="eg eg-bottom" id="eg-bottom"></div>
+    <div class="eg eg-left"   id="eg-left"></div>
+    <div class="eg eg-right"  id="eg-right"></div>
+
     <!-- SVG crosshatch texture -->
     <svg class="rec-texture" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
       <defs>

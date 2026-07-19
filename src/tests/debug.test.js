@@ -85,9 +85,9 @@ describe('pushDebugSample', () => {
     expect(bufs.ax[0]).toBeCloseTo(1.5);
     expect(bufs.ay[0]).toBeCloseTo(-0.5);
     expect(bufs.az[0]).toBeCloseTo(9.2);
-    expect(bufs.gAlpha[0]).toBeCloseTo(90 / 50);
-    expect(bufs.gBeta[0]).toBeCloseTo(45 / 50);
-    expect(bufs.gGamma[0]).toBeCloseTo(-30 / 50);
+    expect(bufs.gAlpha[0]).toBeCloseTo(90 / 10);
+    expect(bufs.gBeta[0]).toBeCloseTo(45 / 10);
+    expect(bufs.gGamma[0]).toBeCloseTo(-30 / 10);
     expect(bufs.speed[0]).toBeCloseTo(0.8); // speed / 10
   });
 

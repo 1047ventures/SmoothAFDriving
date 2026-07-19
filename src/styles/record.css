@@ -143,6 +143,18 @@
   #screen-record.braking .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(201,56,40,.22) 0%,transparent 65%)}
   #screen-record.accel   .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(232,160,58,.18) 0%,transparent 65%)}
 
+  /* Directional G-force edge glows — each edge lights when force pushes that way
+     (top=brake, bottom=accel, sides=turns). Colour + opacity set inline from
+     updateLiveUI via --eg-col; sit above the ambient glow, below the HUD. */
+  /* z-index 3: above the vignette (2) so the glow isn't smothered, below the HUD (10). */
+  .eg{position:absolute;z-index:3;pointer-events:none;opacity:0;transition:opacity .16s ease,background .18s ease}
+  /* Radial blooms from just beyond each edge — brightest at the edge centre,
+     spreading inward. Reads as the edge "lighting up" far better than a flat band. */
+  .eg-top   {top:0;left:0;right:0;height:40%;background:radial-gradient(135% 100% at 50% 0%,var(--eg-col,transparent) 0%,transparent 70%)}
+  .eg-bottom{bottom:0;left:0;right:0;height:40%;background:radial-gradient(135% 100% at 50% 100%,var(--eg-col,transparent) 0%,transparent 70%)}
+  .eg-left  {top:0;bottom:0;left:0;width:36%;background:radial-gradient(100% 135% at 0% 50%,var(--eg-col,transparent) 0%,transparent 70%)}
+  .eg-right {top:0;bottom:0;right:0;width:36%;background:radial-gradient(100% 135% at 100% 50%,var(--eg-col,transparent) 0%,transparent 70%)}
+
   /* vignette */
   .rec-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(6,4,4,.85) 0%,rgba(6,4,4,.12) 28%,rgba(6,4,4,.05) 50%,rgba(6,4,4,.18) 72%,rgba(6,4,4,.92) 100%)}
 
@@ -157,7 +169,7 @@
 
   /* destination drive: live pace strip */
   /* Big, translucent, glanceable countdown — floats over the drive, taps pass through */
-  .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0) + 44px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
+  .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0) + 64px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
   .pace-strip.hidden{display:none}
   .pace-target{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5)}
   .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.62);font-weight:600}
@@ -178,7 +190,10 @@
   }
 
   /* hero numbers */
-  .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 20px;gap:4px}
+  .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 20px;gap:4px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  /* Destination drive: the big countdown lives up top, so drop the speed/score
+     heroes down to make room for it (only when a target is set). */
+  #screen-record.has-target .rec-heroes{top:calc(env(safe-area-inset-top,0) + 150px)}
   .hero-speed{display:flex;flex-direction:column;flex:1 1 0;min-width:0}
   .hero-num-speed{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(88px,36vw,144px);line-height:.86;letter-spacing:-.05em;color:var(--cream)}
   .hero-speed-unit{font-family:var(--sans);font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,235,217,.86);margin-top:7px;align-self:flex-end}
@@ -247,10 +262,13 @@
     background:rgba(244,235,217,.08);color:rgba(244,235,217,.82);
     padding:7px 15px;border-radius:999px;
     font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
-    cursor:pointer;z-index:40;transition:background .15s,border-color .15s;
+    cursor:pointer;z-index:40;transition:background .15s,border-color .15s,bottom .28s cubic-bezier(.4,0,.2,1);
     -webkit-tap-highlight-color:transparent;
   }
   .debug-handle:active{background:rgba(244,235,217,.18);border-color:rgba(244,235,217,.4)}
+  /* When the sensor panel (height:45%) is open, the handle rides up to sit on its
+     top lip — matching the panel's .28s slide — so it reads as the panel's grab bar. */
+  .debug-handle.open{bottom:calc(45% + 6px)}
   .debug-panel{
     position:absolute;left:0;right:0;bottom:0;
     height:45%;

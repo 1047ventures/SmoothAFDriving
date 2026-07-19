@@ -97,6 +97,22 @@ export function setCalibUI(phase){
 
 function updateRoadUI(){ /* roughness tracked in state.currentRoughness; shown in review */ }
 
+// Directional G-force edge glow. `mag` is the force magnitude in m/s² pushing
+// toward this edge; colour ramps green (smooth) → amber → red (harsh), opacity
+// grows with magnitude. Below the deadzone the edge fades out.
+const EG_DEADZONE = 0.6;   // m/s² — ignore idle jitter
+function setEdgeGlow(id, mag){
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (mag < EG_DEADZONE){ el.style.opacity = '0'; return; }
+  const col = mag < 2.0 ? '111,182,105'    // green — smooth
+            : mag < 4.0 ? '232,160,58'      // amber — moderate
+            :             '224,59,47';       // red — harsh
+  const alpha = clamp((mag - EG_DEADZONE) / 3, 0.4, 0.9);
+  el.style.setProperty('--eg-col', `rgba(${col},${alpha.toFixed(3)})`);
+  el.style.opacity = '1';
+}
+
 // Fix 1 + Fix 5: called once the first real GPS sample lands. Swaps the
 // "Acquiring GPS…" state back to the normal source label (which depends on
 // whether motion permission was granted this drive) and hides the indicator.
@@ -111,7 +127,12 @@ function wireDebugPanel() {
   const panel  = document.getElementById('debug-panel');
   if (!handle || !panel || handle._debugWired) return;
   handle._debugWired = true;
-  handle.addEventListener('click', () => panel.classList.toggle('open'));
+  handle.addEventListener('click', () => {
+    const open = panel.classList.toggle('open');
+    // Ride the handle up to sit on the panel's top lip when open, so it acts as
+    // the panel's grab bar instead of floating in the middle of the data stream.
+    handle.classList.toggle('open', open);
+  });
 }
 
 export function updateLiveUI(){
@@ -193,6 +214,13 @@ export function updateLiveUI(){
     }
   }
 
+  // Directional edge glows — top=brake, bottom=accel, right/left=turn direction.
+  // `la` is +accel/−brake, `ra` is +right/−left (m/s²).
+  setEdgeGlow('eg-top',    la < 0 ? -la : 0);
+  setEdgeGlow('eg-bottom', la > 0 ?  la : 0);
+  setEdgeGlow('eg-right',  ra > 0 ?  ra : 0);
+  setEdgeGlow('eg-left',   ra < 0 ? -ra : 0);
+
   // Efficiency bar — 3 segments, based on cumulative penalty weight
   {
     const penalty = state.events.filter(e => e.type !== 'shift')
@@ -219,6 +247,7 @@ export function updateLiveUI(){
   // buffered ETA. Hidden entirely for normal (no-destination) drives.
   {
     const paceStrip = document.getElementById('pace-strip');
+    document.getElementById('screen-record')?.classList.toggle('has-target', !!state.targetEtaSec);
     if (state.targetEtaSec){
       paceStrip?.classList.remove('hidden');
       const bufferedEta = state.targetEtaSec * ETA_BUFFER; // seconds

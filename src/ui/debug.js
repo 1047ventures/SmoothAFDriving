@@ -18,9 +18,12 @@ export function pushDebugSample(state) {
   bufs.ax.push(ra.x);
   bufs.ay.push(ra.y);
   bufs.az.push(ra.z);
-  bufs.gAlpha.push((rg.alpha || 0) / 50);
-  bufs.gBeta.push( (rg.beta  || 0) / 50);
-  bufs.gGamma.push((rg.gamma || 0) / 50);
+  // Gyro (deg/s) scaled so a normal cornering rate fills the lane: ÷10 puts
+  // full-lane at ±30 deg/s (a brisk turn), instead of the old ÷50 that needed
+  // ±150 deg/s to move — the trace barely twitched in real driving.
+  bufs.gAlpha.push((rg.alpha || 0) / 10);
+  bufs.gBeta.push( (rg.beta  || 0) / 10);
+  bufs.gGamma.push((rg.gamma || 0) / 10);
   bufs.speed.push(spd / 10);
   if (bufs.ax.length > MAX_POINTS) BUF_KEYS.forEach(k => bufs[k].shift());
 }
@@ -41,7 +44,7 @@ const GYRO = [
 const LANES  = [...ACCEL, ...GYRO];
 const LEGEND = [...LANES, { key: 'speed', color: '#888888', label: 'Spd÷10' }];
 
-// ± full-scale mapped to each lane's half-height (gyro is pre-scaled ÷50 in
+// ± full-scale mapped to each lane's half-height (gyro is pre-scaled ÷10 in
 // pushDebugSample, so both accel m/s² and gyro land in a comparable range).
 const LANE_HALF_RANGE = 3;
 
