@@ -1,10 +1,13 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
-import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier } from '../services/scoring.js';
+import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
-import { loadDrives } from '../services/storage.js';
+import { loadDrives, loadDriverName } from '../services/storage.js';
+
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 let mapInstance = null;
 let mapLayers = [];
@@ -18,6 +21,19 @@ export function renderReview(drive){
 
   const analysis = analyzeDrive(drive);
   reviewAnalysis = analysis;
+
+  // ── Narrative recap — the story of the drive, up top ────────────────────────
+  {
+    const narrEl = document.getElementById('rv-narrative');
+    if (narrEl){
+      const sentences = driveNarrative(drive, analysis, loadDriverName());
+      // Emphasise the closing hand-off line; keep the rest as clean prose.
+      const last = sentences[sentences.length - 1];
+      const body = sentences.slice(0, -1).join(' ');
+      narrEl.innerHTML = `${escapeHtml(body)} <b>${escapeHtml(last)}</b>`;
+    }
+  }
+
   const exportBtn = document.getElementById('rv-export-btn');
   if (exportBtn) {
     exportBtn.onclick = () => exportDrive(drive, analysis);
@@ -149,6 +165,23 @@ export function renderReview(drive){
       coachingCard.style.display = 'block';
     } else {
       coachingCard.style.display = 'none';
+    }
+  }
+
+  // ── Momentum line + best stretch ──────────────────────────────────────────
+  renderMomentum(drive, analysis);
+  {
+    const bestBlock = document.getElementById('rv-best-block');
+    const bestText  = document.getElementById('rv-best-text');
+    const streak    = analysis.smoothStreakMi;
+    if (bestBlock && bestText && streak != null && streak >= 0.3){
+      const distMi = metersToMiles(drive.distanceMeters || 0);
+      bestText.textContent = (distMi > 0 && streak >= distMi * 0.95)
+        ? 'Clean the whole way — not a single harsh input.'
+        : `${streak.toFixed(1)} mi with zero harsh inputs — your smoothest run of the drive.`;
+      bestBlock.style.display = '';
+    } else if (bestBlock){
+      bestBlock.style.display = 'none';
     }
   }
 
@@ -326,6 +359,72 @@ export function renderReview(drive){
   }
 
   setTimeout(() => mapInstance.invalidateSize(), 80);
+}
+
+// -------------------------------------------------------------------------
+// Momentum line — smoothness score across the drive (the recap narrative)
+// -------------------------------------------------------------------------
+function momentumColor(score){
+  return score >= 88 ? '#6FB669' : score >= 72 ? '#E8A03A' : '#E03B2F';
+}
+
+function renderMomentum(drive, analysis){
+  const block  = document.getElementById('rv-momentum');
+  const canvas = document.getElementById('rv-momentum-canvas');
+  if (!block || !canvas) return;
+  const series = momentumSeries(drive);
+  if (series.length < 4){ block.style.display = 'none'; return; }
+  block.style.display = '';
+
+  const avg = Math.round(series.reduce((s, p) => s + p.score, 0) / series.length);
+  const low = series.reduce((m, p) => p.score < m.score ? p : m, series[0]);
+  const subEl = document.getElementById('rv-momentum-sub');
+  if (subEl) subEl.textContent = `avg ${avg} · low ${low.score}`;
+
+  // Defer to next frame so the canvas has its laid-out width.
+  requestAnimationFrame(() => {
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth, H = canvas.offsetHeight;
+    if (!W || !H) return;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    const pad = 4;
+    const x = i => (i / (series.length - 1)) * (W - pad * 2) + pad;
+    const y = v => H - pad - (clamp(v, 0, 100) / 100) * (H - pad * 2);
+
+    // Gridlines at 50 / 90
+    ctx.strokeStyle = 'rgba(244,235,217,.08)'; ctx.lineWidth = 1;
+    [50, 90].forEach(v => { ctx.beginPath(); ctx.moveTo(pad, y(v)); ctx.lineTo(W - pad, y(v)); ctx.stroke(); });
+
+    // Gradient fill under the line
+    ctx.beginPath();
+    ctx.moveTo(x(0), H - pad);
+    series.forEach((p, i) => ctx.lineTo(x(i), y(p.score)));
+    ctx.lineTo(x(series.length - 1), H - pad);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    const ac = momentumColor(avg);
+    g.addColorStop(0, ac + '55'); g.addColorStop(1, ac + '05');
+    ctx.fillStyle = g; ctx.fill();
+
+    // The line itself, colour segments by local score
+    ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (let i = 1; i < series.length; i++){
+      ctx.beginPath();
+      ctx.moveTo(x(i - 1), y(series[i - 1].score));
+      ctx.lineTo(x(i), y(series[i].score));
+      ctx.strokeStyle = momentumColor((series[i - 1].score + series[i].score) / 2);
+      ctx.stroke();
+    }
+
+    // Mark the lowest point (the dip)
+    const li = series.indexOf(low);
+    ctx.fillStyle = momentumColor(low.score);
+    ctx.beginPath(); ctx.arc(x(li), y(low.score), 3.5, 0, Math.PI * 2); ctx.fill();
+  });
 }
 
 // -------------------------------------------------------------------------

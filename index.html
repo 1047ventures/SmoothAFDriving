@@ -305,6 +305,9 @@
     <!-- v2 results body -->
     <div class="rv-body">
 
+      <!-- Narrative recap — the story of the drive, leads into the numbers -->
+      <p class="rv-narrative" id="rv-narrative"></p>
+
       <!-- Score hero (tap number for analysis) -->
       <div class="rv-score-row">
         <button id="score-header-btn" class="rv-score-num">--</button>
@@ -329,6 +332,16 @@
           <div class="dest-axis-lbl">Efficiency</div>
           <div class="dest-axis-sub">smoothness</div>
         </div>
+      </div>
+
+      <!-- Momentum: smoothness score across the drive -->
+      <div class="rv-momentum" id="rv-momentum" style="display:none">
+        <div class="rv-momentum-head">
+          <span class="rv-momentum-title">Momentum</span>
+          <span class="rv-momentum-sub" id="rv-momentum-sub">—</span>
+        </div>
+        <canvas class="rv-momentum-canvas" id="rv-momentum-canvas"></canvas>
+        <div class="rv-momentum-axis"><span>Start</span><span>Finish</span></div>
       </div>
 
       <!-- Coaching persona card -->
@@ -366,6 +379,12 @@
       <div style="display:none">
         <span id="rv-smooth-main"></span><span id="rv-smooth-sub"></span>
         <span id="rv-events-main"></span><span id="rv-events-sub"></span>
+      </div>
+
+      <!-- Highlights: best stretch + hardest moment -->
+      <div class="rv-best" id="rv-best-block" style="display:none">
+        <div class="rv-best-label">Best Stretch</div>
+        <div class="rv-best-text" id="rv-best-text">—</div>
       </div>
 
       <!-- Hardest moment -->

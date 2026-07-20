@@ -355,6 +355,75 @@ export function driveCoaching(analysis){
   return cards;
 }
 
+// A conversational, second-person recap of how the drive went down — the
+// story that leads the post-drive screen before the numbers. Pure + testable
+// (driverName passed in). Returns an array of sentences (join with ' ').
+export function driveNarrative(drive, analysis, driverName){
+  const out = [];
+  const first = (driverName || '').trim().split(/\s+/)[0] || '';
+  const hi = first ? `Alright ${first}.` : 'Alright.';
+
+  const startT = new Date(drive.startTime);
+  const endT   = new Date(drive.startTime + (drive.durationMs || 0));
+  const clock  = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const durMin = Math.max(1, Math.round((drive.durationMs || 0) / 60000));
+  const dest   = drive.destination?.label ? drive.destination.label.split(',')[0].trim() : null;
+  const miStr  = metersToMiles(drive.distanceMeters || 0).toFixed(1);
+
+  // 1 — where you went
+  if (dest && drive.arrived){
+    out.push(`${hi} You pulled out at ${clock(startT)} and rolled into ${dest} at ${clock(endT)} — ${miStr} mi, ${durMin} min on the road.`);
+  } else if (dest){
+    out.push(`${hi} You set off at ${clock(startT)} aiming for ${dest} — ${miStr} mi over ${durMin} min.`);
+  } else {
+    out.push(`${hi} You rolled out at ${clock(startT)} and covered ${miStr} mi in ${durMin} min.`);
+  }
+
+  // 2 — the clock (destination drives only)
+  if (drive.effectiveness != null && drive.targetEtaSec > 0){
+    const targetMs = drive.targetEtaSec * ETA_BUFFER * 1000;
+    const usedMs   = (drive.movingSec != null ? drive.movingSec * 1000 : (drive.durationMs || 0));
+    const diff     = usedMs - targetMs; // + late, − early
+    const mins = ms => { const m = Math.round(ms / 60000); return m <= 1 ? 'about a minute' : `${m} minutes`; };
+    const pit = (drive.pitStopMs || 0) > 60000
+      ? ` A ${Math.round(drive.pitStopMs / 60000)}-min stop along the way didn't count against you.` : '';
+    if (diff <= -60000)      out.push(`Traffic played nice, so you held a steady pace and got there ${mins(-diff)} ahead of schedule.${pit}`);
+    else if (diff <= 45000)  out.push(`You landed right on schedule.${pit}`);
+    else                     out.push(`It was slower going than the ETA figured — ${mins(diff)} behind.${pit}`);
+  }
+
+  // 3 — what you did well (strongest dimension)
+  const dims = analysis.dims || {};
+  const praise = {
+    cornering:     'kept it smooth through the turns',
+    throttle:      'stayed easy and progressive on the throttle',
+    braking:       'read the stops early and braked gentle',
+    steering:      'held clean, confident lines',
+    transitions:   'blended every input silky-smooth',
+    momentum:      'kept your momentum instead of stop-and-go',
+    peakHarshness: 'never once jolted the car',
+  };
+  const best = Object.entries(dims).sort((a, b) => b[1] - a[1])[0];
+  if (best && best[1] >= 80 && praise[best[0]]) out.push(`You ${praise[best[0]]}.`);
+
+  // 4 — the hiccup(s)
+  const harsh = (drive.events || []).filter(e => e.type !== 'shift' && (e.tier || 2) >= 2);
+  const worst = harsh.slice().sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
+  const noun  = t => t === 'brake' ? 'a hard brake' : t === 'accel' ? 'a quick jump on the gas' : 'a sharp turn';
+  const minIn = e => Math.max(1, Math.round((e.t || 0) / 60000));
+  if (!worst){
+    out.push(`Not a single harsh moment the whole way — clean.`);
+  } else if (harsh.length === 1){
+    out.push(`Only one hiccup — ${noun(worst.type)} about ${minIn(worst)} min in.`);
+  } else {
+    out.push(`A ${harsh.length > 4 ? 'few rough' : 'couple of rough'} moments crept in — the worst ${noun(worst.type)} around the ${minIn(worst)}-min mark.`);
+  }
+
+  // 5 — hand off to the numbers
+  out.push(`Here's how it broke down:`);
+  return out;
+}
+
 export function drivingStyleVerdict(analysis, drive){
   const { score, stopsPerMile } = analysis;
   const topMph = Math.round(mpsToMph(drive.topSpeedMps || 0));
@@ -505,6 +574,35 @@ export function computePitStopMs(samples, opts = {}){
 // floored at 0. Both inputs in seconds.
 export function movingSeconds(durationSec, pitStopSec){
   return Math.max(0, Math.round(durationSec) - Math.round(pitStopSec || 0));
+}
+
+// Momentum series — a smoothness score (0..100) over the course of the drive,
+// one point per time bucket. Dips at rough stretches, rises when you're clean.
+// The narrative line for the post-drive recap. Pure + testable.
+export function momentumSeries(drive, buckets = 48){
+  const smp = drive?.samples || [];
+  if (smp.length < 4) return [];
+  const t0 = smp[0].t, tEnd = smp[smp.length - 1].t;
+  const span = (tEnd - t0) || 1;
+  const events = (drive.events || []).filter(e => e.type !== 'shift');
+  const raw = [];
+  for (let b = 0; b < buckets; b++){
+    const bs = t0 + span * b / buckets;
+    const be = t0 + span * (b + 1) / buckets;
+    const seg = smp.filter(s => s.t >= bs && s.t < be);
+    if (!seg.length){ raw.push(raw.length ? raw[raw.length - 1] : 90); continue; }
+    // Local harshness: p75 of the per-sample peak of |longitudinal|,|lateral|.
+    const mags = seg.map(s => Math.max(Math.abs(s.la || 0), Math.abs(s.ra || 0))).sort((a, b) => a - b);
+    const p75  = mags[Math.floor(mags.length * 0.75)] || 0;
+    let local = 100 - clamp(linMap(p75, 0.4, 4.0, 0, 70), 0, 70);
+    for (const e of events){ if (e.t >= bs && e.t < be) local -= (TIER_MULT[e.tier || 2] || 1) * 6; }
+    raw.push(clamp(Math.round(local), 0, 100));
+  }
+  // Light 3-tap smoothing so the line reads as momentum, not noise.
+  return raw.map((v, i) => ({
+    t: Math.round(span * (i + 0.5) / buckets),
+    score: Math.round((raw[Math.max(0, i - 1)] + v + raw[Math.min(raw.length - 1, i + 1)]) / 3),
+  }));
 }
 
 // Effectiveness (0..100): how the actual drive time compares to the locked ETA.
