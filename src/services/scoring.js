@@ -355,72 +355,131 @@ export function driveCoaching(analysis){
   return cards;
 }
 
-// A conversational, second-person recap of how the drive went down — the
-// story that leads the post-drive screen before the numbers. Pure + testable
-// (driverName passed in). Returns an array of sentences (join with ' ').
-export function driveNarrative(drive, analysis, driverName){
+// A conversational, second-person recap of how the drive went down — the story
+// that leads the post-drive screen. It reads the SHAPE of the trip (a quick
+// neighborhood hop vs a highway haul vs a stop-and-go crawl) and only mentions
+// what's actually relevant: no takeoff/arrival clock for a short local run, no
+// "ahead of schedule" unless you were racing an ETA. `ctx` carries cross-drive
+// context (how many drives, your usual score, route familiarity). Pure + testable
+// (driverName + ctx passed in). Returns an array of sentences (join with ' ').
+export function driveNarrative(drive, analysis, driverName, ctx = {}){
   const out = [];
+  // Deterministic phrasing variety, seeded by the drive so re-renders are stable
+  // but different drives don't read identically.
+  const seed = Math.abs(Math.round(drive.startTime || 0));
+  const pick = arr => arr[seed % arr.length];
+
   const first = (driverName || '').trim().split(/\s+/)[0] || '';
-  const hi = first ? `Alright ${first}.` : 'Alright.';
+  const hi = first ? pick([`Alright ${first}.`, `OK ${first} —`, `${first} —`]) : pick(['Alright.', 'OK —', 'Rundown:']);
 
-  const startT = new Date(drive.startTime);
-  const endT   = new Date(drive.startTime + (drive.durationMs || 0));
-  const clock  = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const durMin = Math.max(1, Math.round((drive.durationMs || 0) / 60000));
+  const miNum  = metersToMiles(drive.distanceMeters || 0);
+  const miStr  = miNum.toFixed(1);
   const dest   = drive.destination?.label ? drive.destination.label.split(',')[0].trim() : null;
-  const miStr  = metersToMiles(drive.distanceMeters || 0).toFixed(1);
+  const arrived = !!(dest && drive.arrived);
 
-  // 1 — where you went
-  if (dest && drive.arrived){
-    out.push(`${hi} You pulled out at ${clock(startT)} and rolled into ${dest} at ${clock(endT)} — ${miStr} mi, ${durMin} min on the road.`);
-  } else if (dest){
-    out.push(`${hi} You set off at ${clock(startT)} aiming for ${dest} — ${miStr} mi over ${durMin} min.`);
+  const dims   = analysis.dims || {};
+  const topMph = Math.round(mpsToMph(drive.topSpeedMps || 0));
+  const avgMph = analysis.avgSpeedMph
+    || (miNum > 0 && drive.durationMs > 0 ? Math.round(miNum / (drive.durationMs / 3600000)) : 0);
+  const stops     = analysis.fullStops || 0;
+  const isShort   = miNum < 3 && durMin <= 12 && !arrived;
+  const isHighway = topMph >= 55 && avgMph >= 38;
+  const stopAndGo = (dims.momentum ?? 100) < 60 || (analysis.stopsPerMile || 0) >= 2.5;
+
+  // 1 — the shape of the trip (short local hops skip the clock entirely)
+  if (arrived){
+    out.push(`${hi} ${miStr} mi into ${dest}, ${durMin} min door to door.`);
+  } else if (dest && !isShort){
+    out.push(`${hi} ${miStr} mi toward ${dest} over ${durMin} min.`);
+  } else if (isShort){
+    const kind = pick(['Quick hop', 'Short run', 'Little jaunt', 'Quick errand']);
+    out.push(`${hi} ${kind} — ${miStr} mi ${dest ? `over to ${dest}` : 'around the neighborhood'} in about ${durMin} min.`);
   } else {
-    out.push(`${hi} You rolled out at ${clock(startT)} and covered ${miStr} mi in ${durMin} min.`);
+    out.push(`${hi} ${miStr} mi over ${durMin} min.`);
   }
 
-  // 2 — the clock (destination drives only)
-  if (drive.effectiveness != null && drive.targetEtaSec > 0){
+  // 2 — the character of the drive (pace / flow)
+  if (isHighway){
+    out.push(pick([`Highway pace — you got it up to ${topMph} and let it breathe.`, `Mostly open road, topping out around ${topMph}.`]));
+  } else if (stopAndGo){
+    out.push(pick([
+      `Real stop-and-go — ${stops} full stop${stops !== 1 ? 's' : ''} and rarely above ${topMph}.`,
+      `Classic city crawl: ${stops} full stop${stops !== 1 ? 's' : ''}, never much past ${topMph}.`,
+    ]));
+  } else {
+    out.push(pick([`You held a steady ~${avgMph} and barely had to stop.`, `Nice flowing pace, right around ${avgMph} with hardly a stop.`]));
+  }
+
+  // 3 — the clock (only when you were actually racing an ETA, and not a tiny hop)
+  if (drive.effectiveness != null && drive.targetEtaSec > 0 && !isShort){
     const targetMs = drive.targetEtaSec * ETA_BUFFER * 1000;
     const usedMs   = (drive.movingSec != null ? drive.movingSec * 1000 : (drive.durationMs || 0));
     const diff     = usedMs - targetMs; // + late, − early
     const mins = ms => { const m = Math.round(ms / 60000); return m <= 1 ? 'about a minute' : `${m} minutes`; };
     const pit = (drive.pitStopMs || 0) > 60000
-      ? ` A ${Math.round(drive.pitStopMs / 60000)}-min stop along the way didn't count against you.` : '';
-    if (diff <= -60000)      out.push(`Traffic played nice, so you held a steady pace and got there ${mins(-diff)} ahead of schedule.${pit}`);
-    else if (diff <= 45000)  out.push(`You landed right on schedule.${pit}`);
-    else                     out.push(`It was slower going than the ETA figured — ${mins(diff)} behind.${pit}`);
+      ? ` A ${Math.round(drive.pitStopMs / 60000)}-min stop didn't count against you.` : '';
+    if (diff <= -60000)      out.push(`Beat the clock — ${mins(-diff)} ahead of the ETA.${pit}`);
+    else if (diff <= 45000)  out.push(`Landed right on schedule.${pit}`);
+    else                     out.push(`Slower than the ETA figured — ${mins(diff)} behind.${pit}`);
   }
 
-  // 3 — what you did well (strongest dimension)
-  const dims = analysis.dims || {};
+  // 4 — what your hands did well
   const praise = {
-    cornering:     'kept it smooth through the turns',
-    throttle:      'stayed easy and progressive on the throttle',
-    braking:       'read the stops early and braked gentle',
-    steering:      'held clean, confident lines',
-    transitions:   'blended every input silky-smooth',
-    momentum:      'kept your momentum instead of stop-and-go',
-    peakHarshness: 'never once jolted the car',
+    cornering:     'composed through the corners',
+    braking:       'braked gentle and early',
+    steering:      'held clean lines',
+    throttle:      'kept the throttle progressive',
+    transitions:   'blended every input smooth',
+    momentum:      'kept your momentum rolling',
+    peakHarshness: 'never jolted the car',
   };
-  const best = Object.entries(dims).sort((a, b) => b[1] - a[1])[0];
-  if (best && best[1] >= 80 && praise[best[0]]) out.push(`You ${praise[best[0]]}.`);
-
-  // 4 — the hiccup(s)
-  const harsh = (drive.events || []).filter(e => e.type !== 'shift' && (e.tier || 2) >= 2);
-  const worst = harsh.slice().sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
-  const noun  = t => t === 'brake' ? 'a hard brake' : t === 'accel' ? 'a quick jump on the gas' : 'a sharp turn';
-  const minIn = e => Math.max(1, Math.round((e.t || 0) / 60000));
-  if (!worst){
-    out.push(`Not a single harsh moment the whole way — clean.`);
-  } else if (harsh.length === 1){
-    out.push(`Only one hiccup — ${noun(worst.type)} about ${minIn(worst)} min in.`);
-  } else {
-    out.push(`A ${harsh.length > 4 ? 'few rough' : 'couple of rough'} moments crept in — the worst ${noun(worst.type)} around the ${minIn(worst)}-min mark.`);
+  const handling = ['steering', 'braking', 'cornering', 'transitions'];
+  const allHands = handling.every(k => (dims[k] ?? 0) >= 95);
+  const strong = Object.entries(dims).filter(([k, v]) => v >= 88 && praise[k]).sort((a, b) => b[1] - a[1]);
+  if (allHands){
+    out.push(pick(['Your hands were dialed — clean lines, smooth corners, gentle brakes.', 'Control was locked in: clean lines, composed corners, easy on the brakes.']));
+  } else if (strong.length >= 2){
+    out.push(`You ${praise[strong[0][0]]} and ${praise[strong[1][0]]}.`);
+  } else if (strong.length === 1){
+    out.push(`You ${praise[strong[0][0]]}.`);
   }
 
-  // 5 — hand off to the numbers
-  out.push(`Here's how it broke down:`);
+  // 5 — the rough moments (recognise a single cluster vs scattered)
+  const harsh = (drive.events || []).filter(e => e.type !== 'shift' && (e.tier || 2) >= 2)
+    .slice().sort((a, b) => (a.t || 0) - (b.t || 0));
+  const noun  = t => t === 'brake' ? 'a hard brake' : t === 'accel' ? 'a jump on the gas' : 'a sharp turn';
+  const minIn = ms => Math.max(1, Math.round((ms || 0) / 60000));
+  if (!harsh.length){
+    out.push(pick(['Not a single harsh moment — clean the whole way.', 'Zero rough inputs. Buttery.']));
+  } else if (harsh.length === 1){
+    out.push(`Only one hiccup — ${noun(harsh[0].type)} about ${minIn(harsh[0].t)} min in.`);
+  } else {
+    const span = (harsh[harsh.length - 1].t || 0) - (harsh[0].t || 0);
+    const mid  = minIn(((harsh[0].t || 0) + (harsh[harsh.length - 1].t || 0)) / 2);
+    if (span <= 90000){
+      // all bunched together — one rough patch
+      const kinds = [...new Set(harsh.map(e => e.type))];
+      const desc = kinds.length === 1 ? `${harsh.length} ${noun(kinds[0]).replace(/^a /, '')}s` : 'a brake or two and a jump on the gas';
+      out.push(`The only firmness came in one patch around the ${mid}-min mark — ${desc}, all close together.`);
+    } else {
+      out.push(`A ${harsh.length > 4 ? 'few' : 'couple'} of firmer moments here and there — the hardest ${noun(harsh.sort((a, b) => (b.severity || 0) - (a.severity || 0))[0].type)} near the ${mid}-min mark.`);
+    }
+  }
+
+  // 6 — where it sits in the bigger picture (cross-drive context)
+  if (ctx && ctx.driveCount > 1){
+    const bits = [];
+    if (ctx.avgScore != null){
+      const d = (drive.score ?? analysis.score ?? 0) - ctx.avgScore;
+      bits.push(d >= 4 ? `a few points above your usual ${ctx.avgScore}` : d <= -4 ? `a bit under your usual ${ctx.avgScore}` : `right around your usual`);
+    }
+    if (ctx.similarRouteCount > 0) bits.push(`and you've run roughly this one ${ctx.similarRouteCount === 1 ? 'once' : ctx.similarRouteCount + '×'} before`);
+    if (bits.length) out.push(`That's ${bits.join(', ')}.`);
+  }
+
+  // 7 — hand off to the numbers
+  out.push(pick(["Here's how it broke down:", 'The breakdown:', "Here's the tape:"]));
   return out;
 }
 
