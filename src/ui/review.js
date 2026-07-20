@@ -26,7 +26,20 @@ export function renderReview(drive){
   {
     const narrEl = document.getElementById('rv-narrative');
     if (narrEl){
-      const sentences = driveNarrative(drive, analysis, loadDriverName());
+      // Cross-drive context: how many drives, your usual score, and how often
+      // you've run roughly this route (similar duration ±40%).
+      const others = loadDrives().filter(d => d.score != null && d.startTime !== drive.startTime);
+      const thisDur = drive.durationMs || 0;
+      const similar = others.filter(d => {
+        const dur = d.durationMs || 0;
+        return dur > 0 && Math.abs(dur - thisDur) / Math.max(thisDur, dur) < 0.4;
+      });
+      const ctx = {
+        driveCount: others.length + 1,
+        avgScore: others.length ? Math.round(others.reduce((s, d) => s + d.score, 0) / others.length) : null,
+        similarRouteCount: similar.length,
+      };
+      const sentences = driveNarrative(drive, analysis, loadDriverName(), ctx);
       // Emphasise the closing hand-off line; keep the rest as clean prose.
       const last = sentences[sentences.length - 1];
       const body = sentences.slice(0, -1).join(' ');

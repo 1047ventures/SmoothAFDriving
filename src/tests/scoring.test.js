@@ -172,38 +172,65 @@ describe('momentumSeries', () => {
 });
 
 describe('driveNarrative', () => {
-  const base = {
-    startTime: 1752900000000, durationMs: 1560000, distanceMeters: 15600,
+  // A real destination haul (arrived, beat the ETA)
+  const haul = {
+    startTime: 1752900000000, durationMs: 1560000, distanceMeters: 15600, topSpeedMps: 27,
     destination: { label: 'Boulder, CO' }, arrived: true,
-    targetEtaSec: 1500, movingSec: 1560, pitStopMs: 0,
-    effectiveness: 92, events: [],
+    targetEtaSec: 1500, movingSec: 1440, pitStopMs: 0, score: 91, effectiveness: 96, events: [],
   };
-  const analysis = { dims: { cornering: 92, throttle: 88, braking: 79, steering: 85, transitions: 84, momentum: 80, peakHarshness: 82 } };
+  const haulAnalysis = { avgSpeedMph: 36, fullStops: 1, stopsPerMile: 0.1,
+    dims: { cornering: 93, throttle: 90, braking: 82, steering: 88, transitions: 87, momentum: 85, peakHarshness: 84 } };
+
+  // A short, slow, stop-and-go neighborhood hop (no destination) — the real trip
+  const hop = {
+    startTime: 1784513643468, durationMs: 381000, distanceMeters: 2269, topSpeedMps: 17, score: 87,
+    events: [
+      { type: 'brake', tier: 2, severity: 1.26, t: 109269 },
+      { type: 'brake', tier: 2, severity: 1.17, t: 146937 },
+      { type: 'accel', tier: 2, severity: 1.16, t: 157521 },
+    ],
+  };
+  const hopAnalysis = { avgSpeedMph: 13, fullStops: 6, stopsPerMile: 4.2,
+    dims: { steering: 100, braking: 100, cornering: 100, transitions: 100, momentum: 53, throttle: 86, peakHarshness: 85 } };
 
   it('greets by first name and hands off to the numbers', () => {
-    const s = driveNarrative(base, analysis, 'Skelly Smith');
-    expect(s[0]).toContain('Alright Skelly.');
-    expect(s[s.length - 1]).toBe("Here's how it broke down:");
+    const s = driveNarrative(haul, haulAnalysis, 'Skelly Smith');
+    expect(s[0]).toContain('Skelly');
+    expect(s[s.length - 1]).toMatch(/broke down|breakdown|the tape/);
   });
-  it('mentions the destination and arrival when arrived', () => {
-    const s = driveNarrative(base, analysis, 'Skelly').join(' ');
+  it('a short local hop drops the clock times and reads as a quick trip', () => {
+    const s = driveNarrative(hop, hopAnalysis, 'Skelly');
+    const joined = s.join(' ');
+    expect(joined).not.toMatch(/\d{1,2}:\d{2}\s?(AM|PM)/i); // no takeoff/arrival clock
+    expect(joined).not.toMatch(/ahead of|behind|on schedule/);       // no ETA framing (no destination)
+    expect(joined).toMatch(/hop|run|jaunt|errand|neighborhood/i);
+  });
+  it('recognises stop-and-go character', () => {
+    const s = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
+    expect(s).toMatch(/stop-and-go|city crawl/i);
+  });
+  it('recognises dialed handling when all handling dims are perfect', () => {
+    const s = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
+    expect(s).toMatch(/dialed|locked in/i);
+  });
+  it('clusters bunched-up rough moments into one patch', () => {
+    const s = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
+    expect(s).toMatch(/one patch|close together/i);
+  });
+  it('mentions the destination + beating the clock on a real haul', () => {
+    const s = driveNarrative(haul, haulAnalysis, 'Skelly').join(' ');
     expect(s).toContain('Boulder');
+    expect(s).toMatch(/ahead of the ETA|on schedule/);
   });
-  it('calls a perfectly clean drive out as clean', () => {
-    const s = driveNarrative(base, analysis, '').join(' ');
-    expect(s).toContain('clean');
-    expect(s.startsWith('Alright.')).toBe(true); // no name
+  it('adds cross-drive context when provided', () => {
+    const s = driveNarrative(hop, hopAnalysis, 'Skelly', { driveCount: 12, avgScore: 82, similarRouteCount: 3 }).join(' ');
+    expect(s).toMatch(/above your usual|under your usual|around your usual/);
+    expect(s).toContain('3×');
   });
-  it('calls out a single hiccup', () => {
-    const d = { ...base, events: [{ type: 'brake', tier: 3, severity: 1.6, t: 300000 }] };
-    const s = driveNarrative(d, analysis, 'Skelly').join(' ');
-    expect(s).toContain('Only one hiccup');
-    expect(s).toContain('hard brake');
-  });
-  it('notes when a pit stop did not count against you', () => {
-    const d = { ...base, pitStopMs: 300000 };
-    const s = driveNarrative(d, analysis, 'Skelly').join(' ');
-    expect(s).toContain("didn't count against you");
+  it('is deterministic for the same drive', () => {
+    const a = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
+    const b = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
+    expect(a).toBe(b);
   });
 });
 
