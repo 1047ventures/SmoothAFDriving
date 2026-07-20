@@ -233,11 +233,11 @@ describe('driveFacts', () => {
     targetEtaSec: 1500, movingSec: 1440, pitStopMs: 120000, effectiveness: 96 };
   const haulA = { avgSpeedMph: 36, fullStops: 1 };
 
-  it('extracts pace + stops for a plain drive', () => {
+  it('extracts distance, time, pace + stops for a plain drive', () => {
     const f = driveFacts(hop, hopA);
     const labels = f.map(x => x.label);
-    expect(labels).toEqual(['Avg', 'Top', 'Stops']);
-    expect(f[0]).toMatchObject({ value: '13', unit: 'mph' });
+    expect(labels).toEqual(['Mi', 'Time', 'Avg', 'Top', 'Stops']);
+    expect(f.find(x => x.label === 'Avg')).toMatchObject({ value: '13', unit: 'mph' });
     expect(f.find(x => x.label === 'Stops').value).toBe('4');
   });
   it('adds the clock margin + pit for a destination drive', () => {

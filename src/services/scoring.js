@@ -14,7 +14,7 @@ import {
   PIT_SPEED_MPS,
   PIT_STOP_MS,
 } from '../constants.js';
-import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles } from '../utils/math.js';
+import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
 import { loadDrives } from './storage.js';
 import { detectEventWithThresh } from './sensors/gps.js';
 
@@ -446,6 +446,8 @@ export function driveFacts(drive, analysis){
   const miNum  = metersToMiles(drive.distanceMeters || 0);
   const avgMph = analysis.avgSpeedMph || (miNum > 0 && durMs > 0 ? Math.round(miNum / (durMs / 3600000)) : 0);
   const topMph = Math.round(mpsToMph(drive.topSpeedMps || 0));
+  facts.push({ label: 'Mi', value: miNum.toFixed(1) });
+  facts.push({ label: 'Time', value: fmtDuration(durMs) });
   facts.push({ label: 'Avg', value: String(avgMph), unit: 'mph' });
   facts.push({ label: 'Top', value: String(topMph), unit: 'mph' });
   if (analysis.fullStops != null) facts.push({ label: 'Stops', value: String(analysis.fullStops) });
@@ -454,6 +456,9 @@ export function driveFacts(drive, analysis){
     const usedMs   = drive.movingSec != null ? drive.movingSec * 1000 : durMs;
     const diff     = usedMs - targetMs; // + behind, − ahead
     facts.push({ label: diff <= 0 ? 'Ahead' : 'Behind', value: String(Math.max(0, Math.round(Math.abs(diff) / 60000))), unit: 'min' });
+    // The two-axis tier grade (S/A/B/…) — the destination-drive payoff.
+    const tier = destinationTier(drive.effectiveness, drive.efficiency ?? drive.score);
+    if (tier) facts.push({ label: 'Grade', value: tier });
   }
   if ((drive.pitStopMs || 0) > 60000) facts.push({ label: 'Pit', value: String(Math.round(drive.pitStopMs / 60000)), unit: 'min' });
   return facts;

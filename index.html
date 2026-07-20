@@ -302,39 +302,25 @@
       </div>
     </div>
 
-    <!-- v2 results body -->
-    <div class="rv-body">
+    <!-- v3 results body — compact, fits one screen (deep detail lives in the
+         tap-for-analysis sheet) -->
+    <div class="rv-body rv-body--fit">
 
-      <!-- Narrative recap — a tight, qualitative read of the drive -->
-      <p class="rv-narrative" id="rv-narrative"></p>
-      <!-- Numbers extracted from the story -->
-      <div class="rv-facts" id="rv-facts"></div>
-
-      <!-- Score hero (tap number for analysis) -->
+      <!-- Score + verdict header -->
       <div class="rv-score-row">
         <button id="score-header-btn" class="rv-score-num">--</button>
         <div class="rv-score-right">
-          <div class="rv-score-label">This Drive</div>
           <div id="review-when" class="rv-when">—</div>
           <div id="score-verdict-tag" class="rv-verdict-tag">—</div>
-          <div class="rv-analysis-hint">Tap score for analysis ›</div>
+          <div class="rv-analysis-hint">Tap score for full analysis ›</div>
         </div>
       </div>
 
-      <!-- Destination Drive two-axis result -->
-      <div id="dest-result" class="dest-result hidden">
-        <div class="dest-axis">
-          <div class="dest-axis-val" id="dest-eff-val">—</div>
-          <div class="dest-axis-lbl">Effectiveness</div>
-          <div class="dest-axis-sub" id="dest-eff-sub">—</div>
-        </div>
-        <div class="dest-tier" id="dest-tier">—</div>
-        <div class="dest-axis">
-          <div class="dest-axis-val" id="dest-epc-val">—</div>
-          <div class="dest-axis-lbl">Efficiency</div>
-          <div class="dest-axis-sub">smoothness</div>
-        </div>
-      </div>
+      <!-- Narrative recap — a tight, qualitative read of the drive -->
+      <p class="rv-narrative" id="rv-narrative"></p>
+
+      <!-- Numbers extracted from the story -->
+      <div class="rv-facts" id="rv-facts"></div>
 
       <!-- Momentum: smoothness score across the drive -->
       <div class="rv-momentum" id="rv-momentum" style="display:none">
@@ -346,70 +332,41 @@
         <div class="rv-momentum-axis"><span>Start</span><span>Finish</span></div>
       </div>
 
-      <!-- Coaching persona card -->
-      <div class="rv-coaching-card" id="rv-coaching-card" style="display:none">
-        <div class="rv-coaching-persona" id="rv-coaching-persona"></div>
-        <div class="rv-coaching-tip" id="rv-coaching-tip"></div>
-      </div>
-
-      <!-- Route history comparison (collapsed by default) -->
-      <div class="rv-route-history" id="rv-route-history" style="display:none">
-        <button class="rv-route-toggle" id="rv-route-toggle">
-          <span id="rv-route-count">—</span>
-          <span class="rv-route-chevron" id="rv-route-chevron">›</span>
-        </button>
-        <div class="rv-route-rows" id="rv-route-rows"></div>
-      </div>
-
-      <!-- Drive stats -->
-      <div class="rv-drive-stats">
-        <div class="rv-stat-col">
-          <div class="rv-stat-val"><span id="r-distance">0.0</span></div>
-          <div class="rv-stat-label">Miles</div>
+      <!-- Highlights: best stretch + hardest moment, side by side -->
+      <div class="rv-highlights">
+        <div class="rv-best" id="rv-best-block" style="display:none">
+          <div class="rv-best-label">Best Stretch</div>
+          <div class="rv-best-text" id="rv-best-text">—</div>
         </div>
-        <div class="rv-stat-col">
-          <div class="rv-stat-val"><span id="r-duration">0:00</span></div>
-          <div class="rv-stat-label">Duration</div>
+        <div class="rv-worst" id="rv-worst-block">
+          <div class="rv-worst-label">Hardest Moment</div>
+          <div class="rv-worst-text" id="rv-worst-text">—</div>
         </div>
-        <div class="rv-stat-col">
-          <div class="rv-stat-val"><span id="r-topspeed">0</span></div>
-          <div class="rv-stat-label">Top MPH</div>
-        </div>
-      </div>
-
-      <!-- Hidden compat for what-happened (JS still populates) -->
-      <div style="display:none">
-        <span id="rv-smooth-main"></span><span id="rv-smooth-sub"></span>
-        <span id="rv-events-main"></span><span id="rv-events-sub"></span>
-      </div>
-
-      <!-- Highlights: best stretch + hardest moment -->
-      <div class="rv-best" id="rv-best-block" style="display:none">
-        <div class="rv-best-label">Best Stretch</div>
-        <div class="rv-best-text" id="rv-best-text">—</div>
-      </div>
-
-      <!-- Hardest moment -->
-      <div class="rv-worst" id="rv-worst-block">
-        <div class="rv-worst-label">Hardest Moment</div>
-        <div class="rv-worst-text" id="rv-worst-text">—</div>
-      </div>
-
-      <!-- Hidden compat (JS still populates these) -->
-      <div style="display:none">
-        <canvas id="force-timeline-canvas"></canvas>
-        <span id="ev-brake">0</span><span id="ev-accel">0</span>
-        <span id="ev-turn">0</span><span id="ev-stop">0</span>
-        <span id="r-road-quality">—</span>
       </div>
 
       <!-- Actions -->
       <div class="rv-actions">
-        <button id="rv-export-btn" class="rv-btn-export" aria-label="Export drive data" title="Export JSON">↓ Export</button>
+        <button id="rv-export-btn" class="rv-btn-export" aria-label="Export drive data" title="Export JSON">↓</button>
         <button class="rv-btn-share" id="btn-share-drive">Share</button>
         <button class="rv-btn-next" id="btn-new-drive">New Drive &#8594;</button>
       </div>
-      <button id="btn-go-home" class="rv-home-link">&#8592; Return to Home</button>
+
+      <!-- Hidden / compat — populated by JS, surfaced in the analysis sheet -->
+      <div class="rv-compat" style="display:none">
+        <div id="dest-result" class="dest-result hidden">
+          <div class="dest-axis"><div class="dest-axis-val" id="dest-eff-val">—</div><div class="dest-axis-lbl">Effectiveness</div><div class="dest-axis-sub" id="dest-eff-sub">—</div></div>
+          <div class="dest-tier" id="dest-tier">—</div>
+          <div class="dest-axis"><div class="dest-axis-val" id="dest-epc-val">—</div><div class="dest-axis-lbl">Efficiency</div><div class="dest-axis-sub">smoothness</div></div>
+        </div>
+        <div class="rv-coaching-card" id="rv-coaching-card"><div class="rv-coaching-persona" id="rv-coaching-persona"></div><div class="rv-coaching-tip" id="rv-coaching-tip"></div></div>
+        <div class="rv-route-history" id="rv-route-history"><button class="rv-route-toggle" id="rv-route-toggle"><span id="rv-route-count">—</span><span class="rv-route-chevron" id="rv-route-chevron">›</span></button><div class="rv-route-rows" id="rv-route-rows"></div></div>
+        <span id="r-distance">0.0</span><span id="r-duration">0:00</span><span id="r-topspeed">0</span>
+        <span id="rv-smooth-main"></span><span id="rv-smooth-sub"></span><span id="rv-events-main"></span><span id="rv-events-sub"></span>
+        <canvas id="force-timeline-canvas"></canvas>
+        <span id="ev-brake">0</span><span id="ev-accel">0</span><span id="ev-turn">0</span><span id="ev-stop">0</span>
+        <span id="r-road-quality">—</span>
+        <button id="btn-go-home">home</button>
+      </div>
 
     </div>
 

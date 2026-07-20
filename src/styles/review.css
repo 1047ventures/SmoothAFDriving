@@ -1,6 +1,6 @@
   /* ============ REVIEW ============ */
   #screen-review{background:var(--bg);flex-direction:column;overflow:hidden}
-  .review-map-block{position:relative;height:40dvh;flex-shrink:0;background:#0B0B0B}
+  .review-map-block{position:relative;height:28dvh;flex-shrink:0;background:#0B0B0B}
   #map{position:absolute;inset:0;background:#0B0B0B}
 
   /* Map fullscreen expand */
@@ -152,61 +152,57 @@
   .ftk::before{content:'';display:inline-block;width:18px;height:3px;border-radius:2px;flex-shrink:0}
   .ftk.brake::before{background:var(--danger)}.ftk.accel::before{background:var(--warn)}.ftk.turn::before{background:var(--gold)}
 
-  /* ── REVIEW v3 ──*/
+  /* ── REVIEW v3 — compact, fits one screen (no scroll) ──*/
   #screen-review{background:#080808}
-  .rv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+  .rv-compat{display:none!important}
+  /* The body fills the space under the map and lays its sections out with even
+     slack so everything fits one viewport; the momentum block absorbs any extra. */
+  .rv-body--fit{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;
+    padding:12px 22px calc(env(safe-area-inset-bottom,0) + 8px);gap:clamp(8px,1.4vh,11px)}
+
+  /* Score + verdict header */
+  .rv-score-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+  .rv-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(48px,15vw,60px);line-height:.9;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border:0;padding:0;cursor:pointer}
+  .rv-score-right{text-align:right;min-width:0}
+  .rv-when{font-family:var(--sans);font-size:10px;letter-spacing:.15em;color:rgba(242,232,213,.7);margin-bottom:3px}
+  .rv-verdict-tag{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;color:var(--cream);line-height:1.05}
+  .rv-analysis-hint{font-family:var(--sans);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(242,232,213,.55);margin-top:4px}
+
   /* Narrative recap — a tight, qualitative read of the drive */
-  .rv-narrative{margin:18px 24px 0;padding:0;font-family:var(--serif);font-size:17px;line-height:1.5;color:rgba(244,235,217,.95);letter-spacing:.005em;flex-shrink:0}
+  .rv-narrative{margin:0;padding:0;font-family:var(--serif);font-size:15.5px;line-height:1.45;color:rgba(244,235,217,.95);flex-shrink:0}
   .rv-narrative:empty{display:none}
+
   /* Numbers extracted from the story — compact fact chips */
-  .rv-facts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 24px 2px;flex-shrink:0}
+  .rv-facts{display:flex;flex-wrap:wrap;gap:7px;flex-shrink:0}
   .rv-facts:empty{display:none}
-  .rv-fact{display:inline-flex;align-items:baseline;gap:4px;padding:6px 11px;border-radius:8px;background:rgba(244,235,217,.055);border:1px solid rgba(244,235,217,.08)}
-  .rv-fact-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:17px;color:var(--cream);line-height:1}
+  .rv-fact{display:inline-flex;align-items:baseline;gap:3px;padding:5px 10px;border-radius:8px;background:rgba(244,235,217,.055);border:1px solid rgba(244,235,217,.08)}
+  .rv-fact-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream);line-height:1}
   .rv-fact-u{font-family:var(--sans);font-size:10px;color:rgba(244,235,217,.55)}
-  .rv-fact-l{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5);margin-left:3px}
-  .rv-score-row{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 24px 0;flex-shrink:0}
-  .rv-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:72px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .rv-score-right{text-align:right;padding-top:8px}
-  .rv-score-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:4px}
-  .rv-when{font-family:var(--sans);font-size:10px;letter-spacing:.15em;color:rgba(242,232,213,.86);margin-bottom:4px;margin-top:2px}
-  .rv-verdict-tag{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream)}
-  .rv-analysis-hint{font-family:var(--sans);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-top:4px}
-  .rv-drive-stats{display:flex;height:48px;padding:0 24px;border-top:1px solid rgba(242,232,213,.1);border-bottom:1px solid rgba(242,232,213,.1);flex-shrink:0;margin-top:12px}
-  .rv-stat-col{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
-  .rv-stat-col:not(:first-child){border-left:1px solid rgba(242,232,213,.1);padding-left:16px}
-  .rv-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1}
-  .rv-stat-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-top:3px}
-  .rv-what-happened{padding:16px 12px 0;flex-shrink:0}
-  .rv-what-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);padding-left:12px;margin-bottom:12px}
-  .rv-what-cols{display:flex;gap:8px}
-  .rv-col{flex:1;padding:12px}
-  .rv-col-smooth{background:rgba(90,158,82,.08);border-left:3px solid #5A9E52}
-  .rv-col-events{background:rgba(201,56,40,.08);border-left:3px solid #C93828}
-  .rv-col-cat{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;margin-bottom:6px}
-  .rv-col-smooth .rv-col-cat{color:#5A9E52}
-  .rv-col-events .rv-col-cat{color:#C93828}
-  .rv-col-main{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--cream);margin-bottom:4px}
-  .rv-col-sub{font-family:var(--sans);font-size:11px;font-style:italic;color:rgba(242,232,213,.86)}
-  .rv-worst{margin:16px 24px 0;background:rgba(201,56,40,.05);border-left:3px solid #C93828;padding:14px 16px;min-height:52px;flex-shrink:0}
-  .rv-worst-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:4px}
-  .rv-worst-text{font-family:var(--sans);font-size:13px;color:var(--cream)}
-  /* Best stretch — the positive twin of the hardest moment */
-  .rv-best{margin:16px 24px 0;background:rgba(90,158,82,.06);border-left:3px solid #5A9E52;padding:14px 16px;min-height:52px;flex-shrink:0}
-  .rv-best-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(111,182,105,.9);margin-bottom:4px}
-  .rv-best-text{font-family:var(--sans);font-size:13px;color:var(--cream)}
-  /* Momentum — smoothness score across the drive */
-  .rv-momentum{margin:16px 24px 0;flex-shrink:0}
-  .rv-momentum-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+  .rv-fact-l{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.5);margin-left:2px}
+
+  /* Momentum — smoothness across the drive; flexes to absorb spare height */
+  .rv-momentum{flex:1 1 auto;min-height:62px;display:flex;flex-direction:column}
+  .rv-momentum-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-shrink:0}
   .rv-momentum-title{font-family:var(--sans);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(242,232,213,.86)}
   .rv-momentum-sub{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.5)}
-  .rv-momentum-canvas{width:100%;height:96px;display:block}
-  .rv-momentum-axis{display:flex;justify-content:space-between;margin-top:5px;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,232,213,.32)}
-  .rv-actions{display:flex;gap:8px;padding:0 24px;margin-top:24px;height:72px;align-items:center;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
-  .rv-btn-share{flex:0 0 38%;height:48px;background:transparent;border:1px solid rgba(242,232,213,.5);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);cursor:pointer;appearance:none}
-  .rv-btn-next{flex:1;height:48px;background:#E8501A;border:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#080808;font-weight:600;cursor:pointer;appearance:none}
-  .rv-home-link{display:block;text-align:center;padding:10px 24px 14px;font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,232,213,.86);cursor:pointer;background:transparent;border:0;width:100%}
-  .rv-home-link:active{color:var(--cream-dim)}
+  .rv-momentum-canvas{width:100%;flex:1 1 auto;min-height:44px;display:block}
+  .rv-momentum-axis{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,232,213,.32);flex-shrink:0}
+
+  /* Highlights — best stretch + hardest moment, side by side, compact */
+  .rv-highlights{display:flex;gap:9px;flex-shrink:0}
+  .rv-best,.rv-worst{flex:1 1 0;min-width:0;padding:9px 12px;border-radius:0 8px 8px 0}
+  .rv-best{background:rgba(90,158,82,.06);border-left:3px solid #5A9E52}
+  .rv-worst{background:rgba(201,56,40,.05);border-left:3px solid #C93828}
+  .rv-best-label,.rv-worst-label{font-family:var(--sans);font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;margin-bottom:4px}
+  .rv-best-label{color:rgba(111,182,105,.9)}
+  .rv-worst-label{color:rgba(224,96,80,.9)}
+  .rv-best-text,.rv-worst-text{font-family:var(--sans);font-size:12px;line-height:1.35;color:var(--cream)}
+
+  /* Actions */
+  .rv-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+  .rv-btn-export{flex:0 0 auto;width:48px;height:46px;background:transparent;border:1px solid rgba(242,232,213,.28);border-radius:8px;color:var(--cream);font-size:18px;cursor:pointer;appearance:none}
+  .rv-btn-share{flex:0 0 30%;height:46px;background:transparent;border:1px solid rgba(242,232,213,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);cursor:pointer;appearance:none}
+  .rv-btn-next{flex:1;height:46px;background:#E8501A;border:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#080808;font-weight:600;cursor:pointer;appearance:none}
 
   /* ── Destination Drive two-axis result ── */
   .dest-result{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 24px 0;padding:14px 16px;background:rgba(242,232,213,.03);border:1px solid rgba(242,232,213,.1);border-radius:12px;flex-shrink:0}
