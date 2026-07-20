@@ -155,6 +155,11 @@
   /* ── REVIEW v3 ──*/
   #screen-review{background:#080808}
   .rv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+  /* Narrative recap — the story of the drive that leads the screen */
+  .rv-narrative{margin:18px 24px 4px;padding:0;font-family:var(--serif);font-size:16.5px;line-height:1.62;color:rgba(244,235,217,.92);letter-spacing:.005em;flex-shrink:0}
+  .rv-narrative:empty{display:none}
+  .rv-narrative b{color:var(--cream);font-weight:700}
+  .rv-narrative .nz{font-style:italic;color:var(--gold)}
   .rv-score-row{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 24px 0;flex-shrink:0}
   .rv-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:72px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .rv-score-right{text-align:right;padding-top:8px}
@@ -181,6 +186,17 @@
   .rv-worst{margin:16px 24px 0;background:rgba(201,56,40,.05);border-left:3px solid #C93828;padding:14px 16px;min-height:52px;flex-shrink:0}
   .rv-worst-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:4px}
   .rv-worst-text{font-family:var(--sans);font-size:13px;color:var(--cream)}
+  /* Best stretch — the positive twin of the hardest moment */
+  .rv-best{margin:16px 24px 0;background:rgba(90,158,82,.06);border-left:3px solid #5A9E52;padding:14px 16px;min-height:52px;flex-shrink:0}
+  .rv-best-label{font-family:var(--sans);font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(111,182,105,.9);margin-bottom:4px}
+  .rv-best-text{font-family:var(--sans);font-size:13px;color:var(--cream)}
+  /* Momentum — smoothness score across the drive */
+  .rv-momentum{margin:16px 24px 0;flex-shrink:0}
+  .rv-momentum-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+  .rv-momentum-title{font-family:var(--sans);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(242,232,213,.86)}
+  .rv-momentum-sub{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.5)}
+  .rv-momentum-canvas{width:100%;height:96px;display:block}
+  .rv-momentum-axis{display:flex;justify-content:space-between;margin-top:5px;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,232,213,.32)}
   .rv-actions{display:flex;gap:8px;padding:0 24px;margin-top:24px;height:72px;align-items:center;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
   .rv-btn-share{flex:0 0 38%;height:48px;background:transparent;border:1px solid rgba(242,232,213,.5);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);cursor:pointer;appearance:none}
   .rv-btn-next{flex:1;height:48px;background:#E8501A;border:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#080808;font-weight:600;cursor:pointer;appearance:none}

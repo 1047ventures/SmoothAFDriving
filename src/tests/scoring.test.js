@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { scoreFromEvents, analyzeDrive, getDriverPersona } from '../services/scoring.js';
 import { effectivenessScore, destinationTier } from '../services/scoring.js';
-import { clockModifier, compositeScore, computePitStopMs, movingSeconds } from '../services/scoring.js';
+import { clockModifier, compositeScore, computePitStopMs, movingSeconds, momentumSeries, driveNarrative } from '../services/scoring.js';
 import { DEFAULTS } from '../constants.js';
 
 const cfg = { ...DEFAULTS };
@@ -137,6 +137,73 @@ describe('computePitStopMs', () => {
   it('returns 0 for too-few samples', () => {
     expect(computePitStopMs([])).toBe(0);
     expect(computePitStopMs([parked(0)])).toBe(0);
+  });
+});
+
+describe('momentumSeries', () => {
+  const mkSamples = (n, laFn) => Array.from({ length: n }, (_, i) => ({
+    t: i * 1000, speed: 12, la: laFn ? laFn(i) : 0, ra: 0,
+  }));
+
+  it('returns [] for too-few samples', () => {
+    expect(momentumSeries({ samples: [] })).toEqual([]);
+    expect(momentumSeries({ samples: mkSamples(3) })).toEqual([]);
+  });
+  it('produces high, flat scores for a perfectly smooth drive', () => {
+    const series = momentumSeries({ samples: mkSamples(200), events: [] }, 20);
+    expect(series.length).toBe(20);
+    expect(series.every(p => p.score >= 95)).toBe(true);
+    expect(series.every(p => p.score <= 100)).toBe(true);
+  });
+  it('dips where the driving gets rough', () => {
+    // smooth for the first half, harsh braking in the second half
+    const samples = mkSamples(200, i => i > 120 ? -4.5 : 0);
+    const series = momentumSeries({ samples, events: [] }, 20);
+    const firstHalfAvg = series.slice(0, 8).reduce((s, p) => s + p.score, 0) / 8;
+    const secondHalfAvg = series.slice(14).reduce((s, p) => s + p.score, 0) / series.slice(14).length;
+    expect(secondHalfAvg).toBeLessThan(firstHalfAvg - 20);
+  });
+  it('carries a t (ms) and score on every point', () => {
+    const series = momentumSeries({ samples: mkSamples(100), events: [] }, 10);
+    expect(series[0]).toHaveProperty('t');
+    expect(series[0]).toHaveProperty('score');
+    expect(series[series.length - 1].t).toBeGreaterThan(series[0].t);
+  });
+});
+
+describe('driveNarrative', () => {
+  const base = {
+    startTime: 1752900000000, durationMs: 1560000, distanceMeters: 15600,
+    destination: { label: 'Boulder, CO' }, arrived: true,
+    targetEtaSec: 1500, movingSec: 1560, pitStopMs: 0,
+    effectiveness: 92, events: [],
+  };
+  const analysis = { dims: { cornering: 92, throttle: 88, braking: 79, steering: 85, transitions: 84, momentum: 80, peakHarshness: 82 } };
+
+  it('greets by first name and hands off to the numbers', () => {
+    const s = driveNarrative(base, analysis, 'Skelly Smith');
+    expect(s[0]).toContain('Alright Skelly.');
+    expect(s[s.length - 1]).toBe("Here's how it broke down:");
+  });
+  it('mentions the destination and arrival when arrived', () => {
+    const s = driveNarrative(base, analysis, 'Skelly').join(' ');
+    expect(s).toContain('Boulder');
+  });
+  it('calls a perfectly clean drive out as clean', () => {
+    const s = driveNarrative(base, analysis, '').join(' ');
+    expect(s).toContain('clean');
+    expect(s.startsWith('Alright.')).toBe(true); // no name
+  });
+  it('calls out a single hiccup', () => {
+    const d = { ...base, events: [{ type: 'brake', tier: 3, severity: 1.6, t: 300000 }] };
+    const s = driveNarrative(d, analysis, 'Skelly').join(' ');
+    expect(s).toContain('Only one hiccup');
+    expect(s).toContain('hard brake');
+  });
+  it('notes when a pit stop did not count against you', () => {
+    const d = { ...base, pitStopMs: 300000 };
+    const s = driveNarrative(d, analysis, 'Skelly').join(' ');
+    expect(s).toContain("didn't count against you");
   });
 });
 
