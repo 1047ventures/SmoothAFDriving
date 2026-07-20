@@ -61,6 +61,11 @@ export const state = {
   targetEtaSec: null,    // raw OSRM duration (seconds), locked at drive start
   routeDistanceM: null,
   routeGeometry: null,   // [[lat,lng], ...] for the review map
+  liveEtaSec: null,      // latest traffic-aware ETA from current position (re-fetched)
+  liveEtaFetchedAt: 0,   // when liveEtaSec was last refreshed
+  _lastEtaFetchT: 0,     // throttle for the re-fetch
+  pitStopMs: 0,          // accumulated pit-stop time (excluded from the clock)
+  inPitStop: false,      // currently parked long enough to count as a pit stop
 };
 
 export function resetState(){
@@ -91,5 +96,10 @@ export function resetState(){
   state.targetEtaSec = null;
   state.routeDistanceM = null;
   state.routeGeometry = null;
+  state.liveEtaSec = null;
+  state.liveEtaFetchedAt = 0;
+  state._lastEtaFetchT = 0;
+  state.pitStopMs = 0;
+  state.inPitStop = false;
   resetCalib();
 }

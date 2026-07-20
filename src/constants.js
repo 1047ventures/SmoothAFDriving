@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v114';
+export const APP_VERSION = 'v115';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
@@ -119,3 +119,10 @@ export const CLOCK_MAX_SWING = 15;   // max ± points the clock can move the sco
 export const CLOCK_BEAT_FULL = 0.20; // beating the (buffered) ETA by 20% = full +bonus
 export const CLOCK_LATE_FULL = 0.20; // 20% over the (buffered) ETA = full -penalty
 export const SCORE_MAX        = 100 + CLOCK_MAX_SWING; // drives can break 100 (rare)
+
+// ── Live ETA + pit-stop detection ──────────────────────────────────────────────
+export const LIVE_ETA_REFRESH_MS = 60000;  // re-fetch the traffic-aware ETA at most this often
+export const PIT_SPEED_MPS       = 0.7;     // below this the car is "stationary"
+export const PIT_STOP_MS         = 180000;  // a stationary run this long = a pit stop (gas/coffee),
+                                            // not a traffic light — its whole duration is excluded
+                                            // from the clock so a mid-drive stop can't make you "late".

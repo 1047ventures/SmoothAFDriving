@@ -1,7 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, TIER_MULT, ETA_BUFFER } from '../constants.js';
+import { CFG, TIER_MULT, ETA_BUFFER, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -9,7 +9,8 @@ import { renderReview } from './review.js';
 import { renderRecAvatar } from './garage.js';
 import { finalizeAndReview, buildDriveFromState } from '../services/drive.js';
 import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
-import { analyzeDrive } from '../services/scoring.js';
+import { analyzeDrive, computePitStopMs } from '../services/scoring.js';
+import { fetchRoute, isTrafficAware } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { showCarPromptIfNeeded, showOnboardingIfNeeded } from './modals.js';
@@ -135,6 +136,89 @@ function wireDebugPanel() {
   });
 }
 
+// Destination Drive: the live pace strip. Uses a traffic-aware ETA re-fetched
+// from the current position when available (Mapbox), otherwise a straight-line
+// estimate. Pit stops (long parked stretches) pause the clock so a gas run can't
+// make you "late". Ahead/behind is carried by the ▲/▼ glyph + colour.
+function updatePaceStrip(last, now){
+  const paceStrip = document.getElementById('pace-strip');
+  const screen = document.getElementById('screen-record');
+  screen?.classList.toggle('has-target', !!state.targetEtaSec);
+  if (!state.targetEtaSec){ paceStrip?.classList.add('hidden'); return; }
+  paceStrip?.classList.remove('hidden');
+
+  // ── Pit-stop accounting ─────────────────────────────────────────────────
+  state.pitStopMs = computePitStopMs(state.samples);
+  let inPit = false;
+  if (last && (last.speed || 0) < PIT_SPEED_MPS && state.samples.length){
+    let i = state.samples.length - 1, startT = last.t;
+    while (i >= 0 && (state.samples[i].speed || 0) < PIT_SPEED_MPS){ startT = state.samples[i].t; i--; }
+    inPit = (last.t - startT) >= PIT_STOP_MS;
+  }
+  state.inPitStop = inPit;
+
+  refreshLiveEta(last, now);
+
+  const bufferedEta = state.targetEtaSec * ETA_BUFFER; // seconds
+  // Target arrival slides later by any pit time, so a stop is "free".
+  const adjustedTargetMs = state.startTime + bufferedEta * 1000 + state.pitStopMs;
+  const targetEl = paceStrip?.querySelector('.pace-target'); // whole label line
+  const deltaEl  = document.getElementById('pace-delta');
+
+  if (inPit){
+    if (targetEl) targetEl.textContent = 'Clock paused';
+    if (deltaEl){
+      deltaEl.textContent = '⏸ PIT';
+      deltaEl.classList.remove('ahead', 'behind');
+    }
+    return;
+  }
+
+  if (targetEl){
+    targetEl.textContent = 'Target ' + new Date(adjustedTargetMs)
+      .toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+
+  let deltaText = '—', deltaCls = '';
+  if (state.liveEtaSec > 0 && last){
+    // Traffic-aware: projected arrival = now + live ETA, vs the (pit-adjusted) target.
+    const projectedMs = now + state.liveEtaSec * 1000;
+    const delta = projectedMs - adjustedTargetMs; // + behind, - ahead
+    const mag = fmtDuration(Math.abs(delta));
+    deltaText = delta <= 0 ? `▲ ${mag}` : `▼ ${mag}`;
+    deltaCls  = delta <= 0 ? 'ahead' : 'behind';
+  } else if (last && state.routeDistanceM > 0){
+    // Fallback: straight-line progress vs expected, with pit time removed.
+    const remain = haversine({ lat: last.lat, lon: last.lon }, { lat: state.destination.lat, lon: state.destination.lng });
+    const fracDone = clamp(1 - remain / state.routeDistanceM, 0, 1);
+    const elapsedSec = (last.t - state.startTime - state.pitStopMs) / 1000;
+    const delta = elapsedSec - fracDone * bufferedEta; // + behind, - ahead
+    const mag = fmtDuration(Math.abs(delta) * 1000);
+    deltaText = delta <= 0 ? `▲ ${mag}` : `▼ ${mag}`;
+    deltaCls  = delta <= 0 ? 'ahead' : 'behind';
+  }
+  if (deltaEl){
+    deltaEl.textContent = deltaText;
+    deltaEl.classList.remove('ahead', 'behind');
+    if (deltaCls) deltaEl.classList.add(deltaCls);
+  }
+}
+
+// Re-fetch the traffic-aware ETA from the current position at most every
+// LIVE_ETA_REFRESH_MS while moving. Async, non-blocking, failures ignored.
+function refreshLiveEta(last, now){
+  if (!isTrafficAware() || !state.destination || !last) return;
+  if (state.inPitStop || (last.speed || 0) < PIT_SPEED_MPS) return; // don't burn calls while parked
+  if (state._lastEtaFetchT && now - state._lastEtaFetchT < LIVE_ETA_REFRESH_MS) return;
+  state._lastEtaFetchT = now;
+  fetchRoute(
+    { lat: last.lat, lng: last.lon },
+    { lat: state.destination.lat, lng: state.destination.lng }
+  ).then(r => {
+    if (r && r.durationSec > 0){ state.liveEtaSec = r.durationSec; state.liveEtaFetchedAt = Date.now(); }
+  }).catch(() => {});
+}
+
 export function updateLiveUI(){
   // Persist every 30s so iOS reload can recover the drive
   const now = Date.now();
@@ -245,42 +329,7 @@ export function updateLiveUI(){
   // Destination Drive: live pace strip — locked target clock time + a rough
   // ahead/behind estimate based on straight-line distance remaining vs. the
   // buffered ETA. Hidden entirely for normal (no-destination) drives.
-  {
-    const paceStrip = document.getElementById('pace-strip');
-    document.getElementById('screen-record')?.classList.toggle('has-target', !!state.targetEtaSec);
-    if (state.targetEtaSec){
-      paceStrip?.classList.remove('hidden');
-      const bufferedEta = state.targetEtaSec * ETA_BUFFER; // seconds
-      const targetClock = new Date(state.startTime + bufferedEta * 1000);
-      const targetEl = document.getElementById('pace-target-time');
-      if (targetEl){
-        targetEl.textContent = targetClock.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      }
-
-      let deltaText = '—';
-      let deltaCls = '';   // '' | 'ahead' | 'behind' — drives the colour
-      if (last && state.routeDistanceM > 0){
-        const remain = haversine({ lat: last.lat, lon: last.lon }, { lat: state.destination.lat, lon: state.destination.lng });
-        const fracDone = clamp(1 - remain / state.routeDistanceM, 0, 1);
-        const elapsedSec = (last.t - state.startTime) / 1000;
-        const expectedElapsed = fracDone * bufferedEta;
-        const delta = elapsedSec - expectedElapsed; // + behind, - ahead
-        const mag = fmtDuration(Math.abs(delta) * 1000);
-        // Ahead/behind is shown by the glyph + colour (see .pace-delta.ahead/.behind),
-        // so the big number stays just the clock delta.
-        deltaText = delta <= 0 ? `▲ ${mag}` : `▼ ${mag}`;
-        deltaCls  = delta <= 0 ? 'ahead' : 'behind';
-      }
-      const deltaEl = document.getElementById('pace-delta');
-      if (deltaEl){
-        deltaEl.textContent = deltaText;
-        deltaEl.classList.remove('ahead', 'behind');
-        if (deltaCls) deltaEl.classList.add(deltaCls);
-      }
-    } else {
-      paceStrip?.classList.add('hidden');
-    }
-  }
+  updatePaceStrip(last, now);
 
   // Avg speed
   const avgMph = state.samples.length

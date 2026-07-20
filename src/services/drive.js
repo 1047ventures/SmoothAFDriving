@@ -7,7 +7,8 @@ import {
   loadDriverName,
   getSyncedIds,
 } from './storage.js';
-import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore } from './scoring.js';
+import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
+import { isTrafficAware } from './routing.js';
 import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
 import { ARRIVAL_RADIUS_M } from '../constants.js';
@@ -177,11 +178,18 @@ export function finalizeAndReview(callbacks = {}){
   // (smoothness + clock), which flows into lifetime + leaderboard.
   drive.efficiency = analysis.score;
   drive.arrived = arrivedAtDestination(drive);
+  // Pit stops (long parked stretches) don't count against the clock — the time
+  // that matters is moving time. The lateness penalty is only fair when the ETA
+  // was traffic-aware (Mapbox), so it's gated on isTrafficAware().
+  drive.pitStopMs = computePitStopMs(drive.samples);
+  const moveSec = movingSeconds(drive.durationMs / 1000, drive.pitStopMs / 1000);
+  drive.movingSec = moveSec;
+  const penalize = isTrafficAware();
   drive.effectiveness = (drive.targetEtaSec && drive.arrived)
-    ? effectivenessScore(drive.targetEtaSec, Math.round(drive.durationMs / 1000))
+    ? effectivenessScore(drive.targetEtaSec, moveSec)
     : null;
-  drive.score = compositeScore(analysis.score, drive.targetEtaSec, Math.round(drive.durationMs / 1000),
-    { arrived: drive.arrived, allowPenalty: false }); // penalty ships with the live traffic-aware ETA
+  drive.score = compositeScore(analysis.score, drive.targetEtaSec, moveSec,
+    { arrived: drive.arrived, allowPenalty: penalize });
   saveDrive(drive);
   pushDriveToSupabase(drive);
   // Non-blocking — corridor detection runs after review renders
