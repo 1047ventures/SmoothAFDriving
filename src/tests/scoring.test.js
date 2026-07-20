@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { scoreFromEvents, analyzeDrive, getDriverPersona } from '../services/scoring.js';
 import { effectivenessScore, destinationTier } from '../services/scoring.js';
-import { clockModifier, compositeScore, computePitStopMs, movingSeconds, momentumSeries, driveNarrative } from '../services/scoring.js';
+import { clockModifier, compositeScore, computePitStopMs, movingSeconds, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { DEFAULTS } from '../constants.js';
 
 const cfg = { ...DEFAULTS };
@@ -193,44 +193,60 @@ describe('driveNarrative', () => {
   const hopAnalysis = { avgSpeedMph: 13, fullStops: 6, stopsPerMile: 4.2,
     dims: { steering: 100, braking: 100, cornering: 100, transitions: 100, momentum: 53, throttle: 86, peakHarshness: 85 } };
 
-  it('greets by first name and hands off to the numbers', () => {
-    const s = driveNarrative(haul, haulAnalysis, 'Skelly Smith');
-    expect(s[0]).toContain('Skelly');
-    expect(s[s.length - 1]).toMatch(/broke down|breakdown|the tape/);
-  });
-  it('a short local hop drops the clock times and reads as a quick trip', () => {
+  it('is tight (at most 3 short lines) and carries no digits', () => {
     const s = driveNarrative(hop, hopAnalysis, 'Skelly');
-    const joined = s.join(' ');
-    expect(joined).not.toMatch(/\d{1,2}:\d{2}\s?(AM|PM)/i); // no takeoff/arrival clock
-    expect(joined).not.toMatch(/ahead of|behind|on schedule/);       // no ETA framing (no destination)
-    expect(joined).toMatch(/hop|run|jaunt|errand|neighborhood/i);
+    expect(s.length).toBeLessThanOrEqual(3);
+    expect(s.join(' ')).not.toMatch(/[0-9]/); // all numbers live in driveFacts
   });
-  it('recognises stop-and-go character', () => {
-    const s = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
-    expect(s).toMatch(/stop-and-go|city crawl/i);
+  it('a short local hop reads as a quick trip with no clock framing', () => {
+    const joined = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
+    expect(joined).not.toMatch(/\d{1,2}:\d{2}\s?(AM|PM)/i);
+    expect(joined).not.toMatch(/ETA|schedule/);
+    expect(joined).toMatch(/hop|run|errand/i);
   });
-  it('recognises dialed handling when all handling dims are perfect', () => {
-    const s = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
-    expect(s).toMatch(/dialed|locked in/i);
+  it('recognises stop-and-go + dialed hands in one line', () => {
+    const s = driveNarrative(hop, hopAnalysis, 'Skelly');
+    expect(s[0]).toMatch(/stop-and-go/i);
+    expect(s[0]).toMatch(/dialed/i);
   });
   it('clusters bunched-up rough moments into one patch', () => {
     const s = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
-    expect(s).toMatch(/one patch|close together/i);
+    expect(s).toMatch(/one firm patch/i);
   });
-  it('mentions the destination + beating the clock on a real haul', () => {
-    const s = driveNarrative(haul, haulAnalysis, 'Skelly').join(' ');
-    expect(s).toContain('Boulder');
-    expect(s).toMatch(/ahead of the ETA|on schedule/);
-  });
-  it('adds cross-drive context when provided', () => {
-    const s = driveNarrative(hop, hopAnalysis, 'Skelly', { driveCount: 12, avgScore: 82, similarRouteCount: 3 }).join(' ');
-    expect(s).toMatch(/above your usual|under your usual|around your usual/);
-    expect(s).toContain('3×');
+  it('leads a real haul with destination + clock, no digits', () => {
+    const s = driveNarrative(haul, haulAnalysis, 'Skelly');
+    const joined = s.join(' ');
+    expect(joined).toContain('Boulder');
+    expect(joined).toMatch(/ETA|schedule/);
+    expect(joined).not.toMatch(/[0-9]/);
   });
   it('is deterministic for the same drive', () => {
-    const a = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
-    const b = driveNarrative(hop, hopAnalysis, 'Skelly').join(' ');
-    expect(a).toBe(b);
+    expect(driveNarrative(hop, hopAnalysis, 'Skelly').join(' '))
+      .toBe(driveNarrative(hop, hopAnalysis, 'Skelly').join(' '));
+  });
+});
+
+describe('driveFacts', () => {
+  const hop = { durationMs: 381000, distanceMeters: 2269, topSpeedMps: 17 };
+  const hopA = { avgSpeedMph: 13, fullStops: 4 };
+  const haul = { durationMs: 1560000, distanceMeters: 15600, topSpeedMps: 27,
+    targetEtaSec: 1500, movingSec: 1440, pitStopMs: 120000, effectiveness: 96 };
+  const haulA = { avgSpeedMph: 36, fullStops: 1 };
+
+  it('extracts pace + stops for a plain drive', () => {
+    const f = driveFacts(hop, hopA);
+    const labels = f.map(x => x.label);
+    expect(labels).toEqual(['Avg', 'Top', 'Stops']);
+    expect(f[0]).toMatchObject({ value: '13', unit: 'mph' });
+    expect(f.find(x => x.label === 'Stops').value).toBe('4');
+  });
+  it('adds the clock margin + pit for a destination drive', () => {
+    const f = driveFacts(haul, haulA);
+    const labels = f.map(x => x.label);
+    expect(labels).toContain('Ahead'); // 1440s vs 1500*1.2=1800 → 6 min ahead
+    expect(labels).toContain('Pit');
+    expect(f.find(x => x.label === 'Ahead').value).toBe('6');
+    expect(f.find(x => x.label === 'Pit').value).toBe('2');
   });
 });
 

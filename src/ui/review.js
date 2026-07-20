@@ -1,6 +1,6 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
-import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative } from '../services/scoring.js';
+import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
@@ -39,11 +39,14 @@ export function renderReview(drive){
         avgScore: others.length ? Math.round(others.reduce((s, d) => s + d.score, 0) / others.length) : null,
         similarRouteCount: similar.length,
       };
-      const sentences = driveNarrative(drive, analysis, loadDriverName(), ctx);
-      // Emphasise the closing hand-off line; keep the rest as clean prose.
-      const last = sentences[sentences.length - 1];
-      const body = sentences.slice(0, -1).join(' ');
-      narrEl.innerHTML = `${escapeHtml(body)} <b>${escapeHtml(last)}</b>`;
+      narrEl.textContent = driveNarrative(drive, analysis, loadDriverName(), ctx).join(' ');
+    }
+    // Numbers pulled out of the prose into a compact facts row.
+    const factsEl = document.getElementById('rv-facts');
+    if (factsEl){
+      factsEl.innerHTML = driveFacts(drive, analysis).map(f =>
+        `<span class="rv-fact"><span class="rv-fact-v">${escapeHtml(f.value)}</span>${f.unit ? `<span class="rv-fact-u">${escapeHtml(f.unit)}</span>` : ''}<span class="rv-fact-l">${escapeHtml(f.label)}</span></span>`
+      ).join('');
     }
   }
 

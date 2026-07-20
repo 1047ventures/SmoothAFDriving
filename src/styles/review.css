@@ -155,11 +155,16 @@
   /* ── REVIEW v3 ──*/
   #screen-review{background:#080808}
   .rv-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
-  /* Narrative recap — the story of the drive that leads the screen */
-  .rv-narrative{margin:18px 24px 4px;padding:0;font-family:var(--serif);font-size:16.5px;line-height:1.62;color:rgba(244,235,217,.92);letter-spacing:.005em;flex-shrink:0}
+  /* Narrative recap — a tight, qualitative read of the drive */
+  .rv-narrative{margin:18px 24px 0;padding:0;font-family:var(--serif);font-size:17px;line-height:1.5;color:rgba(244,235,217,.95);letter-spacing:.005em;flex-shrink:0}
   .rv-narrative:empty{display:none}
-  .rv-narrative b{color:var(--cream);font-weight:700}
-  .rv-narrative .nz{font-style:italic;color:var(--gold)}
+  /* Numbers extracted from the story — compact fact chips */
+  .rv-facts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 24px 2px;flex-shrink:0}
+  .rv-facts:empty{display:none}
+  .rv-fact{display:inline-flex;align-items:baseline;gap:4px;padding:6px 11px;border-radius:8px;background:rgba(244,235,217,.055);border:1px solid rgba(244,235,217,.08)}
+  .rv-fact-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:17px;color:var(--cream);line-height:1}
+  .rv-fact-u{font-family:var(--sans);font-size:10px;color:rgba(244,235,217,.55)}
+  .rv-fact-l{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5);margin-left:3px}
   .rv-score-row{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 24px 0;flex-shrink:0}
   .rv-score-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:72px;line-height:.9;letter-spacing:-.04em;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .rv-score-right{text-align:right;padding-top:8px}
