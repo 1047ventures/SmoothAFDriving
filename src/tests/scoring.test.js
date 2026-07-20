@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { scoreFromEvents, analyzeDrive, getDriverPersona } from '../services/scoring.js';
 import { effectivenessScore, destinationTier } from '../services/scoring.js';
-import { clockModifier, compositeScore } from '../services/scoring.js';
+import { clockModifier, compositeScore, computePitStopMs, movingSeconds } from '../services/scoring.js';
 import { DEFAULTS } from '../constants.js';
 
 const cfg = { ...DEFAULTS };
@@ -106,6 +106,60 @@ describe('effectivenessScore', () => {
     expect(effectivenessScore(0, 500)).toBeNull();
     expect(effectivenessScore(600, 0)).toBeNull();
     expect(effectivenessScore(-1, 500)).toBeNull();
+  });
+});
+
+describe('computePitStopMs', () => {
+  // Samples: t in ms, speed in m/s. Threshold PIT_STOP_MS=180000 (3 min), PIT_SPEED_MPS=0.7.
+  const moving = (t) => ({ t, speed: 12 });
+  const parked = (t) => ({ t, speed: 0 });
+
+  it('ignores short stops (a red light under 3 min)', () => {
+    const s = [moving(0), parked(1000), parked(120000), moving(121000)]; // ~2 min stop
+    expect(computePitStopMs(s)).toBe(0);
+  });
+  it('counts a long stop (gas run) in full', () => {
+    // parked from t=1000 to t=241000 (240s ≥ 180s), resumes at 250000
+    const s = [moving(0), parked(1000), parked(241000), moving(250000)];
+    expect(computePitStopMs(s)).toBe(240000);
+  });
+  it('counts a trailing in-progress pit once it crosses the threshold', () => {
+    const s = [moving(0), parked(1000), parked(200000)]; // 199s parked, still stopped
+    expect(computePitStopMs(s)).toBe(199000);
+  });
+  it('sums multiple pit stops', () => {
+    const s = [
+      moving(0), parked(1000), parked(191000), moving(200000),   // 190s pit
+      moving(400000), parked(401000), parked(601000), moving(610000), // 200s pit
+    ];
+    expect(computePitStopMs(s)).toBe(390000);
+  });
+  it('returns 0 for too-few samples', () => {
+    expect(computePitStopMs([])).toBe(0);
+    expect(computePitStopMs([parked(0)])).toBe(0);
+  });
+});
+
+describe('movingSeconds', () => {
+  it('subtracts pit time from wall-clock', () => {
+    expect(movingSeconds(1200, 300)).toBe(900);
+  });
+  it('floors at zero and rounds', () => {
+    expect(movingSeconds(100, 500)).toBe(0);
+    expect(movingSeconds(120.4, 0)).toBe(120);
+  });
+});
+
+describe('clockModifier lateness penalty (allowPenalty)', () => {
+  it('does not penalize when allowPenalty is false', () => {
+    expect(clockModifier(600, 900, 90, false)).toBe(0);
+  });
+  it('penalizes when late and allowPenalty is true', () => {
+    // target = 600*1.2 = 720; actual 900 → 25% over → full -15 swing (capped at CLOCK_LATE_FULL 20%)
+    expect(clockModifier(600, 900, 90, true)).toBeLessThan(0);
+  });
+  it('never penalizes when on time even with allowPenalty', () => {
+    expect(clockModifier(600, 700, 90, true)).toBeGreaterThanOrEqual(0);
   });
 });
 

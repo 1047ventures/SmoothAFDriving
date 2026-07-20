@@ -11,6 +11,8 @@ import {
   CLOCK_BEAT_FULL,
   CLOCK_LATE_FULL,
   SCORE_MAX,
+  PIT_SPEED_MPS,
+  PIT_STOP_MS,
 } from '../constants.js';
 import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles } from '../utils/math.js';
 import { loadDrives } from './storage.js';
@@ -470,6 +472,39 @@ export function getDriverPersona(drives){
     ];
   }
   return {title, sub: pick(subs), avgScore, drives: drives.length, totalMi: Math.round(totalMi)};
+}
+
+// Total milliseconds spent in "pit stops" — stationary runs at least PIT_STOP_MS
+// long (gas, coffee, a long errand), which shouldn't count against the clock.
+// A normal red light is well under the threshold and is left in. Pure + testable;
+// works on absolute- or relative-`t` samples (it only uses time differences).
+export function computePitStopMs(samples, opts = {}){
+  const pitSpeed = opts.pitSpeed ?? PIT_SPEED_MPS;
+  const pitMs    = opts.pitMs    ?? PIT_STOP_MS;
+  if (!Array.isArray(samples) || samples.length < 2) return 0;
+  let total = 0, runStart = null, prev = null;
+  for (const s of samples){
+    const stationary = (s.speed || 0) < pitSpeed;
+    if (stationary){
+      if (runStart == null) runStart = s.t;
+    } else if (runStart != null){
+      const dur = (prev != null ? prev : s.t) - runStart;
+      if (dur >= pitMs) total += dur;
+      runStart = null;
+    }
+    prev = s.t;
+  }
+  if (runStart != null && prev != null){
+    const dur = prev - runStart;
+    if (dur >= pitMs) total += dur;
+  }
+  return total;
+}
+
+// The drive time that counts against the clock: wall-clock minus pit stops,
+// floored at 0. Both inputs in seconds.
+export function movingSeconds(durationSec, pitStopSec){
+  return Math.max(0, Math.round(durationSec) - Math.round(pitStopSec || 0));
 }
 
 // Effectiveness (0..100): how the actual drive time compares to the locked ETA.
