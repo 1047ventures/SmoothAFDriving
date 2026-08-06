@@ -1,0 +1,12 @@
+{
+  "appId": "com.smoothafdriving.app",
+  "appName": "Smooth AF",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#080808"
+  },
+  "android": {
+    "backgroundColor": "#080808"
+  }
+}

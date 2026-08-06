@@ -7,3 +7,10 @@ dist/
 coverage/
 .superpowers/
 .claude/
+
+# Capacitor native build artifacts (generated on the Mac via `npx cap add ios`)
+/ios/
+/android/
+.gradle/
+*.xcworkspace/xcuserdata/
+DerivedData/

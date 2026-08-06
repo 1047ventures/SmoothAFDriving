@@ -14,6 +14,7 @@ import { shareCurrentDrive } from './ui/share.js';
 import { wireDestination } from './ui/destination.js';
 import { state } from './state.js';
 import { syncUserProfile } from './services/supabase.js';
+import { Capacitor } from '@capacitor/core';
 
 // Export key init functions for DOMContentLoaded (wired below)
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
@@ -195,8 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
     else { showScreen('home'); renderDriveList(); }
   }, { passive: true });
 
-  // Register service worker
-  if ('serviceWorker' in navigator){
+  // Register service worker — web only. Inside a Capacitor WebView the shell is
+  // served from the app bundle, and a network-first SW just causes stale-asset
+  // and load-order problems, so skip it on native.
+  if ('serviceWorker' in navigator && !Capacitor.isNativePlatform()){
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 });
