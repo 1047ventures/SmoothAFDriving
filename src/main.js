@@ -19,7 +19,15 @@ import { Capacitor } from '@capacitor/core';
 // Export key init functions for DOMContentLoaded (wired below)
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
 
-document.addEventListener('DOMContentLoaded', () => {
+// One failing init step must never leave the app dead (UI rendered but nothing
+// wired). Run each risky step in isolation and log rather than throw — the
+// button wiring below always gets to run.
+function safeInit(label, fn){
+  try { fn(); } catch (err){ console.error(`[init] ${label} failed:`, err); }
+}
+
+function boot(){
+  safeInit('adSplash', () => {
   // Show ad landing splash for first-time visitors arriving from ads
   const urlParams = new URLSearchParams(location.search);
   const utmSource = urlParams.get('utm_source');
@@ -44,13 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     localStorage.setItem('smoothaf_visited', '1');
   }
+  });
 
-  migrateLifetimeScore();
-  checkRecoveredDrive({ onListUpdate: renderDriveList });
-  renderDriveList();
-  syncPendingDrives();
-  syncUserProfile();
-  renderCarDisplay();
+  safeInit('migrateLifetimeScore', () => migrateLifetimeScore());
+  safeInit('checkRecoveredDrive',  () => checkRecoveredDrive({ onListUpdate: renderDriveList }));
+  safeInit('renderDriveList',      () => renderDriveList());
+  safeInit('syncPendingDrives',    () => syncPendingDrives());
+  safeInit('syncUserProfile',      () => syncUserProfile());
+  safeInit('renderCarDisplay',     () => renderCarDisplay());
   const verEl = document.querySelector('#app-version');
   if (verEl) verEl.textContent = APP_VERSION;
 
@@ -202,4 +211,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator && !Capacitor.isNativePlatform()){
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
-});
+}
+
+// Boot now if the DOM is already parsed, otherwise wait. A module script can
+// execute after DOMContentLoaded has already fired (seen in the iOS Capacitor
+// WebView) — a bare listener would then never run, leaving the UI rendered but
+// completely inert: no data, no click handlers.
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', boot, { once: true });
+} else {
+  boot();
+}
