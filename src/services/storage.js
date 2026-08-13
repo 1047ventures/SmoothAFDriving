@@ -46,6 +46,18 @@ export function migrateLifetimeScore(){
   saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
 }
 
+/**
+ * Recompute the lifetime score from the 10 most recent drives — the same
+ * rolling average finalizeAndReview uses. Called after a cloud restore, where
+ * the newly merged history should be reflected immediately.
+ */
+export function recomputeLifetimeScore(){
+  const drives = loadDrives().filter(d => d.score != null);
+  if (!drives.length) return;
+  const recent = drives.slice(0, 10);
+  saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
+}
+
 // ── Drives ────────────────────────────────────────────────────────────────────
 export function loadDrives(){
   try {
@@ -53,8 +65,34 @@ export function loadDrives(){
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
+/**
+ * Persist the drive list, trimmed to MAX_STORED_DRIVES.
+ *
+ * GPS samples dominate the payload (a long drive is ~380 KB on its own, and a
+ * full history runs past the ~5 MB localStorage budget), so on a quota error we
+ * shed `samples` from the oldest drives and retry rather than silently dropping
+ * the whole write. A drive without samples still lists and scores fine — only
+ * the review map needs them, and those can be re-fetched from the cloud.
+ * Returns true if the list was persisted.
+ */
 export function saveDrives(all){
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(0, MAX_STORED_DRIVES))); } catch {}
+  const trimmed = all.slice(0, MAX_STORED_DRIVES);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+    return true;
+  } catch {}
+
+  // Over quota — drop samples oldest-first until it fits.
+  const shed = trimmed.map(d => ({ ...d }));
+  for (let i = shed.length - 1; i >= 0; i--){
+    if (!shed[i].samples || !shed[i].samples.length) continue;
+    shed[i] = { ...shed[i], samples: [], samplesDropped: true };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(shed));
+      return true;
+    } catch {}
+  }
+  return false;
 }
 export function saveDrive(drive){
   const all = loadDrives();

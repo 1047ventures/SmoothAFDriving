@@ -4,12 +4,14 @@ import {
   loadDrives,
   saveDrive,
   saveLifetimeScore,
+  saveDrives,
+  recomputeLifetimeScore,
   loadDriverName,
   getSyncedIds,
 } from './storage.js';
 import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
 import { isTrafficAware } from './routing.js';
-import { pushDriveToSupabase, syncToLeaderboard } from './supabase.js';
+import { pushDriveToSupabase, syncToLeaderboard, fetchCloudDrives, cloudRowToDrive } from './supabase.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
 import { ARRIVAL_RADIUS_M } from '../constants.js';
 
@@ -208,4 +210,42 @@ export function finalizeAndReview(callbacks = {}){
 
   if (onReview) onReview(drive);
   if (onListUpdate) onListUpdate();
+}
+
+/**
+ * Merge cloud drives into local storage without clobbering anything local.
+ *
+ * Local drives win on conflict: a locally-recorded drive still has its GPS
+ * samples and events, while the cloud copy is metadata-only. Dedupe is by
+ * startTime, which is the same stable ID the uploader uses.
+ *
+ * Pure apart from the storage read/write — takes rows, returns a summary.
+ */
+export function mergeCloudDrives(rows){
+  if (!Array.isArray(rows) || !rows.length) return { added: 0, skipped: 0, total: loadDrives().length };
+  const local = loadDrives();
+  const seen  = new Set(local.map(d => d.startTime));
+  let added = 0, skipped = 0;
+  for (const row of rows){
+    const drive = cloudRowToDrive(row);
+    if (!drive.startTime || seen.has(drive.startTime)){ skipped++; continue; }
+    seen.add(drive.startTime);
+    local.push(drive);
+    added++;
+  }
+  local.sort((a, b) => (b.startTime || 0) - (a.startTime || 0));
+  const saved = saveDrives(local);
+  return { added, skipped, total: local.length, saved };
+}
+
+/**
+ * Pull a previous install's drives down from the cloud and merge them in.
+ * Returns a summary, or null if the fetch failed / nothing was there.
+ */
+export async function restoreDrivesFromCloud(deviceId){
+  const rows = await fetchCloudDrives(deviceId);
+  if (!rows) return null;
+  const result = mergeCloudDrives(rows);
+  if (result.added > 0) recomputeLifetimeScore();
+  return { ...result, fetched: rows.length };
 }

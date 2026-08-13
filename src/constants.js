@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v121';
+export const APP_VERSION = 'v122';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
@@ -17,7 +17,8 @@ export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
 export const SHARE_PROMPTED_KEY = 'smoothaf.share_prompted';
 export const CORRIDORS_KEY      = 'smoothaf.corridors';
 
-export const MAX_STORED_DRIVES = 20;
+export const MAX_STORED_DRIVES = 200;  // metadata-only restored drives are tiny (~600B each);
+                                       // saveDrives() sheds GPS samples if the quota is hit.
 export const OSM_CACHE_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 days
 export const OSM_CACHE_MAX  = 500;                        // LRU eviction above this
 

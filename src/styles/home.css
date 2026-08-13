@@ -287,3 +287,21 @@
   .hcl-scores{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
   .hcl-score-avg{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);line-height:1}
   .hcl-score-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-top:2px}
+
+  /* ── Cloud restore (empty-state) ─────────────────────────────────────────
+     Transitional until real accounts land; sign-in will drive the same path. */
+  .restore-box{margin-top:14px;text-align:left}
+  .restore-toggle{list-style:none;cursor:pointer;font-family:var(--sans);font-size:12px;
+    letter-spacing:.06em;color:var(--tang);padding:6px 0}
+  .restore-toggle::-webkit-details-marker{display:none}
+  .restore-body{padding:6px 0 2px}
+  .restore-hint{margin:0 0 8px;font-size:11.5px;line-height:1.45;color:rgba(242,232,213,.55)}
+  .restore-input{width:100%;padding:9px 11px;border-radius:8px;
+    background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.16);
+    color:var(--cream);font-family:var(--sans);font-size:12.5px;margin-bottom:8px}
+  .restore-input::placeholder{color:rgba(242,232,213,.28)}
+  .restore-btn{width:100%;padding:10px;border:0;border-radius:8px;background:#E8501A;color:#080808;
+    font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;cursor:pointer}
+  .restore-btn:disabled{opacity:.55}
+  .restore-status{margin-top:8px;font-size:12px;color:rgba(242,232,213,.75);min-height:16px}

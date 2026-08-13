@@ -90,3 +90,51 @@ export async function syncUserProfile() {
   const email = localStorage.getItem(USER_EMAIL_KEY)  || '';
   await registerUser({ name, email, device_id: getDeviceId() });
 }
+
+/**
+ * Fetch a device's drives from the cloud, METADATA ONLY (no GPS samples).
+ *
+ * Samples dominate the payload — a full history runs past the ~5 MB
+ * localStorage budget, while the same drives without samples are ~74 KB. The
+ * list, scores, and lifetime stats need none of it; only the review map does,
+ * and that can be fetched per-drive on demand.
+ *
+ * Returns cloud rows (newest first), or null on any failure — never throws.
+ */
+export async function fetchCloudDrives(deviceId){
+  if (!deviceId) return null;
+  const cols = 'start_time,duration_ms,distance_meters,top_speed_mps,score,event_count,'
+             + 'simulated,dest_label,dest_lat,dest_lng,route_distance_m,target_eta_sec,effectiveness';
+  try {
+    const url = `${SB_URL}/rest/v1/drives?select=${cols}`
+              + `&device_id=eq.${encodeURIComponent(deviceId)}&order=start_time.desc`;
+    const res = await fetch(url, { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Map a cloud row onto the local drive shape the UI expects. */
+export function cloudRowToDrive(r){
+  return {
+    startTime:      r.start_time,
+    durationMs:     r.duration_ms,
+    distanceMeters: r.distance_meters,
+    topSpeedMps:    r.top_speed_mps,
+    score:          r.score,
+    eventCount:     r.event_count || 0,
+    simulated:      !!r.simulated,
+    effectiveness:  r.effectiveness ?? null,
+    targetEtaSec:   r.target_eta_sec ?? null,
+    routeDistanceM: r.route_distance_m ?? null,
+    destination:    r.dest_label ? { label: r.dest_label, lat: r.dest_lat, lng: r.dest_lng } : null,
+    // Restored drives carry no GPS track or events — the list and stats don't
+    // need them, and the review map re-fetches on demand.
+    samples: [],
+    events:  [],
+    restored: true,
+  };
+}
