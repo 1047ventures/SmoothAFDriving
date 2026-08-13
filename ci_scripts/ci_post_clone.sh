@@ -13,9 +13,15 @@
 # re-apply the privacy usage strings.
 set -e
 
-echo "── Installing Node (Capacitor CLI needs >= 22) ──"
-brew install node@22
-export PATH="$(brew --prefix node@22)/bin:$PATH"
+echo "── Checking Node (Capacitor CLI needs >= 22) ──"
+NODE_MAJOR=$(node -v 2>/dev/null | sed 's/^v\([0-9]*\).*/\1/')
+if [ -z "$NODE_MAJOR" ] || [ "$NODE_MAJOR" -lt 22 ]; then
+  echo "   found '${NODE_MAJOR:-none}' — installing node@22"
+  brew install node@22
+  export PATH="$(brew --prefix node@22)/bin:$PATH"
+else
+  echo "   found v$NODE_MAJOR — good, skipping install"
+fi
 node -v
 npm -v
 
