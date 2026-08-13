@@ -76,3 +76,38 @@ npm run cap:ios          # rebuild web, sync into iOS, open Xcode → Archive ag
   Capacitor BLE plugin works). That's a follow-on once TestFlight is live.
 - **Android:** `npm run cap:android` follows the same flow via Android Studio when
   you want it.
+
+## Xcode Cloud (automatic builds → TestFlight)
+
+Goal: `git push` → cloud build → TestFlight, without opening Xcode.
+
+**Why the `ios/` folder is committed.** Xcode Cloud builds from the GitHub repo,
+so the Xcode project has to be *in* the repo. It used to be gitignored (since
+Capacitor regenerates it), which is why Xcode reported *"The project 'App' does
+not have a remote repository."* Only generated output inside `ios/` is now
+ignored — see `.gitignore`.
+
+**Why `ci_scripts/ci_post_clone.sh` exists.** The native project is just a
+WebView shell; the real app is the Vite build that Capacitor copies into
+`ios/App/App/public/`, which is generated and not in git. Xcode Cloud runs this
+script after cloning to install Node, build the web app, `cap sync` it in, and
+re-apply the privacy strings. Without it the cloud would ship a blank app.
+
+### One-time setup
+
+1. Commit the generated iOS project (it only exists on your Mac):
+   ```bash
+   git pull
+   git add ios
+   git commit -m "Add generated iOS project for Xcode Cloud"
+   git push
+   ```
+2. Xcode → **Product → Xcode Cloud → Create Workflow** (it can now find the remote).
+3. **Start Conditions** → Branch Changes → **`claude-pwa`** (not `main`).
+4. **Post-Actions** → **+** → **TestFlight Internal Testing** → your tester group.
+5. Save. Pushes to `claude-pwa` now build and land in TestFlight automatically.
+
+### Bumping the build number
+
+App Store Connect rejects a re-used build number. Xcode Cloud sets `CI_BUILD_NUMBER`
+automatically; if you ever archive by hand instead, bump **Build** in Xcode first.

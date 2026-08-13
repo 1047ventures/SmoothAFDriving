@@ -8,9 +8,18 @@ coverage/
 .superpowers/
 .claude/
 
-# Capacitor native build artifacts (generated on the Mac via `npx cap add ios`)
-/ios/
+# Capacitor native projects.
+# ios/ IS committed — Xcode Cloud builds from the GitHub repo, so the Xcode
+# project has to be in it. Only generated output and per-user state are ignored.
+ios/App/App/public/
+ios/App/Pods/
+ios/App/build/
+ios/App/output/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/App.xcworkspace/xcuserdata/
+DerivedData/
+
+# Android isn't generated or built in CI yet.
 /android/
 .gradle/
-*.xcworkspace/xcuserdata/
-DerivedData/
