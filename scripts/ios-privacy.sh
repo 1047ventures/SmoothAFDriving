@@ -30,3 +30,11 @@ set_string NSLocationWhenInUseUsageDescription \
   "Smooth AF uses your location to score your drive and track your route."
 set_string NSMotionUsageDescription \
   "Smooth AF uses motion sensors to measure how smoothly you accelerate, brake, and corner."
+
+# Export compliance. Without this App Store Connect asks "does your app use
+# encryption?" on EVERY upload and holds the build back from testers until it's
+# answered by hand — which would defund the whole point of automatic builds.
+# The app only uses standard HTTPS, which is exempt.
+"$PB" -c "Delete :ITSAppUsesNonExemptEncryption" "$PLIST" >/dev/null 2>&1 || true
+"$PB" -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
+echo "[ios-privacy] set ITSAppUsesNonExemptEncryption=false (export compliance)"
