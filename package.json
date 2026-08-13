@@ -10,10 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "cap:sync": "npm run build && cap sync",
-    "cap:ios": "npm run build && cap sync ios && cap open ios",
+    "cap:sync": "npm run build && cap sync && npm run ios:privacy",
+    "cap:ios": "npm run build && cap sync ios && npm run ios:privacy && cap open ios",
     "cap:android": "npm run build && cap sync android && cap open android",
-    "cap:icons": "capacitor-assets generate --assetPath assets"
+    "cap:icons": "capacitor-assets generate --assetPath assets",
+    "ios:privacy": "bash scripts/ios-privacy.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
