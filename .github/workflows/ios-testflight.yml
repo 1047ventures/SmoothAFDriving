@@ -1,0 +1,143 @@
+name: iOS → TestFlight
+
+# Push to claude-pwa → macOS runner builds the app → uploads to TestFlight.
+# Replaces Xcode Cloud entirely: nothing to configure in Xcode, no workflow
+# editor, no local machine involved.
+#
+# One-time setup (see NATIVE.md): three repo secrets from an App Store Connect
+# API key. Signing is handled by -allowProvisioningUpdates using that key, so
+# there are no certificates or provisioning profiles to manage by hand.
+
+on:
+  push:
+    branches: [claude-pwa]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:        # lets you trigger a build manually from the Actions tab
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false  # never cancel a half-finished upload
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Apple rejects uploads built against an old SDK ("This app was built with
+      # the iOS 18.5 SDK. All iOS apps must be built with the iOS 26 SDK or
+      # later"). Runner images ship several Xcodes side by side and default to
+      # an older one, so pick the newest and fail loudly if it is still too old
+      # — better than burning a full build to find out at the upload step.
+      - name: Select the newest Xcode
+        run: |
+          echo "Xcode versions on this runner:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "  (none found)"
+          LATEST=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then echo "::error::No Xcode found on runner"; exit 1; fi
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+          echo "iOS SDKs available:"
+          xcodebuild -showsdks | grep -i iphoneos || true
+          XCODE_MAJOR=$(xcodebuild -version | head -1 | sed 's/Xcode \([0-9]*\).*/\1/')
+          if [ "$XCODE_MAJOR" -lt 26 ]; then
+            echo "::error::Xcode $XCODE_MAJOR is too old — App Store Connect requires Xcode 26+ (iOS 26 SDK). Runner image needs updating."
+            exit 1
+          fi
+
+      - name: Use Node 22 (Capacitor CLI requires >= 22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Sync web build into the iOS project
+        run: npx cap sync ios
+
+      - name: Apply iOS privacy strings + export compliance
+        run: bash scripts/ios-privacy.sh
+
+      # App Store Connect rejects a build number it has already seen. The
+      # project hardcodes 1, so stamp the run number instead — monotonic per
+      # repo, and offset so it can never collide with the manual 1.0 (1) upload.
+      - name: Stamp build number
+        run: |
+          BUILD_NUMBER=$(( ${{ github.run_number }} + 100 ))
+          echo "Using build number $BUILD_NUMBER"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9][0-9.]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" \
+            ios/App/App.xcodeproj/project.pbxproj
+
+      - name: Write App Store Connect API key
+        env:
+          KEY_ID:      ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/private_keys
+          # altool/xcodebuild both look for this exact filename convention.
+          printf '%s' "$PRIVATE_KEY" > ~/private_keys/AuthKey_${KEY_ID}.p8
+          chmod 600 ~/private_keys/AuthKey_${KEY_ID}.p8
+
+      - name: Archive
+        env:
+          KEY_ID:    ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey_${KEY_ID}.p8 \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            | xcpretty || exit ${PIPESTATUS[0]}
+
+      - name: Export .ipa
+        env:
+          KEY_ID:    ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey_${KEY_ID}.p8 \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID"
+
+      - name: Upload to TestFlight
+        env:
+          KEY_ID:    ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          IPA=$(find "$RUNNER_TEMP/export" -name '*.ipa' | head -1)
+          echo "Uploading $IPA"
+          xcrun altool --upload-app -f "$IPA" -t ios \
+            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+
+      # Keeps the build inspectable if the upload step fails.
+      - name: Upload .ipa as an artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: ignore

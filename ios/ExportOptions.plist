@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export settings for the CI archive → .ipa step (.github/workflows/ios-testflight.yml).
+  app-store-connect is the TestFlight / App Store distribution method.
+  Signing is resolved at export time via the App Store Connect API key, so no
+  certificate or provisioning profile is pinned here.
+-->
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store-connect</string>
+
+    <key>destination</key>
+    <string>export</string>
+
+    <key>signingStyle</key>
+    <string>automatic</string>
+
+    <!-- Symbols let App Store Connect symbolicate crash reports. -->
+    <key>uploadSymbols</key>
+    <true/>
+
+    <!-- Bitcode is long dead; leaving it on breaks modern builds. -->
+    <key>uploadBitcode</key>
+    <false/>
+
+    <!-- Thin nothing; App Store Connect handles per-device slicing. -->
+    <key>stripSwiftSymbols</key>
+    <true/>
+</dict>
+</plist>
