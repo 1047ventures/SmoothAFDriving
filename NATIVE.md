@@ -18,7 +18,9 @@ TestFlight build. Everything here runs on your **Mac** (iOS builds are macOS-onl
 
 1. **Apple Developer Program** membership ($99/yr) — enroll as **Individual** (fastest). Approval is usually same-day to ~48h.
 2. A **Mac with Xcode** (latest from the App Store) + Xcode command-line tools: `xcode-select --install`.
-3. **CocoaPods**: `sudo gem install cocoapods` (Capacitor uses it for iOS deps).
+3. **No CocoaPods needed** — Capacitor 8 uses Swift Package Manager, so there is
+   no `Podfile` and no `.xcworkspace`. Open **`ios/App/App.xcodeproj`** directly;
+   Xcode resolves the Swift packages itself.
 4. Node 18+ and this repo cloned.
 
 ## First build → TestFlight
