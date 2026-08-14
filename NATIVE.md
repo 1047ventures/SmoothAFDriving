@@ -127,7 +127,12 @@ keeps CI config in the repo where it can be reviewed and changed.
 
 1. Go to [App Store Connect → Users and Access → **Integrations** →
    App Store Connect API](https://appstoreconnect.apple.com/access/integrations/api).
-2. Click **+** to generate a key. Give it the **App Manager** role.
+2. Click **+** to generate a key. Give it the **Admin** role.
+
+   > **It must be Admin, not App Manager.** App Manager can upload builds but
+   > cannot create signing certificates, so the export step fails with
+   > `Cloud signing permission error` / `No signing certificate "iOS
+   > Distribution" found`.
 3. Note the **Key ID** and the **Issuer ID**, and download the `.p8` file —
    Apple only lets you download it once.
 4. Add three secrets at **GitHub → repo → Settings → Secrets and variables →
