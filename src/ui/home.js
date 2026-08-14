@@ -11,6 +11,7 @@ import { metersToMiles, fmtDuration } from '../utils/math.js';
 import { scoreColor, dimColor } from '../utils/color.js';
 import { DIM_DISPLAY } from '../constants.js';
 import { renderReview } from './review.js';
+import { restoreDrivesFromCloud } from '../services/drive.js';
 import { getActiveVehicle } from './garage.js';
 
 export function renderHomeStats(){
@@ -176,7 +177,22 @@ export function renderDriveList(){
   const all = loadDrives();
   renderHomeStats();
   if (!all.length){
-    host.innerHTML = '<div class="empty-drives">No drives yet. Tap start.</div>';
+    // Empty history is also what a fresh install / new device looks like, so
+    // offer the cloud restore right here rather than burying it in settings.
+    host.innerHTML = `
+      <div class="empty-drives">
+        <div>No drives yet. Tap start.</div>
+        <details class="restore-box">
+          <summary class="restore-toggle">Driven before? Restore your history ›</summary>
+          <div class="restore-body">
+            <p class="restore-hint">Paste the device ID from your previous install (Garage → About).</p>
+            <input class="restore-input" id="restore-device-id" placeholder="xxxxxxxx-xxxx-…" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <button class="restore-btn" id="restore-go">Restore</button>
+            <div class="restore-status" id="restore-status"></div>
+          </div>
+        </details>
+      </div>`;
+    wireRestore();
     return;
   }
   const sorted = all
@@ -227,5 +243,37 @@ export function renderDriveList(){
         }, 2500);
       }
     });
+  });
+}
+
+/**
+ * Wire the empty-state "restore from cloud" control. Transitional until real
+ * accounts land — at that point the device-ID field goes away and sign-in
+ * drives the same restoreDrivesFromCloud() path.
+ */
+function wireRestore(){
+  const btn = document.getElementById('restore-go');
+  const input = document.getElementById('restore-device-id');
+  const status = document.getElementById('restore-status');
+  if (!btn || !input || !status) return;
+  btn.addEventListener('click', async () => {
+    const id = input.value.trim();
+    if (!id){ status.textContent = 'Enter a device ID first.'; return; }
+    btn.disabled = true;
+    status.textContent = 'Restoring…';
+    const result = await restoreDrivesFromCloud(id);
+    btn.disabled = false;
+    if (!result){
+      status.textContent = "Couldn't reach the cloud — check your connection and try again.";
+      return;
+    }
+    if (result.added === 0){
+      status.textContent = result.fetched === 0
+        ? 'No drives found for that device ID.'
+        : 'Already up to date.';
+      return;
+    }
+    status.textContent = `Restored ${result.added} drive${result.added === 1 ? '' : 's'}.`;
+    renderDriveList();
   });
 }
