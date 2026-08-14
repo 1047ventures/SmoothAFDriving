@@ -113,3 +113,49 @@ re-apply the privacy strings. Without it the cloud would ship a blank app.
 
 App Store Connect rejects a re-used build number. Xcode Cloud sets `CI_BUILD_NUMBER`
 automatically; if you ever archive by hand instead, bump **Build** in Xcode first.
+
+## Automatic builds via GitHub Actions (recommended)
+
+`.github/workflows/ios-testflight.yml` builds and ships to TestFlight on every
+push to `claude-pwa`. No Xcode, no cable, no Xcode Cloud workflow editor.
+
+Xcode Cloud is the "official" route but its workflow editor repeatedly refused to
+offer a TestFlight post-action, so this is the path that actually works. It also
+keeps CI config in the repo where it can be reviewed and changed.
+
+### One-time setup: three repo secrets
+
+1. Go to [App Store Connect → Users and Access → **Integrations** →
+   App Store Connect API](https://appstoreconnect.apple.com/access/integrations/api).
+2. Click **+** to generate a key. Give it the **App Manager** role.
+3. Note the **Key ID** and the **Issuer ID**, and download the `.p8` file —
+   Apple only lets you download it once.
+4. Add three secrets at **GitHub → repo → Settings → Secrets and variables →
+   Actions → New repository secret**:
+
+   | Secret | Value |
+   |---|---|
+   | `APP_STORE_CONNECT_KEY_ID` | the Key ID (e.g. `A1B2C3D4E5`) |
+   | `APP_STORE_CONNECT_ISSUER_ID` | the Issuer ID (a UUID) |
+   | `APP_STORE_CONNECT_PRIVATE_KEY` | the **entire contents** of the `.p8` file, including the `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----` lines |
+
+That's it. Push to `claude-pwa`, or trigger a run manually from the **Actions**
+tab (**iOS → TestFlight** → *Run workflow*).
+
+### How signing works
+
+No certificates or provisioning profiles to manage: `xcodebuild` runs with
+`-allowProvisioningUpdates` and the API key, so it creates and fetches whatever
+signing assets it needs on the runner.
+
+### Build numbers
+
+App Store Connect rejects a build number it has already seen. The workflow stamps
+`CURRENT_PROJECT_VERSION` from `github.run_number + 100` — always increasing, and
+offset so it can't collide with the `1.0 (1)` uploaded by hand. `MARKETING_VERSION`
+(the user-facing `1.0`) is only changed by editing the project.
+
+### If a run fails
+
+The `.ipa` is uploaded as a build artifact even on failure, so you can download it
+from the run page and inspect or upload it manually.
