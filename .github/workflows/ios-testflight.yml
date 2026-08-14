@@ -28,6 +28,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Apple rejects uploads built against an old SDK ("This app was built with
+      # the iOS 18.5 SDK. All iOS apps must be built with the iOS 26 SDK or
+      # later"). Runner images ship several Xcodes side by side and default to
+      # an older one, so pick the newest and fail loudly if it is still too old
+      # — better than burning a full build to find out at the upload step.
+      - name: Select the newest Xcode
+        run: |
+          echo "Xcode versions on this runner:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "  (none found)"
+          LATEST=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then echo "::error::No Xcode found on runner"; exit 1; fi
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+          echo "iOS SDKs available:"
+          xcodebuild -showsdks | grep -i iphoneos || true
+          XCODE_MAJOR=$(xcodebuild -version | head -1 | sed 's/Xcode \([0-9]*\).*/\1/')
+          if [ "$XCODE_MAJOR" -lt 26 ]; then
+            echo "::error::Xcode $XCODE_MAJOR is too old — App Store Connect requires Xcode 26+ (iOS 26 SDK). Runner image needs updating."
+            exit 1
+          fi
+
       - name: Use Node 22 (Capacitor CLI requires >= 22)
         uses: actions/setup-node@v4
         with:
