@@ -4,7 +4,6 @@ import {
   loadLifetimeScore,
   toggleFavoriteDrive,
   deleteDrive,
-  loadDriverName,
 } from '../services/storage.js';
 import { getDriverPersona, analyzeDrive } from '../services/scoring.js';
 import { metersToMiles, fmtDuration } from '../utils/math.js';
@@ -12,6 +11,7 @@ import { scoreColor, dimColor } from '../utils/color.js';
 import { DIM_DISPLAY } from '../constants.js';
 import { renderReview } from './review.js';
 import { restoreDrivesFromCloud } from '../services/drive.js';
+import { displayName } from '../services/auth.js';
 import { getActiveVehicle } from './garage.js';
 
 export function renderHomeStats(){
@@ -41,7 +41,9 @@ export function renderHomeStats(){
   // Welcome name
   const welcomeEl = document.getElementById('home-welcome-name');
   if (welcomeEl){
-    const name = loadDriverName();
+    // Falls back to the account's name/email when no local driver name is set,
+    // so a signed-in driver on a fresh install is greeted by name.
+    const name = displayName();
     welcomeEl.textContent = name ? `Back at it, ${name}` : 'Hey, Driver';
   }
 

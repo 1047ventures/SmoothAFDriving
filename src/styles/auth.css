@@ -1,0 +1,189 @@
+/* ── Account / sign-in ─────────────────────────────────────────────────────── */
+
+/* Top-bar entry point. The top bar is a single centred brand word, so the
+   button is pinned right rather than added to the flow. */
+.home-topbar-v2{ position:relative; }
+
+.home-account-btn{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  background:rgba(242,232,213,.07);
+  border:1px solid rgba(242,232,213,.16);
+  color:var(--cream-dim);
+  font-family:var(--sans);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.04em;
+  padding:7px 13px;
+  border-radius:999px;
+  cursor:pointer;
+  max-width:40vw;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.home-account-btn:active{ background:rgba(242,232,213,.13); }
+.home-account-btn.is-signed-in{
+  color:var(--cream);
+  border-color:rgba(196,169,98,.42);
+}
+
+/* ── Sheet ─────────────────────────────────────────────────────────────────── */
+
+.auth-overlay{
+  position:fixed;
+  inset:0;
+  z-index:900;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(6px);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:16px;
+  /* Keep the card clear of the home indicator on a notched phone. */
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+}
+.auth-overlay.hidden{ display:none; }
+
+.auth-card{
+  position:relative;
+  width:100%;
+  max-width:420px;
+  background:var(--bg2);
+  border:1px solid rgba(242,232,213,.12);
+  border-radius:20px;
+  padding:26px 20px 20px;
+  animation:auth-rise .22s ease-out;
+}
+
+@keyframes auth-rise{
+  from{ transform:translateY(14px); opacity:0; }
+  to  { transform:translateY(0);    opacity:1; }
+}
+
+.auth-close{
+  position:absolute;
+  top:8px;
+  right:10px;
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-size:26px;
+  line-height:1;
+  padding:4px 8px;
+  cursor:pointer;
+}
+
+.auth-title{
+  font-family:var(--serif);
+  font-size:23px;
+  color:var(--cream);
+  margin-bottom:5px;
+}
+.auth-sub{
+  font-family:var(--sans);
+  font-size:13px;
+  line-height:1.45;
+  color:var(--cream-dim);
+  margin-bottom:18px;
+}
+.auth-email{
+  font-family:var(--sans);
+  font-size:14px;
+  color:var(--gold);
+  word-break:break-all;
+  margin-bottom:16px;
+}
+.auth-sent{
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--cream-dim);
+  margin-bottom:10px;
+  word-break:break-all;
+}
+
+.auth-step.hidden,
+.auth-apple-btn.hidden,
+#auth-signedout.hidden,
+#auth-signedin.hidden{ display:none; }
+
+.auth-input{
+  width:100%;
+  box-sizing:border-box;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(242,232,213,.18);
+  border-radius:11px;
+  color:var(--cream);
+  font-family:var(--sans);
+  /* 16px minimum — anything smaller makes iOS Safari zoom on focus. */
+  font-size:16px;
+  padding:13px 14px;
+  margin-bottom:10px;
+}
+.auth-input::placeholder{ color:var(--muted); }
+.auth-input:focus{ outline:none; border-color:rgba(196,169,98,.55); }
+
+.auth-input-code{
+  text-align:center;
+  letter-spacing:.42em;
+  /* Compensate for the trailing letter-space so digits read as centred. */
+  text-indent:.42em;
+  font-size:22px;
+  font-weight:600;
+}
+
+.auth-submit{
+  width:100%;
+  background:var(--tang);
+  border:none;
+  border-radius:11px;
+  color:#120C0A;
+  font-family:var(--sans);
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.02em;
+  padding:14px;
+  cursor:pointer;
+}
+.auth-submit:active{ filter:brightness(.92); }
+.auth-submit:disabled{ opacity:.55; cursor:default; }
+
+.auth-apple-btn{
+  width:100%;
+  background:var(--cream);
+  border:none;
+  border-radius:11px;
+  color:#0A0A0A;
+  font-family:var(--sans);
+  font-size:15px;
+  font-weight:600;
+  padding:14px;
+  margin-bottom:16px;
+  cursor:pointer;
+}
+.auth-apple-btn:active{ filter:brightness(.9); }
+
+.auth-link{
+  display:block;
+  width:100%;
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-family:var(--sans);
+  font-size:13px;
+  padding:12px 0 2px;
+  cursor:pointer;
+}
+.auth-link:active{ color:var(--cream-dim); }
+
+.auth-status{
+  font-family:var(--sans);
+  font-size:12.5px;
+  line-height:1.4;
+  color:var(--cream-dim);
+  min-height:17px;
+  margin-top:11px;
+}
+.auth-status.is-error{ color:var(--warn); }

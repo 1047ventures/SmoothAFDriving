@@ -1,16 +1,27 @@
 import { loadDrives, getDeviceId, getSyncedIds, markSynced } from './storage.js';
-import { DRIVER_NAME_KEY, USER_EMAIL_KEY, ONBOARDED_KEY, PROFILE_SYNCED_KEY } from '../constants.js';
-
-const SB_URL  = 'https://dbreetxubxdxogmektxc.supabase.co';
-const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicmVldHh1YnhkeG9nbWVrdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjY5ODgsImV4cCI6MjA5MjkwMjk4OH0.hMeEhYpNNgZ67Nh9GnjwJvtSBbdQVhbdjiBBNNG5qe4';
+import {
+  DRIVER_NAME_KEY, USER_EMAIL_KEY, ONBOARDED_KEY, PROFILE_SYNCED_KEY,
+  SB_URL, SB_ANON,
+} from '../constants.js';
+import { authHeaders, currentUser } from './auth.js';
 
 export async function pushDriveToSupabase(drive){
   if (!drive || !drive.startTime) return;
   const driveId = String(drive.startTime); // stable local ID
   if (getSyncedIds().has(driveId)) return;  // already uploaded
   try {
+    const uid = currentUser()?.id;
     const payload = {
       device_id:       getDeviceId(),
+      // Stamped at insert time — this is what makes a drive follow the driver to
+      // a new phone instead of being stranded on this one.
+      //
+      // OMITTED entirely when signed out rather than sent as null, so an app
+      // build that reaches a database where the accounts migration hasn't run
+      // yet still uploads exactly as it did before. Sending the key would 400 on
+      // the missing column, and pushDriveToSupabase swallows errors — drives
+      // would silently stop syncing.
+      ...(uid ? { user_id: uid } : {}),
       start_time:      drive.startTime,
       duration_ms:     drive.durationMs,
       distance_meters: drive.distanceMeters,
@@ -31,8 +42,7 @@ export async function pushDriveToSupabase(drive){
     const res = await fetch(`${SB_URL}/rest/v1/drives`, {
       method: 'POST',
       headers: {
-        'apikey':        SB_ANON,
-        'Authorization': `Bearer ${SB_ANON}`,
+        ...authHeaders(),
         'Content-Type':  'application/json',
         'Prefer':        'return=minimal',
       },
@@ -101,17 +111,61 @@ export async function syncUserProfile() {
  *
  * Returns cloud rows (newest first), or null on any failure — never throws.
  */
+const DRIVE_COLS = 'start_time,duration_ms,distance_meters,top_speed_mps,score,event_count,'
+                 + 'simulated,dest_label,dest_lat,dest_lng,route_distance_m,target_eta_sec,effectiveness';
+
 export async function fetchCloudDrives(deviceId){
   if (!deviceId) return null;
-  const cols = 'start_time,duration_ms,distance_meters,top_speed_mps,score,event_count,'
-             + 'simulated,dest_label,dest_lat,dest_lng,route_distance_m,target_eta_sec,effectiveness';
+  return selectDrives(`device_id=eq.${encodeURIComponent(deviceId)}`);
+}
+
+/**
+ * Every drive belonging to the signed-in account, across all their devices.
+ * This is what restore becomes once identity exists — no UUID to paste.
+ */
+export async function fetchDrivesForUser(){
+  const uid = currentUser()?.id;
+  if (!uid) return null;
+  return selectDrives(`user_id=eq.${encodeURIComponent(uid)}`);
+}
+
+async function selectDrives(filter){
   try {
-    const url = `${SB_URL}/rest/v1/drives?select=${cols}`
-              + `&device_id=eq.${encodeURIComponent(deviceId)}&order=start_time.desc`;
-    const res = await fetch(url, { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } });
+    const url = `${SB_URL}/rest/v1/drives?select=${DRIVE_COLS}&${filter}&order=start_time.desc`;
+    const res = await fetch(url, { headers: authHeaders() });
     if (!res.ok) return null;
     const rows = await res.json();
     return Array.isArray(rows) ? rows : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Adopt this device's previously anonymous drives into the account that just
+ * signed in.
+ *
+ * Everything recorded before accounts existed is stamped with a device_id and a
+ * null user_id. Without this, signing in would look like starting over — the
+ * history would still be in the cloud but invisible to the new identity.
+ *
+ * Idempotent: the `user_id=is.null` filter means a second run matches nothing.
+ * Returns the number of rows claimed, or null if the call failed.
+ */
+export async function claimDeviceDrives(){
+  const uid = currentUser()?.id;
+  if (!uid) return null;
+  try {
+    const url = `${SB_URL}/rest/v1/drives`
+              + `?device_id=eq.${encodeURIComponent(getDeviceId())}&user_id=is.null`;
+    const res = await fetch(url, {
+      method:  'PATCH',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json', Prefer: 'return=representation' },
+      body:    JSON.stringify({ user_id: uid }),
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows.length : 0;
   } catch {
     return null;
   }

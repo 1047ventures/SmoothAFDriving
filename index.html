@@ -26,6 +26,7 @@
     <!-- Top bar -->
     <div class="home-topbar-v2">
       <span class="home-brand">Smooth AF</span>
+      <button class="home-account-btn" id="btn-account" aria-label="Account">Sign in</button>
     </div>
 
     <!-- Score number — hero element -->
@@ -732,6 +733,48 @@
       <input class="signup-input" id="signup-name-input" type="text" placeholder="Your name" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="signup-submit" id="signup-submit-btn">Save name →</button>
       <button class="signup-cancel" id="signup-cancel-btn">Maybe later</button>
+    </div>
+  </div>
+
+  <!-- ACCOUNT / SIGN-IN SHEET -->
+  <div class="auth-overlay hidden" id="auth-sheet">
+    <div class="auth-card">
+      <button class="auth-close" id="auth-close" aria-label="Close">×</button>
+
+      <!-- Signed out -->
+      <div id="auth-signedout">
+        <div class="auth-title">Save your drives</div>
+        <div class="auth-sub">Sign in so your score and history follow you to any phone.</div>
+
+        <button class="auth-apple-btn hidden" id="auth-apple-btn">
+           Sign in with Apple
+        </button>
+
+        <div class="auth-step" id="auth-step-email">
+          <input class="auth-input" id="auth-email" type="email" inputmode="email"
+                 placeholder="you@email.com" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <button class="auth-submit" id="auth-email-btn">Email me a code</button>
+        </div>
+
+        <div class="auth-step hidden" id="auth-step-code">
+          <div class="auth-sent" id="auth-sent"></div>
+          <input class="auth-input auth-input-code" id="auth-code" type="text" inputmode="numeric"
+                 maxlength="6" placeholder="123456" autocomplete="one-time-code" autocorrect="off" spellcheck="false">
+          <button class="auth-submit" id="auth-code-btn">Verify &amp; sign in</button>
+          <button class="auth-link" id="auth-back">Use a different email</button>
+        </div>
+
+        <div class="auth-status" id="auth-status" aria-live="polite"></div>
+      </div>
+
+      <!-- Signed in -->
+      <div id="auth-signedin" class="hidden">
+        <div class="auth-title">Signed in</div>
+        <div class="auth-email" id="auth-who"></div>
+        <div class="auth-status" id="auth-status-in" aria-live="polite"></div>
+        <button class="auth-submit" id="auth-sync-btn">Sync my drives</button>
+        <button class="auth-link" id="auth-signout">Sign out</button>
+      </div>
     </div>
   </div>
 

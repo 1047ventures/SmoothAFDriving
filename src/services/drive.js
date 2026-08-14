@@ -11,7 +11,11 @@ import {
 } from './storage.js';
 import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
 import { isTrafficAware } from './routing.js';
-import { pushDriveToSupabase, syncToLeaderboard, fetchCloudDrives, cloudRowToDrive } from './supabase.js';
+import {
+  pushDriveToSupabase, syncToLeaderboard, fetchCloudDrives, cloudRowToDrive,
+  fetchDrivesForUser, claimDeviceDrives,
+} from './supabase.js';
+import { isSignedIn } from './auth.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
 import { ARRIVAL_RADIUS_M } from '../constants.js';
 
@@ -244,6 +248,24 @@ export function mergeCloudDrives(rows){
  */
 export async function restoreDrivesFromCloud(deviceId){
   const rows = await fetchCloudDrives(deviceId);
+  if (!rows) return null;
+  const result = mergeCloudDrives(rows);
+  if (result.added > 0) recomputeLifetimeScore();
+  return { ...result, fetched: rows.length };
+}
+
+/**
+ * The post-sign-in restore: adopt this device's anonymous drives into the
+ * account, then pull down everything the account owns — including drives from
+ * phones this install has never heard of.
+ *
+ * Safe to call on every launch. Claiming filters on user_id=is.null and the
+ * merge dedupes by startTime, so repeat runs settle to a no-op.
+ */
+export async function restoreDrivesForUser(){
+  if (!isSignedIn()) return null;
+  await claimDeviceDrives();
+  const rows = await fetchDrivesForUser();
   if (!rows) return null;
   const result = mergeCloudDrives(rows);
   if (result.added > 0) recomputeLifetimeScore();
