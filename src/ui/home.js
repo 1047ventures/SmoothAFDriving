@@ -172,6 +172,25 @@ function renderLifetimeSheet(all){
   document.getElementById('lifetime-sheet')?.classList.remove('hidden');
 }
 
+/**
+ * Markup for the cloud-restore control. Rendered in BOTH the empty state and
+ * below an existing list — a returning driver may already have a drive or two
+ * on the new install, which would otherwise hide the only way to get their
+ * history back.
+ */
+function restoreBoxHtml(){
+  return `
+    <details class="restore-box">
+      <summary class="restore-toggle">Driven before? Restore your history ›</summary>
+      <div class="restore-body">
+        <p class="restore-hint">Paste the device ID from a previous install to pull those drives down from the cloud.</p>
+        <input class="restore-input" id="restore-device-id" placeholder="xxxxxxxx-xxxx-…" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button class="restore-btn" id="restore-go">Restore</button>
+        <div class="restore-status" id="restore-status"></div>
+      </div>
+    </details>`;
+}
+
 export function renderDriveList(){
   const host = $('#drives-container');
   const all = loadDrives();
@@ -182,15 +201,7 @@ export function renderDriveList(){
     host.innerHTML = `
       <div class="empty-drives">
         <div>No drives yet. Tap start.</div>
-        <details class="restore-box">
-          <summary class="restore-toggle">Driven before? Restore your history ›</summary>
-          <div class="restore-body">
-            <p class="restore-hint">Paste the device ID from your previous install (Garage → About).</p>
-            <input class="restore-input" id="restore-device-id" placeholder="xxxxxxxx-xxxx-…" autocapitalize="off" autocorrect="off" spellcheck="false">
-            <button class="restore-btn" id="restore-go">Restore</button>
-            <div class="restore-status" id="restore-status"></div>
-          </div>
-        </details>
+${restoreBoxHtml()}
       </div>`;
     wireRestore();
     return;
@@ -213,7 +224,8 @@ export function renderDriveList(){
           <button class="drive-del-btn" data-idx="${i}" aria-label="Delete">×</button>
         </div>
       </div>`;
-  }).join('');
+  }).join('') + `<div class="restore-after-list">${restoreBoxHtml()}</div>`;
+  wireRestore();
   $$('#drives-container .drive-row').forEach(row => {
     row.addEventListener('click', e => {
       if (e.target.closest('.drive-star-btn, .drive-del-btn')) return;
