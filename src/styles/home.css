@@ -305,3 +305,5 @@
     text-transform:uppercase;cursor:pointer}
   .restore-btn:disabled{opacity:.55}
   .restore-status{margin-top:8px;font-size:12px;color:rgba(242,232,213,.75);min-height:16px}
+  /* Restore control shown beneath an existing drive list (not just empty state) */
+  .restore-after-list{padding:10px 4px 2px;border-top:1px solid rgba(242,232,213,.08);margin-top:8px}
