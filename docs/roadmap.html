@@ -190,7 +190,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 15, 2026 · 4:35 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 15, 2026 · 5:35 PM MDT</b>
     </div>
     <div class="legend">
       <span><i class="dot d-warn"></i>Waiting on you</span>
@@ -204,26 +204,25 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 thing · tap for steps</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 blocked · 1 optional</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
         <summary class="wsum">
-          <span class="pill p-block">1 · Do</span>
-          <span class="t">Create one Supabase token &mdash; it unblocks everything <span class="tag">~2 min</span></span>
+          <span class="pill p-block">1 · Blocked</span>
+          <span class="t">The sign-in email isn&rsquo;t arriving <span class="tag">delivery, not a bug</span></span>
           <span class="chev">▶</span>
         </summary>
         <div class="wbody">
-          <p><b>Where we are:</b> sign-in is <b>shipped and on your phone</b> in TestFlight build 106, but it <b>can't complete yet</b>. Two things were blocking it, and both used to be dashboard clicking. They're now one script &mdash; but it needs a credential, and only you can make one.</p>
+          <p><b>Setup is done and correct</b> &mdash; the migration is applied and both email templates carry the code. But a sign-in was attempted and <b>no email arrived</b>.</p>
+          <p>Requesting a code returns <code>HTTP 200</code> from Supabase, with no rate-limit rejection. <code>200</code> means <i>accepted and queued</i> &mdash; so the app is doing its job and <b>this is a mail delivery failure, not a code bug</b>.</p>
+          <p>Prime suspect is Supabase&rsquo;s built-in shared mailer, which is explicitly not for production: throttled at the project level, slow, and it drops mail without telling you.</p>
           <ol>
-            <li>Go to <a href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noopener">supabase.com/dashboard/account/tokens</a> &rarr; <b>Generate new token</b>. Copy it.</li>
-            <li>Put it somewhere I can use it &mdash; <b>don't paste it into chat</b>:
-              <br>&nbsp;&nbsp;<b>Easiest:</b> <a href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">GitHub &rarr; Secrets and variables &rarr; Actions</a> &rarr; New secret named <code>SUPABASE_ACCESS_TOKEN</code>. Then tell me, and I'll run it and read you the result.
-              <br>&nbsp;&nbsp;<b>Or from your Mac:</b> <code>export SUPABASE_ACCESS_TOKEN=...</code> then <code>node scripts/supabase-setup.mjs --dry-run</code>, then again without the flag.
-            </li>
+            <li>Check Gmail <b>spam</b> and <b>Promotions</b>. Bare transactional mail from a shared sender lands there constantly.</li>
+            <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; <b>Authentication &rarr; Logs</b> &mdash; the definitive answer on whether it was dispatched or dropped.</li>
+            <li>If dropped: set up <b>custom SMTP</b>. <a href="https://resend.com" target="_blank" rel="noopener">Resend</a> is the least friction &mdash; 3,000/month free, sends from their test domain with no DNS wait.</li>
           </ol>
-          <p><b>What it does:</b> applies the accounts migration (production still has <b>no <code>user_id</code> column</b>) and adds the 6-digit code to the auth emails (they currently mail a link, so you'd reach the code screen with nothing to type). Idempotent, and <code>--dry-run</code> writes nothing.</p>
-          <p class="dim">Fully manual instructions are still in <code>ACCOUNTS.md</code> if you'd rather click through the dashboard yourself.</p>
+          <div class="note"><b>Also queued:</b> the 6-digit code <b>didn&rsquo;t fit the input field</b> on the phone. Shortening it to 4 digits is on the list &mdash; the field is worth widening either way.</div>
         </div>
       </details>
 
@@ -352,7 +351,7 @@
     <div class="s-head"><h2>Flagged / tech debt</h2><span class="rule"></span></div>
     <div class="grid">
       <div class="card">
-        <div class="row"><span class="pill p-flag">Privacy</span><div class="body"><div class="t">Drives are world-readable</div><div class="d">Full GPS tracks readable via the anon key — needs a row-level-security pass.</div></div></div>
+        <div class="row"><span class="pill p-flag">Privacy</span><div class="body"><div class="t">Drives are still world-readable</div><div class="d">Today's accounts migration <b>turned row-level security on</b>, but deliberately left reads open: the select policy is <code>using (true)</code>, so full GPS tracks are still readable by anyone with the anon key. That was intentional — tightening it to <code>using (user_id = auth.uid())</code> breaks the device-ID restore box for anyone not signed in yet. <b>The fix is a one-line policy change</b>, gated on sign-in being confirmed working and the restore box being retired.</div></div></div>
         <div class="row"><span class="pill p-flag">Bug</span><div class="body"><div class="t">Dead leaderboard table</div><div class="d">The <code>drivers</code> table doesn't exist; those writes silently fail.</div></div></div>
       </div>
       <div class="card">
@@ -371,8 +370,9 @@
   <section>
     <div class="s-head"><h2>Completed</h2><span class="count">22 releases</span><span class="rule"></span></div>
     <div class="card full">
+      <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Production is set up — migration applied, emails carry the code <span class="tag">Aug 15</span></div><div class="d">The setup script ran for real against production. <b>The accounts migration applied</b> (<code>drives.user_id</code> now exists, with indexes and row-level-security policies), and <b>both auth email templates now print the 6-digit code</b> — "Confirm signup" and "Magic Link" — with the existing custom content preserved underneath. A dry run was read first and wrote nothing; the real run then re-read its own work from the API to confirm, and an independent check from outside agreed. Sign-in is no longer blocked on setup — only on someone actually trying it.</div></div></div>
       <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Supabase setup without the dashboard <span class="tag">#46</span></div><div class="d">The last two setup steps were both dashboard-only clicking, and the automated path we had broke when the database password was rotated. One script now does both over Supabase's Management API — applies migrations and puts the code in the auth emails — using a personal access token instead of the DB password. Idempotent, with a dry run that writes nothing.</div></div></div>
-      <div class="row"><span class="ver-tag">v124</span><div class="body"><div class="t">Real accounts — sign in, and your drives follow you <span class="tag">#44</span></div><div class="d">The app had <b>no notion of identity</b>: the "device ID" was a random UUID per install, so it knew a handset, not a driver — a new phone looked like a stranger. Now there's a <b>Sign in</b> button on the home screen: email + a 6-digit code, and on sign-in it <b>claims every drive that phone recorded anonymously</b> into your account, then pulls down anything from your other devices. Sign in with Apple is built and switches itself on when the provider is enabled. Needs the two setup steps above to work end to end.</div></div></div>
+      <div class="row"><span class="ver-tag">v124</span><div class="body"><div class="t">Real accounts — sign in, and your drives follow you <span class="tag">#44</span></div><div class="d">The app had <b>no notion of identity</b>: the "device ID" was a random UUID per install, so it knew a handset, not a driver — a new phone looked like a stranger. Now there's a <b>Sign in</b> button on the home screen: email + a 6-digit code, and on sign-in it <b>claims every drive that phone recorded anonymously</b> into your account, then pulls down anything from your other devices. Sign in with Apple is built and switches itself on when the provider is enabled. <b>Both setup steps are now done</b> — all that's left is trying it on your phone.</div></div></div>
       <div class="row"><span class="ver-tag">v124</span><div class="body"><div class="t">Sign-in layout, and a top-bar collision <span class="tag">#45</span></div><div class="d">A visual pass caught the new account button colliding with the version badge — literally painting text over text — plus a pill clipped off the top of the screen, a position that drifted into the status bar on a notched phone, a modal that could scroll its own close button out of reach on a small screen, tap targets under Apple's 44px minimum, and two links failing contrast. All fixed and re-measured.</div></div></div>
       <div class="row"><span class="ver-tag">v123</span><div class="body"><div class="t">Cloud restore, reachable <span class="tag">#42–#43</span></div><div class="d">Your <b>122 drives / 403 mi</b> are restorable from the cloud — and the control now shows below an existing drive list, not just on an empty one. Anyone who recorded a test drive before looking for their history previously had no way to reach it.</div></div></div>
       <div class="row"><span class="ver-tag">🎉</span><div class="body"><div class="t">Native iOS app running on a real phone <span class="tag">Aug 13</span></div><div class="d">Apple Developer account enrolled, Xcode project generated, signing sorted, Developer Mode on, app installed and <b>confirmed working end to end</b> — GPS, motion sensors, live scoring, the recap, onboarding, and the leaderboard prompt all functioning natively. Privacy usage strings are now auto-applied on every sync (<span class="tag">#36</span>) so they can't go missing again.</div></div></div>

@@ -200,7 +200,11 @@ which inverts the earlier advice:
 ## 6 · Conventions to keep
 
 **Roadmap.** `docs/roadmap.html` is the source of truth and publishes to a
-**fixed artifact URL**. Republish with **both** `file_path` and that `url` —
+**fixed artifact URL**. **Commit the file every time you publish.** This has
+already gone wrong once: a session edited and published the roadmap without
+committing, so the live artifact ran ahead of the repo copy — and the next
+publish from the repo would have silently reverted that work. It was recovered
+by reading the live artifact back and reconciling. Republish with **both** `file_path` and that `url` —
 omitting the URL forks a second artifact and orphans the user's bookmark. Keep
 `favicon: 🏎️`. **Always re-stamp the "Updated" line**; this has already been
 missed once and made the page look stale. Full procedure is in the comment at
