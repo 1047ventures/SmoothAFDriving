@@ -153,7 +153,109 @@ async function setupEmailTemplates(){
   console.log('\nTemplates updated.');
 }
 
-// ── 3 · Verify ────────────────────────────────────────────────────────────────
+// ── 3 · One-time-code length ──────────────────────────────────────────────────
+
+// The code gets typed on a phone, into a field the width of a postage stamp.
+// Six digits didn't fit — there was physically not enough room — so the driver
+// couldn't enter it. Four fits.
+//
+// The cost is real and worth stating: 4 digits is 10,000 combinations against
+// 1,000,000. What keeps that honest is the expiry window plus Supabase's own
+// rate limit (one code per address per 60s), NOT length alone. So the fix for
+// a code that expired before it arrived is faster mail — see SMTP below — and
+// never a longer expiry, which would widen the guessing window instead.
+const OTP_LENGTH = Number(process.env.SUPABASE_OTP_LENGTH || 4);
+
+async function setupOtpLength(){
+  console.log('\n── One-time-code length ─────────────────────────');
+
+  if (!Number.isInteger(OTP_LENGTH) || OTP_LENGTH < 4 || OTP_LENGTH > 10){
+    throw new Error(`SUPABASE_OTP_LENGTH must be an integer 4–10, got ${OTP_LENGTH}`);
+  }
+
+  const cfg     = await api(`/v1/projects/${REF}/config/auth`);
+  const current = cfg?.mailer_otp_length;
+  const expSecs = Number(cfg?.mailer_otp_exp ?? 0);
+
+  // Surfaced rather than changed: if mail arrives after this window the code is
+  // already dead on arrival, and that is a delivery problem wearing a costume.
+  console.log(`code expires after: ${expSecs ? `${expSecs}s (${Math.round(expSecs / 60)} min)` : 'unknown'}`);
+
+  if (Number(current) === OTP_LENGTH){
+    console.log(`• already ${OTP_LENGTH} digits`);
+    return;
+  }
+
+  console.log(`→ ${current || 'default'} digits → ${OTP_LENGTH}`);
+  if (DRY){ console.log('  (dry run — not sent)'); return; }
+
+  await api(`/v1/projects/${REF}/config/auth`, {
+    method: 'PATCH',
+    body:   { mailer_otp_length: OTP_LENGTH },
+  });
+  console.log(`✓ code is now ${OTP_LENGTH} digits`);
+}
+
+// ── 4 · Custom SMTP ───────────────────────────────────────────────────────────
+
+// Supabase's built-in mailer is a shared, throttled service the docs are explicit
+// about not using in production. Here it delivered a sign-in code more than an
+// hour late — past the code's own expiry — which to the driver is indistinguishable
+// from "sign-in is broken". Custom SMTP is the fix.
+//
+// Credentials come from the environment, never the repo. Set them as Actions
+// secrets and pass them through in the workflow. With none set this is skipped,
+// so the script stays safe to run for the migration/template half alone.
+const SMTP = {
+  smtp_host:        process.env.SMTP_HOST,
+  smtp_port:        process.env.SMTP_PORT,
+  smtp_user:        process.env.SMTP_USER,
+  smtp_pass:        process.env.SMTP_PASS,
+  smtp_admin_email: process.env.SMTP_SENDER_EMAIL,
+  smtp_sender_name: process.env.SMTP_SENDER_NAME || 'Smooth AF',
+};
+
+async function setupSmtp(){
+  console.log('\n── Custom SMTP ──────────────────────────────────');
+
+  // sender_name has a default, so it can't be the thing that decides intent.
+  const required = ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_admin_email'];
+  const missing  = required.filter(k => !SMTP[k]);
+
+  if (missing.length === required.length){
+    console.log('No SMTP_* environment variables set — skipping.');
+    console.log('Set SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS / SMTP_SENDER_EMAIL to configure it.');
+    return;
+  }
+  if (missing.length){
+    throw new Error(`SMTP is half-configured. Missing: ${missing.join(', ')}`);
+  }
+
+  const cfg = await api(`/v1/projects/${REF}/config/auth`);
+
+  // The live config is the authority on which keys this project actually
+  // exposes — cheaper to check than to discover through a silently-ignored PATCH.
+  const unknown = Object.keys(SMTP).filter(k => !(k in (cfg || {})));
+  if (unknown.length){
+    console.log(`! not present in this project's auth config: ${unknown.join(', ')}`);
+    console.log('  (they will be sent anyway; Supabase ignores keys it does not know)');
+  }
+
+  if (cfg?.smtp_host === SMTP.smtp_host && cfg?.smtp_user === SMTP.smtp_user){
+    console.log(`• already sending through ${SMTP.smtp_host} as ${SMTP.smtp_admin_email}`);
+    return;
+  }
+
+  console.log(`→ host:   ${SMTP.smtp_host}:${SMTP.smtp_port}`);
+  console.log(`→ sender: ${SMTP.smtp_sender_name} <${SMTP.smtp_admin_email}>`);
+  console.log('  (password not printed)');
+  if (DRY){ console.log('\n(dry run — not sent)'); return; }
+
+  await api(`/v1/projects/${REF}/config/auth`, { method: 'PATCH', body: SMTP });
+  console.log('\n✓ SMTP configured — mail now leaves through your own sender.');
+}
+
+// ── 5 · Verify ────────────────────────────────────────────────────────────────
 
 async function verify(){
   console.log('\n── Verify ───────────────────────────────────────');
@@ -166,6 +268,8 @@ async function verify(){
   for (const { key, label } of TEMPLATES){
     console.log(`${label}: ${(cfg?.[key] || '').includes('{{ .Token }}') ? 'prints the code ✓' : 'NO CODE ✗'}`);
   }
+  console.log(`Code length: ${cfg?.mailer_otp_length || 'default'} digits${Number(cfg?.mailer_otp_length) === OTP_LENGTH ? ' ✓' : ''}`);
+  console.log(`Mail sender: ${cfg?.smtp_host ? `${cfg.smtp_host} ✓` : 'Supabase shared mailer — slow, not for production ✗'}`);
   console.log(`Sign in with Apple: ${cfg?.external_apple_enabled ? 'enabled ✓' : 'off (optional)'}`);
 }
 
@@ -175,6 +279,8 @@ try {
   console.log(`Project: ${REF}${DRY ? '   [DRY RUN]' : ''}`);
   await applyMigrations();
   await setupEmailTemplates();
+  await setupOtpLength();
+  await setupSmtp();
   if (!DRY) await verify();
   console.log('\nDone.');
 } catch (err) {
