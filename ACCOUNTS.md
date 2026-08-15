@@ -28,6 +28,32 @@ anonymous recording keeps working exactly as before.
 
 ---
 
+## Fastest path — do steps 1 and 2 in one shot
+
+`scripts/supabase-setup.mjs` does the migration **and** the email templates over
+Supabase's Management API. One credential, no dashboard clicking, no database
+password. It's idempotent — re-running it is a no-op.
+
+Create a token at <https://supabase.com/dashboard/account/tokens>, then either:
+
+**From CI** — add it as the repo secret `SUPABASE_ACCESS_TOKEN`, then Actions →
+**Supabase Setup** → Run workflow. Tick `dry_run` first to preview.
+
+**From a terminal** — the token stays in your shell, never in a transcript:
+
+```bash
+export SUPABASE_ACCESS_TOKEN=sbp_...
+node scripts/supabase-setup.mjs --dry-run   # preview
+node scripts/supabase-setup.mjs             # apply
+```
+
+It finishes by verifying: whether `drives.user_id` exists, whether each template
+prints the code, and whether Apple is enabled.
+
+The manual versions of both steps are below, if you'd rather click.
+
+---
+
 ## Step 1 — Run the migration (required)
 
 `supabase/migrations/20260814000000_accounts.sql` adds the nullable `user_id`
