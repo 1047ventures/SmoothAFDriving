@@ -39,17 +39,41 @@ export async function pushDriveToSupabase(drive){
       target_eta_sec:   drive.targetEtaSec ?? null,
       effectiveness:    drive.effectiveness ?? null,
     };
-    const res = await fetch(`${SB_URL}/rest/v1/drives`, {
-      method: 'POST',
-      headers: {
-        ...authHeaders(),
-        'Content-Type':  'application/json',
-        'Prefer':        'return=minimal',
-      },
-      body: JSON.stringify(payload),
-    });
+    let res = await postDrive(payload);
+
+    // The accounts migration may not have reached this database yet, in which
+    // case PostgREST rejects the unknown user_id column (PGRST204 / 400). The
+    // drive itself is still perfectly valid without it, and this function
+    // swallows failures — so without this retry a signed-in driver would just
+    // silently stop syncing. Drop the column and send it as an anonymous row;
+    // signing in again later claims it via claimDeviceDrives().
+    if (!res.ok && uid && await mentionsUserIdColumn(res)){
+      const { user_id, ...withoutUser } = payload;
+      res = await postDrive(withoutUser);
+    }
+
     if (res.ok) markSynced(driveId);
   } catch { /* offline – will retry on next startup */ }
+}
+
+function postDrive(payload){
+  return fetch(`${SB_URL}/rest/v1/drives`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(),
+      'Content-Type':  'application/json',
+      'Prefer':        'return=minimal',
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+/** True when a failed response blames the user_id column specifically. */
+async function mentionsUserIdColumn(res){
+  try {
+    const body = await res.clone().text();
+    return /user_id/.test(body);
+  } catch { return false; }
 }
 
 // Sync any drives that weren't uploaded yet (e.g. was offline during drive)
