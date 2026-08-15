@@ -1,6 +1,6 @@
 name: iOS → TestFlight
 
-# Push to claude-pwa → macOS runner builds the app → uploads to TestFlight.
+# Push to main → macOS runner builds the app → uploads to TestFlight.
 # Replaces Xcode Cloud entirely: nothing to configure in Xcode, no workflow
 # editor, no local machine involved.
 #
@@ -10,7 +10,7 @@ name: iOS → TestFlight
 
 on:
   push:
-    branches: [claude-pwa]
+    branches: [main]
     paths-ignore:
       - '**.md'
       - 'docs/**'

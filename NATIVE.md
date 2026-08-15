@@ -105,9 +105,9 @@ re-apply the privacy strings. Without it the cloud would ship a blank app.
    git push
    ```
 2. Xcode → **Product → Xcode Cloud → Create Workflow** (it can now find the remote).
-3. **Start Conditions** → Branch Changes → **`claude-pwa`** (not `main`).
+3. **Start Conditions** → Branch Changes → **`main`**.
 4. **Post-Actions** → **+** → **TestFlight Internal Testing** → your tester group.
-5. Save. Pushes to `claude-pwa` now build and land in TestFlight automatically.
+5. Save. Pushes to `main` now build and land in TestFlight automatically.
 
 ### Bumping the build number
 
@@ -117,7 +117,7 @@ automatically; if you ever archive by hand instead, bump **Build** in Xcode firs
 ## Automatic builds via GitHub Actions (recommended)
 
 `.github/workflows/ios-testflight.yml` builds and ships to TestFlight on every
-push to `claude-pwa`. No Xcode, no cable, no Xcode Cloud workflow editor.
+push to `main`. No Xcode, no cable, no Xcode Cloud workflow editor.
 
 Xcode Cloud is the "official" route but its workflow editor repeatedly refused to
 offer a TestFlight post-action, so this is the path that actually works. It also
@@ -144,7 +144,7 @@ keeps CI config in the repo where it can be reviewed and changed.
    | `APP_STORE_CONNECT_ISSUER_ID` | the Issuer ID (a UUID) |
    | `APP_STORE_CONNECT_PRIVATE_KEY` | the **entire contents** of the `.p8` file, including the `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----` lines |
 
-That's it. Push to `claude-pwa`, or trigger a run manually from the **Actions**
+That's it. Push to `main`, or trigger a run manually from the **Actions**
 tab (**iOS → TestFlight** → *Run workflow*).
 
 ### How signing works

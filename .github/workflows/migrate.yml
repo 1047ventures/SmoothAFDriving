@@ -1,7 +1,7 @@
 name: DB Migrate
 
 # Applies pending Supabase migrations (supabase/migrations/*.sql) automatically
-# whenever they change on the production branch. Also runnable on demand.
+# whenever they change on the production branch (main). Also runnable on demand.
 #
 # Requires one repo secret: SUPABASE_DB_URL
 #   Supabase dashboard → Project Settings → Database → Connection string →
@@ -13,7 +13,7 @@ name: DB Migrate
 
 on:
   push:
-    branches: [claude-pwa]
+    branches: [main]
     paths: ['supabase/migrations/**']
   workflow_dispatch: {}
 
