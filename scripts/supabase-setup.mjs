@@ -155,22 +155,29 @@ async function setupEmailTemplates(){
 
 // ── 3 · One-time-code length ──────────────────────────────────────────────────
 
-// The code gets typed on a phone, into a field the width of a postage stamp.
-// Six digits didn't fit — there was physically not enough room — so the driver
-// couldn't enter it. Four fits.
+// The project was configured to mail 8-digit codes while the app's input was
+// capped at 6 characters — the last two digits could not be typed at all, so
+// sign-in was impossible rather than merely fiddly. That mismatch is the bug.
 //
-// The cost is real and worth stating: 4 digits is 10,000 combinations against
-// 1,000,000. What keeps that honest is the expiry window plus Supabase's own
-// rate limit (one code per address per 60s), NOT length alone. So the fix for
-// a code that expired before it arrived is faster mail — see SMTP below — and
-// never a longer expiry, which would widen the guessing window instead.
-const OTP_LENGTH = Number(process.env.SUPABASE_OTP_LENGTH || 4);
+// 6 is the floor: Supabase rejects anything shorter with
+//   "mailer_otp_length: Too small: expected number to be >=6"
+// so the app's existing maxlength="6" was right all along, and this only has to
+// bring the server down to meet it. Don't lower it further — you can't.
+//
+// Note also what is deliberately NOT changed here: the expiry, left at its
+// 3600s default. A code that expired before arriving is a mail-latency problem;
+// widening the window would only enlarge the guessing surface. Fix the mail.
+const OTP_MIN     = 6;   // enforced server-side by Supabase
+const OTP_LENGTH  = Number(process.env.SUPABASE_OTP_LENGTH || OTP_MIN);
 
 async function setupOtpLength(){
   console.log('\n── One-time-code length ─────────────────────────');
 
-  if (!Number.isInteger(OTP_LENGTH) || OTP_LENGTH < 4 || OTP_LENGTH > 10){
-    throw new Error(`SUPABASE_OTP_LENGTH must be an integer 4–10, got ${OTP_LENGTH}`);
+  if (!Number.isInteger(OTP_LENGTH) || OTP_LENGTH < OTP_MIN || OTP_LENGTH > 10){
+    throw new Error(
+      `SUPABASE_OTP_LENGTH must be an integer ${OTP_MIN}–10, got ${OTP_LENGTH}. ` +
+      `Supabase rejects anything below ${OTP_MIN}.`
+    );
   }
 
   const cfg     = await api(`/v1/projects/${REF}/config/auth`);
@@ -279,8 +286,12 @@ try {
   console.log(`Project: ${REF}${DRY ? '   [DRY RUN]' : ''}`);
   await applyMigrations();
   await setupEmailTemplates();
-  await setupOtpLength();
+  // SMTP before code length, deliberately. Mail delivery is the critical path;
+  // code length is cosmetic. Running them the other way round once meant a
+  // rejected length value aborted the script before it ever configured the
+  // mailer — a nice-to-have blocking the thing that actually mattered.
   await setupSmtp();
+  await setupOtpLength();
   if (!DRY) await verify();
   console.log('\nDone.');
 } catch (err) {
