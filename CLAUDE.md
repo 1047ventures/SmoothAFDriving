@@ -123,7 +123,7 @@ All three hosts (Netlify, Vercel, Cloudflare) run `npm run build` and serve from
 - `.github/workflows/deploy.yml` — installs, builds, tests, deploys to Netlify
 
 ## Branches
-- `claude-pwa` — production
+- `main` — production
 - `claude/step-1-avg-speed-*` — active dev branch
 
 ## What lives where (legacy files)
