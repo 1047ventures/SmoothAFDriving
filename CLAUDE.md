@@ -104,6 +104,22 @@ Every 30s during a live drive, `persistActiveDrive()` snapshots state to `localS
 
 `stopRecording()` sets `state.recording = false` as its **first** line to prevent the 200ms ticker from re-saving after `clearActiveDrive()` clears the key.
 
+## Roadmap artifact
+
+`docs/roadmap.html` is the source of truth for the build log / roadmap the user
+reads. It is published as an Artifact at:
+
+```
+https://claude.ai/code/artifact/248fed84-e783-4407-b137-4dc0b291ed33
+```
+
+Update it whenever the user's action items change or something ships. Edit the
+file, then publish with **both** `file_path: docs/roadmap.html` and that `url` —
+publishing without the `url` creates a second artifact and orphans the link the
+user has bookmarked. Keep `favicon: 🏎️` stable, and **always re-stamp the
+"Updated" line in the header**; changing content without the date makes the page
+look stale to the user.
+
 ## Commands
 
 ```bash

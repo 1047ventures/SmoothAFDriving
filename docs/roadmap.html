@@ -1,0 +1,417 @@
+<!--
+  Smooth AF — Build Log & Roadmap.
+
+  PUBLISHED ARTIFACT (do not create a new one):
+    https://claude.ai/code/artifact/248fed84-e783-4407-b137-4dc0b291ed33
+
+  To update from ANY session, including one that didn't publish it:
+    1. Edit this file.
+    2. Call the Artifact tool with BOTH:
+         file_path: docs/roadmap.html
+         url:       https://claude.ai/code/artifact/248fed84-e783-4407-b137-4dc0b291ed33
+       Omitting `url` publishes a SEPARATE artifact and orphans this link.
+    3. favicon: 🏎️  (keep it stable — the user finds the tab by its icon)
+    4. ALWAYS re-stamp the "Updated" line in the header. It is easy to change the
+       content and forget the date, which makes the page look stale.
+
+  This file is the source of truth. Content lives here, not in the artifact.
+-->
+<title>Smooth AF — Build Log & Roadmap</title>
+<style>
+  :root{
+    --bg:#0A0908;
+    --panel:#151110;
+    --panel-2:#1C1715;
+    --line:rgba(242,232,213,.10);
+    --line-2:rgba(242,232,213,.16);
+    --cream:#F2E8D5;
+    --dim:#A99F8C;
+    --muted:#7A7060;
+    --tang:#E85D3A;
+    --gold:#C4A962;
+    --good:#6FB669;
+    --warn:#E8A03A;
+    --danger:#E0503A;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--cream);
+    font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(120% 80% at 50% -10%,rgba(232,93,58,.06),transparent 60%);
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 22px 96px}
+
+  header{padding:52px 0 30px;border-bottom:1px solid var(--line);position:relative}
+  header::before{content:"";position:absolute;top:0;left:0;width:56px;height:3px;background:var(--tang);border-radius:2px}
+  .kicker{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin:0 0 14px;font-weight:600}
+  h1{font-family:var(--serif);font-weight:700;font-style:italic;font-size:clamp(34px,6vw,52px);line-height:1.02;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  h1 .light{font-style:normal;color:var(--dim);font-weight:400}
+  .lede{margin:16px 0 0;max-width:60ch;color:var(--dim);font-size:15.5px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin-top:24px;font-size:13px}
+  .meta .ver{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--cream)}
+  .meta .sep{color:var(--muted)}
+  .meta .lbl{color:var(--muted);letter-spacing:.03em}
+  .meta b{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:26px 0 4px}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;letter-spacing:.04em;color:var(--dim);text-transform:uppercase}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .d-good{background:var(--good)} .d-gold{background:var(--gold)} .d-tang{background:var(--tang)}
+  .d-warn{background:var(--warn)} .d-dang{background:var(--danger)} .d-mut{background:var(--muted)}
+
+  section{margin-top:44px}
+  .s-head{display:flex;align-items:baseline;gap:12px;margin:0 0 18px}
+  .s-head h2{font-family:var(--serif);font-style:italic;font-weight:700;font-size:23px;margin:0;letter-spacing:-.01em}
+  .s-head .count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.05em}
+  .s-head .rule{flex:1;height:1px;background:var(--line);align-self:center}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 4px}
+  .card.full{grid-column:1/-1}
+
+  .row{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:start}
+  .row:last-child{border-bottom:0}
+  .pill{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:6px;white-space:nowrap;align-self:start;margin-top:1px}
+  .p-ship{background:rgba(111,182,105,.14);color:var(--good)}
+  .p-prog{background:rgba(196,169,98,.16);color:var(--gold)}
+  .p-next{background:rgba(232,93,58,.15);color:var(--tang)}
+  .p-wait{background:rgba(232,160,58,.15);color:var(--warn)}
+  .p-flag{background:rgba(224,80,58,.15);color:var(--danger)}
+  .p-idea{background:rgba(122,112,96,.18);color:var(--dim)}
+  .p-block{background:rgba(224,80,58,.22);color:#FF7A62}
+
+  .row .body{min-width:0}
+  .row .t{font-size:14.5px;color:var(--cream);font-weight:500}
+  .row .t .tag{font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600;margin-left:7px;letter-spacing:.02em}
+  .row .d{font-size:12.5px;color:var(--dim);margin-top:3px}
+
+  .ver-tag{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--gold);font-variant-numeric:tabular-nums;min-width:44px;text-align:right;padding-top:1px}
+
+  /* ── Expandable "waiting on you" items ── */
+  .wrow{border-bottom:1px solid var(--line)}
+  .wrow:last-child{border-bottom:0}
+  .wsum{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border-radius:11px;transition:background .15s}
+  .wsum::-webkit-details-marker{display:none}
+  .wsum:hover{background:var(--panel-2)}
+  .wsum:focus-visible{outline:2px solid var(--tang);outline-offset:-2px}
+  .wsum .t{font-size:14.5px;color:var(--cream);font-weight:500}
+  .wsum .t .tag{font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600;margin-left:7px}
+  .chev{color:var(--muted);font-size:11px;transition:transform .18s ease,color .18s;flex-shrink:0}
+  .wrow[open] .chev{transform:rotate(90deg);color:var(--tang)}
+  .wrow[open] .wsum{background:var(--panel-2)}
+  .wbody{padding:2px 18px 18px 16px}
+  .wbody ol{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:10px}
+  .wbody li{font-size:13px;color:var(--dim);line-height:1.55}
+  .wbody p{margin:6px 0 0;font-size:13px;color:var(--dim);line-height:1.55}
+  .wbody b{color:var(--cream);font-weight:600}
+  .wbody a{color:var(--tang);text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(232,93,58,.4)}
+  .wbody a:hover{text-decoration-color:var(--tang)}
+  .wbody a:focus-visible{outline:2px solid var(--tang);outline-offset:2px;border-radius:2px}
+  .wbody .note{margin-top:13px;padding:10px 13px;border-left:2px solid var(--gold);background:rgba(196,169,98,.07);border-radius:0 8px 8px 0;font-size:12.5px;color:var(--dim)}
+  .wbody .note b{color:var(--gold)}
+  .wbody .kv{margin-top:10px;width:100%;border-collapse:collapse;font-size:12.5px}
+  .wbody .kv td{padding:7px 9px;border:1px solid var(--line);color:var(--dim);vertical-align:top}
+  .wbody .kv td:first-child{white-space:nowrap;color:var(--cream);font-family:var(--sans);font-weight:600}
+  code{font-size:.86em;color:var(--warn);background:rgba(232,160,58,.08);padding:1px 5px;border-radius:4px}
+  @media(prefers-reduced-motion:reduce){.chev,.wsum{transition:none}}
+
+  /* ── Big wins ─────────────────────────────────────────────────────────── */
+  .statband{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;margin-bottom:14px;
+  }
+  @media(max-width:720px){
+    .statband{grid-template-columns:repeat(2,1fr)}
+    /* Five stats into two columns leaves a hole in the last row, which reads as
+       a rendering fault. Let the final one run the full width instead. */
+    .statband .stat:last-child{grid-column:1/-1}
+  }
+  .statband .stat{background:var(--panel);padding:18px 16px}
+  /* Echoes the app's own hero element — a huge italic serif score number. */
+  .stat .n{
+    font-family:var(--serif);font-style:italic;font-weight:700;
+    font-size:clamp(28px,4.4vw,38px);line-height:1;color:var(--cream);
+    font-variant-numeric:tabular-nums;display:block;
+  }
+  .stat .n .u{font-size:.5em;color:var(--gold);font-style:normal;margin-left:3px;letter-spacing:.02em}
+  .stat .l{
+    display:block;margin-top:9px;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);line-height:1.35;
+  }
+
+  .wins{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.wins{grid-template-columns:1fr}}
+  .win{
+    background:var(--panel-2);border:1px solid var(--line);border-radius:14px;
+    padding:20px 20px 18px;display:flex;flex-direction:column;gap:9px;
+  }
+  /* The boldness is spent here and nowhere else in this section. */
+  .win.lead{
+    grid-column:1/-1;border-color:var(--line-2);
+    background:linear-gradient(180deg,rgba(232,93,58,.07),transparent 70%),var(--panel-2);
+    position:relative;padding-left:26px;
+  }
+  .win.lead::before{
+    content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;
+    background:var(--tang);border-radius:0 3px 3px 0;
+  }
+  .win .eyebrow{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .win h3{
+    font-family:var(--serif);font-style:italic;font-weight:700;margin:0;
+    font-size:20px;line-height:1.2;letter-spacing:-.01em;color:var(--cream);text-wrap:balance;
+  }
+  .win.lead h3{font-size:clamp(22px,3.4vw,28px)}
+  .win p{margin:0;color:var(--dim);font-size:14px;line-height:1.55}
+  .win p b{color:var(--cream);font-weight:600}
+  .win .then-now{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-top:2px;
+    font-size:12.5px;color:var(--muted);
+  }
+  .win .then-now .was{text-decoration:line-through;text-decoration-color:var(--muted)}
+  .win .then-now .arrow{color:var(--tang)}
+  .win .then-now .is{color:var(--cream)}
+
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Smooth AF · Driving</p>
+    <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
+    <p class="lede">A living record of what's on your plate, what's moving, and what's shipped. Tap a “Waiting on you” item for the exact steps and links. Bookmark it — I keep it current.</p>
+    <div class="meta">
+      <span><span class="lbl">Live in production</span> &nbsp;<span class="ver">v124</span></span>
+      <span class="sep">·</span>
+      <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
+      <span class="sep">·</span>
+      <span class="lbl">Updated</span> <b>Aug 15, 2026 · 4:35 PM MDT</b>
+    </div>
+    <div class="legend">
+      <span><i class="dot d-warn"></i>Waiting on you</span>
+      <span><i class="dot d-gold"></i>In flight</span>
+      <span><i class="dot d-tang"></i>Queued next</span>
+      <span><i class="dot d-dang"></i>Flagged / debt</span>
+      <span><i class="dot d-good"></i>Completed</span>
+      <span><i class="dot d-mut"></i>Maybe someday</span>
+    </div>
+  </header>
+
+  <!-- 1 · WAITING ON YOU -->
+  <section>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 thing · tap for steps</span><span class="rule"></span></div>
+    <div class="card full">
+
+      <details class="wrow" open>
+        <summary class="wsum">
+          <span class="pill p-block">1 · Do</span>
+          <span class="t">Create one Supabase token &mdash; it unblocks everything <span class="tag">~2 min</span></span>
+          <span class="chev">▶</span>
+        </summary>
+        <div class="wbody">
+          <p><b>Where we are:</b> sign-in is <b>shipped and on your phone</b> in TestFlight build 106, but it <b>can't complete yet</b>. Two things were blocking it, and both used to be dashboard clicking. They're now one script &mdash; but it needs a credential, and only you can make one.</p>
+          <ol>
+            <li>Go to <a href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noopener">supabase.com/dashboard/account/tokens</a> &rarr; <b>Generate new token</b>. Copy it.</li>
+            <li>Put it somewhere I can use it &mdash; <b>don't paste it into chat</b>:
+              <br>&nbsp;&nbsp;<b>Easiest:</b> <a href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">GitHub &rarr; Secrets and variables &rarr; Actions</a> &rarr; New secret named <code>SUPABASE_ACCESS_TOKEN</code>. Then tell me, and I'll run it and read you the result.
+              <br>&nbsp;&nbsp;<b>Or from your Mac:</b> <code>export SUPABASE_ACCESS_TOKEN=...</code> then <code>node scripts/supabase-setup.mjs --dry-run</code>, then again without the flag.
+            </li>
+          </ol>
+          <p><b>What it does:</b> applies the accounts migration (production still has <b>no <code>user_id</code> column</b>) and adds the 6-digit code to the auth emails (they currently mail a link, so you'd reach the code screen with nothing to type). Idempotent, and <code>--dry-run</code> writes nothing.</p>
+          <p class="dim">Fully manual instructions are still in <code>ACCOUNTS.md</code> if you'd rather click through the dashboard yourself.</p>
+        </div>
+      </details>
+
+      <details class="wrow">
+        <summary class="wsum">
+          <span class="pill p-wait">Optional</span>
+          <span class="t">Turn on Sign in with Apple <span class="tag">button appears by itself</span></span>
+          <span class="chev">▶</span>
+        </summary>
+        <div class="wbody">
+          <p>Already built and shipped &mdash; it checks Supabase at runtime and <b>appears on its own the moment you enable the provider</b>. No new app release needed.</p>
+          <p><b>Skippable:</b> Apple only <i>requires</i> Sign in with Apple if you offer another third-party login. Email-only is App Store submittable as-is.</p>
+          <ol>
+            <li><a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank" rel="noopener">developer.apple.com</a> &rarr; Identifiers &rarr; your App ID &rarr; tick <b>Sign In with Apple</b>.</li>
+            <li>Xcode &rarr; App target &rarr; Signing &amp; Capabilities &rarr; <b>+ Capability</b> &rarr; Sign In with Apple.</li>
+            <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; Authentication &rarr; Providers &rarr; <b>Apple</b> &rarr; enable, add <code>com.smoothafdriving.app</code> to Authorized Client IDs.</li>
+            <li>Tell me and I'll add the native plugin and ship it.</li>
+          </ol>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- 1.5 · BIG WINS -->
+  <section>
+    <div class="s-head"><h2>Big wins</h2><span class="count">where it started &rarr; where it is</span><span class="rule"></span></div>
+
+    <div class="statband">
+      <div class="stat"><span class="n">21</span><span class="l">Releases<br>shipped</span></div>
+      <div class="stat"><span class="n">235</span><span class="l">Automated<br>tests</span></div>
+      <div class="stat"><span class="n">7</span><span class="l">Scoring<br>dimensions</span></div>
+      <div class="stat"><span class="n">122</span><span class="l">Drives<br>in your history</span></div>
+      <div class="stat"><span class="n">403<span class="u">mi</span></span><span class="l">Scored<br>on the road</span></div>
+    </div>
+
+    <div class="wins">
+
+      <div class="win lead">
+        <span class="eyebrow">The big one</span>
+        <h3>It stopped being a website and became an app you can ship</h3>
+        <p>Smooth AF now runs as a <b>real native iOS app</b> — same code, wrapped in a native shell, installed on your phone through TestFlight and capable of going to the App Store. The part that matters day to day: a <b><code>git push</code> now builds, signs and delivers a new build by itself</b>. No Xcode, no manual Archive, no waiting on you.</p>
+        <p>Getting here meant clearing a lot of Apple's undergrowth — an enrolled Developer account, cloud signing that needed <b>Admin</b> rather than App Manager, and a forced-newest Xcode once Apple started requiring the iOS 26 SDK. Xcode Cloud got abandoned along the way for GitHub Actions, which actually works.</p>
+        <div class="then-now"><span class="was">open Xcode, archive, upload, repeat</span><span class="arrow">&rarr;</span><span class="is">push to <code>main</code>, done</span></div>
+      </div>
+
+      <div class="win">
+        <span class="eyebrow">The game</span>
+        <h3>You play against the clock, not just a smoothness number</h3>
+        <p>Destination Drive turned a logger into a game. Set a destination, get a <b>live traffic-aware ETA</b>, and score on two axes at once: <b>effective</b> (did you actually get there on time) &times; <b>efficient</b> (did you do it smoothly). Gaming it doesn't work — being smooth by crawling tanks the clock, and beating the clock by driving like a maniac tanks the smoothness.</p>
+        <p>A 3+ minute stop for gas or coffee pauses the clock, so a legitimate errand can't make you "late."</p>
+      </div>
+
+      <div class="win">
+        <span class="eyebrow">The engine</span>
+        <h3>Scoring that holds up to a real drive</h3>
+        <p>Every drive is graded across <b>seven independent dimensions</b> — peak harshness, throttle, steering, braking anticipation, corner composure, transitions, momentum — then blended into one composite. Short drives get pulled toward the mean on purpose, so a <b>30-second test drive can't score a perfect 100</b>.</p>
+        <p>All of it is covered by <b>235 automated tests</b> that run on every change.</p>
+      </div>
+
+      <div class="win">
+        <span class="eyebrow">Identity</span>
+        <h3>Your history is yours now, not your phone's</h3>
+        <p>The app used to know a <i>handset</i>, not a driver — a new phone or a reinstall looked like a total stranger, and <b>122 drives could vanish with one device</b>. Now you sign in, and every drive that phone recorded anonymously gets claimed into your account and follows you anywhere.</p>
+        <div class="then-now"><span class="was">a random ID per install</span><span class="arrow">&rarr;</span><span class="is">an account that travels</span></div>
+      </div>
+
+      <div class="win">
+        <span class="eyebrow">The payoff</span>
+        <h3>A recap that tells you how the drive went</h3>
+        <p>The post-drive screen reads the <b>shape</b> of the trip and says something true about it — a quick neighborhood hop and a long highway run get different stories, and a clean drive collapses to a single line instead of padding. Numbers live in their own row, and the whole thing <b>fits one phone screen with no scrolling</b>.</p>
+      </div>
+
+      <div class="win">
+        <span class="eyebrow">In the car</span>
+        <h3>You can feel the score while you drive</h3>
+        <p>The screen edges light up with what the car is actually doing — <b style="color:var(--good)">green</b> smooth through <b style="color:var(--warn)">amber</b> to <b style="color:var(--danger)">red</b> harsh, top for braking, bottom for acceleration, sides for turns. Glanceable at speed, no reading required.</p>
+      </div>
+
+      <div class="win">
+        <span class="eyebrow">Over time</span>
+        <h3>The same road, compared against itself</h3>
+        <p>Drives get grouped by <b>road corridor</b>, so the same route is one entry no matter where you joined it — the groundwork for "are you actually getting smoother on your commute," rather than a flat list of one-off scores.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 2 · IN FLIGHT / NEXT -->
+  <section>
+    <div class="s-head"><h2>In flight &amp; next</h2><span class="count">tap for details</span><span class="rule"></span></div>
+    <div class="card full">
+
+      <details class="wrow" open>
+        <summary class="wsum"><span class="pill p-prog">In flight</span><span class="t">Native iOS app → TestFlight <span class="tag">#34 · v121</span></span><span class="chev">▶</span></summary>
+        <div class="wbody"><p><b>Fully automated now.</b> A push to <code>main</code> builds on a GitHub Actions macOS runner and lands in TestFlight by itself — no Xcode, no manual Archive. Xcode Cloud is gone; it never got past its workflow editor only offering "Notify". Getting here meant sorting cloud signing (the App Store Connect key needs <b>Admin</b>, not App Manager), and forcing the newest Xcode since Apple now requires the iOS 26 SDK. Build 103 confirmed installed and working on your phone. Android follows the same flow whenever you want it.</p></div></details>
+
+      <details class="wrow" open>
+        <summary class="wsum"><span class="pill p-next">Mine · next</span><span class="t">OBD-II over Bluetooth — dongle in hand <span class="tag">unblocked</span></span><span class="chev">▶</span></summary>
+        <div class="wbody"><p>Veepeak OBDCheck BLE has arrived and the native shell is running, so this is unblocked and it's my build. A Capacitor BLE plugin talks ELM327 to the dongle for real <b>throttle %, RPM, and true vehicle speed</b> — data the phone's sensors can't see, feeding the scoring engine directly. Nothing needed from you beyond having the dongle in the car when it's time to test.</p></div>
+      </details>
+
+      <details class="wrow">
+        <summary class="wsum"><span class="pill p-next">Idea</span><span class="t">Name the places in the recap</span><span class="chev">▶</span></summary>
+        <div class="wbody"><p>Reverse-geocode start/end so the story can say "from Congress Park over to where you're parked on York St" instead of just "quick neighborhood hop." One extra lookup per drive; the geocoder is already wired.</p></div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- 3 · SPECCED -->
+  <section>
+    <div class="s-head"><h2>Specced, not built</h2><span class="rule"></span></div>
+    <div class="grid">
+      <div class="card">
+        <div class="row"><span class="pill p-prog">Design done</span><div class="body"><div class="t">First-run onboarding</div><div class="d">Cold-start intro (value + "mount your phone" + permission priming), and merging the scattered post-drive modals into one.</div></div></div>
+      </div>
+      <div class="card">
+        <div class="row"><span class="pill p-prog">Design done</span><div class="body"><div class="t">Vehicle fingerprinting</div><div class="d">Older design doc + the <code>shiftRatePerMin</code> idea.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · FLAGGED -->
+  <section>
+    <div class="s-head"><h2>Flagged / tech debt</h2><span class="rule"></span></div>
+    <div class="grid">
+      <div class="card">
+        <div class="row"><span class="pill p-flag">Privacy</span><div class="body"><div class="t">Drives are world-readable</div><div class="d">Full GPS tracks readable via the anon key — needs a row-level-security pass.</div></div></div>
+        <div class="row"><span class="pill p-flag">Bug</span><div class="body"><div class="t">Dead leaderboard table</div><div class="d">The <code>drivers</code> table doesn't exist; those writes silently fail.</div></div></div>
+      </div>
+      <div class="card">
+        <div class="row"><span class="pill p-flag">Unfinished</span><div class="body"><div class="t">Leaderboard "Corridors" / "Rivals" tabs</div><div class="d">Permanent empty placeholders — the road-trends fix fills these.</div></div></div>
+        <div class="row"><span class="pill p-flag">Cleanup</span><div class="body"><div class="t">Four deploy pipelines → one</div><div class="d">Netlify + 2× Vercel + Cloudflare all build every push, and the domain points at none of them. Pick one owner (Cloudflare Pages) and retire the rest — this is what caused the dead-app confusion.</div></div></div>
+      </div>
+      <div class="card full">
+        <div class="row"><span class="pill p-flag">Data gap</span><div class="body"><div class="t">Drives upload to the cloud but can never come back down</div><div class="d"><b>154 drives are safely in Supabase</b> — your main device alone has <b>122 drives, 403 mi, avg 88, May 2 → Aug 5</b>. But the app only ever <em>pushes</em>: there's no "restore my drives" path in the code. So switching URLs (or reinstalling) shows an empty history even though the data exists. Needs a fetch-and-restore on first run, keyed to your account rather than a per-browser device ID.</div></div></div>
+        <div class="row"><span class="pill p-flag">Confusing</span><div class="body"><div class="t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</div><div class="d">The Lovable marketing site (separate codebase, DNS at <b>IONOS</b>) still hosts a stale tracker at <code>/tracker</code> — which is what made the app look broken. <b>Decision made:</b> the domain stays brand/marketing/coaching; the app ships independently via the App Store. So this page should just become a <b>"Download the app"</b> link. Not blocking anything.</div></div></div>
+        <div class="row"><span class="pill p-flag">Polish</span><div class="body"><div class="t">UX-audit leftovers</div><div class="d">Modal focus management, the dead "Explore Rewards" button, a couple of missing empty states.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · COMPLETED -->
+  <section>
+    <div class="s-head"><h2>Completed</h2><span class="count">22 releases</span><span class="rule"></span></div>
+    <div class="card full">
+      <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Supabase setup without the dashboard <span class="tag">#46</span></div><div class="d">The last two setup steps were both dashboard-only clicking, and the automated path we had broke when the database password was rotated. One script now does both over Supabase's Management API — applies migrations and puts the code in the auth emails — using a personal access token instead of the DB password. Idempotent, with a dry run that writes nothing.</div></div></div>
+      <div class="row"><span class="ver-tag">v124</span><div class="body"><div class="t">Real accounts — sign in, and your drives follow you <span class="tag">#44</span></div><div class="d">The app had <b>no notion of identity</b>: the "device ID" was a random UUID per install, so it knew a handset, not a driver — a new phone looked like a stranger. Now there's a <b>Sign in</b> button on the home screen: email + a 6-digit code, and on sign-in it <b>claims every drive that phone recorded anonymously</b> into your account, then pulls down anything from your other devices. Sign in with Apple is built and switches itself on when the provider is enabled. Needs the two setup steps above to work end to end.</div></div></div>
+      <div class="row"><span class="ver-tag">v124</span><div class="body"><div class="t">Sign-in layout, and a top-bar collision <span class="tag">#45</span></div><div class="d">A visual pass caught the new account button colliding with the version badge — literally painting text over text — plus a pill clipped off the top of the screen, a position that drifted into the status bar on a notched phone, a modal that could scroll its own close button out of reach on a small screen, tap targets under Apple's 44px minimum, and two links failing contrast. All fixed and re-measured.</div></div></div>
+      <div class="row"><span class="ver-tag">v123</span><div class="body"><div class="t">Cloud restore, reachable <span class="tag">#42–#43</span></div><div class="d">Your <b>122 drives / 403 mi</b> are restorable from the cloud — and the control now shows below an existing drive list, not just on an empty one. Anyone who recorded a test drive before looking for their history previously had no way to reach it.</div></div></div>
+      <div class="row"><span class="ver-tag">🎉</span><div class="body"><div class="t">Native iOS app running on a real phone <span class="tag">Aug 13</span></div><div class="d">Apple Developer account enrolled, Xcode project generated, signing sorted, Developer Mode on, app installed and <b>confirmed working end to end</b> — GPS, motion sensors, live scoring, the recap, onboarding, and the leaderboard prompt all functioning natively. Privacy usage strings are now auto-applied on every sync (<span class="tag">#36</span>) so they can't go missing again.</div></div></div>
+      <div class="row"><span class="ver-tag">v121</span><div class="body"><div class="t">Bulletproof app startup <span class="tag">#35</span></div><div class="d">The app could render but end up completely inert — no data, nothing clickable — if any single startup step threw, because the button wiring ran last in one unprotected block. Each step is now isolated (one failure logs and the app keeps working), plus a boot-timing guard for when the DOM finishes parsing before the script runs. Verified by deliberately breaking storage: old code went dead, new code boots fine.</div></div></div>
+      <div class="row"><span class="ver-tag">v120</span><div class="body"><div class="t">Native iOS shell (Capacitor) <span class="tag">#34</span></div><div class="d">The same web build now runs in a real native iOS WebView — App Store capable, and the prerequisite for reading an OBD dongle over Bluetooth. Icons, config, and a full <code>NATIVE.md</code> runbook included.</div></div></div>
+      <div class="row"><span class="ver-tag">v119</span><div class="body"><div class="t">One-screen post-drive recap</div><div class="d">The whole review fits a single phone screen — no scrolling. Map, score, story, a unified fact-chip row (Mi · Time · Avg · Top · Stops, plus Ahead/Grade/Pit on destination drives), the momentum line, and Best/Hardest side by side. The deep 7-dim breakdown lives one tap away.</div></div></div>
+      <div class="row"><span class="ver-tag">v118</span><div class="body"><div class="t">Context-aware post-drive recap <span class="tag">#30–#32</span></div><div class="d">The review opens with a <b>tight, qualitative story</b> that reads the shape of each trip — "Quick neighborhood hop — stop-and-go, but your hands stayed dialed. One firm patch mid-drive, otherwise clean." — with the numbers pulled into their own chip row. A clean drive collapses to one line; it only expands when the drive earns it.</div></div></div>
+      <div class="row"><span class="ver-tag">v115</span><div class="body"><div class="t">Live traffic-aware ETA + pit-stop detection <span class="tag">#30</span></div><div class="d">The countdown re-fetches the live traffic ETA from your current spot, so ahead/behind is real. A 3+ min stop (gas/coffee) pauses the clock so it can't make you "late," and the lateness penalty is now fairly enabled.</div></div></div>
+      <div class="row"><span class="ver-tag">v114</span><div class="body"><div class="t">Driving HUD + G-force edge glows <span class="tag">#28</span></div><div class="d">The screen edges light up with what the car's doing — <b style="color:var(--good)">green</b> smooth → <b style="color:var(--warn)">amber</b> → <b style="color:var(--danger)">red</b> harsh, top=brake / bottom=accel / sides=turns. Plus the countdown room, Sensors pill, and tighter gyro trace.</div></div></div>
+      <div class="row"><span class="ver-tag">v114</span><div class="body"><div class="t">Road-corridor dedupe <span class="tag">#29</span></div><div class="d">Same road = one entry no matter where you got on; a one-time merge folds existing duplicates together. Groundwork for per-road trends.</div></div></div>
+      <div class="row"><span class="ver-tag">v110</span><div class="body"><div class="t">Composite drive score <span class="tag">#27</span></div><div class="d">Final score = smoothness + a smoothness-gated clock bonus (effective × efficient). Feeds review, lifetime, and the leaderboard; breaking 100 is rare and earned.</div></div></div>
+      <div class="row"><span class="ver-tag">v109</span><div class="body"><div class="t">Destination Drive routing upgrades <span class="tag">#26</span></div><div class="d">Drop-a-pin "find on map", Mapbox traffic-aware routing, and the arrival gate that killed the gas-stop-scores-100 bug.</div></div></div>
+      <div class="row"><span class="ver-tag">v107</span><div class="body"><div class="t">Legible text + Sensors pill <span class="tag">#25</span></div><div class="d">Raised all the dim greyish text across the app to readable cream; turned the stray sensor handle into a labeled "⌃ Sensors" pill.</div></div></div>
+      <div class="row"><span class="ver-tag">v106</span><div class="body"><div class="t">Sensor chart → per-axis lanes <span class="tag">#24</span></div><div class="d">Split the overlaid accel/gyro tangle into stacked lanes — flat line = steady, wiggly = varying.</div></div></div>
+      <div class="row"><span class="ver-tag">v105</span><div class="body"><div class="t">UX "critical five" <span class="tag">#23</span></div><div class="d">Acquiring-GPS state, short-drive recovery, wired the toast system, and made silent failures visible.</div></div></div>
+      <div class="row"><span class="ver-tag">v104</span><div class="body"><div class="t">Destination Drive <span class="tag">#21</span></div><div class="d">Play against the ETA: two-axis scoring (Effectiveness × Efficiency), address search, route + target ETA, two-axis review screen.</div></div></div>
+      <div class="row"><span class="ver-tag">v102</span><div class="body"><div class="t">Sensor-panel handle moved clear of End Drive</div><div class="d">Stopped accidental ride-ends when reaching for the data panel.</div></div></div>
+      <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Live-score-collapse fix</div><div class="d">The in-drive gauge now uses the real scoring engine instead of drifting to 0 on long drives.</div></div></div>
+      <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Operator analytics dashboard <span class="tag">/admin</span></div><div class="d">Password-gated who's-using-it dashboard (overview + per-user drill-down).</div></div></div>
+      <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Auto-applied DB migrations</div><div class="d">Schema changes ship with the code — a CI step applies Supabase migrations on merge.</div></div></div>
+      <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Sensor debug panel + JSON export</div><div class="d">Rolling sensor buffers, the live chart, and a one-tap data export.</div></div></div>
+    </div>
+  </section>
+
+  <!-- 6 · MAYBE SOMEDAY -->
+  <section>
+    <div class="s-head"><h2>Maybe someday</h2><span class="rule"></span></div>
+    <div class="grid">
+      <div class="card">
+        <div class="row"><span class="pill p-idea">Someday</span><div class="body"><div class="t">"G in traffic" / smart-lane read</div><div class="d">Beating a traffic ETA smoothly is measurable now; true lane-use analysis is hard (no lane data).</div></div></div>
+      </div>
+      <div class="card">
+        <div class="row"><span class="pill p-idea">Parked</span><div class="body"><div class="t">ANCEL BD300</div><div class="d">Your existing reader — likely locked to ANCEL's own app rather than exposing a standard ELM327 interface. Superseded by the Veepeak BLE recommendation.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Smooth AF · effective <b style="color:var(--gold)">&amp;</b> efficient</span>
+    <span>Kept current by Claude · ask me to refresh it anytime</span>
+  </footer>
+</div>
