@@ -11,6 +11,21 @@ if [ -z "${SUPABASE_DB_URL:-}" ]; then
   exit 0
 fi
 
+# psql treats an argument that isn't a connection URI as a bare database name and
+# quietly falls back to a local unix socket, which fails with a "is the server
+# running locally" error that says nothing about the real cause. Catch it here
+# instead — this is what a rotated password pasted in on its own looks like.
+case "$SUPABASE_DB_URL" in
+  postgres://*|postgresql://*) ;;
+  *)
+    echo "SUPABASE_DB_URL is set but is not a postgres:// or postgresql:// URI." >&2
+    echo "Expected the full Session pooler connection string from Supabase →" >&2
+    echo "Project Settings → Database → Connection string → Session pooler (URI)," >&2
+    echo "password included — not the password on its own." >&2
+    exit 1
+    ;;
+esac
+
 MIG_DIR="$(cd "$(dirname "$0")/.." && pwd)/supabase/migrations"
 if [ ! -d "$MIG_DIR" ]; then
   echo "No migrations directory at $MIG_DIR — nothing to do."

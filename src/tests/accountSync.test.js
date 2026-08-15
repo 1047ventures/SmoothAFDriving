@@ -44,6 +44,34 @@ describe('drive upload — user stamping', () => {
     expect(bodyOf(f).user_id).toBe('user-1');
   });
 
+  it('retries without user_id when the column does not exist yet', async () => {
+    saveSession(session());
+    const f = vi.fn()
+      .mockResolvedValueOnce({
+        ok: false, status: 400,
+        clone: () => ({ text: async () => JSON.stringify({ code: 'PGRST204', message: "Could not find the 'user_id' column of 'drives'" }) }),
+      })
+      .mockResolvedValueOnce({ ok: true, status: 201, json: async () => ({}) });
+    vi.stubGlobal('fetch', f);
+    await pushDriveToSupabase(drive());
+    expect(f).toHaveBeenCalledTimes(2);
+    // The drive still lands, just as an anonymous row — a later sign-in claims it.
+    const retry = bodyOf(f, 1);
+    expect('user_id' in retry).toBe(false);
+    expect(retry.start_time).toBe(1000);
+  });
+
+  it('does not retry when the failure is unrelated to user_id', async () => {
+    saveSession(session());
+    const f = vi.fn().mockResolvedValue({
+      ok: false, status: 500,
+      clone: () => ({ text: async () => 'internal server error' }),
+    });
+    vi.stubGlobal('fetch', f);
+    await pushDriveToSupabase(drive());
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
   it('sends the user token, not the anon key, when signed in', async () => {
     saveSession(session());
     const f = okFetch();
