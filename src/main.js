@@ -14,6 +14,9 @@ import { shareCurrentDrive } from './ui/share.js';
 import { wireDestination } from './ui/destination.js';
 import { state } from './state.js';
 import { syncUserProfile } from './services/supabase.js';
+import { initAuthUI } from './ui/auth.js';
+import { refreshIfNeeded, isSignedIn } from './services/auth.js';
+import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
 
 // Export key init functions for DOMContentLoaded (wired below)
@@ -54,6 +57,15 @@ function boot(){
   }
   });
 
+  safeInit('initAuthUI',           () => initAuthUI());
+  // Silent catch-up for an already-signed-in driver: refresh the token, then
+  // pull down anything recorded on another device since the last launch.
+  safeInit('resumeSession',        () => {
+    refreshIfNeeded().then(() => {
+      if (!isSignedIn()) return;
+      return restoreDrivesForUser().then(r => { if (r?.added > 0) renderDriveList(); });
+    }).catch(() => {});
+  });
   safeInit('migrateLifetimeScore', () => migrateLifetimeScore());
   safeInit('checkRecoveredDrive',  () => checkRecoveredDrive({ onListUpdate: renderDriveList }));
   safeInit('renderDriveList',      () => renderDriveList());

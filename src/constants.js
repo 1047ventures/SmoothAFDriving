@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v123';
+export const APP_VERSION = 'v124';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
@@ -16,6 +16,14 @@ export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
 export const SHARE_PROMPTED_KEY = 'smoothaf.share_prompted';
 export const CORRIDORS_KEY      = 'smoothaf.corridors';
+export const AUTH_KEY           = 'smoothaf.auth';
+
+// ── Supabase ──────────────────────────────────────────────────────────────────
+// The anon key is public by design — it is the browser-facing key and carries no
+// privileges beyond what row-level security grants. Lives here (not in
+// supabase.js) so auth.js can use it without a circular import.
+export const SB_URL  = 'https://dbreetxubxdxogmektxc.supabase.co';
+export const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicmVldHh1YnhkeG9nbWVrdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjY5ODgsImV4cCI6MjA5MjkwMjk4OH0.hMeEhYpNNgZ67Nh9GnjwJvtSBbdQVhbdjiBBNNG5qe4';
 
 export const MAX_STORED_DRIVES = 200;  // metadata-only restored drives are tiny (~600B each);
                                        // saveDrives() sheds GPS samples if the quota is hit.

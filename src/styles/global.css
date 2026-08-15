@@ -46,10 +46,14 @@
   @keyframes bdp-in{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
   /* ── Version badge (initial placement) ── */
+  /* Rides in the home top bar next to the brand. It used to be position:fixed
+     top-right, which sat underneath the account button and — at z-index 1000,
+     above the sheet's 900 — painted crisply over the sign-in scrim. Plain flow
+     was no good either: the home CTAs are fixed, so an in-flow badge landed
+     mid-layout above "Set Destination". */
   #app-version{
-    position:fixed;top:calc(env(safe-area-inset-top,0) + 6px);right:10px;
-    font-size:12px;letter-spacing:.14em;color:rgba(244,235,217,.86);
-    z-index:1000;pointer-events:none;font-variant-numeric:tabular-nums;
+    font-size:10px;letter-spacing:.14em;color:rgba(244,235,217,.34);
+    pointer-events:none;font-variant-numeric:tabular-nums;
   }
 
   /* ── App Toast ── */

@@ -1,0 +1,263 @@
+/* ── Account / sign-in ─────────────────────────────────────────────────────── */
+
+/* Top-bar entry point.
+   Stays in the flex flow rather than absolutely positioned. Absolute broke in
+   three ways at once: `right:0` resolves against the padding box so it ignored
+   the topbar's 24px gutter and sat flush to the screen edge; `top:50%` against a
+   21px-tall bar put a 30px pill at y:-4.5 (clipped); and because the bar's
+   height includes env(safe-area-inset-top), the centre drifted up into the
+   status bar on a notched phone. Flex handles all three for free. */
+.home-topbar-v2{ justify-content:space-between; gap:12px; }
+
+/* Brand + version badge travel together as the left half of the bar. */
+.home-topbar-left{ display:flex; align-items:baseline; gap:9px; min-width:0; }
+
+.home-account-btn{
+  flex:0 0 auto;
+  /* Let the 34px pill sit on the 21px brand line without growing the bar. */
+  margin:-7px 0;
+  background:rgba(242,232,213,.07);
+  border:1px solid rgba(242,232,213,.16);
+  color:var(--cream-dim);
+  font-family:var(--sans);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.04em;
+  padding:9px 13px;
+  border-radius:999px;
+  cursor:pointer;
+  max-width:40vw;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+/* The pill renders 34px tall — making it a literal 44px would dominate a top bar
+   whose only other content is an 11px brand line. Extend the hit area instead,
+   so the touch target clears 44px while the visual stays proportionate. */
+.home-account-btn{ position:relative; }
+.home-account-btn::after{
+  content:"";
+  position:absolute;
+  inset:-5px -4px;
+}
+
+.home-account-btn:active{ background:rgba(242,232,213,.13); }
+.home-account-btn.is-signed-in{
+  color:var(--cream);
+  border-color:rgba(196,169,98,.42);
+}
+
+/* ── Sheet ─────────────────────────────────────────────────────────────────── */
+
+.auth-overlay{
+  position:fixed;
+  inset:0;
+  z-index:900;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(6px);
+  display:flex;
+  /* stretch + margin-top:auto on the card, rather than align-items:flex-end.
+     flex-end silently overflows upward once the card is taller than the
+     viewport — on a small phone with the keyboard open the title and the close
+     button end up above y:0 with no way to scroll to them. An auto cross-axis
+     margin suppresses the stretch, so the card still sits at the bottom, but
+     now the overlay can scroll when it has to. */
+  align-items:stretch;
+  justify-content:center;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:16px;
+  /* Keep the card clear of the home indicator on a notched phone. */
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+}
+.auth-overlay.hidden{ display:none; }
+
+.auth-card{
+  position:relative;
+  margin-top:auto;
+  width:100%;
+  max-width:420px;
+  background:var(--bg2);
+  border:1px solid rgba(242,232,213,.12);
+  border-radius:20px;
+  padding:26px 20px 20px;
+  animation:auth-rise .22s ease-out;
+}
+
+@keyframes auth-rise{
+  from{ transform:translateY(14px); opacity:0; }
+  to  { transform:translateY(0);    opacity:1; }
+}
+
+.auth-close{
+  position:absolute;
+  top:4px;
+  right:6px;
+  background:none;
+  border:none;
+  /* --muted is 3.1:1 on --bg2; this clears 4.5:1. */
+  color:#8E8478;
+  font-size:24px;
+  line-height:1;
+  /* 44×44 minimum tap target — it was 31×34. Padding alone left it 38px wide,
+     since the glyph is narrow, so the floor is explicit. */
+  min-width:44px;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  cursor:pointer;
+}
+
+.auth-title{
+  font-family:var(--serif);
+  font-size:23px;
+  color:var(--cream);
+  margin-bottom:5px;
+  /* Reserve the close button's corner so a longer title can't run under it. */
+  padding-right:44px;
+}
+.auth-sub{
+  font-family:var(--sans);
+  font-size:13px;
+  line-height:1.45;
+  color:var(--cream-dim);
+  margin-bottom:18px;
+}
+.auth-email{
+  font-family:var(--sans);
+  font-size:14px;
+  color:var(--gold);
+  /* anywhere, not break-all — same overflow safety, better break points. */
+  overflow-wrap:anywhere;
+  margin-bottom:16px;
+}
+.auth-sent{
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--cream-dim);
+  margin-bottom:10px;
+  word-break:break-all;
+}
+
+.auth-step.hidden,
+.auth-apple-btn.hidden,
+#auth-signedout.hidden,
+#auth-signedin.hidden{ display:none; }
+
+.auth-input{
+  width:100%;
+  box-sizing:border-box;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(242,232,213,.18);
+  border-radius:11px;
+  color:var(--cream);
+  font-family:var(--sans);
+  /* 16px minimum — anything smaller makes iOS Safari zoom on focus. */
+  font-size:16px;
+  padding:13px 14px;
+  margin-bottom:10px;
+}
+.auth-input::placeholder{ color:var(--muted); }
+.auth-input:focus{ outline:none; border-color:rgba(196,169,98,.55); }
+
+.auth-input-code{
+  text-align:center;
+  letter-spacing:.42em;
+  /* Compensate for the trailing letter-space so digits read as centred. */
+  text-indent:.42em;
+  font-size:22px;
+  font-weight:600;
+}
+
+.auth-submit{
+  width:100%;
+  background:var(--tang);
+  border:none;
+  border-radius:11px;
+  color:#120C0A;
+  font-family:var(--sans);
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.02em;
+  padding:14px;
+  cursor:pointer;
+}
+.auth-submit:active{ filter:brightness(.92); }
+.auth-submit:disabled{ opacity:.55; cursor:default; }
+
+.auth-apple-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  background:var(--cream);
+  border:none;
+  border-radius:11px;
+  color:#0A0A0A;
+  font-family:var(--sans);
+  font-size:15px;
+  font-weight:600;
+  padding:14px;
+  cursor:pointer;
+}
+.auth-apple-btn:active{ filter:brightness(.9); }
+.auth-apple-logo{ width:15px; height:18px; display:block; flex:0 0 auto; }
+
+/* Separator, only when both methods are on screen. Without it the Apple button,
+   the email field and the CTA read as one three-step form rather than two
+   independent ways in — the gap between the methods (16px) was barely larger
+   than the gap inside the email group (10px). */
+.auth-apple-btn:not(.hidden) + .auth-step::before{
+  content:"or";
+  display:block;
+  text-align:center;
+  margin:18px 0;
+  font-family:var(--sans);
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#8E8478;
+}
+
+/* With Apple showing, the cream button is the primary. Demote the email CTA to
+   an outline so there aren't two competing primaries stacked on one card. */
+.auth-apple-btn:not(.hidden) + .auth-step .auth-submit{
+  background:transparent;
+  border:1px solid rgba(232,93,58,.65);
+  color:var(--tang);
+}
+
+.auth-link{
+  display:block;
+  width:100%;
+  background:none;
+  border:none;
+  /* --muted is 3.1:1 on --bg2, under AA for 13px text — and these links are the
+     only way back out of their step. */
+  color:#8E8478;
+  font-family:var(--sans);
+  font-size:13px;
+  /* 44px tall tap target — these links are small text, so the floor is explicit
+     rather than left to padding plus line-height. */
+  min-height:44px;
+  padding:14px 0 6px;
+  cursor:pointer;
+}
+.auth-link:active{ color:var(--cream-dim); }
+
+.auth-status{
+  font-family:var(--sans);
+  font-size:12.5px;
+  line-height:1.4;
+  color:var(--cream-dim);
+  min-height:17px;
+  margin-top:11px;
+  /* In the signed-in pane the status sits above the Sync button, where a
+     bottom margin of 0 left the text touching it. */
+  margin-bottom:14px;
+}
+.auth-status:last-child{ margin-bottom:0; }
+.auth-status.is-error{ color:var(--warn); }
