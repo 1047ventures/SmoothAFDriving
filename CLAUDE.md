@@ -1,5 +1,53 @@
 # Smooth AF Driving — Developer Guide
 
+## ⚠️ Verify with subagents — everything, not just UI (operating rule)
+
+**Nothing is "done" because it was written and the tests passed.** Dispatch
+subagents to independently test and verify every change before calling it
+complete, and run them in parallel when they don't depend on each other.
+
+Verify against the **running system**, not the diff. The bugs that have actually
+cost time here were all invisible in the code and obvious the moment something
+real was exercised:
+
+- The project mailed **8-digit** codes into a **6-character** field. Both halves
+  read fine on their own; only checking the live auth config found it.
+- A setup script aborted on a cosmetic step *before* configuring the mailer, so
+  a failed run looked like a successful one.
+- A roadmap was published but never committed, so the artifact and the repo
+  silently diverged.
+
+What that means in practice:
+
+- **UI change** → a UI/UX-expert subagent that renders and critiques it (below).
+- **Backend / config / infra change** → a subagent that queries the live thing
+  and reports what it actually found — the REST endpoint, the auth config, the
+  workflow log — never just "the script says it worked".
+- **Anything non-trivial** → an adversarial reviewer whose job is to find the
+  failure case, and a fresh-eyes agent that reads the change cold.
+- **Claims from another agent or handoff doc are input, not truth.** Re-derive
+  anything load-bearing yourself; two such claims have already been wrong.
+
+Spawn as many as the work warrants. The cost of an extra agent is trivial next
+to shipping a build that can't sign in.
+
+## ⚠️ Build log & roadmap — update at EVERY opportunity (operating rule)
+
+`docs/roadmap.html` is how the user tracks this project. Treat it as part of the
+deliverable, not documentation to catch up on later.
+
+Update it **every time** anything below changes — not just when asked, and not
+only at the end of a session:
+
+- something ships, or starts, or gets unblocked
+- a user action item is added, resolved, or turns out to be unnecessary
+- a diagnosis changes — *especially* when an earlier entry turns out to be wrong
+- a flagged/tech-debt item's shape changes, even if it isn't fixed
+
+Re-stamp the "Updated" line, publish to the existing artifact URL, **and commit
+the file in the same breath** — details in "Roadmap artifact" below. An entry
+that is merely stale is worse than no entry: the user makes decisions from it.
+
 ## ⚠️ UI/UX changes — ALWAYS visually verify (operating rule)
 
 Any change that affects the rendered UI (CSS, HTML/markup, layout, or JS that

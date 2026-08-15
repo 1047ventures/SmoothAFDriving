@@ -190,7 +190,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 15, 2026 · 5:35 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 15, 2026 · 5:58 PM MDT</b>
     </div>
     <div class="legend">
       <span><i class="dot d-warn"></i>Waiting on you</span>
@@ -204,25 +204,24 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 blocked · 1 optional</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 test drive · 1 optional</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
         <summary class="wsum">
-          <span class="pill p-block">1 · Blocked</span>
-          <span class="t">The sign-in email isn&rsquo;t arriving <span class="tag">delivery, not a bug</span></span>
+          <span class="pill p-next">1 · Try it</span>
+          <span class="t">Sign in &mdash; both faults are fixed <span class="tag">no new build needed</span></span>
           <span class="chev">▶</span>
         </summary>
         <div class="wbody">
-          <p><b>Setup is done and correct</b> &mdash; the migration is applied and both email templates carry the code. But a sign-in was attempted and <b>no email arrived</b>.</p>
-          <p>Requesting a code returns <code>HTTP 200</code> from Supabase, with no rate-limit rejection. <code>200</code> means <i>accepted and queued</i> &mdash; so the app is doing its job and <b>this is a mail delivery failure, not a code bug</b>.</p>
-          <p>Prime suspect is Supabase&rsquo;s built-in shared mailer, which is explicitly not for production: throttled at the project level, slow, and it drops mail without telling you.</p>
+          <p><b>Sign-in was impossible, and not for the reason anyone thought.</b> The project was configured to mail <b>8-digit</b> codes into an input capped at <b>6 characters</b> &mdash; the last two digits physically could not be typed. No amount of waiting for the email would ever have worked.</p>
+          <p>The slow email was a <i>second, unrelated</i> fault. Both are now fixed in production:</p>
           <ol>
-            <li>Check Gmail <b>spam</b> and <b>Promotions</b>. Bare transactional mail from a shared sender lands there constantly.</li>
-            <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; <b>Authentication &rarr; Logs</b> &mdash; the definitive answer on whether it was dispatched or dropped.</li>
-            <li>If dropped: set up <b>custom SMTP</b>. <a href="https://resend.com" target="_blank" rel="noopener">Resend</a> is the least friction &mdash; 3,000/month free, sends from their test domain with no DNS wait.</li>
+            <li><b>Codes are 6 digits</b>, matching the field. (6 is the floor &mdash; Supabase rejects anything shorter, so the field was right all along and the server came down to meet it.)</li>
+            <li><b>Mail goes through Resend</b> on your own verified <code>smoothafdriving.com</code>, not Supabase&rsquo;s shared mailer &mdash; which had been delivering a code more than an hour late, past its own expiry.</li>
           </ol>
-          <div class="note"><b>Also queued:</b> the 6-digit code <b>didn&rsquo;t fit the input field</b> on the phone. Shortening it to 4 digits is on the list &mdash; the field is worth widening either way.</div>
+          <p><b>Open the app and sign in.</b> TestFlight build 106 already has the correct field, so there is nothing to install first. Your <b>122 anonymous drives should get claimed</b> into the account.</p>
+          <div class="note"><b>If a build is mid-flight:</b> one release briefly carried a 4-digit field before Supabase&rsquo;s 6-digit minimum was discovered. Don&rsquo;t install that one &mdash; the build behind it is correct.</div>
         </div>
       </details>
 
@@ -370,6 +369,7 @@
   <section>
     <div class="s-head"><h2>Completed</h2><span class="count">22 releases</span><span class="rule"></span></div>
     <div class="card full">
+      <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Sign-in unblocked — the code now fits, and the mail is fast <span class="tag">Aug 15</span></div><div class="d">Two independent faults, both fixed. <b>The real one:</b> the project mailed <b>8-digit</b> codes into a field capped at <b>6 characters</b>, so the last two digits couldn't be typed — sign-in was impossible, not merely awkward, and no amount of waiting for email would have helped. Codes are now 6 digits, which is Supabase's floor; the field was correct all along. <b>The second:</b> Supabase's shared mailer had delivered a code more than an hour late, past its own 60-minute expiry. Mail now leaves through <b>Resend</b> on the verified <code>smoothafdriving.com</code>. The expiry was deliberately left alone — a code that expires before arriving is a latency problem, and widening the window would only enlarge the guessing surface.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Production is set up — migration applied, emails carry the code <span class="tag">Aug 15</span></div><div class="d">The setup script ran for real against production. <b>The accounts migration applied</b> (<code>drives.user_id</code> now exists, with indexes and row-level-security policies), and <b>both auth email templates now print the 6-digit code</b> — "Confirm signup" and "Magic Link" — with the existing custom content preserved underneath. A dry run was read first and wrote nothing; the real run then re-read its own work from the API to confirm, and an independent check from outside agreed. Sign-in is no longer blocked on setup — only on someone actually trying it.</div></div></div>
       <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Supabase setup without the dashboard <span class="tag">#46</span></div><div class="d">The last two setup steps were both dashboard-only clicking, and the automated path we had broke when the database password was rotated. One script now does both over Supabase's Management API — applies migrations and puts the code in the auth emails — using a personal access token instead of the DB password. Idempotent, with a dry run that writes nothing.</div></div></div>
       <div class="row"><span class="ver-tag">v124</span><div class="body"><div class="t">Real accounts — sign in, and your drives follow you <span class="tag">#44</span></div><div class="d">The app had <b>no notion of identity</b>: the "device ID" was a random UUID per install, so it knew a handset, not a driver — a new phone looked like a stranger. Now there's a <b>Sign in</b> button on the home screen: email + a 6-digit code, and on sign-in it <b>claims every drive that phone recorded anonymously</b> into your account, then pulls down anything from your other devices. Sign in with Apple is built and switches itself on when the provider is enabled. <b>Both setup steps are now done</b> — all that's left is trying it on your phone.</div></div></div>
