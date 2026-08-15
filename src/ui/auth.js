@@ -19,6 +19,26 @@ function show(id, on){
   el(id)?.classList.toggle('hidden', !on);
 }
 
+/**
+ * Swap the card header between the two steps. On the code step the pitch
+ * ("Save your drives / …follow you to any phone") is spent — the driver has
+ * already decided — and it competed with the "Code sent to …" line for the same
+ * job. Tell them what to do instead.
+ */
+function setStep(step){
+  const onCode = step === 'code';
+  show('auth-step-email', !onCode);
+  show('auth-step-code',   onCode);
+  const title = el('auth-title');
+  const sub   = el('auth-sub');
+  if (title) title.textContent = onCode ? 'Check your email' : 'Save your drives';
+  if (sub){
+    sub.textContent = onCode
+      ? 'Enter the 6-digit code we just sent.'
+      : 'Sign in so your score and history follow you to any phone.';
+  }
+}
+
 function setStatus(text, isError){
   const s = el(isSignedIn() ? 'auth-status-in' : 'auth-status');
   if (!s) return;
@@ -38,8 +58,7 @@ function renderSheet(){
   } else {
     // Always reopen on step 1 — a half-finished code entry from a previous
     // visit is stale, since the mailed code expires.
-    show('auth-step-email', true);
-    show('auth-step-code', false);
+    setStep('email');
   }
   setStatus('');
 }
@@ -120,8 +139,7 @@ export function initAuthUI(){
     pendingEmail = input.value.trim().toLowerCase();
     const sent = el('auth-sent');
     if (sent) sent.textContent = `Code sent to ${pendingEmail}`;
-    show('auth-step-email', false);
-    show('auth-step-code', true);
+    setStep('code');
     setStatus('');
     el('auth-code')?.focus();
   });
@@ -141,8 +159,7 @@ export function initAuthUI(){
   });
 
   el('auth-back')?.addEventListener('click', () => {
-    show('auth-step-code', false);
-    show('auth-step-email', true);
+    setStep('email');
     setStatus('');
   });
 
