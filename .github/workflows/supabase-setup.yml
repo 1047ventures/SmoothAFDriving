@@ -1,0 +1,36 @@
+name: Supabase Setup
+
+# Applies pending migrations AND makes the auth emails print the 6-digit code,
+# both over the Supabase Management API.
+#
+# Requires one repo secret: SUPABASE_ACCESS_TOKEN
+#   https://supabase.com/dashboard/account/tokens → Generate new token
+#
+# This is the no-database-password path. The older DB Migrate workflow needs
+# SUPABASE_DB_URL (a Session-pooler URI including the DB password), which broke
+# when that password was rotated. Either can apply migrations — they share the
+# public.schema_migrations tracking table, so running both is safe.
+#
+# Manual only: this changes production auth config, so it shouldn't fire on a
+# push. Run it from the Actions tab.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview what would change, without writing'
+        type: boolean
+        default: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply migrations + email templates
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: node scripts/supabase-setup.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
