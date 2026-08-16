@@ -1,5 +1,6 @@
 import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, REMOVEBG_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
+import { pushProfile } from '../services/profile.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
@@ -178,7 +179,17 @@ function loadGarage(){
 }
 
 function saveGarage(vehicles){
-  try { localStorage.setItem(GARAGE_KEY, JSON.stringify(vehicles)); } catch {}
+  // Stamp every vehicle on write. The merge in profile.js resolves same-id
+  // conflicts by newest-wins, and an unstamped record is treated as oldest — so
+  // without this, two devices editing the same car would resolve arbitrarily.
+  // Stamping all of them (rather than only what changed) makes the rule easy to
+  // state: the device that saved most recently owns the garage.
+  const stamped = (vehicles || []).map(v => ({ ...v, updated_at: new Date().toISOString() }));
+  try { localStorage.setItem(GARAGE_KEY, JSON.stringify(stamped)); } catch {}
+  // Mirror to the account so the garage survives a new phone. Fire-and-forget
+  // and never awaited: local is the source of truth while you're editing, and a
+  // dropped connection must not stop you adding a car. Signed out it no-ops.
+  pushProfile({ garage: stamped }).catch(() => {});
 }
 
 export function getActiveVehicle(){

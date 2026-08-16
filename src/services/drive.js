@@ -32,6 +32,7 @@ function arrivedAtDestination(drive){
   return d <= ARRIVAL_RADIUS_M;
 }
 import { detectCorridors } from './corridors.js';
+import { syncProfile } from './profile.js';
 
 export function persistActiveDrive(){
   if (!state.recording || state.simulated) return;
@@ -265,6 +266,13 @@ export async function restoreDrivesFromCloud(deviceId){
 export async function restoreDrivesForUser(){
   if (!isSignedIn()) return null;
   await claimDeviceDrives();
+
+  // Your garage is part of "everything the account owns" too. It lived only in
+  // localStorage, so signing in on a new phone used to bring the drives and
+  // leave the cars behind. Deliberately not awaited into the return value: a
+  // profile that fails to sync must never stop drives from restoring.
+  syncProfile().catch(() => {});
+
   const rows = await fetchDrivesForUser();
   if (!rows) return null;
   const result = mergeCloudDrives(rows);
