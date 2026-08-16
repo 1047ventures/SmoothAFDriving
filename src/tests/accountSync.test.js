@@ -89,24 +89,26 @@ describe('claimDeviceDrives', () => {
     expect(f).not.toHaveBeenCalled();
   });
 
-  it('claims only this device’s unclaimed rows', async () => {
+  it('claims only this device’s unclaimed rows, through the RPC', async () => {
     saveSession(session());
-    const f = okFetch([{}, {}, {}]);
+    const f = okFetch(3);
     vi.stubGlobal('fetch', f);
     const n = await claimDeviceDrives();
     expect(n).toBe(3);
-    const url = urlOf(f);
-    expect(url).toContain(`device_id=eq.${getDeviceId()}`);
-    // Without this filter a re-run would re-claim rows, and rows already owned
-    // by another account could be reassigned.
-    expect(url).toContain('user_id=is.null');
-    expect(f.mock.calls[0][1].method).toBe('PATCH');
-    expect(bodyOf(f)).toEqual({ user_id: 'user-1' });
+
+    // Claiming goes through claim_drives rather than a direct PATCH. The policy
+    // that allowed the PATCH let any signed-in user adopt any unowned row —
+    // free history once a score is worth something. The function scopes the
+    // claim to rows already stamped with this device_id, server-side, where the
+    // client can't widen it.
+    expect(urlOf(f)).toContain('/rpc/claim_drives');
+    expect(f.mock.calls[0][1].method).toBe('POST');
+    expect(bodyOf(f)).toEqual({ p_device_id: getDeviceId() });
   });
 
   it('reports zero when there is nothing left to claim', async () => {
     saveSession(session());
-    vi.stubGlobal('fetch', okFetch([]));
+    vi.stubGlobal('fetch', okFetch(0));
     expect(await claimDeviceDrives()).toBe(0);
   });
 

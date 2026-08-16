@@ -173,23 +173,29 @@ async function selectDrives(filter){
  * null user_id. Without this, signing in would look like starting over — the
  * history would still be in the cloud but invisible to the new identity.
  *
- * Idempotent: the `user_id=is.null` filter means a second run matches nothing.
- * Returns the number of rows claimed, or null if the call failed.
+ * Idempotent: the function only matches rows that are still unowned, so a
+ * second run claims nothing. Returns the number of rows claimed, or null if the
+ * call failed.
+ *
+ * This goes through the claim_drives RPC rather than a direct PATCH. The policy
+ * that used to permit the PATCH read `using (user_id is null)` — "any signed-in
+ * user may adopt any unowned row" — which was harmless while the leaderboard was
+ * decoration and is free history the moment a score is worth a fuel discount.
+ * The function claims only rows already stamped with the device_id we pass.
  */
 export async function claimDeviceDrives(){
   const uid = currentUser()?.id;
   if (!uid) return null;
   try {
-    const url = `${SB_URL}/rest/v1/drives`
-              + `?device_id=eq.${encodeURIComponent(getDeviceId())}&user_id=is.null`;
-    const res = await fetch(url, {
-      method:  'PATCH',
-      headers: { ...authHeaders(), 'Content-Type': 'application/json', Prefer: 'return=representation' },
-      body:    JSON.stringify({ user_id: uid }),
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/claim_drives`, {
+      method:  'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ p_device_id: getDeviceId() }),
     });
     if (!res.ok) return null;
-    const rows = await res.json();
-    return Array.isArray(rows) ? rows.length : 0;
+    // The function returns a bare integer.
+    const claimed = await res.json();
+    return Number.isFinite(Number(claimed)) ? Number(claimed) : 0;
   } catch {
     return null;
   }
