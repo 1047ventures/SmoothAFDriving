@@ -50,6 +50,18 @@ jobs:
             exit 1
           fi
 
+          # Xcode 26 ships without its platform SDKs pre-installed, and the
+          # runner image does not download them. Without the iOS platform the
+          # archive fails with the unhelpful "Supported platforms for the
+          # buildables in the current scheme is empty" and then "archive not
+          # found" — which reads like a project fault rather than a missing SDK.
+          if ! xcodebuild -showsdks | grep -qi iphoneos; then
+            echo "No iOS SDK present — downloading the platform (this takes a few minutes)."
+            xcodebuild -downloadPlatform iOS
+            xcodebuild -showsdks | grep -i iphoneos \
+              || { echo "::error::iOS platform still missing after download."; exit 1; }
+          fi
+
       - name: Use Node 22 (Capacitor CLI requires >= 22)
         uses: actions/setup-node@v4
         with:
