@@ -13,6 +13,10 @@
 --   3. What's public is a deliberate, minimal projection — a username and a
 --      score. Not your GPS traces.
 
+-- Must precede the profiles table: username is citext, and the type has to
+-- exist before a column can be declared with it.
+create extension if not exists citext;
+
 -- ── 1 · Profiles ──────────────────────────────────────────────────────────────
 
 -- Everything the user authored about themselves. One row per account, not per
@@ -50,8 +54,6 @@ create table if not exists public.profiles (
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
-
-create extension if not exists citext;
 
 alter table public.profiles enable row level security;
 
