@@ -312,3 +312,13 @@
 .obd-cell{ display:flex; align-items:baseline; gap:3px; font-size:12px; color:var(--dim, #A99F8C); }
 .obd-cell b{ font-size:17px; color:var(--cream, #F2E8D5); font-variant-numeric:tabular-nums; }
 .obd-cell i{ font-style:normal; margin-left:4px; opacity:.7; }
+
+/* Sensors pill gains an OBD badge while an adapter is live. The drawer is shut
+   during a drive, so this is the only on-screen proof the car is talking. */
+.debug-handle.has-obd{ border-color:rgba(111,182,105,.45); }
+.pill-obd{
+  display:inline-block; margin-left:6px; padding:1px 6px; border-radius:5px;
+  background:rgba(111,182,105,.18); color:var(--good, #6FB669);
+  font-size:10px; font-weight:700; letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;
+}

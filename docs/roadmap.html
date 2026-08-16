@@ -190,7 +190,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 15, 2026 · 5:58 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 6:05 PM MDT</b>
     </div>
     <div class="legend">
       <span><i class="dot d-warn"></i>Waiting on you</span>
@@ -204,30 +204,48 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 test drive · 1 optional</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 things &middot; ~10 min total</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
         <summary class="wsum">
-          <span class="pill p-next">1 · Try it</span>
-          <span class="t">Sign in &mdash; both faults are fixed <span class="tag">no new build needed</span></span>
+          <span class="pill p-block">1 &middot; Before you drive</span>
+          <span class="t">Engine OFF &mdash; is the dongle still visible? <span class="tag">2 min &middot; decides a design</span></span>
           <span class="chev">▶</span>
         </summary>
         <div class="wbody">
-          <p><b>Sign-in was impossible, and not for the reason anyone thought.</b> The project was configured to mail <b>8-digit</b> codes into an input capped at <b>6 characters</b> &mdash; the last two digits physically could not be typed. No amount of waiting for the email would ever have worked.</p>
-          <p>The slow email was a <i>second, unrelated</i> fault. Both are now fixed in production:</p>
+          <p>Plug the Veepeak in, then with the <b>engine switched off</b>, open any OBD scanner app (<a href="https://apps.apple.com/app/car-scanner-elm-obd2/id1259933623" target="_blank" rel="noopener">Car Scanner ELM OBD2</a>, free) and look at its Bluetooth device list.</p>
+          <p><b>Tell me one thing: does the dongle still appear, yes or no?</b></p>
+          <table class="kv">
+            <tr><td>Disappears</td><td>The dongle powers down with the ignition &mdash; so it can <b>be</b> the auto-start trigger. The app can wake itself when the car starts.</td></tr>
+            <tr><td>Still there</td><td>It stays live on constant 12V. Auto-start has to use motion/location instead, and the dongle is slowly draining your battery when parked.</td></tr>
+          </table>
+          <p>This is the only reason I can&rsquo;t just build auto-start &mdash; the answer picks the mechanism.</p>
+        </div>
+      </details>
+
+      <details class="wrow" open>
+        <summary class="wsum">
+          <span class="pill p-next">2 &middot; In the car</span>
+          <span class="t">Connect the dongle and send me the readout <span class="tag">3 min &middot; parked</span></span>
+          <span class="chev">▶</span>
+        </summary>
+        <div class="wbody">
+          <p><b>Wait for the new TestFlight build first</b> &mdash; the OBD panel does not exist in build 106. (Two builds failed to ship earlier today; that&rsquo;s fixed, see below.)</p>
           <ol>
-            <li><b>Codes are 6 digits</b>, matching the field. (6 is the floor &mdash; Supabase rejects anything shorter, so the field was right all along and the server came down to meet it.)</li>
-            <li><b>Mail goes through Resend</b> on your own verified <code>smoothafdriving.com</code>, not Supabase&rsquo;s shared mailer &mdash; which had been delivering a code more than an hour late, past its own expiry.</li>
+            <li>Engine running, parked. Open the app &rarr; <b>Start Drive</b>.</li>
+            <li>Tap the <b>&ldquo;⌃ Sensors&rdquo;</b> pill near the bottom.</li>
+            <li>Tap <b>Connect OBD</b> and pick the Veepeak from the list.</li>
+            <li>Blip the throttle a couple of times.</li>
           </ol>
-          <p><b>Open the app and sign in.</b> TestFlight build 106 already has the correct field, so there is nothing to install first. Your <b>122 anonymous drives should get claimed</b> into the account.</p>
-          <div class="note"><b>If a build is mid-flight:</b> one release briefly carried a 4-digit field before Supabase&rsquo;s 6-digit minimum was discovered. Don&rsquo;t install that one &mdash; the build behind it is correct.</div>
+          <p><b>Send me the status line and the four numbers</b> (throttle / rpm / speed / load). That tells me whether your car reports throttle plate or pedal position, which decides how it feeds the score.</p>
+          <div class="note"><b>Expect rough edges.</b> No one has tested this against real hardware &mdash; the adapter&rsquo;s Bluetooth identifiers aren&rsquo;t standardised, so the app discovers them at runtime. If it says <i>&ldquo;That device isn&rsquo;t an OBD adapter&rdquo;</i>, that is useful information, not a dead end.</div>
         </div>
       </details>
 
       <details class="wrow">
         <summary class="wsum">
-          <span class="pill p-wait">Optional</span>
+          <span class="pill p-wait">3 &middot; Optional</span>
           <span class="t">Turn on Sign in with Apple <span class="tag">button appears by itself</span></span>
           <span class="chev">▶</span>
         </summary>
@@ -238,10 +256,11 @@
             <li><a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank" rel="noopener">developer.apple.com</a> &rarr; Identifiers &rarr; your App ID &rarr; tick <b>Sign In with Apple</b>.</li>
             <li>Xcode &rarr; App target &rarr; Signing &amp; Capabilities &rarr; <b>+ Capability</b> &rarr; Sign In with Apple.</li>
             <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; Authentication &rarr; Providers &rarr; <b>Apple</b> &rarr; enable, add <code>com.smoothafdriving.app</code> to Authorized Client IDs.</li>
-            <li>Tell me and I'll add the native plugin and ship it.</li>
+            <li>Tell me and I&rsquo;ll add the native plugin and ship it.</li>
           </ol>
         </div>
       </details>
+
 
     </div>
   </section>
@@ -369,6 +388,9 @@
   <section>
     <div class="s-head"><h2>Completed</h2><span class="count">22 releases</span><span class="rule"></span></div>
     <div class="card full">
+      <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">The app can read your car — OBD-II over Bluetooth <span class="tag">Aug 16</span></div><div class="d">Throttle position, RPM, true wheel speed and engine load, polled about four times a second — data the phone's own sensors cannot see. GPS speed is a lagging, smoothed derivative of position; the car knows immediately. The adapter's Bluetooth identifiers aren't standardised across ELM327 clones, so rather than hardcode a guess the app interrogates whatever you plug in and pairs the first characteristic that can notify with the first that can be written. <b>Connection state shows on the Sensors pill</b> with live RPM, so a dropped link looks dropped. Readings are recorded but deliberately not feeding the score yet — they get validated against a real car first.</div></div></div>
+      <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Your garage follows the account, not the phone <span class="tag">Aug 16</span></div><div class="d">Signing in brought your drives and left your cars behind, because the garage only ever existed in <code>localStorage</code> on the phone that created it. It now syncs to the account on sign-in, on launch, and on every edit. Garages <b>merge</b> rather than overwrite — either direction of overwrite silently destroys a vehicle someone typed in by hand — resolving per-vehicle by newest-wins, with exactly one active car guaranteed.</div></div></div>
+      <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Scores made impossible to assert <span class="tag">Aug 16</span></div><div class="d">Groundwork for rewards meaning anything. The leaderboard is now <b>derived on the server</b> from recorded drives instead of a number the client posts, and it <b>excludes simulated drives</b> — which could otherwise produce a flawless run from a desk. It exposes a handle and a score: no user id, no device id, no coordinates. Also closed a hole where <b>any signed-in user could claim all 154 unowned drives</b> in the table, and added <code>vehicle_id</code> to drives so a per-vehicle or per-corridor title can actually be defended.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Sign-in unblocked — the code now fits, and the mail is fast <span class="tag">Aug 15</span></div><div class="d">Two independent faults, both fixed. <b>The real one:</b> the project mailed <b>8-digit</b> codes into a field capped at <b>6 characters</b>, so the last two digits couldn't be typed — sign-in was impossible, not merely awkward, and no amount of waiting for email would have helped. Codes are now 6 digits, which is Supabase's floor; the field was correct all along. <b>The second:</b> Supabase's shared mailer had delivered a code more than an hour late, past its own 60-minute expiry. Mail now leaves through <b>Resend</b> on the verified <code>smoothafdriving.com</code>. The expiry was deliberately left alone — a code that expires before arriving is a latency problem, and widening the window would only enlarge the guessing surface.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Production is set up — migration applied, emails carry the code <span class="tag">Aug 15</span></div><div class="d">The setup script ran for real against production. <b>The accounts migration applied</b> (<code>drives.user_id</code> now exists, with indexes and row-level-security policies), and <b>both auth email templates now print the 6-digit code</b> — "Confirm signup" and "Magic Link" — with the existing custom content preserved underneath. A dry run was read first and wrote nothing; the real run then re-read its own work from the API to confirm, and an independent check from outside agreed. Sign-in is no longer blocked on setup — only on someone actually trying it.</div></div></div>
       <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Supabase setup without the dashboard <span class="tag">#46</span></div><div class="d">The last two setup steps were both dashboard-only clicking, and the automated path we had broke when the database password was rotated. One script now does both over Supabase's Management API — applies migrations and puts the code in the auth emails — using a personal access token instead of the DB password. Idempotent, with a dry run that writes nothing.</div></div></div>

@@ -20,6 +20,27 @@ function setStatus(text){
   if (node) node.textContent = text;
 }
 
+/**
+ * Mirror connection state onto the Sensors pill.
+ *
+ * The panel itself lives inside a drawer that is collapsed while driving, so
+ * without this there is no way to tell a connected adapter from a dead one at a
+ * glance — which is precisely the moment you want to know. The pill is already
+ * on screen for the whole drive, so it carries the indicator rather than
+ * spending new real estate on one.
+ */
+function setPill(connected){
+  const pill = el('debug-handle');
+  if (!pill) return;
+  pill.classList.toggle('has-obd', connected);
+  // A live reading is better proof than a label: a stale adapter that dropped
+  // mid-drive still says "connected" but stops moving.
+  const { rpm } = getLatest();
+  pill.innerHTML = connected
+    ? `⌃&nbsp;Sensors <span class="pill-obd">OBD${rpm == null ? '' : ` ${Math.round(rpm)}`}</span>`
+    : '⌃&nbsp;Sensors';
+}
+
 function renderReadout(){
   const node = el('obd-readout');
   if (!node) return;
@@ -58,8 +79,8 @@ function publish(){
 function startPolling(){
   stopPolling();
   timer = setInterval(async () => {
-    if (!isConnected()) return stopPolling();
-    try { await poll(); publish(); renderReadout(); }
+    if (!isConnected()){ setPill(false); return stopPolling(); }
+    try { await poll(); publish(); renderReadout(); setPill(true); }
     catch { /* a dropped frame is not worth interrupting a drive over */ }
   }, POLL_MS);
 }
@@ -79,6 +100,7 @@ async function onConnectClick(){
     if (btn) btn.textContent = 'Connect OBD';
     setStatus('Disconnected');
     renderReadout();
+    setPill(false);
     return;
   }
 
@@ -89,6 +111,7 @@ async function onConnectClick(){
     // Naming what the car actually offered is the fastest way to tell a working
     // adapter from one that connected but has nothing behind it.
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
+    setPill(true);
     startPolling();
   } catch (err) {
     setStatus(err?.message === 'not an ELM327 adapter'
@@ -103,4 +126,5 @@ async function onConnectClick(){
 export function wireObdPanel(){
   el('obd-connect')?.addEventListener('click', onConnectClick);
   renderReadout();
+  setPill(isConnected());
 }
