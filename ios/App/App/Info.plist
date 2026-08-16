@@ -22,8 +22,14 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Smooth AF connects to your OBD-II adapter to read throttle, RPM, and true vehicle speed from the car.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Smooth AF connects to your OBD-II adapter to read throttle, RPM, and true vehicle speed from the car.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Smooth AF uses your location to score your drive and track your route.</string>
 	<key>NSMotionUsageDescription</key>

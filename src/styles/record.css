@@ -288,3 +288,27 @@
   }
   .debug-legend b{font-weight:700}
   .debug-canvas{flex:1;min-height:0;width:100%;border-radius:6px}
+
+/* ── OBD panel (v3) ─────────────────────────────────────────────────────────
+   Sits inside the Sensors drawer. Sized for a glance in a parked car, not for
+   reading at speed — connecting happens before you set off. */
+.obd-row{
+  display:flex; align-items:center; gap:10px;
+  margin-top:10px; padding-top:10px;
+  /* The drawer itself has no inline padding, so without this the button sits
+     hard against the bezel — and on a rounded/notched screen, partly under it. */
+  padding-inline:14px;
+  border-top:1px solid rgba(242,232,213,.10);
+}
+.obd-btn{
+  flex:0 0 auto; min-height:44px; padding:0 14px;   /* 44px = Apple's tap min */
+  background:rgba(232,93,58,.16); color:var(--tang, #E85D3A);
+  border:1px solid rgba(232,93,58,.35); border-radius:10px;
+  font-size:13px; font-weight:600; cursor:pointer;
+}
+.obd-btn:disabled{ opacity:.55; cursor:default; }
+.obd-status{ font-size:12px; color:var(--dim, #A99F8C); line-height:1.35; min-width:0; }
+.obd-readout{ display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; padding-inline:14px; padding-bottom:12px; }
+.obd-cell{ display:flex; align-items:baseline; gap:3px; font-size:12px; color:var(--dim, #A99F8C); }
+.obd-cell b{ font-size:17px; color:var(--cream, #F2E8D5); font-variant-numeric:tabular-nums; }
+.obd-cell i{ font-style:normal; margin-left:4px; opacity:.7; }

@@ -277,6 +277,15 @@
     <div id="debug-panel" class="debug-panel">
       <div id="debug-legend" class="debug-legend"></div>
       <canvas id="debug-canvas" class="debug-canvas"></canvas>
+
+      <!-- OBD-II adapter. Lives inside the Sensors panel because that is what
+           it is — another sensor source — and because it has to be reachable
+           from the car without leaving the record screen. -->
+      <div class="obd-row">
+        <button id="obd-connect" class="obd-btn" type="button">Connect OBD</button>
+        <span id="obd-status" class="obd-status">Not connected</span>
+      </div>
+      <div id="obd-readout" class="obd-readout"></div>
     </div>
 
     <button id="btn-stop" class="stop-btn">End Drive</button>

@@ -18,6 +18,7 @@ import { initAuthUI } from './ui/auth.js';
 import { refreshIfNeeded, isSignedIn } from './services/auth.js';
 import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
+import { wireObdPanel } from './ui/obd.js';
 
 // Export key init functions for DOMContentLoaded (wired below)
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
@@ -192,6 +193,7 @@ function boot(){
 
   // Garage sheet
   wireGarageButtons();
+  wireObdPanel();
 
   // Swipe from left edge to go back
   let swipeStartX = 0, swipeStartY = 0;

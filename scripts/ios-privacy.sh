@@ -31,6 +31,13 @@ set_string NSLocationWhenInUseUsageDescription \
 set_string NSMotionUsageDescription \
   "Smooth AF uses motion sensors to measure how smoothly you accelerate, brake, and corner."
 
+# Bluetooth: the OBD-II dongle. iOS kills the app on first CoreBluetooth call
+# without this string, exactly like location and motion above.
+set_string NSBluetoothAlwaysUsageDescription \
+  "Smooth AF connects to your OBD-II adapter to read throttle, RPM, and true vehicle speed from the car."
+set_string NSBluetoothPeripheralUsageDescription \
+  "Smooth AF connects to your OBD-II adapter to read throttle, RPM, and true vehicle speed from the car."
+
 # Export compliance. Without this App Store Connect asks "does your app use
 # encryption?" on EVERY upload and holds the build back from testers until it's
 # answered by hand — which would defund the whole point of automatic builds.
