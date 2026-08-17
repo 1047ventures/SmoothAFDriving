@@ -1,0 +1,226 @@
+<!--
+  Smooth AF — Home Screen Audit.
+
+  PUBLISHED ARTIFACT (do not create a new one):
+    https://claude.ai/code/artifact/5b0f3541-951e-49af-bbb7-05e0fdc3fb85
+
+  Same rules as docs/roadmap.html: edit this file, then publish with BOTH
+  file_path and the url above. favicon: 🏠. Re-stamp the "Reviewed" line.
+
+  Deliberately single-theme (dark), matching the app and the roadmap. Every
+  colour is painted explicitly so the page holds on any host ground.
+-->
+<title>Home Screen Audit</title>
+<style>
+  :root{
+    --bg:#0A0908;
+    --panel:#151110;
+    --panel-2:#1C1715;
+    --line:rgba(242,232,213,.10);
+    --line-2:rgba(242,232,213,.18);
+    --cream:#F2E8D5;
+    --dim:#A99F8C;
+    --muted:#7A7060;
+    --tang:#E85D3A;
+    --gold:#C4A962;
+    --good:#6FB669;
+    --danger:#E0503A;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--cream);
+    font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 22px 96px}
+
+  header{padding:52px 0 26px;border-bottom:1px solid var(--line);position:relative}
+  header::before{content:"";position:absolute;top:0;left:0;width:56px;height:3px;background:var(--tang);border-radius:2px}
+  .kicker{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin:0 0 14px;font-weight:600}
+  h1{font-family:var(--serif);font-weight:700;font-style:italic;font-size:clamp(32px,6vw,46px);line-height:1.04;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .lede{margin:16px 0 0;max-width:62ch;color:var(--dim);font-size:15.5px}
+  .stamp{margin-top:20px;font-size:13px;color:var(--muted)}
+  .stamp b{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* The rule this audit applies. Stated once, up front, because every verdict
+     below is just this sentence applied to one element. */
+  .rule-card{
+    margin-top:26px;padding:18px 20px;border-left:3px solid var(--tang);
+    background:linear-gradient(90deg,rgba(232,93,58,.08),transparent 70%);
+    border-radius:0 10px 10px 0;
+  }
+  .rule-card p{margin:0;font-size:15px;color:var(--cream);max-width:60ch}
+  .rule-card p + p{margin-top:8px;color:var(--dim);font-size:13.5px}
+
+  section{margin-top:44px}
+  .s-head{display:flex;align-items:baseline;gap:12px;margin:0 0 6px}
+  .s-head h2{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;margin:0}
+  .s-head .count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.05em}
+  .s-head .rule{flex:1;height:1px;background:var(--line);align-self:center}
+  .s-note{margin:0 0 16px;font-size:13.5px;color:var(--muted);max-width:62ch}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+
+  .row{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:start}
+  .row:last-child{border-bottom:0}
+  .el{font-size:14.5px;color:var(--cream);font-weight:600}
+  .el code{font-family:var(--sans);font-size:13px;color:var(--gold);background:none;padding:0}
+  .why{font-size:13px;color:var(--dim);margin-top:3px}
+
+  .chip{
+    font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
+    padding:4px 8px;border-radius:6px;white-space:nowrap;align-self:start;margin-top:2px;
+  }
+  .c-decide{background:rgba(232,93,58,.16);color:var(--tang)}
+  .c-link{background:rgba(196,169,98,.16);color:var(--gold)}
+  .c-cut{background:rgba(224,80,58,.16);color:var(--danger)}
+  .c-keep{background:rgba(111,182,105,.14);color:var(--good)}
+
+  .keepers{display:flex;flex-wrap:wrap;gap:8px;padding:16px}
+  .keepers span{
+    font-size:12.5px;color:var(--dim);border:1px solid var(--line-2);
+    border-radius:999px;padding:5px 11px;
+  }
+
+  .finding{
+    margin-top:34px;padding:22px 24px;border:1px solid var(--line-2);border-radius:14px;
+    background:var(--panel-2);
+  }
+  .finding h3{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;margin:0 0 10px;color:var(--cream)}
+  .finding p{margin:0;color:var(--dim);font-size:14px;max-width:62ch}
+  .finding p b{color:var(--cream)}
+
+  footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  a{color:var(--tang);text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(232,93,58,.4)}
+  a:hover{text-decoration-color:var(--tang)}
+  a:focus-visible{outline:2px solid var(--tang);outline-offset:2px;border-radius:2px}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Smooth AF · Driving</p>
+    <h1>Home Screen Audit</h1>
+    <p class="lede">Every element on the home screen, sorted by what should happen to it. Grouped by verdict rather than by position, because the useful question is what needs deciding — not what sits nearest the top.</p>
+    <p class="stamp">Reviewed <b>Aug 16, 2026</b> · against build <b>118</b></p>
+
+    <div class="rule-card">
+      <p>If it&rsquo;s on the home screen it should open something on tap. If there&rsquo;s nothing worth opening, it shouldn&rsquo;t be competing for the space.</p>
+      <p>That cuts both ways, which is what makes it useful as a test rather than a to-do list.</p>
+    </div>
+  </header>
+
+  <!-- Decisions first: these are the only items that need the user, and both
+       are product calls rather than engineering ones. -->
+  <section>
+    <div class="s-head"><h2>Needs a decision</h2><span class="count">2 · product calls</span><span class="rule"></span></div>
+    <p class="s-note">Neither of these is a bug or an oversight. Both are features that were started and never finished, and the rule catches them precisely because half-built things fail it.</p>
+    <div class="card">
+      <div class="row">
+        <span class="chip c-decide">Finish or cut</span>
+        <div>
+          <div class="el">&ldquo;Driving Trends&rdquo; sparkline</div>
+          <div class="why">A chart you can&rsquo;t interrogate. It draws a real line from real drives, then refuses to explain any of it. Either tapping it opens a trends view worth the space, or the space goes to something that earns it.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-decide">Finish or cut</span>
+        <div>
+          <div class="el">The persona block <code>home-persona-title · home-persona-sub · home-unlock-text</code></div>
+          <div class="why">Hidden with inline <code>display:none</code>, but the code still writes content into all three every render. A feature that computes something nobody can see. Reviving it and deleting it are both defensible; leaving it is the one option that isn&rsquo;t.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="s-head"><h2>Give it somewhere to go</h2><span class="count">6 · straightforward</span><span class="rule"></span></div>
+    <p class="s-note">These already carry information the driver would reasonably want to pull on. None needs a new concept — most have a destination that already exists.</p>
+    <div class="card">
+      <div class="row">
+        <span class="chip c-link">Link</span>
+        <div>
+          <div class="el">Lifetime Score</div>
+          <div class="why">The largest number on the screen and it does nothing. The breakdown sheet it should open (<code>lifetime-sheet</code>) is already built &mdash; currently reachable only by tapping the drives count, which is not where anyone looks for it.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-link">Link</span>
+        <div>
+          <div class="el">Miles</div>
+          <div class="why">Sits between two stats that are both tappable and behaves differently from both. Pure inconsistency &mdash; the kind that teaches people the screen isn&rsquo;t worth touching.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-link">Link</span>
+        <div>
+          <div class="el">&ldquo;Hey, Driver&rdquo;</div>
+          <div class="why">Your name, and the obvious place to change it. Name editing currently lives inside the leaderboard, which is a strange room to keep your own identity in.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-link">Link</span>
+        <div>
+          <div class="el">Score sentence</div>
+          <div class="why">&ldquo;Start driving to build your score.&rdquo; It&rsquo;s coaching, and coaching invites a follow-up question. Opens the persona explanation &mdash; which ties it to the decision above.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-link">Link</span>
+        <div>
+          <div class="el">Version badge</div>
+          <div class="why">Now reads <b>118</b> and matches the TestFlight build exactly, so it&rsquo;s finally worth tapping: build info, and what changed in it.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-keep">Leave dead</span>
+        <div>
+          <div class="el">&ldquo;Smooth AF&rdquo; wordmark</div>
+          <div class="why">The one honest exception. Branding is allowed to be branding, and a wordmark that opens a menu is worse than one that doesn&rsquo;t.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="s-head"><h2>Delete</h2><span class="count">1 · no argument</span><span class="rule"></span></div>
+    <div class="card">
+      <div class="row">
+        <span class="chip c-cut">Cut</span>
+        <div>
+          <div class="el"><code>persona-badge</code></div>
+          <div class="why">Hidden markup with <b>zero references anywhere in the code</b> &mdash; only a stylesheet rule keeping its corpse warm. Nothing reads it, nothing writes it, nobody can see it.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="s-head"><h2>Already fine</h2><span class="count">9 · pass the test today</span><span class="rule"></span></div>
+    <div class="card">
+      <div class="keepers">
+        <span>Garage card</span>
+        <span>Sign in</span>
+        <span>Drives count</span>
+        <span>Best score</span>
+        <span>Routes</span>
+        <span>Rewards</span>
+        <span>Board</span>
+        <span>Set destination</span>
+        <span>Drive rows</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="finding">
+    <h3>What the audit actually found</h3>
+    <p>Applied strictly, the rule doesn&rsquo;t produce a list of eight tap targets to bolt on. It produces <b>two unfinished features and one corpse</b>. The elements that fail hardest aren&rsquo;t clutter &mdash; they&rsquo;re the sparkline and the persona block, both of which were built partway and left. The linking work is a couple of hours; the decision about those two is the audit.</p>
+  </div>
+
+  <footer>
+    <span>Smooth AF · effective <b style="color:var(--gold)">&amp;</b> efficient</span>
+    <span>Linked from the Build Log &amp; Roadmap</span>
+  </footer>
+</div>

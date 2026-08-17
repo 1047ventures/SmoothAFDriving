@@ -168,6 +168,19 @@ user has bookmarked. Keep `favicon: 🏎️` stable, and **always re-stamp the
 "Updated" line in the header**; changing content without the date makes the page
 look stale to the user.
 
+## Home screen audit artifact
+
+`docs/home-audit.html` is a second published page, linked from the roadmap:
+
+```
+https://claude.ai/code/artifact/5b0f3541-951e-49af-bbb7-05e0fdc3fb85
+```
+
+Same rules as the roadmap — publish with **both** `file_path` and that `url`,
+keep `favicon: 🏠`, and re-stamp the "Reviewed" line. Update it when home-screen
+elements are added, linked, or removed, so it never describes a screen that no
+longer exists.
+
 ## Commands
 
 ```bash
