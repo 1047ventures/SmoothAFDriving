@@ -190,7 +190,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 6:05 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 7:25 PM MDT</b>
     </div>
     <div class="legend">
       <span><i class="dot d-warn"></i>Waiting on you</span>
@@ -369,16 +369,17 @@
     <div class="s-head"><h2>Flagged / tech debt</h2><span class="rule"></span></div>
     <div class="grid">
       <div class="card">
-        <div class="row"><span class="pill p-flag">Privacy</span><div class="body"><div class="t">Drives are still world-readable</div><div class="d">Today's accounts migration <b>turned row-level security on</b>, but deliberately left reads open: the select policy is <code>using (true)</code>, so full GPS tracks are still readable by anyone with the anon key. That was intentional — tightening it to <code>using (user_id = auth.uid())</code> breaks the device-ID restore box for anyone not signed in yet. <b>The fix is a one-line policy change</b>, gated on sign-in being confirmed working and the restore box being retired.</div></div></div>
-        <div class="row"><span class="pill p-flag">Bug</span><div class="body"><div class="t">Dead leaderboard table</div><div class="d">The <code>drivers</code> table doesn't exist; those writes silently fail.</div></div></div>
+        <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">GPS tracks are no longer world-readable</div><div class="d">The select policy was <code>using (true)</code> — anyone holding the anon key, which ships inside the client, could read every coordinate track in the database. It stayed open because closing it appeared to cost anonymous cloud restore. <b>That trade was false:</b> restore never needed a blanket read, only the drives of one device id, which a security-definer function now returns — and only <i>unclaimed</i> ones, so a resold phone can&rsquo;t pull back history since claimed. Reads are owner-only; anonymous callers have no read policy at all. <b>Verified from outside:</b> an anonymous select returns empty, restore still returns all 122 drives.</div></div></div>
+        <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">The leaderboard was writing to a table that never existed</div><div class="d">Every score upload 404&rsquo;d into a silent catch, so the feature looked implemented and did nothing for months. Had the table existed it would have been worse — anyone with the anon key could have posted any score under any name. Standing is now <b>derived on the server</b> from recorded drives. The five invented competitors are gone too: fine as set dressing, dishonest once a ranking is attached to a discount.</div></div></div>
       </div>
       <div class="card">
         <div class="row"><span class="pill p-flag">Unfinished</span><div class="body"><div class="t">Leaderboard "Corridors" / "Rivals" tabs</div><div class="d">Permanent empty placeholders — the road-trends fix fills these.</div></div></div>
         <div class="row"><span class="pill p-flag">Cleanup</span><div class="body"><div class="t">Four deploy pipelines → one</div><div class="d">Netlify + 2× Vercel + Cloudflare all build every push, and the domain points at none of them. Pick one owner (Cloudflare Pages) and retire the rest — this is what caused the dead-app confusion.</div></div></div>
       </div>
       <div class="card full">
-        <div class="row"><span class="pill p-flag">Data gap</span><div class="body"><div class="t">Drives upload to the cloud but can never come back down</div><div class="d"><b>154 drives are safely in Supabase</b> — your main device alone has <b>122 drives, 403 mi, avg 88, May 2 → Aug 5</b>. But the app only ever <em>pushes</em>: there's no "restore my drives" path in the code. So switching URLs (or reinstalling) shows an empty history even though the data exists. Needs a fetch-and-restore on first run, keyed to your account rather than a per-browser device ID.</div></div></div>
+        <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">Drives come back down again</div><div class="d">The app only ever pushed, so a reinstall showed an empty history while the data sat safely in the cloud. Restore now works two ways: signed in it pulls everything the account owns across every device, and signed out it still recovers this device&rsquo;s own drives. Your <b>122 drives / 403 mi</b> are claimed to your account.</div></div></div>
         <div class="row"><span class="pill p-flag">Confusing</span><div class="body"><div class="t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</div><div class="d">The Lovable marketing site (separate codebase, DNS at <b>IONOS</b>) still hosts a stale tracker at <code>/tracker</code> — which is what made the app look broken. <b>Decision made:</b> the domain stays brand/marketing/coaching; the app ships independently via the App Store. So this page should just become a <b>"Download the app"</b> link. Not blocking anything.</div></div></div>
+        <div class="row"><span class="pill p-flag">Security</span><div class="body"><div class="t">Rotate the remove.bg API key</div><div class="d">A key was hardcoded in the source, committed, and shipped inside every client bundle — anyone with the app could read it out and spend the quota. The fallback is removed and the app now prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>.</div></div></div>
         <div class="row"><span class="pill p-flag">Polish</span><div class="body"><div class="t">UX-audit leftovers</div><div class="d">Modal focus management, the dead "Explore Rewards" button, a couple of missing empty states.</div></div></div>
       </div>
     </div>
