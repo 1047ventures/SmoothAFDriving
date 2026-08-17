@@ -46,15 +46,25 @@ function renderReadout(){
   if (!node) return;
   if (!isConnected()){ node.textContent = ''; return; }
 
-  const { rpm, speed, throttle, load } = getLatest();
+  const { rpm, speed, throttle, load, horsepower, torqueNm, gear } = getLatest();
   const cell = (label, value, unit) =>
     `<span class="obd-cell"><b>${value == null ? '—' : Math.round(value)}</b>${unit}<i>${label}</i></span>`;
+
+  // Ordinal gear reads better than a bare number, and — is honest when the ratio
+  // isn't learned yet or the car is stopped.
+  const gearCell =
+    `<span class="obd-cell"><b>${gear == null ? '—' : gear}</b><i>gear</i></span>`;
 
   node.innerHTML =
     cell('throttle', throttle, '%') +
     cell('rpm',      rpm,      '')  +
     cell('speed',    speed,    'km/h') +
-    cell('load',     load,     '%');
+    cell('load',     load,     '%') +
+    // Power/torque/gear only appear once the car actually yields them, so a car
+    // that reports no torque simply shows fewer cells rather than a row of dashes.
+    (horsepower != null ? cell('hp',  horsepower, '')   : '') +
+    (torqueNm   != null ? cell('nm',  torqueNm,   '')   : '') +
+    gearCell;
 }
 
 /**

@@ -24,6 +24,7 @@
  */
 
 import { BleClient } from '@capacitor-community/bluetooth-le';
+import { derive as deriveMetrics } from './obdDerived.js';
 
 // ── Pure decoding ─────────────────────────────────────────────────────────────
 // Everything below this heading is deterministic string→number work, which is
@@ -43,6 +44,12 @@ export const PIDS = {
   throttle: { pid: '11', bytes: 1, decode: a => (a * 100) / 255 },      // %
   load:     { pid: '04', bytes: 1, decode: a => (a * 100) / 255 },      // %
   pedal:    { pid: '49', bytes: 1, decode: a => (a * 100) / 255 },      // % (fallback)
+  // Torque is the raw material for horsepower (see obdDerived.js). Both PIDs are
+  // optional — many cars answer neither — so they are polled only if the ECU
+  // advertised them in the 0100 support mask, and the derived figures stay null
+  // rather than guessing when they're absent.
+  torquePct: { pid: '62', bytes: 1, decode: a => a - 125 },   // % of reference, signed (offset 125)
+  torqueRef: { pid: '63', bytes: 2, decode: (a, b) => (a * 256) + b }, // Nm
 };
 
 /**
@@ -139,8 +146,11 @@ const state = {
   buffer:    '',
   pending:   null,   // { resolve, timer }
   queue:     Promise.resolve(),
-  latest:    { rpm: null, speed: null, throttle: null, load: null, at: 0 },
+  latest:    { rpm: null, speed: null, throttle: null, load: null,
+               torquePct: null, torqueRef: null,
+               torqueNm: null, horsepower: null, gear: null, at: 0 },
   supported: null,
+  gearClusters: [],   // learned across the drive; see obdDerived.learnRatio
 };
 
 export function getLatest(){ return { ...state.latest }; }
@@ -267,7 +277,10 @@ export async function poll(){
   if (!state.deviceId) return null;
 
   const has = n => !state.supported?.length || state.supported.includes(parseInt(PIDS[n].pid, 16));
-  const wanted = ['throttle', 'rpm', 'speed', 'load'].filter(has);
+  // Torque leads nothing — it's optional and slow — but the core four stay
+  // first so the scoring-relevant values keep their cadence even when the extra
+  // PIDs are being polled.
+  const wanted = ['throttle', 'rpm', 'speed', 'load', 'torquePct', 'torqueRef'].filter(has);
 
   for (const name of wanted){
     const reply = await send('01' + PIDS[name].pid);
@@ -279,6 +292,20 @@ export async function poll(){
     const value = decodePid('pedal', await send('0149'));
     if (value != null) state.latest.throttle = value;
   }
+
+  // Horsepower, torque-in-Nm and gear are computed, not read. Done here rather
+  // than in the UI so any consumer of getLatest() sees the same derived values.
+  const d = deriveMetrics({
+    rpm:       state.latest.rpm,
+    speedKmh:  state.latest.speed,
+    torquePct: state.latest.torquePct,
+    torqueRef: state.latest.torqueRef,
+    clusters:  state.gearClusters,
+  });
+  state.gearClusters       = d.clusters;
+  state.latest.torqueNm    = d.torqueNm;
+  state.latest.horsepower  = d.horsepower;
+  state.latest.gear        = d.gear;
 
   state.latest.at = Date.now();
   return getLatest();

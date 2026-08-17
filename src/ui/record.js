@@ -227,9 +227,14 @@ export function updateLiveUI(){
     persistActiveDrive();
   }
 
+  // Prefer the car's own speed when the dongle is connected: OBD reads true
+  // wheel speed, where GPS is a lagging, smoothed derivative of position. Fall
+  // back to GPS the instant OBD has no fresh reading, so a dropped dongle mid-
+  // drive degrades to the old behaviour rather than freezing the number.
   const last = state.samples[state.samples.length - 1];
-  const mph = last ? mpsToMph(last.speed || 0) : 0;
-  $('#live-speed').textContent = Math.round(mph);
+  const obdFresh = state.obd && state.obd.speedMps != null && (Date.now() - state.obd.at) < 2000;
+  const speedMps = obdFresh ? state.obd.speedMps : (last ? last.speed || 0 : 0);
+  $('#live-speed').textContent = Math.round(mpsToMph(speedMps));
 
   // G-force value (shown as text in bottom-right stat)
   const gVal = state.lastMotionG
