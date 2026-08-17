@@ -48,101 +48,55 @@ export function horsepower(nm, rpm){
 }
 
 /**
- * The engine-speed to road-speed ratio.
+ * Decode PID 0xA4 "Transmission Actual Gear" — the car's OWN gear, not a guess.
  *
- * Constant within a gear for a given car, which is what makes gear inference
- * possible without knowing anything about the vehicle.
+ * An earlier version inferred gear from the rpm-to-speed ratio, which was wrong
+ * often enough to be useless: torque-converter slip, sample timing and shift
+ * transitions all smear that ratio. 0xA4 (added to J1979 in 2020) asks the
+ * transmission directly. Not every car answers it — hence the support bit — but
+ * when it does, it is ground truth, and a blank beats a bad guess.
  *
- * Below walking pace the ratio explodes toward infinity and means nothing — a
- * stationary car with the engine running is not in an infinitely tall gear — so
- * anything under 5 km/h returns null rather than poisoning a ratio cluster.
+ * @param bytes  the data bytes after the `41 A4` marker: [A, B, C, D]
+ *
+ * Byte layout, by confidence:
+ *   A — status bits. Bit 0 (0x01) = gear number supported, bit 1 (0x02) = ratio
+ *       supported. This gate is well documented and is what stops us inventing a
+ *       gear on a car that doesn't report one.
+ *   C,D — gear RATIO = (256·C + D) × 0.001. Well documented and reliable.
+ *   B — the gear NUMBER. This byte's encoding is NOT authoritatively documented
+ *       and implementations differ, so it's decoded best-effort and flagged for
+ *       confirmation against a real drive before it's trusted.
  */
-export function speedRatio(rpm, speedKmh){
-  if (typeof rpm !== 'number' || typeof speedKmh !== 'number') return null;
-  if (!Number.isFinite(rpm) || !Number.isFinite(speedKmh)) return null;
-  if (speedKmh < 5 || rpm <= 0) return null;
-  return rpm / speedKmh;
-}
-
-/** Two ratios belong to the same gear if they're within this fraction. */
-const RATIO_TOLERANCE = 0.12;
-
-/**
- * Learn this car's gear ratios as it drives.
- *
- * No configuration, no vehicle database: gears reveal themselves as clusters of
- * repeated ratios. A new observation either joins the nearest cluster — nudging
- * its centre, so the estimate sharpens with use — or starts a new one.
- *
- * Returns a NEW array; callers hold the state so this stays pure and testable.
- */
-export function learnRatio(clusters, ratio){
-  const list = Array.isArray(clusters) ? clusters.map(c => ({ ...c })) : [];
-  if (typeof ratio !== 'number' || !Number.isFinite(ratio) || ratio <= 0) return list;
-
-  let nearest = null, nearestDist = Infinity;
-  for (const c of list){
-    const dist = Math.abs(c.ratio - ratio) / c.ratio;
-    if (dist < nearestDist){ nearestDist = dist; nearest = c; }
+export function decodeGearA4(bytes){
+  if (!Array.isArray(bytes) || bytes.length < 4) {
+    return { supported: false, gear: null, ratio: null };
   }
+  const [a, b, c, d] = bytes;
+  const gearSupported  = (a & 0x01) !== 0;
+  const ratioSupported = (a & 0x02) !== 0;
 
-  if (nearest && nearestDist <= RATIO_TOLERANCE){
-    // Running mean: later observations refine the centre without letting one
-    // noisy reading drag it.
-    nearest.n     += 1;
-    nearest.ratio += (ratio - nearest.ratio) / nearest.n;
-  } else {
-    list.push({ ratio, n: 1 });
-  }
+  // A gear number is a small integer (0=neutral, up to ~8). A byte holding a
+  // value above 15 is therefore not a raw gear — it's nibble-packed, so take
+  // the high nibble. This spans both conventions seen in the wild without
+  // needing to know which the car uses; a real reading confirms which it is.
+  let gear = null;
+  if (gearSupported) gear = b > 15 ? (b >> 4) : b;
 
-  // Tallest ratio = lowest gear. Sorting descending means the index IS the gear
-  // number, which is why inference below is just a lookup.
-  return list.sort((a, b) => b.ratio - a.ratio);
-}
+  const ratio = ratioSupported ? ((c * 256 + d) * 0.001) : null;
 
-/**
- * Which gear, given what we've learned so far.
- *
- * Requires a cluster to have been seen a few times before it may name a gear: a
- * single observation is as likely to be a clutch slip or a shift in progress as
- * a real ratio, and flickering "6th" at someone mid-corner is worse than blank.
- */
-export function inferGear(clusters, ratio, minObservations = 3){
-  if (typeof ratio !== 'number' || !Number.isFinite(ratio) || ratio <= 0) return null;
-  const confident = (clusters || []).filter(c => c.n >= minObservations);
-  if (!confident.length) return null;
-
-  let best = null, bestDist = Infinity;
-  confident.forEach((c) => {
-    const dist = Math.abs(c.ratio - ratio) / c.ratio;
-    if (dist < bestDist){ bestDist = dist; best = c; }
-  });
-
-  if (!best || bestDist > RATIO_TOLERANCE) return null;
-
-  // Position among ALL known clusters, not just the confident ones — otherwise
-  // the number shifts as new gears are learned and 4th silently becomes 3rd.
-  const ordered = [...(clusters || [])].sort((a, b) => b.ratio - a.ratio);
-  return ordered.findIndex(c => c.ratio === best.ratio) + 1;
+  return { supported: gearSupported || ratioSupported, gear, ratio };
 }
 
 /**
  * Everything derivable from one poll, in one call.
  *
- * `clusters` is carried by the caller across polls; this returns the updated set
- * alongside the readings so the learning survives without a module global.
+ * Torque and horsepower only — gear now comes straight from PID 0xA4 via
+ * decodeGearA4(), not from anything computed here.
  */
-export function derive({ rpm, speedKmh, torquePct, torqueRef, clusters = [] } = {}){
-  const nm    = torqueNm(torquePct, torqueRef);
-  const hp    = horsepower(nm, rpm);
-  const ratio = speedRatio(rpm, speedKmh);
-  const next  = ratio == null ? clusters : learnRatio(clusters, ratio);
-
+export function derive({ rpm, torquePct, torqueRef } = {}){
+  const nm = torqueNm(torquePct, torqueRef);
   return {
     torqueNm:   nm,
-    horsepower: hp,
-    ratio,
-    gear:       ratio == null ? null : inferGear(next, ratio),
-    clusters:   next,
+    horsepower: horsepower(nm, rpm),
   };
 }

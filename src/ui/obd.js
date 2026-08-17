@@ -46,22 +46,25 @@ function renderReadout(){
   if (!node) return;
   if (!isConnected()){ node.textContent = ''; return; }
 
-  const { rpm, speed, throttle, load, horsepower, torqueNm, gear } = getLatest();
+  const { rpm, speed, throttle, load, horsepower, torqueNm, gear, gearRatio } = getLatest();
   const cell = (label, value, unit) =>
     `<span class="obd-cell"><b>${value == null ? '—' : Math.round(value)}</b>${unit}<i>${label}</i></span>`;
 
-  // Ordinal gear reads better than a bare number, and — is honest when the ratio
-  // isn't learned yet or the car is stopped.
-  const gearCell =
-    `<span class="obd-cell"><b>${gear == null ? '—' : gear}</b><i>gear</i></span>`;
+  // Gear comes straight from the car (PID 0xA4). Show the gear number when the
+  // transmission reports one; otherwise the actual ratio if it offers that; and
+  // nothing at all if it reports neither — no guessing, which is the whole point
+  // of the rewrite.
+  let gearCell = '';
+  if (gear != null)      gearCell = `<span class="obd-cell"><b>${gear}</b><i>gear</i></span>`;
+  else if (gearRatio != null) gearCell = `<span class="obd-cell"><b>${gearRatio.toFixed(2)}</b><i>ratio</i></span>`;
 
   node.innerHTML =
     cell('throttle', throttle, '%') +
     cell('rpm',      rpm,      '')  +
     cell('speed',    speed,    'km/h') +
     cell('load',     load,     '%') +
-    // Power/torque/gear only appear once the car actually yields them, so a car
-    // that reports no torque simply shows fewer cells rather than a row of dashes.
+    // Power/torque only appear once the car actually yields them, so a car that
+    // reports no torque simply shows fewer cells rather than a row of dashes.
     (horsepower != null ? cell('hp',  horsepower, '')   : '') +
     (torqueNm   != null ? cell('nm',  torqueNm,   '')   : '') +
     gearCell;

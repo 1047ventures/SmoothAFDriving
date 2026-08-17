@@ -24,7 +24,7 @@
  */
 
 import { BleClient } from '@capacitor-community/bluetooth-le';
-import { derive as deriveMetrics } from './obdDerived.js';
+import { derive as deriveMetrics, decodeGearA4 } from './obdDerived.js';
 
 // ── Pure decoding ─────────────────────────────────────────────────────────────
 // Everything below this heading is deterministic string→number work, which is
@@ -148,9 +148,9 @@ const state = {
   queue:     Promise.resolve(),
   latest:    { rpm: null, speed: null, throttle: null, load: null,
                torquePct: null, torqueRef: null,
-               torqueNm: null, horsepower: null, gear: null, at: 0 },
+               torqueNm: null, horsepower: null, gear: null, gearRatio: null, at: 0 },
   supported: null,
-  gearClusters: [],   // learned across the drive; see obdDerived.learnRatio
+  gearSupported: false,   // set once at connect by probing PID 0xA4
 };
 
 export function getLatest(){ return { ...state.latest }; }
@@ -254,6 +254,11 @@ export async function connect({ onStatus = () => {} } = {}){
   onStatus('Asking the car what it supports…');
   state.supported = decodeSupportedPids(await send('0100'));
 
+  // Ask the transmission whether it reports its own gear (PID 0xA4). Probed
+  // once here rather than every poll, so a car without it never wastes a query.
+  const gearProbe = decodeGearA4(extractBytes(await send('01A4'), 'A4'));
+  state.gearSupported = gearProbe.supported;
+
   onStatus('Connected');
   return { deviceId: device.deviceId, name: device.name || 'OBD adapter', supported: state.supported };
 }
@@ -297,15 +302,19 @@ export async function poll(){
   // than in the UI so any consumer of getLatest() sees the same derived values.
   const d = deriveMetrics({
     rpm:       state.latest.rpm,
-    speedKmh:  state.latest.speed,
     torquePct: state.latest.torquePct,
     torqueRef: state.latest.torqueRef,
-    clusters:  state.gearClusters,
   });
-  state.gearClusters       = d.clusters;
-  state.latest.torqueNm    = d.torqueNm;
-  state.latest.horsepower  = d.horsepower;
-  state.latest.gear        = d.gear;
+  state.latest.torqueNm   = d.torqueNm;
+  state.latest.horsepower = d.horsepower;
+
+  // Gear straight from the car, when it offers it. No inference — a blank is the
+  // honest answer for a transmission that doesn't report 0xA4.
+  if (state.gearSupported){
+    const g = decodeGearA4(extractBytes(await send('01A4'), 'A4'));
+    if (g.gear  != null) state.latest.gear      = g.gear;
+    if (g.ratio != null) state.latest.gearRatio = g.ratio;
+  }
 
   state.latest.at = Date.now();
   return getLatest();
