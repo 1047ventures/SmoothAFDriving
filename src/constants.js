@@ -1,4 +1,8 @@
-export const APP_VERSION = 'v124';
+// Injected by Vite at build time (see resolveVersion in vite.config.js). In CI
+// this is the TestFlight build number, so what the app reports and what the
+// build list shows are the same number. The fallback keeps tests and any
+// non-Vite consumer working, since __APP_VERSION__ only exists after bundling.
+export const APP_VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';

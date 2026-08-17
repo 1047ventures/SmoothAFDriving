@@ -74,6 +74,20 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # Resolved BEFORE the web build so the bundle can bake the same number the
+      # native project is stamped with. The in-app badge used to be a
+      # hand-edited constant and had drifted — the app reported v124 while
+      # running build 118 — which makes a bug report impossible to place.
+      #
+      # App Store Connect rejects a build number it has already seen. The
+      # project hardcodes 1, so use the run number — monotonic per repo, and
+      # offset so it can never collide with the manual 1.0 (1) upload.
+      - name: Resolve build number
+        run: |
+          BUILD_NUMBER=$(( ${{ github.run_number }} + 100 ))
+          echo "Using build number $BUILD_NUMBER"
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+
       - name: Build web app
         run: npm run build
 
@@ -83,13 +97,8 @@ jobs:
       - name: Apply iOS privacy strings + export compliance
         run: bash scripts/ios-privacy.sh
 
-      # App Store Connect rejects a build number it has already seen. The
-      # project hardcodes 1, so stamp the run number instead — monotonic per
-      # repo, and offset so it can never collide with the manual 1.0 (1) upload.
-      - name: Stamp build number
+      - name: Stamp build number into the Xcode project
         run: |
-          BUILD_NUMBER=$(( ${{ github.run_number }} + 100 ))
-          echo "Using build number $BUILD_NUMBER"
           sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9][0-9.]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" \
             ios/App/App.xcodeproj/project.pbxproj
 
