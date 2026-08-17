@@ -16,7 +16,11 @@ import { execSync } from 'node:child_process';
  *   3. 'dev' when there's no git at all (a tarball, a fresh container).
  */
 function resolveVersion(){
-  if (process.env.BUILD_NUMBER) return `b${process.env.BUILD_NUMBER}`;
+  // Bare number, no prefix: this is displayed beside the brand AND is what
+  // TestFlight lists. A tester reading "118" off the screen and the build list
+  // showing 118 is the whole point — a 'b' or 'v' in front reintroduces the
+  // "are these the same number?" question this was meant to end.
+  if (process.env.BUILD_NUMBER) return String(process.env.BUILD_NUMBER);
   try {
     const count = execSync('git rev-list --count HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
     const sha   = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
