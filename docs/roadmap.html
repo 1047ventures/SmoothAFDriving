@@ -58,6 +58,30 @@
   .meta b{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600}
 
 
+
+  /* ── Key files ─────────────────────────────────────────────────────────────
+     Sits directly under the header so the companion documents are reachable
+     without hunting through sections. Deliberately compact: it is a signpost,
+     not content, and must not push "Waiting on you" below the fold. */
+  /* Two columns, not auto-fit: four cards in a three-wide grid orphan the last
+     one onto its own row, which reads as a rendering fault — the same reason the
+     stat band promotes its final tile. */
+  .keyfiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+  @media(max-width:600px){.keyfiles{grid-template-columns:1fr}}
+  .kf{
+    display:block;text-decoration:none;padding:13px 15px;
+    background:var(--panel);border:1px solid var(--line);border-radius:11px;
+    transition:border-color .15s,background .15s;
+  }
+  .kf:hover{border-color:var(--line-2);background:var(--panel-2)}
+  .kf:focus-visible{outline:2px solid var(--tang);outline-offset:2px}
+  .kf-name{display:flex;align-items:baseline;gap:7px;font-size:14px;color:var(--cream);font-weight:600}
+  .kf-name .kf-ico{font-size:13px}
+  .kf-what{margin-top:3px;font-size:12px;color:var(--muted);line-height:1.45}
+  /* Live pages read as the app's own; repo files stay quieter — they are
+     reference, not something you check between drives. */
+  .kf--live .kf-name{color:var(--tang)}
+
   section{margin-top:44px}
   .s-head{display:flex;align-items:baseline;gap:12px;margin:0 0 18px}
   .s-head h2{font-family:var(--serif);font-style:italic;font-weight:700;font-size:23px;margin:0;letter-spacing:-.01em}
@@ -185,10 +209,34 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 8:20 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 8:35 PM MDT</b>
     </div>
     
   </header>
+
+
+  <!-- KEY FILES -->
+  <section style="margin-top:34px">
+    <div class="s-head"><h2>Key files</h2><span class="count">companion documents</span><span class="rule"></span></div>
+    <div class="keyfiles">
+      <a class="kf kf--live" href="https://claude.ai/code/artifact/5b0f3541-951e-49af-bbb7-05e0fdc3fb85" target="_blank" rel="noopener">
+        <span class="kf-name"><span class="kf-ico">🏠</span>Home Screen Audit</span>
+        <span class="kf-what">Every home-screen element sorted by verdict — link, cut, or decide.</span>
+      </a>
+      <a class="kf" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/ACCOUNTS.md" target="_blank" rel="noopener">
+        <span class="kf-name">ACCOUNTS.md</span>
+        <span class="kf-what">Auth setup, and the manual fallbacks if the script path fails.</span>
+      </a>
+      <a class="kf" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/NATIVE.md" target="_blank" rel="noopener">
+        <span class="kf-name">NATIVE.md</span>
+        <span class="kf-what">The iOS and TestFlight runbook.</span>
+      </a>
+      <a class="kf" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/CLAUDE.md" target="_blank" rel="noopener">
+        <span class="kf-name">CLAUDE.md</span>
+        <span class="kf-what">Architecture and the standing rules this project is built under.</span>
+      </a>
+    </div>
+  </section>
 
   <!-- 1 · WAITING ON YOU -->
   <section>
