@@ -4,7 +4,12 @@ import { pushProfile } from '../services/profile.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
-function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || '9BMp9XXKWRiqoXeqEPp1T63U'; }
+// No hardcoded fallback. A remove.bg key used to live here in plain source,
+// shipped to every client, where anyone could read it out of the bundle and
+// spend the quota. The app already has a "Add your API key" prompt for this —
+// returning null routes users there instead of quietly burning someone's
+// credits. That key should be treated as compromised and rotated.
+function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || null; }
 function loadCarPos(){ try { return JSON.parse(localStorage.getItem(CAR_POS_KEY)) || {x:50,y:38}; } catch { return {x:50,y:38}; } }
 function saveCarPos(p){ try { localStorage.setItem(CAR_POS_KEY, JSON.stringify(p)); } catch {} }
 function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)) || {x:50,y:42}; } catch { return {x:50,y:42}; } }

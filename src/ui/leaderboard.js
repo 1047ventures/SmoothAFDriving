@@ -3,13 +3,12 @@ import { loadDriverName, saveDriverName, loadLifetimeScore } from '../services/s
 import { fetchLeaderboard, syncToLeaderboard } from '../services/supabase.js';
 import { getDeviceId } from '../services/storage.js';
 
-const GHOST_ROWS = [
-  { username: 'SilkySmith',   lifetime_score: 94 },
-  { username: 'CoastMaster',  lifetime_score: 91 },
-  { username: 'BrakeWhisper', lifetime_score: 88 },
-  { username: 'VelvetRoller', lifetime_score: 85 },
-  { username: 'GlideKing',    lifetime_score: 82 },
-];
+// The ghost rows that used to live here — SilkySmith, CoastMaster and friends —
+// were invented names with invented scores, shown whenever the real board came
+// back empty. Harmless as set dressing for a demo; dishonest the moment a
+// ranking is tied to a fuel discount, and indistinguishable from real
+// competitors to anyone looking at the screen. An empty board that says it is
+// empty is worth more than a full one that is fiction.
 
 export async function openLeaderboard(tab = 'overall'){
   showScreen('leaderboard');
@@ -45,21 +44,27 @@ export async function openLeaderboard(tab = 'overall'){
     rows = null;
   }
 
-  if (!rows || rows.length === 0) rows = GHOST_ROWS;
-
   let myRank = '--';
   if (list) {
-    list.innerHTML = rows.map((row, i) => {
-      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-      const isMe = myName && row.username === myName;
-      if (isMe) myRank = '#' + (i + 1);
-      const isGhost = GHOST_ROWS.includes(row) && !myName;
-      return `<div class="lb-row${isMe ? ' lb-row--me' : ''}${isGhost ? ' lb-row--ghost' : ''}">
-        <div class="lb-rank ${rankClass}">${i + 1}</div>
-        <div class="lb-row-name">${row.username}</div>
-        <div class="lb-row-score">${row.lifetime_score}</div>
-      </div>`;
-    }).join('');
+    if (!rows) {
+      // Distinguish "couldn't ask" from "nobody qualifies yet" — one is a
+      // network blip worth retrying, the other is the true state of the board.
+      list.innerHTML = '<div class="lb-empty">Couldn\u2019t load the leaderboard \u2014 check your connection.</div>';
+    } else if (rows.length === 0) {
+      list.innerHTML = '<div class="lb-empty">No ranked drivers yet.<br>'
+                     + 'Three scored drives puts you on the board.</div>';
+    } else {
+      list.innerHTML = rows.map((row, i) => {
+        const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+        const isMe = myName && row.username === myName;
+        if (isMe) myRank = '#' + (i + 1);
+        return `<div class="lb-row${isMe ? ' lb-row--me' : ''}">
+          <div class="lb-rank ${rankClass}">${i + 1}</div>
+          <div class="lb-row-name">${row.username}</div>
+          <div class="lb-row-score">${row.lifetime_score}</div>
+        </div>`;
+      }).join('');
+    }
   }
 
   const myRankEl = document.getElementById('lb-my-rank');

@@ -82,27 +82,40 @@ export function syncPendingDrives(){
   drives.forEach(d => pushDriveToSupabase(d));
 }
 
-export async function syncToLeaderboard(name, score){
-  try {
-    await fetch(`${SB_URL}/rest/v1/drivers`, {
-      method:'POST',
-      headers:{
-        'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`,
-        'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'
-      },
-      body:JSON.stringify({ device_id:getDeviceId(), username:name.trim(), lifetime_score:Math.round(score), updated_at:new Date().toISOString() })
-    });
-  } catch {}
+/**
+ * Publishing a score is no longer a thing the client does.
+ *
+ * This used to POST {device_id, username, lifetime_score} to a `drivers` table
+ * that was never created — every write 404'd into a bare catch, so a feature
+ * that looked implemented did nothing for months. Worse, had the table existed,
+ * anyone with the anon key could have written any score under any name.
+ *
+ * Standing does not get asserted now; it gets derived from the drives actually
+ * recorded. Kept as a no-op rather than deleted because callers exist in the
+ * drive-finalise path, and a silent no-op there is preferable to a crash at the
+ * end of someone's drive.
+ */
+export async function syncToLeaderboard(){
+  return null;
 }
 
+/**
+ * The leaderboard, read from the server-derived view.
+ *
+ * Ranking comes from a minimum of three non-simulated drives per driver, so a
+ * single lucky trip — or one produced by the simulator at a desk — cannot top
+ * it. The view exposes a handle and numbers, never coordinates or ids.
+ */
 export async function fetchLeaderboard(){
   try {
     const res = await fetch(
-      `${SB_URL}/rest/v1/drivers?select=username,lifetime_score&order=lifetime_score.desc&limit=25`,
-      { headers:{ 'apikey':SB_ANON, 'Authorization':`Bearer ${SB_ANON}` } }
+      `${SB_URL}/rest/v1/leaderboard?select=username,lifetime_score,drives,miles`
+      + `&order=lifetime_score.desc&limit=25`,
+      { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } },
     );
     if (!res.ok) return null;
-    return await res.json();
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows : null;
   } catch { return null; }
 }
 
@@ -138,9 +151,28 @@ export async function syncUserProfile() {
 const DRIVE_COLS = 'start_time,duration_ms,distance_meters,top_speed_mps,score,event_count,'
                  + 'simulated,dest_label,dest_lat,dest_lng,route_distance_m,target_eta_sec,effectiveness';
 
+/**
+ * Anonymous restore, via a function rather than a table read.
+ *
+ * `drives_select` is owner-only now — full GPS tracks were readable by anyone
+ * holding the anon key, which ships in the client. Restore never needed that
+ * breadth: it needs the drives of one device id, which get_device_drives
+ * returns and nothing more.
+ */
 export async function fetchCloudDrives(deviceId){
   if (!deviceId) return null;
-  return selectDrives(`device_id=eq.${encodeURIComponent(deviceId)}`);
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/get_device_drives`, {
+      method:  'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ p_device_id: deviceId }),
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
