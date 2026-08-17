@@ -23,3 +23,6 @@ DerivedData/
 # Android isn't generated or built in CI yet.
 /android/
 .gradle/
+
+# Local secrets / tokens — never commit
+.env

@@ -18,6 +18,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
+        env:
+          # Baked into the bundle so production routing is traffic-aware. A pk.
+          # token is public by design (it ships in the client either way); with
+          # the secret unset the build still works and simply falls back to OSRM.
+          VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
         run: npm run build
       - name: Run tests
         run: npm test

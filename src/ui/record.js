@@ -1,7 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, TIER_MULT, ETA_BUFFER, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
+import { CFG, TIER_MULT, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -10,7 +10,7 @@ import { renderRecAvatar } from './garage.js';
 import { finalizeAndReview, buildDriveFromState } from '../services/drive.js';
 import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
 import { analyzeDrive, computePitStopMs } from '../services/scoring.js';
-import { fetchRoute, isTrafficAware } from '../services/routing.js';
+import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { showCarPromptIfNeeded, showOnboardingIfNeeded } from './modals.js';
@@ -159,7 +159,7 @@ function updatePaceStrip(last, now){
 
   refreshLiveEta(last, now);
 
-  const bufferedEta = state.targetEtaSec * ETA_BUFFER; // seconds
+  const bufferedEta = state.targetEtaSec * etaBuffer(); // seconds, provider-aware
   // Target arrival slides later by any pit time, so a stop is "free".
   const adjustedTargetMs = state.startTime + bufferedEta * 1000 + state.pitStopMs;
   const targetEl = paceStrip?.querySelector('.pace-target'); // whole label line

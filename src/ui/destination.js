@@ -5,7 +5,7 @@
 // `state.destination`/`state.targetEtaSec`/etc. `startRecording()` reads the
 // cache via getPendingDestination() AFTER resetState() to apply it.
 import { geocode, fetchRoute, reverseGeocode } from '../services/routing.js';
-import { ETA_BUFFER } from '../constants.js';
+import { etaBuffer } from '../services/routing.js';
 import { showToast } from '../utils/toast.js';
 
 let picked = null; // { label, lat, lng } | null
@@ -34,7 +34,7 @@ function renderChip(){
   if (!chip) return;
   if (picked){
     if (chipText){
-      const mins = route ? Math.round(route.durationSec * ETA_BUFFER / 60) : null;
+      const mins = route ? Math.round(route.durationSec * etaBuffer() / 60) : null;
       chipText.textContent = mins != null
         ? `📍 ${shortLabel(picked.label)} · ~${mins} min`
         : `📍 ${shortLabel(picked.label)}`;

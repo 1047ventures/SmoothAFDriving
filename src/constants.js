@@ -123,9 +123,15 @@ export const MAPBOX_TOKEN     = import.meta.env?.VITE_MAPBOX_TOKEN || '';
 export const MAPBOX_BASE      = 'https://api.mapbox.com';
 export const NOMINATIM_BASE   = 'https://nominatim.openstreetmap.org';
 export const OSRM_BASE        = 'https://router.project-osrm.org';
-export const ETA_BUFFER       = 1.2;      // absorbs OSRM optimism (no lights/traffic). With Mapbox
-                                          // traffic active this could trend to ~1.0 — tune when the
-                                          // dynamic-ETA work lands (routing.isTrafficAware() exposes the mode).
+// The target you're scored against is the raw route ETA times a buffer. Which
+// buffer depends on where the ETA came from, and getting this wrong is exactly
+// the "beat a 40-min drive by 14 minutes" bug: OSRM returns free-flow times with
+// no lights or traffic, so 1.2 pads it toward reality — but that same 1.2 on top
+// of a Mapbox traffic-aware ETA (which already counts lights and congestion)
+// just hands you 20% of free time. Use routing.etaBuffer(), never the raw
+// constant, so the value tracks the active provider.
+export const ETA_BUFFER         = 1.2;    // OSRM: free-flow, needs real padding
+export const ETA_BUFFER_TRAFFIC = 1.05;   // Mapbox driving-traffic: already realistic; a hair for final approach/parking
 export const PACE_PENALTY     = 180;      // effectiveness points lost per unit of over-fraction
 export const ARRIVAL_RADIUS_M = 200;      // must end within this of the destination for effectiveness to count
 export const CLOCK_MAX_SWING = 15;   // max ± points the clock can move the score

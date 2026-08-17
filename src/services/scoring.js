@@ -404,7 +404,7 @@ export function driveNarrative(drive, analysis, driverName, ctx = {}){
 
   let clockLine = null;
   if (drive.effectiveness != null && drive.targetEtaSec > 0 && !isShort){
-    const targetMs = drive.targetEtaSec * ETA_BUFFER * 1000;
+    const targetMs = drive.targetEtaSec * (drive.etaBuffer ?? ETA_BUFFER) * 1000;
     const usedMs   = drive.movingSec != null ? drive.movingSec * 1000 : durMs;
     const diff     = usedMs - targetMs;
     clockLine = diff <= -60000 ? pick(['Beat the ETA with room to spare.', 'Came in ahead of the clock.'])
@@ -452,7 +452,7 @@ export function driveFacts(drive, analysis){
   facts.push({ label: 'Top', value: String(topMph), unit: 'mph' });
   if (analysis.fullStops != null) facts.push({ label: 'Stops', value: String(analysis.fullStops) });
   if (drive.effectiveness != null && drive.targetEtaSec > 0){
-    const targetMs = drive.targetEtaSec * ETA_BUFFER * 1000;
+    const targetMs = drive.targetEtaSec * (drive.etaBuffer ?? ETA_BUFFER) * 1000;
     const usedMs   = drive.movingSec != null ? drive.movingSec * 1000 : durMs;
     const diff     = usedMs - targetMs; // + behind, − ahead
     facts.push({ label: diff <= 0 ? 'Ahead' : 'Behind', value: String(Math.max(0, Math.round(Math.abs(diff) / 60000))), unit: 'min' });
@@ -649,9 +649,9 @@ export function momentumSeries(drive, buckets = 48){
 // On time or faster (after the ETA buffer) = 100; lateness decays linearly.
 // Returns null for invalid input. Never rewards beating the ETA further — the
 // speed/smoothness trade-off is captured by the separate Efficiency score.
-export function effectivenessScore(rawEtaSec, actualSec){
+export function effectivenessScore(rawEtaSec, actualSec, buffer = ETA_BUFFER){
   if (!(rawEtaSec > 0) || !(actualSec > 0)) return null;
-  const targetSec = rawEtaSec * ETA_BUFFER;
+  const targetSec = rawEtaSec * buffer;
   const overFrac = Math.max(0, (actualSec - targetSec) / targetSec);
   return Math.round(Math.max(0, Math.min(100, 100 - overFrac * PACE_PENALTY)));
 }
@@ -672,9 +672,9 @@ export function destinationTier(effectiveness, efficiency){
 // Signed clock modifier in points. Positive (beat the ETA) is smoothness-gated so
 // only smooth drivers approach the max and can break 100; negative (late) applies
 // only when allowPenalty (which ships with the live traffic-aware ETA).
-export function clockModifier(rawEtaSec, actualSec, efficiency, allowPenalty = false){
+export function clockModifier(rawEtaSec, actualSec, efficiency, allowPenalty = false, buffer = ETA_BUFFER){
   if (!(rawEtaSec > 0) || !(actualSec > 0)) return 0;
-  const target = rawEtaSec * ETA_BUFFER;
+  const target = rawEtaSec * buffer;
   const margin = (target - actualSec) / target; // >0 beat it, <0 late
   if (margin >= 0){
     const pace = Math.min(1, margin / CLOCK_BEAT_FULL);
@@ -687,8 +687,8 @@ export function clockModifier(rawEtaSec, actualSec, efficiency, allowPenalty = f
 
 // Final composite drive score (rounded). Efficiency-only unless the driver
 // actually arrived at a destination with a known ETA. Can exceed 100 (rare).
-export function compositeScore(efficiency, rawEtaSec, actualSec, { arrived = false, allowPenalty = false } = {}){
+export function compositeScore(efficiency, rawEtaSec, actualSec, { arrived = false, allowPenalty = false, buffer = ETA_BUFFER } = {}){
   const base = clamp(efficiency, 0, 100);
   if (!arrived || !(rawEtaSec > 0) || !(actualSec > 0)) return Math.round(base);
-  return Math.round(clamp(base + clockModifier(rawEtaSec, actualSec, base, allowPenalty), 0, SCORE_MAX));
+  return Math.round(clamp(base + clockModifier(rawEtaSec, actualSec, base, allowPenalty, buffer), 0, SCORE_MAX));
 }

@@ -10,7 +10,7 @@ import {
   getSyncedIds,
 } from './storage.js';
 import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
-import { isTrafficAware } from './routing.js';
+import { isTrafficAware, etaBuffer } from './routing.js';
 import {
   pushDriveToSupabase, syncToLeaderboard, fetchCloudDrives, cloudRowToDrive,
   fetchDrivesForUser, claimDeviceDrives,
@@ -192,11 +192,15 @@ export function finalizeAndReview(callbacks = {}){
   const moveSec = movingSeconds(drive.durationMs / 1000, drive.pitStopMs / 1000);
   drive.movingSec = moveSec;
   const penalize = isTrafficAware();
+  // Stamp the buffer this drive was scored under, so a drive recorded on OSRM
+  // keeps its 1.2 target even after a Mapbox token later flips the app to 1.05.
+  // Without this, switching providers would silently re-judge old history.
+  drive.etaBuffer = etaBuffer();
   drive.effectiveness = (drive.targetEtaSec && drive.arrived)
-    ? effectivenessScore(drive.targetEtaSec, moveSec)
+    ? effectivenessScore(drive.targetEtaSec, moveSec, drive.etaBuffer)
     : null;
   drive.score = compositeScore(analysis.score, drive.targetEtaSec, moveSec,
-    { arrived: drive.arrived, allowPenalty: penalize });
+    { arrived: drive.arrived, allowPenalty: penalize, buffer: drive.etaBuffer });
   saveDrive(drive);
   pushDriveToSupabase(drive);
   // Non-blocking — corridor detection runs after review renders

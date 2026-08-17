@@ -16,13 +16,19 @@
 // failure just means "no ETA target", never a blocked drive.
 import {
   ROUTING_PROVIDER, MAPBOX_TOKEN, MAPBOX_BASE, NOMINATIM_BASE, OSRM_BASE,
+  ETA_BUFFER, ETA_BUFFER_TRAFFIC,
 } from '../constants.js';
 
 function useMapbox(){ return ROUTING_PROVIDER === 'mapbox' && !!MAPBOX_TOKEN; }
 
-// True when live-traffic ETAs are active — callers can drop the OSRM optimism
-// buffer (ETA_BUFFER) toward 1.0 since Mapbox durations already reflect traffic.
+// True when live-traffic ETAs are active — the ETA already reflects lights and
+// congestion, so it barely needs padding.
 export function isTrafficAware(){ return useMapbox(); }
+
+// The buffer to apply to a raw route ETA, for the CURRENTLY active provider.
+// This is the one place the choice is made; scoring takes the value as input so
+// it never has to know which map engine produced the number.
+export function etaBuffer(){ return isTrafficAware() ? ETA_BUFFER_TRAFFIC : ETA_BUFFER; }
 
 // query -> [{ label, lat, lng }] (up to 5) | null
 export async function geocode(query){

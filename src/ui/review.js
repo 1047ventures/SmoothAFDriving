@@ -79,7 +79,7 @@ export function renderReview(drive){
       const tierEl = document.getElementById('dest-tier');
       if (tierEl) tierEl.textContent = destinationTier(drive.effectiveness, drive.efficiency ?? drive.score) ?? '—';
       // On-time / late delta vs buffered target
-      const targetMs = drive.targetEtaSec ? drive.targetEtaSec * ETA_BUFFER * 1000 : null;
+      const targetMs = drive.targetEtaSec ? drive.targetEtaSec * (drive.etaBuffer ?? ETA_BUFFER) * 1000 : null;
       const sub = document.getElementById('dest-eff-sub');
       if (sub) {
         if (targetMs) {
