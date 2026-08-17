@@ -224,7 +224,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 9:35 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 9:55 PM MDT</b>
     </div>
     
   </header>
@@ -257,42 +257,22 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">4 things</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 to do &middot; 1 tested</span><span class="rule"></span></div>
     <div class="card full">
 
-      <details class="wrow" open>
+      <details class="wrow">
         <summary class="wsum">
-          <span class="pill p-block">1 &middot; Before you drive</span>
-          <span class="t">Engine OFF &mdash; is the dongle still visible? <span class="tag">2 min &middot; decides a design</span></span>
-          <span class="chev">▶</span>
+          <span class="pill p-ship">Done &middot; tested on the car</span>
+          <span class="t">OBD field test &mdash; here&rsquo;s what it told us <span class="tag">2 findings</span></span>
+          <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
-          <p>Plug the Veepeak in, then with the <b>engine switched off</b>, open any OBD scanner app (<a href="https://apps.apple.com/app/car-scanner-elm-obd2/id1259933623" target="_blank" rel="noopener">Car Scanner ELM OBD2</a>, free) and look at its Bluetooth device list.</p>
-          <p><b>Tell me one thing: does the dongle still appear, yes or no?</b></p>
+          <p>Both field-test items are done. Two results, each of which changed a plan:</p>
           <table class="kv">
-            <tr><td>Disappears</td><td>The dongle powers down with the ignition &mdash; so it can <b>be</b> the auto-start trigger. The app can wake itself when the car starts.</td></tr>
-            <tr><td>Still there</td><td>It stays live on constant 12V. Auto-start has to use motion/location instead, and the dongle is slowly draining your battery when parked.</td></tr>
+            <tr><td>Dongle, engine off</td><td><b>Stays connected</b> &mdash; it runs on constant 12V. So auto-start <b>can&rsquo;t</b> key off the dongle; it&rsquo;ll use motion/location instead. And the adapter sips your battery when parked &mdash; worth unplugging between sessions, or swapping for one that sleeps.</td></tr>
+            <tr><td>Gear readout</td><td>The inferred gear was <b>way off</b> &mdash; rpm-vs-speed guessing can&rsquo;t survive torque-converter slip. Replaced with a <b>direct read of the transmission&rsquo;s own gear</b> (PID 0xA4). If your car reports it, you&rsquo;ll see the real gear; if not, it shows nothing rather than a wrong number.</td></tr>
           </table>
-          <p>This is the only reason I can&rsquo;t just build auto-start &mdash; the answer picks the mechanism.</p>
-        </div>
-      </details>
-
-      <details class="wrow" open>
-        <summary class="wsum">
-          <span class="pill p-next">2 &middot; In the car</span>
-          <span class="t">Connect the dongle and send me the readout <span class="tag">3 min &middot; parked</span></span>
-          <span class="chev">▶</span>
-        </summary>
-        <div class="wbody">
-          <p><b>Wait for the new TestFlight build first</b> &mdash; the OBD panel does not exist in build 106. (Two builds failed to ship earlier today; that&rsquo;s fixed, see below.)</p>
-          <ol>
-            <li>Engine running, parked. Open the app &rarr; <b>Start Drive</b>.</li>
-            <li>Tap the <b>&ldquo;⌃ Sensors&rdquo;</b> pill near the bottom.</li>
-            <li>Tap <b>Connect OBD</b> and pick the Veepeak from the list.</li>
-            <li>Blip the throttle a couple of times.</li>
-          </ol>
-          <p><b>Send me the status line and the four numbers</b> (throttle / rpm / speed / load). That tells me whether your car reports throttle plate or pedal position, which decides how it feeds the score.</p>
-          <div class="note"><b>Expect rough edges.</b> No one has tested this against real hardware &mdash; the adapter&rsquo;s Bluetooth identifiers aren&rsquo;t standardised, so the app discovers them at runtime. If it says <i>&ldquo;That device isn&rsquo;t an OBD adapter&rdquo;</i>, that is useful information, not a dead end.</div>
+          <p><b>Next drive:</b> confirm the gear number matches reality so I can lock the decode, and tell me whether the <b>hp / torque</b> cells appear (that&rsquo;s whether your car reports the torque PIDs).</p>
         </div>
       </details>
 
