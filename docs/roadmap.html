@@ -224,7 +224,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 9:10 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 9:35 PM MDT</b>
     </div>
     
   </header>
@@ -257,7 +257,7 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 things &middot; ~10 min total</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">4 things</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
@@ -296,9 +296,21 @@
         </div>
       </details>
 
+      <details class="wrow" open>
+        <summary class="wsum">
+          <span class="pill p-block">3 &middot; One secret</span>
+          <span class="t">Add the Mapbox token to GitHub so shipped builds get traffic ETAs <span class="tag">1 min</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <p>Your token is in the local <code>.env</code> and working &mdash; but CI builds don&rsquo;t see it, so <b>TestFlight builds would still ship on OSRM</b> (no traffic) until the secret exists.</p>
+          <p>Add a repo secret named <code>VITE_MAPBOX_TOKEN</code> at <a href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">GitHub &rarr; Secrets &rarr; Actions</a>, value your <code>pk.</code> token. Both build workflows already read it. A <code>pk.</code> token is public by design (it ships in the app either way), so this isn&rsquo;t a sensitive secret &mdash; just where CI looks for it.</p>
+        </div>
+      </details>
+
       <details class="wrow">
         <summary class="wsum">
-          <span class="pill p-wait">3 &middot; Optional</span>
+          <span class="pill p-wait">4 &middot; Optional</span>
           <span class="t">Turn on Sign in with Apple <span class="tag">button appears by itself</span></span>
           <span class="chev">▶</span>
         </summary>
@@ -461,6 +473,7 @@
   <section>
     <div class="s-head"><h2>Completed</h2><span class="count">22 releases</span><span class="rule"></span></div>
     <div class="card full">
+      <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">ETAs are honest now — real traffic, no phantom padding <span class="tag">Aug 16</span></div><div class="d">Beating a 40-minute drive by 14 minutes was two bugs stacked. There was <b>no traffic data at all</b> — with no Mapbox token the app fell back to OSRM free-flow times (no lights, no congestion), so the "traffic-aware ETA" wasn&rsquo;t actually running. And a flat <b>1.2 buffer padded the target another 20%</b> on top, with the hook meant to remove it never wired in. Now Mapbox <code>driving-traffic</code> supplies the ETA and the buffer follows the provider: 1.2 for OSRM, 1.05 for a Mapbox time that already counts traffic. Each drive is stamped with the buffer it was scored under, so this can&rsquo;t retroactively re-judge old drives.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">The app can read your car — OBD-II over Bluetooth <span class="tag">Aug 16</span></div><div class="d">Throttle position, RPM, true wheel speed and engine load, polled about four times a second — data the phone's own sensors cannot see. GPS speed is a lagging, smoothed derivative of position; the car knows immediately. The adapter's Bluetooth identifiers aren't standardised across ELM327 clones, so rather than hardcode a guess the app interrogates whatever you plug in and pairs the first characteristic that can notify with the first that can be written. <b>Connection state shows on the Sensors pill</b> with live RPM, so a dropped link looks dropped. Readings are recorded but deliberately not feeding the score yet — they get validated against a real car first.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Your garage follows the account, not the phone <span class="tag">Aug 16</span></div><div class="d">Signing in brought your drives and left your cars behind, because the garage only ever existed in <code>localStorage</code> on the phone that created it. It now syncs to the account on sign-in, on launch, and on every edit. Garages <b>merge</b> rather than overwrite — either direction of overwrite silently destroys a vehicle someone typed in by hand — resolving per-vehicle by newest-wins, with exactly one active car guaranteed.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">Scores made impossible to assert <span class="tag">Aug 16</span></div><div class="d">Groundwork for rewards meaning anything. The leaderboard is now <b>derived on the server</b> from recorded drives instead of a number the client posts, and it <b>excludes simulated drives</b> — which could otherwise produce a flawless run from a desk. It exposes a handle and a score: no user id, no device id, no coordinates. Also closed a hole where <b>any signed-in user could claim all 154 unowned drives</b> in the table, and added <code>vehicle_id</code> to drives so a per-vehicle or per-corridor title can actually be defended.</div></div></div>
