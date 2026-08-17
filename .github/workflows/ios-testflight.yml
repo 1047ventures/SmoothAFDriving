@@ -108,6 +108,11 @@ jobs:
           KEY_ID:    ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
+          # Raw output goes to a file, xcpretty only prettifies what's shown.
+          # Piping straight into xcpretty means a failure prints nothing but
+          # "** ARCHIVE FAILED **" — which is how this build stayed undiagnosable
+          # through several attempts. On failure, dump the real log.
+          set -o pipefail
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -119,7 +124,15 @@ jobs:
             -authenticationKeyID "$KEY_ID" \
             -authenticationKeyIssuerID "$ISSUER_ID" \
             CODE_SIGN_STYLE=Automatic \
-            | xcpretty || exit ${PIPESTATUS[0]}
+            2>&1 | tee "$RUNNER_TEMP/archive.log" | xcpretty || ARCHIVE_RC=$?
+
+          if [ ! -d "$RUNNER_TEMP/App.xcarchive" ]; then
+            echo "::group::Raw xcodebuild output (last 300 lines)"
+            tail -300 "$RUNNER_TEMP/archive.log"
+            echo "::endgroup::"
+            echo "::error::Archive failed — see the raw output above."
+            exit "${ARCHIVE_RC:-1}"
+          fi
 
       - name: Export .ipa
         env:
