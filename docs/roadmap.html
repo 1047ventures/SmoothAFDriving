@@ -190,7 +190,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 7:25 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 7:45 PM MDT</b>
     </div>
     <div class="legend">
       <span><i class="dot d-warn"></i>Waiting on you</span>
@@ -343,6 +343,25 @@
         <div class="wbody"><p>Veepeak OBDCheck BLE has arrived and the native shell is running, so this is unblocked and it's my build. A Capacitor BLE plugin talks ELM327 to the dongle for real <b>throttle %, RPM, and true vehicle speed</b> — data the phone's sensors can't see, feeding the scoring engine directly. Nothing needed from you beyond having the dongle in the car when it's time to test.</p></div>
       </details>
 
+      <details class="wrow" open>
+        <summary class="wsum"><span class="pill p-next">Queued</span><span class="t">Hand the destination to Apple / Google Maps <span class="tag">blocked by background recording</span></span><span class="chev">▶</span></summary>
+        <div class="wbody">
+          <p>Opening a destination in Maps is a two-line change &mdash; a <code>maps://</code> or <code>comgooglemaps://</code> link. <b>That is not the hard part.</b></p>
+          <p><b>The real problem:</b> launching Maps backgrounds Smooth AF, and iOS suspends a backgrounded web view. GPS stops, the drive stops being scored, and you arrive to find nothing recorded &mdash; which is worse than having no Maps button at all. The crash-recovery snapshot the app already takes every 30s exists precisely because backgrounding eats drives.</p>
+          <p>So the work is <b>background location</b>, not the link: the native shell needs the <code>location</code> background mode and Always permission so recording survives while you navigate in another app. Once that holds, the handoff button is trivial and so is the return trip.</p>
+          <p>A middle option worth considering: keep navigation in Maps for your eyes, and show only a next-turn hint in our HUD from the Mapbox route we already fetch &mdash; no second map to maintain, no second set of tiles to pay for.</p>
+        </div>
+      </details>
+
+      <details class="wrow" open>
+        <summary class="wsum"><span class="pill p-next">Queued</span><span class="t">Every home-screen element earns its place <span class="tag">tap for depth, or remove</span></span><span class="chev">▶</span></summary>
+        <div class="wbody">
+          <p>The rule: <b>if it is on the home screen it should open something on tap</b> &mdash; and if there is nothing worth opening, it should not be competing for space there.</p>
+          <p>That cuts both ways, which is what makes it a useful rule. Each element gets sorted into one of three outcomes: <b>give it a detail view</b> (a score opens its history, a stat opens its trend), <b>merge it</b> into something that already has one, or <b>cut it</b>. Expect the audit to delete as much as it links.</p>
+          <p>Needs an inventory pass over the home screen first, element by element, with a proposed destination for each &mdash; then the ones that survive get built.</p>
+        </div>
+      </details>
+
       <details class="wrow">
         <summary class="wsum"><span class="pill p-next">Idea</span><span class="t">Name the places in the recap</span><span class="chev">▶</span></summary>
         <div class="wbody"><p>Reverse-geocode start/end so the story can say "from Congress Park over to where you're parked on York St" instead of just "quick neighborhood hop." One extra lookup per drive; the geocoder is already wired.</p></div>
@@ -380,6 +399,7 @@
         <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">Drives come back down again</div><div class="d">The app only ever pushed, so a reinstall showed an empty history while the data sat safely in the cloud. Restore now works two ways: signed in it pulls everything the account owns across every device, and signed out it still recovers this device&rsquo;s own drives. Your <b>122 drives / 403 mi</b> are claimed to your account.</div></div></div>
         <div class="row"><span class="pill p-flag">Confusing</span><div class="body"><div class="t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</div><div class="d">The Lovable marketing site (separate codebase, DNS at <b>IONOS</b>) still hosts a stale tracker at <code>/tracker</code> — which is what made the app look broken. <b>Decision made:</b> the domain stays brand/marketing/coaching; the app ships independently via the App Store. So this page should just become a <b>"Download the app"</b> link. Not blocking anything.</div></div></div>
         <div class="row"><span class="pill p-flag">Security</span><div class="body"><div class="t">Rotate the remove.bg API key</div><div class="d">A key was hardcoded in the source, committed, and shipped inside every client bundle — anyone with the app could read it out and spend the quota. The fallback is removed and the app now prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>.</div></div></div>
+        <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">OpenStreetMap attribution bleeding through the score breakdown</div><div class="d">Leaflet&rsquo;s <code>.leaflet-top</code>/<code>.leaflet-bottom</code> containers default to <code>z-index:1000</code>, which outranked the breakdown sheet at 900 &mdash; so the attribution painted over it. An existing rule pinned <code>.leaflet-control-container</code>, which is not the element carrying that value. The map block is now its own stacking context, so every z-index Leaflet sets is contained inside it and cannot reach a sheet above. Containing the subtree beats pinning controls one at a time.</div></div></div>
         <div class="row"><span class="pill p-flag">Polish</span><div class="body"><div class="t">UX-audit leftovers</div><div class="d">Modal focus management, the dead "Explore Rewards" button, a couple of missing empty states.</div></div></div>
       </div>
     </div>
