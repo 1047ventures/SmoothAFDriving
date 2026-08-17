@@ -103,6 +103,54 @@ jobs:
           printf '%s' "$PRIVATE_KEY" > ~/private_keys/AuthKey_${KEY_ID}.p8
           chmod 600 ~/private_keys/AuthKey_${KEY_ID}.p8
 
+      # Every runner starts with an empty keychain. Without a certificate in it,
+      # -allowProvisioningUpdates asks Apple for a NEW distribution certificate
+      # on every single build — which is how this account accumulated twenty of
+      # them and hit the cap, at which point signing simply stops working and
+      # the archive fails with no useful message.
+      #
+      # Importing one certificate we own means Xcode finds a usable identity and
+      # reuses it instead of minting another. Optional on purpose: with no
+      # secret set the build still runs exactly as before, so adding this could
+      # not break a working pipeline.
+      - name: Import signing certificate
+        env:
+          CERT_P12:     ${{ secrets.IOS_DIST_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+        run: |
+          if [ -z "$CERT_P12" ]; then
+            echo "::warning::No IOS_DIST_CERT_P12 secret set — Xcode will create a new"
+            echo "::warning::distribution certificate for this build. Apple caps these, and"
+            echo "::warning::once the cap is hit every build fails until you revoke some."
+            exit 0
+          fi
+
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          # Ephemeral password for an ephemeral keychain on a throwaway runner.
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          printf '%s' "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" \
+            -k "$KEYCHAIN" -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          rm -f "$RUNNER_TEMP/cert.p12"
+
+          # Without this, codesign blocks on a GUI prompt that nobody can answer
+          # and the build hangs until it times out.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+
+          # Keep the login keychain in the search list; xcodebuild needs both.
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$KEYCHAIN"
+
+          echo "Imported signing identities:"
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
       - name: Archive
         env:
           KEY_ID:    ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
