@@ -5,6 +5,7 @@ import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
 import { loadDrives, loadDriverName } from '../services/storage.js';
+import { showToast } from '../utils/toast.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -867,35 +868,58 @@ export function buildExportData(drive, analysis) {
     },
     dims:    analysis ? analysis.dims : null,
     events:  drive.events || [],
+    // Persisted samples use abbreviated keys (la/ra/h) — buildDriveFromState in
+    // drive.js trims them to keep localStorage under quota. Read those first and
+    // fall back to the long names so both a freshly-built drive and a
+    // round-tripped-from-storage one export populated numbers, not undefined.
     samples: (drive.samples || []).map(s => ({
       t:             s.t,
       lat:           s.lat,
       lon:           s.lon,
       speed:         s.speed,
-      heading:       s.heading,
-      longAccel:     s.longAccel,
-      latAccel:      s.latAccel,
-      jerk:          s.jerk,
-      harshness:     s.harshness,
-      roadRoughness: s.roadRoughness,
+      heading:       s.heading ?? null,
+      longAccel:     s.longAccel     ?? s.la ?? null,
+      latAccel:      s.latAccel      ?? s.ra ?? null,
+      jerk:          s.jerk          ?? null,
+      harshness:     s.harshness     ?? s.h  ?? null,
+      roadRoughness: s.roadRoughness ?? null,
     })),
   };
 }
 
-export function exportDrive(drive, analysis) {
+export async function exportDrive(drive, analysis) {
   const data  = buildExportData(drive, analysis);
   const when  = new Date(drive.startTime);
   const pad   = n => String(n).padStart(2, '0');
   const fname = `smoothaf-${when.getFullYear()}-${pad(when.getMonth()+1)}-${pad(when.getDate())}-${pad(when.getHours())}-${pad(when.getMinutes())}.json`;
-  const blob  = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url   = URL.createObjectURL(blob);
-  const a     = document.createElement('a');
-  a.href      = url;
-  a.download  = fname;
+  const json  = JSON.stringify(data, null, 2);
+  const blob  = new Blob([json], { type: 'application/json' });
+  const file  = new File([blob], fname, { type: 'application/json' });
+
+  // iOS — and installed PWAs in general — silently ignore the <a download>
+  // attribute, so the old anchor-click did nothing on the phone (which is where
+  // this app lives). Prefer the native share sheet, which on iOS offers "Save to
+  // Files" and AirDrop; fall back to the anchor download for desktop browsers
+  // that don't implement file sharing.
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: fname });
+      return;
+    } catch (err) {
+      if (err?.name === 'AbortError') return; // user dismissed the sheet — not an error
+      // any other failure: fall through to the anchor download below
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href    = url;
+  a.download = fname;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 10000);
+  showToast('Drive JSON exported');
 }
 
 export { mapInstance };
