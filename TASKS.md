@@ -1,8 +1,8 @@
 # Task Ledger — Smooth AF Driving
 
 Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
-Numbers are stable and never re-assigned. New tasks append at the next number.
-Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count.
+Numbers are stable and never re-assigned; new tasks append at the next number.
+Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
 **270 tasks shipped** as of 2026-08-19.
 

@@ -52,6 +52,15 @@ history linear). That only stays painless if both sessions follow this exactly:
   merge — only pass `force` when you've verified the other version is stale with
   nothing to keep.
 
+## Task ledger
+
+`TASKS.md` is the numbered, commit-level ledger of every shipped task (T1 =
+first commit). It is **derived from git**, not hand-maintained — regenerate it
+with `python3 scripts/build-task-ledger.py` after shipping, so it never goes
+stale. The roadmap's open tasks continue the same sequence (currently T271+); a
+new open task takes the next free number. Reference tasks by their T-number so
+both sessions mean the same thing.
+
 ## The wake routine (SessionStart hook)
 
 `.claude/settings.json` runs `.claude/wake-check.sh` at the start of every
