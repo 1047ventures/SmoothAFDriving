@@ -13,6 +13,7 @@ coverage/
 !.claude/agents/
 !.claude/agents/*.md
 !.claude/settings.json
+!.claude/wake-check.sh
 
 # Capacitor native projects.
 # ios/ IS committed — Xcode Cloud builds from the GitHub repo, so the Xcode
