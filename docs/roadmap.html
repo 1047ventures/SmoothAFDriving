@@ -45,13 +45,15 @@
   }
   .wrap{max-width:900px;margin:0 auto;padding:0 22px 96px}
 
-  header{padding:52px 0 30px;border-bottom:1px solid var(--line);position:relative}
+  /* Compact header: this is read in a narrow side panel, so vertical space is
+     precious — the glance below must not start below the fold. */
+  header{padding:30px 0 20px;border-bottom:1px solid var(--line);position:relative}
   header::before{content:"";position:absolute;top:0;left:0;width:56px;height:3px;background:var(--tang);border-radius:2px}
-  .kicker{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin:0 0 14px;font-weight:600}
-  h1{font-family:var(--serif);font-weight:700;font-style:italic;font-size:clamp(34px,6vw,52px);line-height:1.02;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .kicker{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;font-weight:600}
+  h1{font-family:var(--serif);font-weight:700;font-style:italic;font-size:clamp(26px,5vw,40px);line-height:1.04;margin:0;letter-spacing:-.01em;text-wrap:balance}
   h1 .light{font-style:normal;color:var(--dim);font-weight:400}
-  .lede{margin:16px 0 0;max-width:60ch;color:var(--dim);font-size:15.5px}
-  .meta{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin-top:24px;font-size:13px}
+  .lede{margin:11px 0 0;max-width:60ch;color:var(--dim);font-size:14px}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:16px;font-size:12.5px}
   .meta .ver{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--cream)}
   .meta .sep{color:var(--muted)}
   .meta .lbl{color:var(--muted);letter-spacing:.03em}
@@ -211,6 +213,45 @@
   .win .then-now .arrow{color:var(--tang)}
   .win .then-now .is{color:var(--cream)}
 
+  /* ── Now board: the glance ──────────────────────────────────────────────────
+     Three lanes — what just shipped, what's moving, what's next — so opening the
+     page answers those three questions in one look, before any scrolling. This
+     is the hero; everything below it is reference. */
+  .now{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+  @media(max-width:760px){.now{grid-template-columns:1fr}}
+  .lane{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:15px 16px 8px;display:flex;flex-direction:column;
+  }
+  /* The "right now" lane carries a touch more weight than its neighbours. */
+  .lane--prog{border-color:rgba(196,169,98,.34);background:linear-gradient(180deg,rgba(196,169,98,.05),transparent 60%),var(--panel)}
+  .lane-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .lane-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .lane--ship .lane-dot{background:var(--good)}
+  .lane--prog .lane-dot{background:var(--gold)}
+  .lane--next .lane-dot{background:var(--tang)}
+  .lane-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--cream)}
+  .lane-sub{font-size:10.5px;color:var(--muted);margin-left:auto;letter-spacing:.04em}
+  .lane-item{
+    padding:10px 0;border-top:1px solid var(--line);
+    font-size:13.5px;color:var(--cream);line-height:1.4;
+  }
+  .lane-item .sub{display:block;font-size:12px;color:var(--dim);margin-top:3px;line-height:1.45}
+
+  /* Foldable reference sections — collapsed by default so the glance up top
+     isn't buried under the archive in a narrow panel. */
+  details.fold{margin-top:40px}
+  details.fold > summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:12px;padding:4px 0}
+  details.fold > summary::-webkit-details-marker{display:none}
+  details.fold > summary:focus-visible{outline:2px solid var(--tang);outline-offset:3px}
+  details.fold > summary h2{font-family:var(--serif);font-style:italic;font-weight:700;font-size:23px;margin:0;letter-spacing:-.01em}
+  details.fold > summary .count{font-size:12px;color:var(--muted);letter-spacing:.05em}
+  details.fold > summary .rule{flex:1;height:1px;background:var(--line);align-self:center}
+  details.fold > summary .fold-chev{color:var(--muted);font-size:11px;transition:transform .18s ease,color .18s;flex-shrink:0;align-self:center}
+  details.fold[open] > summary .fold-chev{transform:rotate(90deg);color:var(--tang)}
+  details.fold > summary:hover .fold-chev{color:var(--cream)}
+  @media(prefers-reduced-motion:reduce){.fold-chev{transition:none}}
+
   footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 </style>
 
@@ -218,22 +259,112 @@
   <header>
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
-    <p class="lede">A living record of what's on your plate, what's moving, and what's shipped. Tap a “Waiting on you” item for the exact steps and links. Bookmark it — I keep it current.</p>
     <div class="meta">
       <span><span class="lbl">Live in production</span> &nbsp;<span class="ver">build 118</span></span>
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 16, 2026 · 9:55 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 19, 2026 · 3:30 PM MDT</b>
     </div>
     
   </header>
 
 
+  <!-- THE GLANCE — three lanes, the whole point of the page -->
+  <section class="now" aria-label="Status at a glance">
+    <div class="lane lane--ship">
+      <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
+      <div class="lane-item">Gear read straight from the car <span class="sub">PID 0xA4 — no more guessing it</span></div>
+      <div class="lane-item">Traffic-aware ETAs <span class="sub">no more beating a 40-min drive by 14</span></div>
+      <div class="lane-item">Horsepower, torque &amp; gear off the OBD dongle</div>
+      <div class="lane-item">Your garage follows the account, not the phone</div>
+      <div class="lane-item">GPS tracks locked down &amp; the leaderboard made honest</div>
+    </div>
+    <div class="lane lane--prog">
+      <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
+      <div class="lane-item">Driving Trends screen <span class="sub">the charts + data are built and tested; the tap-through UI is the last piece</span></div>
+      <div class="lane-item">OBD readings into the score <span class="sub">validating throttle &amp; torque against your real car first</span></div>
+    </div>
+    <div class="lane lane--next">
+      <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
+      <div class="lane-item">Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
+      <div class="lane-item">Background location <span class="sub">unlocks handing a destination to Apple / Google Maps</span></div>
+      <div class="lane-item">Home screen: link or cut what the audit flagged</div>
+    </div>
+  </section>
+
+  <!-- 1 · WAITING ON YOU -->
+  <section>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 open &middot; 1 optional</span><span class="rule"></span></div>
+    <div class="card full">
+
+      <details class="wrow" open>
+        <summary class="wsum">
+          <span class="pill p-next">Next drive</span>
+          <span class="t">Two things to eyeball with the dongle in <span class="tag">2 min</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <ol>
+            <li><b>Does the gear number match reality?</b> If it's consistently off in a fixed way (e.g. shows 64 in 4th), tell me the number &mdash; that locks the decode.</li>
+            <li><b>Do the <code>hp</code> and <code>nm</code> cells appear?</b> That's the only way to know if your car reports the torque PIDs.</li>
+          </ol>
+          <p>Wait for the newest TestFlight build first &mdash; earlier ones don't have this.</p>
+        </div>
+      </details>
+
+      <details class="wrow" open>
+        <summary class="wsum">
+          <span class="pill p-block">Security</span>
+          <span class="t">Revoke the old remove.bg API key <span class="tag">2 min</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <p>A key was hardcoded in the source and shipped inside every app bundle &mdash; anyone with the app could read it and spend your quota. I removed it from the code, but that doesn't un-ship the copies already out there. <b>Revoke it at <a href="https://www.remove.bg/dashboard#api-key" target="_blank" rel="noopener">remove.bg</a></b> and paste a new one into the app's key prompt when you want background removal.</p>
+        </div>
+      </details>
+
+      <details class="wrow">
+        <summary class="wsum">
+          <span class="pill p-wait">Stops a repeat</span>
+          <span class="t">Export a signing cert so builds stop hitting Apple's cap <span class="tag">5 min</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <p>Right now every CI build mints a fresh Apple distribution certificate, and the account caps them &mdash; that's what silently broke three builds earlier. The fix is in place but dormant until it has a cert to reuse:</p>
+          <ol>
+            <li>Xcode &rarr; Settings &rarr; Accounts &rarr; your Apple ID &rarr; <b>Manage Certificates</b> &rarr; <b>+</b> &rarr; Apple Distribution.</li>
+            <li>Keychain Access &rarr; find that cert &rarr; right-click &rarr; <b>Export</b> as <code>.p12</code> with a password.</li>
+            <li>Terminal: <code>base64 -i cert.p12 | pbcopy</code></li>
+            <li>Add two <a href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">repo secrets</a>: <code>IOS_DIST_CERT_P12</code> (paste) and <code>IOS_DIST_CERT_PASSWORD</code>.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="wrow">
+        <summary class="wsum">
+          <span class="pill p-wait">Optional</span>
+          <span class="t">Turn on Sign in with Apple <span class="tag">appears by itself</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <p>Already built &mdash; it checks Supabase at runtime and <b>appears on its own the moment you enable the provider</b>. No release needed. <b>Skippable:</b> Apple only requires it if you offer another third-party login; email-only is submittable as-is.</p>
+          <ol>
+            <li><a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank" rel="noopener">developer.apple.com</a> &rarr; Identifiers &rarr; your App ID &rarr; tick <b>Sign In with Apple</b>.</li>
+            <li>Xcode &rarr; App target &rarr; Signing &amp; Capabilities &rarr; <b>+ Capability</b> &rarr; Sign In with Apple.</li>
+            <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; Authentication &rarr; Providers &rarr; <b>Apple</b> &rarr; enable, add <code>com.smoothafdriving.app</code>.</li>
+            <li>Tell me and I'll add the native plugin and ship it.</li>
+          </ol>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
   <!-- KEY FILES -->
   <details class="kf-details">
     <summary class="kf-summary">
-      <h2>Key files</h2><span class="count">4 documents</span><span class="rule"></span><span class="kf-chev">▶</span>
+      <h2>Key files</h2><span class="count">4 documents</span><span class="rule"></span><span class="kf-chev">&#9654;</span>
     </summary>
     <div class="keyfiles">
       <a class="kf kf--live" href="https://claude.ai/code/artifact/5b0f3541-951e-49af-bbb7-05e0fdc3fb85" target="_blank" rel="noopener">
@@ -255,63 +386,9 @@
     </div>
   </details>
 
-  <!-- 1 · WAITING ON YOU -->
-  <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 to do &middot; 1 tested</span><span class="rule"></span></div>
-    <div class="card full">
-
-      <details class="wrow">
-        <summary class="wsum">
-          <span class="pill p-ship">Done &middot; tested on the car</span>
-          <span class="t">OBD field test &mdash; here&rsquo;s what it told us <span class="tag">2 findings</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Both field-test items are done. Two results, each of which changed a plan:</p>
-          <table class="kv">
-            <tr><td>Dongle, engine off</td><td><b>Stays connected</b> &mdash; it runs on constant 12V. So auto-start <b>can&rsquo;t</b> key off the dongle; it&rsquo;ll use motion/location instead. And the adapter sips your battery when parked &mdash; worth unplugging between sessions, or swapping for one that sleeps.</td></tr>
-            <tr><td>Gear readout</td><td>The inferred gear was <b>way off</b> &mdash; rpm-vs-speed guessing can&rsquo;t survive torque-converter slip. Replaced with a <b>direct read of the transmission&rsquo;s own gear</b> (PID 0xA4). If your car reports it, you&rsquo;ll see the real gear; if not, it shows nothing rather than a wrong number.</td></tr>
-          </table>
-          <p><b>Next drive:</b> confirm the gear number matches reality so I can lock the decode, and tell me whether the <b>hp / torque</b> cells appear (that&rsquo;s whether your car reports the torque PIDs).</p>
-        </div>
-      </details>
-
-      <details class="wrow" open>
-        <summary class="wsum">
-          <span class="pill p-block">3 &middot; One secret</span>
-          <span class="t">Add the Mapbox token to GitHub so shipped builds get traffic ETAs <span class="tag">1 min</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Your token is in the local <code>.env</code> and working &mdash; but CI builds don&rsquo;t see it, so <b>TestFlight builds would still ship on OSRM</b> (no traffic) until the secret exists.</p>
-          <p>Add a repo secret named <code>VITE_MAPBOX_TOKEN</code> at <a href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">GitHub &rarr; Secrets &rarr; Actions</a>, value your <code>pk.</code> token. Both build workflows already read it. A <code>pk.</code> token is public by design (it ships in the app either way), so this isn&rsquo;t a sensitive secret &mdash; just where CI looks for it.</p>
-        </div>
-      </details>
-
-      <details class="wrow">
-        <summary class="wsum">
-          <span class="pill p-wait">4 &middot; Optional</span>
-          <span class="t">Turn on Sign in with Apple <span class="tag">button appears by itself</span></span>
-          <span class="chev">▶</span>
-        </summary>
-        <div class="wbody">
-          <p>Already built and shipped &mdash; it checks Supabase at runtime and <b>appears on its own the moment you enable the provider</b>. No new app release needed.</p>
-          <p><b>Skippable:</b> Apple only <i>requires</i> Sign in with Apple if you offer another third-party login. Email-only is App Store submittable as-is.</p>
-          <ol>
-            <li><a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank" rel="noopener">developer.apple.com</a> &rarr; Identifiers &rarr; your App ID &rarr; tick <b>Sign In with Apple</b>.</li>
-            <li>Xcode &rarr; App target &rarr; Signing &amp; Capabilities &rarr; <b>+ Capability</b> &rarr; Sign In with Apple.</li>
-            <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; Authentication &rarr; Providers &rarr; <b>Apple</b> &rarr; enable, add <code>com.smoothafdriving.app</code> to Authorized Client IDs.</li>
-            <li>Tell me and I&rsquo;ll add the native plugin and ship it.</li>
-          </ol>
-        </div>
-      </details>
-
-    </div>
-  </section>
-
   <!-- 1.5 · BIG WINS -->
-  <section>
-    <div class="s-head"><h2>Big wins</h2><span class="count">where it started &rarr; where it is</span><span class="rule"></span></div>
+  <details class="fold">
+    <summary><h2>Big wins</h2><span class="count">the story so far</span><span class="rule"></span><span class="fold-chev">&#9654;</span></summary>
 
     <div class="statband">
       <div class="stat"><span class="n">21</span><span class="l">Releases<br>shipped</span></div>
@@ -371,11 +448,11 @@
       </div>
 
     </div>
-  </section>
+  </details>
 
   <!-- 2 · IN FLIGHT / NEXT -->
-  <section>
-    <div class="s-head"><h2>In flight &amp; next</h2><span class="count">tap for details</span><span class="rule"></span></div>
+  <details class="fold">
+    <summary><h2>In flight &amp; next</h2><span class="count">the detail behind the lanes</span><span class="rule"></span><span class="fold-chev">&#9654;</span></summary>
     <div class="card full">
 
       <details class="wrow" open>
@@ -412,7 +489,7 @@
       </details>
 
     </div>
-  </section>
+  </details>
 
   <!-- 3 · SPECCED -->
   <section>
@@ -450,8 +527,8 @@
   </section>
 
   <!-- 5 · COMPLETED -->
-  <section>
-    <div class="s-head"><h2>Completed</h2><span class="count">22 releases</span><span class="rule"></span></div>
+  <details class="fold">
+    <summary><h2>Completed</h2><span class="count">the full log</span><span class="rule"></span><span class="fold-chev">&#9654;</span></summary>
     <div class="card full">
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">ETAs are honest now — real traffic, no phantom padding <span class="tag">Aug 16</span></div><div class="d">Beating a 40-minute drive by 14 minutes was two bugs stacked. There was <b>no traffic data at all</b> — with no Mapbox token the app fell back to OSRM free-flow times (no lights, no congestion), so the "traffic-aware ETA" wasn&rsquo;t actually running. And a flat <b>1.2 buffer padded the target another 20%</b> on top, with the hook meant to remove it never wired in. Now Mapbox <code>driving-traffic</code> supplies the ETA and the buffer follows the provider: 1.2 for OSRM, 1.05 for a Mapbox time that already counts traffic. Each drive is stamped with the buffer it was scored under, so this can&rsquo;t retroactively re-judge old drives.</div></div></div>
       <div class="row"><span class="ver-tag">✓</span><div class="body"><div class="t">The app can read your car — OBD-II over Bluetooth <span class="tag">Aug 16</span></div><div class="d">Throttle position, RPM, true wheel speed and engine load, polled about four times a second — data the phone's own sensors cannot see. GPS speed is a lagging, smoothed derivative of position; the car knows immediately. The adapter's Bluetooth identifiers aren't standardised across ELM327 clones, so rather than hardcode a guess the app interrogates whatever you plug in and pairs the first characteristic that can notify with the first that can be written. <b>Connection state shows on the Sensors pill</b> with live RPM, so a dropped link looks dropped. Readings are recorded but deliberately not feeding the score yet — they get validated against a real car first.</div></div></div>
@@ -483,7 +560,7 @@
       <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Auto-applied DB migrations</div><div class="d">Schema changes ship with the code — a CI step applies Supabase migrations on merge.</div></div></div>
       <div class="row"><span class="ver-tag">—</span><div class="body"><div class="t">Sensor debug panel + JSON export</div><div class="d">Rolling sensor buffers, the live chart, and a one-tap data export.</div></div></div>
     </div>
-  </section>
+  </details>
 
   <!-- 6 · MAYBE SOMEDAY -->
   <section>
