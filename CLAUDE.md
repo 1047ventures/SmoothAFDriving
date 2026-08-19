@@ -54,12 +54,20 @@ history linear). That only stays painless if both sessions follow this exactly:
 
 ## Task ledger
 
-`TASKS.md` is the numbered, commit-level ledger of every shipped task (T1 =
-first commit). It is **derived from git**, not hand-maintained — regenerate it
-with `python3 scripts/build-task-ledger.py` after shipping, so it never goes
-stale. The roadmap's open tasks continue the same sequence (currently T271+); a
-new open task takes the next free number. Reference tasks by their T-number so
-both sessions mean the same thing.
+Two number spaces, so they never collide:
+
+- **`T#` = shipped ledger.** `TASKS.md` numbers every shipped task from git (T1 =
+  first commit), **derived, not hand-maintained** — regenerate with
+  `python3 scripts/build-task-ledger.py` after shipping so it never goes stale.
+  A task's T-number is its commit's position and never changes.
+- **`Q#` = the open queue.** The roadmap's not-yet-shipped tasks are Q1, Q2, …
+  in reading order (waiting → in progress → up next). When a Q item ships it
+  leaves the queue and reappears in the ledger with its own T-number; the
+  remaining Q items renumber. Reference open work as "Q3", shipped as "T150".
+
+Roadmap task badges are tinted by status (`.tn--ship` green, `.tn--prog` gold,
+`.tn--next` tangerine, `.tn--wait` amber, `.tn--pend` amber for claimed-but-
+unpushed). Keep the colour matching the lane when you add or move a task.
 
 ## The wake routine (SessionStart hook)
 

@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**273 tasks shipped** as of 2026-08-19.
+**274 tasks shipped** as of 2026-08-19.
 
 
 ## 2026-04
@@ -289,3 +289,4 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T271** · Make the task ledger self-regenerating from git  _( 2026-08-19 )_
 - **T272** · Number the Just-shipped items too (T256-T269); flag the two unpushed ones  _( 2026-08-19 )_
 - **T273** · Delete the remove.bg integration entirely (T272 done)  _( 2026-08-19 )_
+- **T274** · Ship Sign in with Apple — add the native plugin (T274)  _( 2026-08-19 )_
