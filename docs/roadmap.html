@@ -237,6 +237,10 @@
     font-size:13.5px;color:var(--cream);line-height:1.4;
   }
   .lane-item .sub{display:block;font-size:12px;color:var(--dim);margin-top:3px;line-height:1.45}
+  /* Task number — a stable handle so either session can say "take T5". */
+  .tn{display:inline-block;min-width:24px;text-align:center;font-size:10.5px;font-weight:700;
+      font-variant-numeric:tabular-nums;color:var(--tang);background:rgba(232,93,58,.13);
+      border:1px solid rgba(232,93,58,.3);border-radius:5px;padding:1px 5px;margin-right:7px;letter-spacing:.02em}
 
   /* Foldable reference sections — collapsed by default so the glance up top
      isn't buried under the archive in a narrow panel. */
@@ -264,7 +268,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 19, 2026 · 3:55 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 19, 2026 · 4:10 PM MDT</b>
     </div>
     
   </header>
@@ -284,14 +288,14 @@
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
-      <div class="lane-item">Driving Trends screen <span class="sub">the charts + data are built and tested; the tap-through UI is the last piece</span></div>
-      <div class="lane-item">OBD readings into the score <span class="sub">validating throttle &amp; torque against your real car first</span></div>
+      <div class="lane-item"><span class="tn">T5</span>Driving Trends screen <span class="sub">the charts + data are built and tested; the tap-through UI is the last piece</span></div>
+      <div class="lane-item"><span class="tn">T6</span>OBD readings into the score <span class="sub">validating throttle &amp; torque against your real car first</span></div>
     </div>
     <div class="lane lane--next">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
-      <div class="lane-item">Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
-      <div class="lane-item">Background location <span class="sub">unlocks handing a destination to Apple / Google Maps</span></div>
-      <div class="lane-item">Home screen: link or cut what the audit flagged</div>
+      <div class="lane-item"><span class="tn">T7</span>Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
+      <div class="lane-item"><span class="tn">T8</span>Background location <span class="sub">unlocks handing a destination to Apple / Google Maps</span></div>
+      <div class="lane-item"><span class="tn">T9</span>Home screen: link or cut what the audit flagged</div>
     </div>
   </section>
 
@@ -303,7 +307,7 @@
       <details class="wrow" open>
         <summary class="wsum">
           <span class="pill p-next">Next drive</span>
-          <span class="t">Two things to eyeball with the dongle in <span class="tag">2 min</span></span>
+          <span class="t"><span class="tn">T1</span>Two things to eyeball with the dongle in <span class="tag">2 min</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
@@ -318,7 +322,7 @@
       <details class="wrow" open>
         <summary class="wsum">
           <span class="pill p-block">Security</span>
-          <span class="t">Revoke the old remove.bg API key <span class="tag">2 min</span></span>
+          <span class="t"><span class="tn">T2</span>Revoke the old remove.bg API key <span class="tag">2 min</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
@@ -329,7 +333,7 @@
       <details class="wrow">
         <summary class="wsum">
           <span class="pill p-wait">Stops a repeat</span>
-          <span class="t">Export a signing cert so builds stop hitting Apple's cap <span class="tag">5 min</span></span>
+          <span class="t"><span class="tn">T3</span>Export a signing cert so builds stop hitting Apple's cap <span class="tag">5 min</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
@@ -346,7 +350,7 @@
       <details class="wrow">
         <summary class="wsum">
           <span class="pill p-wait">Optional</span>
-          <span class="t">Turn on Sign in with Apple <span class="tag">appears by itself</span></span>
+          <span class="t"><span class="tn">T4</span>Turn on Sign in with Apple <span class="tag">appears by itself</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
@@ -393,8 +397,8 @@
     <summary><h2>Big wins</h2><span class="count">the story so far</span><span class="rule"></span><span class="fold-chev">&#9654;</span></summary>
 
     <div class="statband">
-      <div class="stat"><span class="n">21</span><span class="l">Releases<br>shipped</span></div>
-      <div class="stat"><span class="n">235</span><span class="l">Automated<br>tests</span></div>
+      <div class="stat"><span class="n">33</span><span class="l">Tasks<br>shipped</span></div>
+      <div class="stat"><span class="n">305</span><span class="l">Automated<br>tests</span></div>
       <div class="stat"><span class="n">7</span><span class="l">Scoring<br>dimensions</span></div>
       <div class="stat"><span class="n">122</span><span class="l">Drives<br>in your history</span></div>
       <div class="stat"><span class="n">403<span class="u">mi</span></span><span class="l">Scored<br>on the road</span></div>
