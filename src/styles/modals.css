@@ -15,15 +15,6 @@
   .ad-splash-install-text{font-size:13px;color:var(--cream-dim);line-height:1.5}
   .ad-splash-skip{appearance:none;border:0;background:transparent;color:var(--cream-dim);font-size:13px;padding:8px;cursor:pointer;width:100%}
 
-  /* ── remove.bg key modal ── */
-  .removebg-error{color:var(--danger);font-size:12px;min-height:16px;margin:0 0 10px;text-align:center}
-  .removebg-input{
-    width:100%;padding:12px 14px;border-radius:10px;margin-bottom:12px;
-    border:1px solid rgba(244,235,217,.18);background:rgba(244,235,217,.06);
-    color:var(--cream);font-size:14px;outline:none;font-family:var(--sans);
-  }
-  .removebg-input::placeholder{color:var(--cream-dim)}
-  .removebg-link{font-size:12px;color:var(--cream-dim);text-align:center;display:block;margin-bottom:14px}
 
   /* ============ SIGNUP MODAL ============ */
   .signup-overlay{position:fixed;inset:0;z-index:900;background:rgba(4,2,2,.82);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}

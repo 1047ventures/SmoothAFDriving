@@ -1,15 +1,9 @@
-import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, REMOVEBG_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY } from '../constants.js';
+import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 import { pushProfile } from '../services/profile.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
-// No hardcoded fallback. A remove.bg key used to live here in plain source,
-// shipped to every client, where anyone could read it out of the bundle and
-// spend the quota. The app already has a "Add your API key" prompt for this —
-// returning null routes users there instead of quietly burning someone's
-// credits. That key should be treated as compromised and rotated.
-function getRemoveBgKey(){ return localStorage.getItem(REMOVEBG_KEY) || null; }
 function loadCarPos(){ try { return JSON.parse(localStorage.getItem(CAR_POS_KEY)) || {x:50,y:38}; } catch { return {x:50,y:38}; } }
 function saveCarPos(p){ try { localStorage.setItem(CAR_POS_KEY, JSON.stringify(p)); } catch {} }
 function loadRecPos(){ try { return JSON.parse(localStorage.getItem(REC_POS_KEY)) || {x:50,y:42}; } catch { return {x:50,y:42}; } }
@@ -617,23 +611,6 @@ export function renderRecAvatar(){
   }
 }
 
-// ── remove.bg API helpers ────────────────────────────────────────────────────
-async function removeBgAPI(file){
-  const key = getRemoveBgKey();
-  if (!key) throw Object.assign(new Error('No key'), { code: 'no-key' });
-  const fd = new FormData();
-  fd.append('image_file', file);
-  fd.append('size', 'auto');
-  const res = await fetch('https://api.remove.bg/v1.0/removebg', {
-    method: 'POST',
-    headers: { 'X-Api-Key': key },
-    body: fd,
-  });
-  if (res.status === 403) throw Object.assign(new Error('Invalid key'), { code: 'invalid-key' });
-  if (!res.ok) throw new Error(`remove.bg ${res.status}`);
-  return res.blob();
-}
-
 function savePhotoPlain(file){
   const reader = new FileReader();
   reader.onload = e => {
@@ -653,39 +630,10 @@ function savePhotoPlain(file){
   reader.readAsDataURL(file);
 }
 
+// A car photo is saved as-is (resized). Background removal used to run through
+// remove.bg — a shipped API key for a feature nobody used — so it's gone (T272).
 export async function processCarPhoto(file){
-  const container = document.getElementById('car-display');
-  if (container) container.innerHTML = '<div class="car-loading"><span>Processing…</span></div>';
-
-  try {
-    const blob = await removeBgAPI(file);
-    await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        try { localStorage.setItem(CAR_PHOTO_KEY, e.target.result); } catch {}
-        resolve();
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    renderCarDisplay(); renderRecAvatar();
-  } catch (err) {
-    if (err.code === 'invalid-key'){
-      localStorage.removeItem(REMOVEBG_KEY);
-      showApiKeyPrompt(file, 'That key didn\'t work — try again.');
-    } else {
-      console.warn('remove.bg failed, using plain:', err);
-      savePhotoPlain(file);
-    }
-  }
-}
-
-export function showApiKeyPrompt(pendingFile, errorMsg){
-  const modal = document.getElementById('removebg-modal');
-  modal.querySelector('.removebg-error').textContent = errorMsg || '';
-  modal.querySelector('#removebg-key-input').value = '';
-  modal._pendingFile = pendingFile;
-  modal.classList.remove('hidden');
+  savePhotoPlain(file);
 }
 
 // Wire garage form buttons (called from main.js after DOMContentLoaded)
