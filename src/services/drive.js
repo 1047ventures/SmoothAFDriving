@@ -106,6 +106,48 @@ export function checkRecoveredDrive(callbacks = {}){
  * via analyzeDrive. Used by both finalizeAndReview (on stop) and the live gauge
  * (every ~1s) so the in-drive score and the stored score share one engine.
  */
+/**
+ * Roll the per-sample OBD readings up into a drive-level summary.
+ *
+ * Returns null when no sample carried OBD data, so a GPS-only drive has no `obd`
+ * key at all and the review/export layers can treat presence as "car was
+ * connected". Averages are over the samples that actually reported each channel,
+ * not the whole drive, so a mid-drive connect doesn't drag an average toward
+ * zero. `coverage` is the fraction of samples with any OBD reading — the honest
+ * signal for how much of the drive the car was actually feeding.
+ */
+export function summarizeObd(samples){
+  const n = samples.length;
+  if (!n) return null;
+  const stat = key => {
+    const vals = samples.map(s => s[key]).filter(v => v != null);
+    if (!vals.length) return null;
+    const sum = vals.reduce((a, v) => a + v, 0);
+    return { avg: sum / vals.length, max: Math.max(...vals), n: vals.length };
+  };
+  const rpm = stat('rpm'), throttle = stat('throttle'), load = stat('load'),
+        hp = stat('horsepower'), nm = stat('torqueNm'), obdSpeed = stat('obdSpeed');
+  const withObd = samples.filter(s =>
+    s.throttle != null || s.rpm != null || s.gear != null || s.obdSpeed != null).length;
+  if (!withObd) return null;
+
+  const gears = [...new Set(samples.map(s => s.gear).filter(g => g != null))].sort((a, b) => a - b);
+  const r1 = v => v == null ? null : +v.toFixed(1);
+  return {
+    coverage:    +(withObd / n).toFixed(3),
+    samples:     withObd,
+    peakRpm:     rpm ? Math.round(rpm.max) : null,
+    avgRpm:      rpm ? Math.round(rpm.avg) : null,
+    maxThrottle: r1(throttle?.max),
+    avgThrottle: r1(throttle?.avg),
+    avgLoad:     r1(load?.avg),
+    peakHp:      hp ? Math.round(hp.max) : null,
+    peakTorqueNm: nm ? Math.round(nm.max) : null,
+    topObdSpeedMps: obdSpeed ? +obdSpeed.max.toFixed(2) : null,
+    gears:       gears.length ? gears : null,
+  };
+}
+
 export function buildDriveFromState(){
   const samples = state.samples;
   let distance = 0, topSpeed = 0, topSpeedLat = null, topSpeedLon = null;
@@ -129,16 +171,31 @@ export function buildDriveFromState(){
     topSpeedLon: topSpeedLon != null ? +topSpeedLon.toFixed(6) : null,
     speedLimitMps: state.currentSpeedLimitMps || null,
     score: 0,  // filled in by caller via analyzeDrive
-    samples: samples.map(s => ({
-      t:       s.t - state.startTime,
-      lat:     +s.lat.toFixed(6),
-      lon:     +s.lon.toFixed(6),
-      speed:   +((s.speed||0).toFixed(2)),
-      heading: s.heading != null ? +s.heading.toFixed(1) : null,
-      h:       +((s.harshness||0).toFixed(2)),
-      la:      +((s.longAccel||0).toFixed(3)),
-      ra:      +((s.latAccel||0).toFixed(3)),
-    })),
+    samples: samples.map(s => {
+      const out = {
+        t:       s.t - state.startTime,
+        lat:     +s.lat.toFixed(6),
+        lon:     +s.lon.toFixed(6),
+        speed:   +((s.speed||0).toFixed(2)),
+        heading: s.heading != null ? +s.heading.toFixed(1) : null,
+        h:       +((s.harshness||0).toFixed(2)),
+        la:      +((s.longAccel||0).toFixed(3)),
+        ra:      +((s.latAccel||0).toFixed(3)),
+      };
+      // OBD channels ride along only on the samples that actually carry them, so
+      // a GPS-only drive keeps its old compact shape and a car-connected drive
+      // gains throttle/RPM/gear/true-speed per point. Abbreviated to match the
+      // la/ra/h convention that keeps drives under the localStorage quota.
+      if (s.throttle   != null) out.thr = +s.throttle.toFixed(1);
+      if (s.rpm        != null) out.rpm = Math.round(s.rpm);
+      if (s.load       != null) out.ld  = +s.load.toFixed(1);
+      if (s.gear       != null) out.g   = s.gear;
+      if (s.obdSpeed   != null) out.os  = +s.obdSpeed.toFixed(2);
+      if (s.horsepower != null) out.hp  = Math.round(s.horsepower);
+      if (s.torqueNm   != null) out.nm  = Math.round(s.torqueNm);
+      return out;
+    }),
+    obd: summarizeObd(samples),
     events: events.map(e => ({
       type: e.type, severity: +((e.severity||1).toFixed(2)),
       tier: e.tier || 2,

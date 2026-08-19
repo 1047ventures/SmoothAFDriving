@@ -33,7 +33,7 @@ const ANALYSIS = {
 describe('buildExportData', () => {
   it('produces the correct top-level keys', () => {
     const data = buildExportData(DRIVE, ANALYSIS);
-    expect(Object.keys(data)).toEqual(['meta', 'dims', 'events', 'samples']);
+    expect(Object.keys(data)).toEqual(['meta', 'dims', 'obd', 'events', 'samples']);
   });
 
   it('meta has required fields', () => {

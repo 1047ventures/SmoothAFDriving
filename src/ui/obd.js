@@ -78,10 +78,15 @@ function renderReadout(){
  * score. Getting them visible and recorded is this build's job.
  */
 function publish(){
-  const { throttle, rpm, speed } = getLatest();
+  const { throttle, rpm, speed, load, horsepower, torqueNm, gear, gearRatio } = getLatest();
   state.obd = {
     throttle,
     rpm,
+    load,
+    horsepower,
+    torqueNm,
+    gear,
+    gearRatio,
     // The car's speed is truth; GPS is a lagging derivative of position. Stored
     // in m/s so it is directly comparable with the GPS figure beside it.
     speedMps: speed == null ? null : kmhToMps(speed),

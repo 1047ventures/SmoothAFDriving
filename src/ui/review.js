@@ -867,23 +867,41 @@ export function buildExportData(drive, analysis) {
       startTime:     drive.startTime,
     },
     dims:    analysis ? analysis.dims : null,
+    // Present only when the car was connected; readers use its presence to
+    // decide whether to render an OBD section at all.
+    obd:     drive.obd || null,
     events:  drive.events || [],
-    // Persisted samples use abbreviated keys (la/ra/h) — buildDriveFromState in
-    // drive.js trims them to keep localStorage under quota. Read those first and
-    // fall back to the long names so both a freshly-built drive and a
-    // round-tripped-from-storage one export populated numbers, not undefined.
-    samples: (drive.samples || []).map(s => ({
-      t:             s.t,
-      lat:           s.lat,
-      lon:           s.lon,
-      speed:         s.speed,
-      heading:       s.heading ?? null,
-      longAccel:     s.longAccel     ?? s.la ?? null,
-      latAccel:      s.latAccel      ?? s.ra ?? null,
-      jerk:          s.jerk          ?? null,
-      harshness:     s.harshness     ?? s.h  ?? null,
-      roadRoughness: s.roadRoughness ?? null,
-    })),
+    // Persisted samples use abbreviated keys (la/ra/h, thr/rpm/g/os/…) —
+    // buildDriveFromState in drive.js trims them to keep localStorage under
+    // quota. Read those first and fall back to the long names so both a
+    // freshly-built drive and a round-tripped-from-storage one export populated,
+    // self-describing numbers rather than undefined.
+    samples: (drive.samples || []).map(s => {
+      const out = {
+        t:             s.t,
+        lat:           s.lat,
+        lon:           s.lon,
+        speed:         s.speed,
+        heading:       s.heading ?? null,
+        longAccel:     s.longAccel     ?? s.la ?? null,
+        latAccel:      s.latAccel      ?? s.ra ?? null,
+        jerk:          s.jerk          ?? null,
+        harshness:     s.harshness     ?? s.h  ?? null,
+        roadRoughness: s.roadRoughness ?? null,
+      };
+      const throttle = s.throttle ?? s.thr;
+      const obdSpeed = s.obdSpeed ?? s.os;
+      const gear     = s.gear ?? s.g;
+      const load     = s.load ?? s.ld;
+      if (throttle               != null) out.throttle    = throttle;
+      if (s.rpm                  != null) out.rpm         = s.rpm;
+      if (load                   != null) out.engineLoad  = load;
+      if (gear                   != null) out.gear        = gear;
+      if (obdSpeed               != null) out.obdSpeedMps = obdSpeed;
+      if ((s.horsepower ?? s.hp) != null) out.horsepower  = s.horsepower ?? s.hp;
+      if ((s.torqueNm   ?? s.nm) != null) out.torqueNm    = s.torqueNm   ?? s.nm;
+      return out;
+    }),
   };
 }
 
