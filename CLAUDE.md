@@ -20,6 +20,18 @@ from a phone, and expects you to carry the detail.
   below. When something failed, report it with the evidence; don't smooth it
   over.
 
+## CEO advisor on wake
+
+`.claude/agents/ceo.md` is a bootstrapping-founder advisor subagent, and
+`.claude/settings.json` has a **SessionStart hook** that asks you to spawn it at
+the start of each session. On wake, spawn it (Agent tool, `subagent_type: "ceo"`),
+let it read the git history / roadmap / workflow, and **open by relaying its
+briefing of what matters most next** — the one highest-leverage move, momentum
+read, owner-only blockers, and a kill/defer list. If the owner leads with a
+specific task, do that first, then surface the CEO's take. It's read-only and
+advisory; it never edits code. The owner asked for this — don't skip it unless
+they say to.
+
 ## ⚠️ Verify with subagents — everything, not just UI (operating rule)
 
 **Nothing is "done" because it was written and the tests passed.** Dispatch

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s' '[CEO check-in] This project has a bootstrapping-founder advisor. At the start of this session, before settling into work, spawn the \"ceo\" subagent (Agent tool, subagent_type: \"ceo\") to review recent git history, the roadmap, and the owner workflow, and open by relaying its briefing of what matters most next. If the owner leads with a specific task, do that first, then surface the CEO take. Skip only if the owner explicitly says not to.'"
+          }
+        ]
+      }
+    ]
+  }
+}
