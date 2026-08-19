@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**270 tasks shipped** as of 2026-08-19.
+**273 tasks shipped** as of 2026-08-19.
 
 
 ## 2026-04
@@ -286,3 +286,6 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T268** · Make ETAs traffic-aware, and stop padding them like they aren't  _( 2026-08-16 )_
 - **T269** · Read gear straight from the car (PID 0xA4), stop guessing it  _( 2026-08-16 )_
 - **T270** · Add a bootstrapping-CEO advisor subagent that briefs on every wake  _( 2026-08-19 )_
+- **T271** · Make the task ledger self-regenerating from git  _( 2026-08-19 )_
+- **T272** · Number the Just-shipped items too (T256-T269); flag the two unpushed ones  _( 2026-08-19 )_
+- **T273** · Delete the remove.bg integration entirely (T272 done)  _( 2026-08-19 )_
