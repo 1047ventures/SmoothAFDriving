@@ -20,6 +20,49 @@ from a phone, and expects you to carry the detail.
   below. When something failed, report it with the evidence; don't smooth it
   over.
 
+## ⚠️ Working alongside another session (operating rule)
+
+The owner runs **two sessions at once** — desktop here plus a phone / remote /
+cloud session — on this same repo. Both push to `origin/main`. To keep them from
+clobbering each other:
+
+- **Pull right before you push, every time — not just on wake.** `git fetch` and
+  fast-forward (or rebase your commits on top) immediately before pushing. A
+  wake-time sync is stale the moment the other session pushes.
+- **Commit small, push often.** A short divergence merges cleanly; a big
+  uncommitted pile does not.
+- **Never force-push `main`** — it's shared. On a non-fast-forward push, pull and
+  merge, don't `--force`.
+- **The roadmap is the sharpest conflict** — one HTML file both sessions edit,
+  and the artifact publish 409s on a stale base. Before editing `docs/roadmap.html`,
+  re-read the current copy (origin, or WebFetch the live artifact); merge your
+  change on top; publish. On a publish conflict, re-read and merge — only pass
+  `force` when you've verified the other version is stale with nothing to keep.
+- **Split lanes when both are active.** Keep the two sessions on different files
+  or features (e.g. one on code, one on docs) so merges stay trivial. Say what
+  you touched in the commit message so the other session can see it.
+
+## The wake routine (SessionStart hook)
+
+`.claude/settings.json` runs `.claude/wake-check.sh` at the start of every
+session. It does two things, and its output arrives as context:
+
+1. **Repo sync.** It `git fetch`es and reports any commits another session —
+   **phone, remote, or cloud** — pushed since this clone last looked. If the
+   desktop is behind and clean, fast-forward (`git pull --ff-only`); if there's
+   local uncommitted/unpushed work, **merge on top, never clobber**. After
+   pulling someone else's work, **reflect any user-facing changes in
+   `docs/roadmap.html` and re-publish** — the roadmap must not lag the code.
+2. **CEO briefing.** It prompts you to spawn the `ceo` subagent
+   (`.claude/agents/ceo.md`, a bootstrapping-founder advisor). Spawn it (Agent
+   tool, `subagent_type: "ceo"`), let it read git history / roadmap / workflow,
+   and **open by relaying its briefing** — the one highest-leverage move, a
+   momentum read, owner-only blockers, and a kill/defer list. If the owner leads
+   with a specific task, do that first, then surface the CEO's take. It's
+   read-only and advisory; it never edits code.
+
+The owner asked for both. Don't skip them unless they say to.
+
 ## ⚠️ Verify with subagents — everything, not just UI (operating rule)
 
 **Nothing is "done" because it was written and the tests passed.** Dispatch
