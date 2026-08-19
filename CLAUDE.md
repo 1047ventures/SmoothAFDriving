@@ -69,6 +69,10 @@ Roadmap task badges are tinted by status (`.tn--ship` green, `.tn--prog` gold,
 `.tn--next` tangerine, `.tn--wait` amber, `.tn--pend` amber for claimed-but-
 unpushed). Keep the colour matching the lane when you add or move a task.
 
+The **Just shipped** lane holds only the **4 most recent shipped tasks** — when
+a new one lands, add it at the top and drop the oldest. Older shipped work lives
+in the Completed fold and `TASKS.md`, not the glance.
+
 ## The wake routine (SessionStart hook)
 
 `.claude/settings.json` runs `.claude/wake-check.sh` at the start of every
