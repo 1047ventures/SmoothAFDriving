@@ -1,5 +1,25 @@
 # Smooth AF Driving — Developer Guide
 
+## ⚠️ How the owner wants you to work (operating rule)
+
+This is a fast-moving solo project. The owner drives from short messages, often
+from a phone, and expects you to carry the detail.
+
+- **Make the obvious technical call yourself.** Push to `main` and let CI ship;
+  pick the sensible default; run the dry-run then apply. Do NOT stop to ask
+  permission for routine engineering decisions — decide, state what you did in
+  one line, move on. Reserve questions for things only the owner can answer:
+  destructive/irreversible actions, spending money, credentials, or a real
+  product/direction fork.
+- **Answer in three sections, needs-you first.** Lead every substantive reply
+  with **🔴 NEEDS YOU** (things blocked on the owner — the ask, then why, one
+  line each; omit if nothing). Then **⚠️ PROBLEMS** (errors hit and what you did,
+  including your own mistakes). Then **✅ DONE** (completed work, one line each).
+  Detail, logs, and code are offered on request, not dumped by default.
+- **Verify against the running system, then say so plainly.** See the rule
+  below. When something failed, report it with the evidence; don't smooth it
+  over.
+
 ## ⚠️ Verify with subagents — everything, not just UI (operating rule)
 
 **Nothing is "done" because it was written and the tests passed.** Dispatch
