@@ -53,8 +53,17 @@ function renderSheet(){
   show('auth-signedin', signed);
   if (signed){
     const u = currentUser();
+    const label = u?.email || u?.name || 'Your account';
     const who = el('auth-who');
-    if (who) who.textContent = u?.email || u?.name || 'Your account';
+    if (who) who.textContent = label;
+    // Seed the avatar with the driver's initial — a name's first letter when we
+    // have one, otherwise the email's, falling back to a dot so the circle is
+    // never blank.
+    const avatar = el('auth-avatar');
+    if (avatar){
+      const src = displayName() || u?.email || '';
+      avatar.textContent = (src.trim()[0] || '•').toUpperCase();
+    }
   } else {
     // Always reopen on step 1 — a half-finished code entry from a previous
     // visit is stale, since the mailed code expires.
@@ -80,7 +89,11 @@ export function closeAuthSheet(){
 async function maybeShowAppleButton(){
   const btn = el('auth-apple-btn');
   if (!btn || isSignedIn()) return;
-  if (await isAppleConfigured()) btn.classList.remove('hidden');
+  if (await isAppleConfigured()){
+    btn.classList.remove('hidden');
+    // The "or" divider only makes sense once there are two methods on screen.
+    el('auth-or')?.classList.remove('hidden');
+  }
 }
 
 /** Home top-bar label: the driver's name when known, "Sign in" otherwise. */
@@ -161,6 +174,21 @@ export function initAuthUI(){
   el('auth-back')?.addEventListener('click', () => {
     setStep('email');
     setStatus('');
+  });
+
+  // Resend the code to the same address — the mailed code expires, so a driver
+  // who was slow to switch apps needs a way to get a fresh one without retyping
+  // their email.
+  el('auth-resend')?.addEventListener('click', async () => {
+    const go = el('auth-resend');
+    if (!pendingEmail || !go) return;
+    go.disabled = true;
+    setStatus('Sending a new code…');
+    const res = await sendEmailCode(pendingEmail);
+    go.disabled = false;
+    if (!res.ok){ setStatus(res.error, true); return; }
+    setStatus('New code sent — check your email.');
+    el('auth-code')?.focus();
   });
 
   el('auth-apple-btn')?.addEventListener('click', async () => {
