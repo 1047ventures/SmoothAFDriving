@@ -237,6 +237,18 @@
     font-size:13.5px;color:var(--cream);line-height:1.4;
   }
   .lane-item .sub{display:block;font-size:12px;color:var(--dim);margin-top:3px;line-height:1.45}
+  /* Task number — a stable handle so either session can say "take T5". */
+  .tn{display:inline-block;min-width:24px;text-align:center;font-size:10.5px;font-weight:700;
+      font-variant-numeric:tabular-nums;color:var(--tang);background:rgba(232,93,58,.13);
+      border:1px solid rgba(232,93,58,.3);border-radius:5px;padding:1px 5px;margin-right:7px;letter-spacing:.02em}
+  /* Claimed shipped but not yet pushed to origin — no commit to number. A visible
+     nudge to push, not a silent gap. */
+  .tn--pend{color:var(--warn);background:rgba(232,160,58,.12);border-color:rgba(232,160,58,.3)}
+  /* Task badge tinted by status, so the number's colour reads its state at a glance. */
+  .tn--ship{color:var(--good);background:rgba(111,182,105,.13);border-color:rgba(111,182,105,.3)}
+  .tn--prog{color:var(--gold);background:rgba(196,169,98,.13);border-color:rgba(196,169,98,.32)}
+  .tn--next{color:var(--tang);background:rgba(232,93,58,.13);border-color:rgba(232,93,58,.3)}
+  .tn--wait{color:var(--warn);background:rgba(232,160,58,.12);border-color:rgba(232,160,58,.3)}
 
   /* Foldable reference sections — collapsed by default so the glance up top
      isn't buried under the archive in a narrow panel. */
@@ -264,7 +276,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 19, 2026 · 3:55 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 19, 2026 · 4:50 PM MDT</b>
     </div>
     
   </header>
@@ -274,36 +286,33 @@
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
-      <div class="lane-item">The car's numbers recorded into every drive <span class="sub">throttle, RPM, gear, HP &amp; torque now saved, summarised &amp; downloadable</span></div>
-      <div class="lane-item">Drive-data download works on the phone <span class="sub">was a no-op on iOS; now the share sheet, with the data actually filled in</span></div>
-      <div class="lane-item">Gear read straight from the car <span class="sub">PID 0xA4 — no more guessing it</span></div>
-      <div class="lane-item">Traffic-aware ETAs <span class="sub">no more beating a 40-min drive by 14</span></div>
-      <div class="lane-item">Horsepower, torque &amp; gear off the OBD dongle</div>
-      <div class="lane-item">Your garage follows the account, not the phone</div>
-      <div class="lane-item">GPS tracks locked down &amp; the leaderboard made honest</div>
+      <div class="lane-item"><span class="tn tn--ship">T274</span>Sign in with Apple works <span class="sub">native plugin wired; the button lights up now the provider's on</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T269</span>Gear read straight from the car <span class="sub">PID 0xA4 — no more guessing it</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T268</span>Traffic-aware ETAs <span class="sub">no more beating a 40-min drive by 14</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T267</span>Horsepower, torque &amp; gear off the OBD dongle</div>
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
-      <div class="lane-item">Driving Trends screen <span class="sub">the charts + data are built and tested; the tap-through UI is the last piece</span></div>
-      <div class="lane-item">OBD readings into the score <span class="sub">validating throttle &amp; torque against your real car first</span></div>
+      <div class="lane-item"><span class="tn tn--prog">Q3</span>Driving Trends screen <span class="sub">the charts + data are built and tested; the tap-through UI is the last piece</span></div>
+      <div class="lane-item"><span class="tn tn--prog">Q4</span>OBD readings into the score <span class="sub">validating throttle &amp; torque against your real car first</span></div>
     </div>
     <div class="lane lane--next">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
-      <div class="lane-item">Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
-      <div class="lane-item">Background location <span class="sub">unlocks handing a destination to Apple / Google Maps</span></div>
-      <div class="lane-item">Home screen: link or cut what the audit flagged</div>
+      <div class="lane-item"><span class="tn tn--next">Q5</span>Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q6</span>Background location <span class="sub">unlocks handing a destination to Apple / Google Maps</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q7</span>Home screen: link or cut what the audit flagged</div>
     </div>
   </section>
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 open &middot; 1 optional</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
         <summary class="wsum">
           <span class="pill p-next">Next drive</span>
-          <span class="t">Two things to eyeball with the dongle in <span class="tag">2 min</span></span>
+          <span class="t"><span class="tn tn--wait">Q1</span>Two things to eyeball with the dongle in <span class="tag">2 min</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
@@ -315,21 +324,11 @@
         </div>
       </details>
 
-      <details class="wrow" open>
-        <summary class="wsum">
-          <span class="pill p-block">Security</span>
-          <span class="t">Revoke the old remove.bg API key <span class="tag">2 min</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>A key was hardcoded in the source and shipped inside every app bundle &mdash; anyone with the app could read it and spend your quota. I removed it from the code, but that doesn't un-ship the copies already out there. <b>Revoke it at <a href="https://www.remove.bg/dashboard#api-key" target="_blank" rel="noopener">remove.bg</a></b> and paste a new one into the app's key prompt when you want background removal.</p>
-        </div>
-      </details>
-
+      
       <details class="wrow">
         <summary class="wsum">
           <span class="pill p-wait">Stops a repeat</span>
-          <span class="t">Export a signing cert so builds stop hitting Apple's cap <span class="tag">5 min</span></span>
+          <span class="t"><span class="tn tn--wait">Q2</span>Export a signing cert so builds stop hitting Apple's cap <span class="tag">5 min</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
@@ -343,23 +342,7 @@
         </div>
       </details>
 
-      <details class="wrow">
-        <summary class="wsum">
-          <span class="pill p-wait">Optional</span>
-          <span class="t">Turn on Sign in with Apple <span class="tag">appears by itself</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Already built &mdash; it checks Supabase at runtime and <b>appears on its own the moment you enable the provider</b>. No release needed. <b>Skippable:</b> Apple only requires it if you offer another third-party login; email-only is submittable as-is.</p>
-          <ol>
-            <li><a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank" rel="noopener">developer.apple.com</a> &rarr; Identifiers &rarr; your App ID &rarr; tick <b>Sign In with Apple</b>.</li>
-            <li>Xcode &rarr; App target &rarr; Signing &amp; Capabilities &rarr; <b>+ Capability</b> &rarr; Sign In with Apple.</li>
-            <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Supabase</a> &rarr; Authentication &rarr; Providers &rarr; <b>Apple</b> &rarr; enable, add <code>com.smoothafdriving.app</code>.</li>
-            <li>Tell me and I'll add the native plugin and ship it.</li>
-          </ol>
-        </div>
-      </details>
-
+      
     </div>
   </section>
 
@@ -393,8 +376,8 @@
     <summary><h2>Big wins</h2><span class="count">the story so far</span><span class="rule"></span><span class="fold-chev">&#9654;</span></summary>
 
     <div class="statband">
-      <div class="stat"><span class="n">21</span><span class="l">Releases<br>shipped</span></div>
-      <div class="stat"><span class="n">235</span><span class="l">Automated<br>tests</span></div>
+      <div class="stat"><span class="n">270</span><span class="l">Tasks<br>shipped</span></div>
+      <div class="stat"><span class="n">305</span><span class="l">Automated<br>tests</span></div>
       <div class="stat"><span class="n">7</span><span class="l">Scoring<br>dimensions</span></div>
       <div class="stat"><span class="n">122</span><span class="l">Drives<br>in your history</span></div>
       <div class="stat"><span class="n">403<span class="u">mi</span></span><span class="l">Scored<br>on the road</span></div>

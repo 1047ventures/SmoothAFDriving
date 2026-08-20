@@ -1,4 +1,4 @@
-import { APP_VERSION, REMOVEBG_KEY } from './constants.js';
+import { APP_VERSION } from './constants.js';
 import { migrateLifetimeScore } from './services/storage.js';
 import { checkRecoveredDrive } from './services/drive.js';
 import { syncPendingDrives } from './services/supabase.js';
@@ -125,23 +125,6 @@ function boot(){
                  : chip.classList.contains('stop')  ? 'stop' : 'turn';
       enterMapFilter(type);
     });
-  });
-
-  // Remove.bg API key modal
-  document.getElementById('removebg-save')?.addEventListener('click', () => {
-    const key = document.getElementById('removebg-key-input').value.trim();
-    if (!key) return;
-    localStorage.setItem(REMOVEBG_KEY, key);
-    document.getElementById('removebg-modal').classList.add('hidden');
-    const f = document.getElementById('removebg-modal')._pendingFile;
-    if (f) processCarPhoto(f);
-  });
-  document.getElementById('removebg-skip')?.addEventListener('click', () => {
-    const modal = document.getElementById('removebg-modal');
-    modal.classList.add('hidden');
-    const f = modal._pendingFile;
-    // Plain photo save — skip remove.bg, processCarPhoto handles the fallback internally
-    if (f) processCarPhoto(f);
   });
 
   // Recording screen background upload

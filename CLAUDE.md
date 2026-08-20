@@ -23,24 +23,55 @@ from a phone, and expects you to carry the detail.
 ## ⚠️ Working alongside another session (operating rule)
 
 The owner runs **two sessions at once** — desktop here plus a phone / remote /
-cloud session — on this same repo. Both push to `origin/main`. To keep them from
-clobbering each other:
+cloud session — and **both push to `origin/main`** (no feature branches; keep the
+history linear). That only stays painless if both sessions follow this exactly:
 
-- **Pull right before you push, every time — not just on wake.** `git fetch` and
-  fast-forward (or rebase your commits on top) immediately before pushing. A
-  wake-time sync is stale the moment the other session pushes.
-- **Commit small, push often.** A short divergence merges cleanly; a big
-  uncommitted pile does not.
-- **Never force-push `main`** — it's shared. On a non-fast-forward push, pull and
-  merge, don't `--force`.
-- **The roadmap is the sharpest conflict** — one HTML file both sessions edit,
-  and the artifact publish 409s on a stale base. Before editing `docs/roadmap.html`,
+- **The push loop, every time — not just on wake:**
+  `git add … && git commit` → `git pull --rebase origin main` → (resolve any
+  conflict) → `git push`. The rebase replays your commit on top of whatever the
+  other session pushed, so `main` stays linear and a non-fast-forward rejection
+  becomes a clean replay instead of a merge knot. A wake-time sync is stale the
+  moment the other session pushes, so re-pull right before pushing.
+- **Commit small, push often.** Two writers on one branch is fine when each
+  change is small and lands fast; a big uncommitted pile is what turns a rebase
+  into a fight.
+- **Never force-push `main`** — it's shared. If a rebase gets messy, stop and
+  reconcile by hand; don't `--force`.
+- **Stay in separate files.** Same-file simultaneous edits are the ONLY thing
+  that makes both-on-main hurt — everything else the rebase loop absorbs. Keep
+  the two sessions on different files/features and say what you touched in the
+  commit message. `docs/roadmap.html` is the one file both will want; whoever
+  edits it commits+pushes immediately so it never sits diverged.
+- **Push code before you claim it shipped.** Never move a roadmap item to
+  "Shipped" whose commit isn't on `origin/main` yet — that's how the roadmap gets
+  ahead of the code. Publishing the artifact is not shipping; the push is.
+- **The roadmap is the sharpest conflict** — one HTML file both edit, and the
+  artifact publish 409s on a stale base. Before editing `docs/roadmap.html`,
   re-read the current copy (origin, or WebFetch the live artifact); merge your
-  change on top; publish. On a publish conflict, re-read and merge — only pass
-  `force` when you've verified the other version is stale with nothing to keep.
-- **Split lanes when both are active.** Keep the two sessions on different files
-  or features (e.g. one on code, one on docs) so merges stay trivial. Say what
-  you touched in the commit message so the other session can see it.
+  change on top; publish AND commit together. On a publish 409, re-read and
+  merge — only pass `force` when you've verified the other version is stale with
+  nothing to keep.
+
+## Task ledger
+
+Two number spaces, so they never collide:
+
+- **`T#` = shipped ledger.** `TASKS.md` numbers every shipped task from git (T1 =
+  first commit), **derived, not hand-maintained** — regenerate with
+  `python3 scripts/build-task-ledger.py` after shipping so it never goes stale.
+  A task's T-number is its commit's position and never changes.
+- **`Q#` = the open queue.** The roadmap's not-yet-shipped tasks are Q1, Q2, …
+  in reading order (waiting → in progress → up next). When a Q item ships it
+  leaves the queue and reappears in the ledger with its own T-number; the
+  remaining Q items renumber. Reference open work as "Q3", shipped as "T150".
+
+Roadmap task badges are tinted by status (`.tn--ship` green, `.tn--prog` gold,
+`.tn--next` tangerine, `.tn--wait` amber, `.tn--pend` amber for claimed-but-
+unpushed). Keep the colour matching the lane when you add or move a task.
+
+The **Just shipped** lane holds only the **4 most recent shipped tasks** — when
+a new one lands, add it at the top and drop the oldest. Older shipped work lives
+in the Completed fold and `TASKS.md`, not the glance.
 
 ## The wake routine (SessionStart hook)
 

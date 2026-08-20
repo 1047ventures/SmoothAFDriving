@@ -108,7 +108,6 @@ export const VOICE_LABELS = { brake: 'Hard brake!', accel: 'Hard acceleration!',
 
 // ── Photo / garage keys ───────────────────────────────────────────────────────
 export const CAR_PHOTO_KEY = 'smoothaf.car_photo';
-export const REMOVEBG_KEY  = 'smoothaf.removebg_key';
 export const CAR_POS_KEY   = 'smoothaf.car_pos';
 export const REC_PHOTO_KEY = 'smoothaf.rec_photo';
 export const REC_POS_KEY   = 'smoothaf.rec_pos';

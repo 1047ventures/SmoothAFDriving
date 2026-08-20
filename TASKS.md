@@ -1,0 +1,292 @@
+# Task Ledger — Smooth AF Driving
+
+Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
+Numbers are stable and never re-assigned; new tasks append at the next number.
+Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
+
+**274 tasks shipped** as of 2026-08-19.
+
+
+## 2026-04
+- **T1** · Initial commit — Smooth AF PWA with algorithm fixes + UI Step 0  _( 2026-04-30 )_
+- **T2** · Step 1: replace live score gauge with average MPH on recording screen  _( 2026-04-30 )_
+- **T3** · Clean home screen: hide drives list, remove dashboard icon and car arrows  _( 2026-04-30 )_
+- **T4** · Remove settings screen — algorithm constants tuned through code, not UI  _( 2026-04-30 )_
+- **T5** · Bump service worker to v12 to force PWA cache refresh on deploy  _( 2026-04-30 )_
+
+## 2026-05
+- **T6** · Replace SVG car carousel with duotone car photo upload  _( 2026-05-01 )_
+- **T7** · Gitignore .claude/settings.local.json (contains Netlify token)  _( 2026-05-01 )_
+- **T8** · Add GitHub Actions auto-deploy to Netlify on push  _( 2026-05-01 )_
+- **T9** · Skip deploy gracefully when secrets not yet configured  _( 2026-05-01 )_
+- **T10** · Cartoon circle avatar + directional bursts + silent calib + road quality in review  _( 2026-05-01 )_
+- **T11** · Add version badge (v13) in top-right corner  _( 2026-05-01 )_
+- **T12** · v14: map expand to fullscreen + fix stat/analytics grid layout  _( 2026-05-01 )_
+- **T13** · Add vercel.json for static site deployment  _( 2026-05-01 )_
+- **T14** · v15: seven-dimension continuous scoring model  _( 2026-05-01 )_
+- **T15** · v16: remove cartoon filter from car photo  _( 2026-05-01 )_
+- **T16** · v17: car photo background removal + cartoon effect  _( 2026-05-01 )_
+- **T17** · hardcode remove.bg API key as default  _( 2026-05-01 )_
+- **T18** · fix: force event chips onto one line, no wrap  _( 2026-05-01 )_
+- **T19** · v18: shorten event chip labels to fit one line, bust SW cache  _( 2026-05-01 )_
+- **T20** · v19: tappable event chips filter fullscreen map, collapsible coaching cards, raw G-force in event popups  _( 2026-05-02 )_
+- **T21** · v20: fix left-edge bleed on review screen, bump safe-area-aware padding  _( 2026-05-02 )_
+- **T22** · v21: bump score font size 80px to 108px  _( 2026-05-02 )_
+- **T23** · v22: switch SW to network-first for app shell, fix stale-cache problem  _( 2026-05-02 )_
+- **T24** · v23: Netlify _headers to disable HTTP cache on sw.js and index.html  _( 2026-05-02 )_
+- **T25** · v24: direction-of-travel arrows along route on map  _( 2026-05-02 )_
+- **T26** · v25: full stop markers on map, tappable stops chip, purple S markers  _( 2026-05-02 )_
+- **T27** · v26: dims as tappable tiles, collapsible section, momentum breakdown + map link  _( 2026-05-02 )_
+- **T28** · v27: full-bleed car photo, remove cartoon filter, clean dark vignette  _( 2026-05-02 )_
+- **T29** · v28: big Smooth AF wordmark top-left, car shifted higher  _( 2026-05-02 )_
+- **T30** · v29: stack AF under Smooth in wordmark  _( 2026-05-02 )_
+- **T31** · v30: car photo full-bleed cover, no filters  _( 2026-05-02 )_
+- **T32** · v31: stop pills show duration, style verdict replaces coaching cards, remove momentum card  _( 2026-05-02 )_
+- **T33** · v32 — brake event deceleration profile sparkline  _( 2026-05-04 )_
+- **T34** · v33 — force-type map coloring, full-drive timeline chart, show all events  _( 2026-05-04 )_
+- **T35** · v34 — vehicle selector, AI cinematic photos, recording screen redesign  _( 2026-05-04 )_
+- **T36** · v35 — static vehicle images, remove Puter.js live generation  _( 2026-05-05 )_
+- **T37** · v36 — Lux SUV front/rear images, bigger speed + G-bar, anchored stop btn  _( 2026-05-05 )_
+- **T38** · Add Lux SUV vehicle images (front + rear)  _( 2026-05-05 )_
+- **T39** · v37 — fix BMW override, fix stop btn position  _( 2026-05-05 )_
+- **T40** · v38 — image reposition, driving screen upload, driver persona badge  _( 2026-05-05 )_
+- **T41** · v39 — score tap opens analysis sheet, dims moved inside, rec photo fix  _( 2026-05-05 )_
+- **T42** · v40 — fix stop btn layout gap, revert to flex flow  _( 2026-05-05 )_
+- **T43** · v41: nuclear stop-button fix — wrap rec content in flex:1 div  _( 2026-05-05 )_
+- **T44** · v42: fix recording screen height — remove position:relative override  _( 2026-05-05 )_
+- **T45** · v43: fresh recording screen — visible bg image, version badge bigger  _( 2026-05-05 )_
+- **T46** · v44: reduce rec-bg blur 10px → 8px (-20%)  _( 2026-05-05 )_
+- **T47** · v45: reduce rec-bg blur 8px → 6px (-20%)  _( 2026-05-05 )_
+- **T48** · v46: both screens split to 75% car image / 25% controls  _( 2026-05-05 )_
+- **T49** · v47: fix controls panel overflow — tighter split and spacing  _( 2026-05-05 )_
+- **T50** · v48: fix controls panel dead space  _( 2026-05-05 )_
+- **T51** · v49: persist motion permission — skip modal after first grant  _( 2026-05-05 )_
+- **T52** · v50: permission cookie, reposition Done fix, favorite/delete drives  _( 2026-05-06 )_
+- **T53** · v51: vehicle sheet margins, home btn on review, no-blur rec bg + reposition  _( 2026-05-06 )_
+- **T54** · v52: garage feature, speedometer shift, G-force circle redesign  _( 2026-05-07 )_
+- **T55** · v53: shift speedometer +40px lower, G-force bar +20px lower  _( 2026-05-07 )_
+- **T56** · v54: fix top padding on garage + rec screen, move reposition button  _( 2026-05-07 )_
+- **T57** · v55: reliable safe-area for iPhone 14 Pro, G-force inside ring mockup  _( 2026-05-07 )_
+- **T58** · v56: remove G value from ring, remove rec reposition button, lock rear view  _( 2026-05-07 )_
+- **T59** · v57: speed-big font +20% (min(29vw,149px))  _( 2026-05-07 )_
+- **T60** · v58: seamless background bleed from car panel through controls panel  _( 2026-05-07 )_
+- **T61** · v59: match road color at controls panel top, blend to dark  _( 2026-05-07 )_
+- **T62** · v60: zoom out rec-bg to 82% height, increase brightness for clarity  _( 2026-05-07 )_
+- **T63** · v61: full-screen driving screen redesign with live score ring  _( 2026-05-08 )_
+- **T64** · v62: add visible version badge to home screen  _( 2026-05-08 )_
+- **T65** · v62: bump SW cache to force update for stuck clients  _( 2026-05-08 )_
+- **T66** · v63: driving screen redesign, cumulative score, leaderboard + signup  _( 2026-05-11 )_
+- **T67** · v63: move version badge to top-right corner of home screen  _( 2026-05-11 )_
+- **T68** · fix: leaderboard screen bleeding through all screens  _( 2026-05-11 )_
+- **T69** · v64: retroactive lifetime score migration + equal-height nav buttons  _( 2026-05-11 )_
+- **T70** · v65: redesign drive screen — SVG arc gauge + hero speed + g-force radar  _( 2026-05-11 )_
+- **T71** · Add UI/UX mockup: score-centric redesign concept  _( 2026-05-11 )_
+- **T72** · Add bold UI/UX mockup v2 — score-centric redesign  _( 2026-05-11 )_
+- **T73** · Add UI/UX mockup v3 — brand-disciplined redesign  _( 2026-05-11 )_
+- **T74** · Update mockup-v3 Screen 2: post-drive reveal with SVG route map  _( 2026-05-11 )_
+- **T75** · Add mockup-v4: 5-screen bold redesign with driving screen  _( 2026-05-12 )_
+- **T76** · Update mockup-v4 Screen 5: car photo + radar ring overlay  _( 2026-05-12 )_
+- **T77** · v66: fix broken driving screen — SVG intrinsic sizing + arc score overlay position  _( 2026-05-12 )_
+- **T78** · v66: fix broken driving screen (SVG sizing + score overlay position)  _( 2026-05-11 )_
+- **T79** · feat: full UI/UX redesign v67 — all 5 screens from mockup-v4  _( 2026-05-12 )_
+- **T80** · feat: full UI/UX redesign v67 — all 5 screens from mockup-v4  _( 2026-05-12 )_
+- **T81** · fix: tighten home screen layout — all info visible without scrolling  _( 2026-05-12 )_
+- **T82** · fix: tighten home screen layout v68  _( 2026-05-12 )_
+- **T83** · v69: home welcome/routes, G-force glow, review simplification  _( 2026-05-13 )_
+- **T84** · v69: Home welcome/routes, G-force glow, review simplification  _( 2026-05-13 )_
+- **T85** · v70: full CSS rewrite — no more !important overrides  _( 2026-05-13 )_
+- **T86** · v70: Full CSS rewrite — clean layouts for home, recording, review  _( 2026-05-13 )_
+- **T87** · v71: fix 3 visible bugs from screenshots  _( 2026-05-13 )_
+- **T88** · v72: drive recovery + wake lock fix + visual adjustments  _( 2026-05-26 )_
+- **T89** · v72: Drive recovery, wake lock fix, visual adjustments  _( 2026-05-26 )_
+- **T90** · Add game HUD mockup for recording screen redesign review  _( 2026-05-26 )_
+- **T91** · v73: car photo full-bleed cover on recording screen  _( 2026-05-26 )_
+- **T92** · Center car photo — shift background-position 35% to fix left-side clip  _( 2026-05-26 )_
+- **T93** · Zoom out car photo 10% — background-size auto 90%  _( 2026-05-26 )_
+- **T94** · Fix italic number clipping on all four corners  _( 2026-05-26 )_
+- **T95** · v73: Game HUD mockup, full-bleed car photo, corner margin fixes  _( 2026-05-26 )_
+- **T96** · Fix lifetime score showing as 0 despite real drives existing  _( 2026-05-27 )_
+- **T97** · Fix lifetime score showing as 0 despite real drives existing (#15)  _( 2026-05-30 )_
+- **T98** · Add version badge to home screen  _( 2026-05-31 )_
+- **T99** · Set up Vite + Vitest build infrastructure and begin module extraction  _( 2026-05-31 )_
+- **T100** · Add service modules and CSS extraction (partial)  _( 2026-05-31 )_
+- **T101** · Complete module refactor: UI layer, tests, docs, Vite wiring  _( 2026-05-31 )_
+- **T102** · Modular refactor: Vite + ES modules + Vitest test suite + docs (#16)  _( 2026-05-30 )_
+
+## 2026-06
+- **T103** · UX + brand overhaul: smooth operator, working buttons, spaced layout  _( 2026-06-03 )_
+- **T104** · Fix score number clipping — line-height 1 + padding-bottom for Playfair descenders  _( 2026-06-03 )_
+- **T105** · Fix score clipping on iOS Safari — em-based padding + overflow:visible  _( 2026-06-03 )_
+- **T106** · Add onboarding + drive tracking design spec  _( 2026-06-03 )_
+- **T107** · docs: update onboarding spec + add implementation plan  _( 2026-06-11 )_
+- **T108** · feat: add onboarding localStorage key constants  _( 2026-06-12 )_
+- **T109** · test: add failing tests for registerUser and syncUserProfile  _( 2026-06-12 )_
+- **T110** · test: strengthen onboarding test assertions (payload + endpoint verification)  _( 2026-06-12 )_
+- **T111** · feat: add registerUser and syncUserProfile to supabase service  _( 2026-06-12 )_
+- **T112** · feat: add register-user Netlify function (Resend + Supabase users)  _( 2026-06-12 )_
+- **T113** · feat: add onboarding modal CSS helpers  _( 2026-06-12 )_
+- **T114** · feat: add addVehicleFromPrompt export to garage  _( 2026-06-12 )_
+- **T115** · feat: add onboarding and car-prompt modal components  _( 2026-06-12 )_
+- **T116** · fix: guard against duplicate event listeners in modals  _( 2026-06-12 )_
+- **T117** · feat: wire onboarding modal and profile sync on app startup  _( 2026-06-12 )_
+- **T118** · feat: show car details prompt after 2nd completed drive  _( 2026-06-12 )_
+- **T119** · fix: return 500 on Supabase upsert failure; add env guard; strengthen test body assertions  _( 2026-06-12 )_
+- **T120** · Add ad landing splash for first-time visitors from paid ads  _( 2026-06-20 )_
+- **T121** · Fix live score crashing to 0 and raise event thresholds  _( 2026-06-23 )_
+- **T122** · Add /install landing page for alpha tester sharing  _( 2026-06-23 )_
+- **T123** · Redesign install page: merge minimal card + split desktop layout  _( 2026-06-23 )_
+- **T124** · Add speed-adaptive event detection thresholds  _( 2026-06-23 )_
+- **T125** · User onboarding, install page, live score fix, speed-adaptive thresholds  _( 2026-06-22 )_
+- **T126** · Bump version to v76  _( 2026-06-23 )_
+- **T127** · Bump version to v76  _( 2026-06-23 )_
+- **T128** · Show only tier-3 events on drive map, simplify popups  _( 2026-06-23 )_
+- **T129** · Show only tier-3 events on drive map, simplify popups  _( 2026-06-23 )_
+- **T130** · Redesign recording screen: crosshatch texture, hero speed/score layout  _( 2026-06-23 )_
+- **T131** · Redesign recording screen: crosshatch texture, hero speed/score layout  _( 2026-06-23 )_
+- **T132** · Fix vehicle bg showing on record screen; fix lifetime score corruption  _( 2026-06-23 )_
+- **T133** · Fix vehicle bg showing on record screen; fix lifetime score corruption  _( 2026-06-23 )_
+- **T134** · docs: add algorithm improvements spec (OSM speed limits, gyroscope, tier 4)  _( 2026-06-23 )_
+- **T135** · feat: OSM speed limits, gyroscope lateral G, four-tier event detection  _( 2026-06-23 )_
+- **T136** · docs: add algorithm improvements spec (OSM speed limits, gyroscope, tier 4)  _( 2026-06-23 )_
+- **T137** · feat: OSM speed limits, gyroscope lateral G, four-tier event detection  _( 2026-06-23 )_
+- **T138** · chore: bump version to v77  _( 2026-06-23 )_
+- **T139** · chore: bump version to v77  _( 2026-06-23 )_
+- **T140** · feat: tier-4 UX polish + map expand auto-fit  _( 2026-06-23 )_
+- **T141** · feat: tier-4 UX polish + map expand auto-fit  _( 2026-06-23 )_
+- **T142** · v79: pill-style Start Drive and Stop Drive buttons  _( 2026-06-23 )_
+- **T143** · v79: pill-style Start Drive and Stop Drive buttons  _( 2026-06-23 )_
+- **T144** · v80: full analysis sheet redesign with all 20 stats  _( 2026-06-23 )_
+- **T145** · v80: full analysis sheet redesign with all 20 stats  _( 2026-06-23 )_
+- **T146** · v81: canvas drive card share feature with social handles  _( 2026-06-23 )_
+- **T147** · v81: /install page — platform-aware install guide + QR code  _( 2026-06-23 )_
+- **T148** · Defer onboarding until after first drive, add Skip button  _( 2026-06-23 )_
+- **T149** · Fix 404 on /tracker and /install — add rewrite rules for all three hosts  _( 2026-06-23 )_
+- **T150** · Fix Leaflet attribution bleeding over analysis sheet  _( 2026-06-23 )_
+- **T151** · Remove duplicate Best score stat from home screen stats row  _( 2026-06-23 )_
+- **T152** · Restore Best stat, make it tappable to open best drive review  _( 2026-06-23 )_
+- **T153** · Hide corridor teaser 'Your best drive' box — Best stat is now tappable  _( 2026-06-23 )_
+- **T154** · Move Start Drive and Stop Drive buttons closer to bottom edge (8px vs 20px)  _( 2026-06-23 )_
+- **T155** · Sparkline: trend headline + tappable dots per drive  _( 2026-06-23 )_
+- **T156** · Add .superpowers/ to .gitignore (brainstorming session files)  _( 2026-06-23 )_
+- **T157** · Add corridors feature design spec  _( 2026-06-23 )_
+- **T158** · Add Corridors Phase 1 implementation plan  _( 2026-06-23 )_
+- **T159** · feat: add corridor storage key and localStorage functions  _( 2026-06-23 )_
+- **T160** · fix: cap corridor drives array and pin slugify test  _( 2026-06-23 )_
+- **T161** · feat: add corridor detection service with GPS sampling and Overpass lookup  _( 2026-06-23 )_
+- **T162** · fix: guard osmWayId and center against out-of-range roads in assignRoadNames  _( 2026-06-23 )_
+- **T163** · feat: run corridor detection non-blocking after each drive is finalized  _( 2026-06-23 )_
+- **T164** · feat: replace corridor teaser with real corridor cards on home screen  _( 2026-06-23 )_
+- **T165** · feat: add corridor detail screen with stats, sparkline, and drive history  _( 2026-06-23 )_
+- **T166** · feat: inject version from package.json; rename Rivals nav to Corridors  _( 2026-06-23 )_
+- **T167** · ui: slide Start Drive button down further (bottom -8px)  _( 2026-06-23 )_
+- **T168** · chore: bump service worker cache to v82  _( 2026-06-24 )_
+- **T169** · fix: add class=screen to corridor section and switch topbar to sticky  _( 2026-06-24 )_
+- **T170** · revert: roll back corridors feature — restore working app state  _( 2026-06-24 )_
+- **T171** · chore: ignore .superpowers/ directory  _( 2026-06-24 )_
+- **T172** · feat: lifetime analysis sheet, remove home share button, save dims per drive  _( 2026-06-24 )_
+- **T173** · feat: corridors Phase 1 — OSM detection, local storage, home cards, detail screen  _( 2026-06-24 )_
+- **T174** · fix: include corridor back-button handler in main.js  _( 2026-06-24 )_
+- **T175** · chore: bump APP_VERSION to v83  _( 2026-06-24 )_
+- **T176** · feat: home layout polish + universal swipe-back gesture  _( 2026-06-24 )_
+- **T177** · feat: home screen polish — remove corridors section, richer personas, score/garage alignment  _( 2026-06-24 )_
+- **T178** · fix: distribute home screen content + align garage with score cap-height  _( 2026-06-24 )_
+- **T179** · fix: add breathing room between home screen sections  _( 2026-06-24 )_
+- **T180** · home: add breathing room between score and persona block (v88)  _( 2026-06-24 )_
+- **T181** · home: push content down 30px, neon vehicle name centered under garage (v89)  _( 2026-06-24 )_
+- **T182** · home: label above number, fix descender clip, redesign garage card (v90)  _( 2026-06-24 )_
+- **T183** · home: fix label-to-number gap and garage card alignment (v91)  _( 2026-06-24 )_
+- **T184** · home: reduce score zone bottom padding 30px → 20px (v92)  _( 2026-06-24 )_
+- **T185** · feat: replace Rivals nav with Routes (corridors list) screen (v93)  _( 2026-06-24 )_
+- **T186** · fix: fully opaque backgrounds on analysis and garage sheets (v94)  _( 2026-06-24 )_
+- **T187** · home: redesign garage element as floating HUD (v95)  _( 2026-06-24 )_
+- **T188** · feat: replace event text popups with radar glow blast (v96)  _( 2026-06-24 )_
+- **T189** · v97: redesign garage vehicle cards with SVG silhouettes and stats  _( 2026-06-24 )_
+- **T190** · v97: replace blob silhouettes with line-art vehicle outlines  _( 2026-06-24 )_
+- **T191** · v98: vehicle icon picker — search Wikimedia, tap to save  _( 2026-06-24 )_
+- **T192** · v99: fix lifetime score number right-side clipping  _( 2026-06-24 )_
+- **T193** · docs: sensor debug dashboard design spec  _( 2026-06-24 )_
+- **T194** · docs: sensor debug dashboard implementation plan  _( 2026-06-24 )_
+- **T195** · feat: add buildExportData serialiser + tests  _( 2026-06-24 )_
+- **T196** · tests: pin appVersion assertion to APP_VERSION constant  _( 2026-06-24 )_
+- **T197** · feat: add JSON drive export button to review screen  _( 2026-06-24 )_
+- **T198** · feat: debug chart module — rolling buffers + canvas renderer  _( 2026-06-24 )_
+- **T199** · feat: debug panel HTML and CSS (hidden until wired)  _( 2026-06-24 )_
+- **T200** · v100: live sensor chart panel + JSON drive export  _( 2026-06-24 )_
+- **T201** · fix: debug handle position and visibility above stop button  _( 2026-06-25 )_
+- **T202** · feat: raw IMU streams in debug chart (aX/aY/aZ + gYaw/gPitch/gRoll)  _( 2026-06-25 )_
+- **T203** · fix: move export button to bottom actions row (thumb-accessible)  _( 2026-06-26 )_
+- **T204** · docs: vehicle fingerprinting + auto-assignment spec  _( 2026-06-26 )_
+- **T205** · fix: live drive score collapsing to 0 on long drives  _( 2026-06-27 )_
+- **T206** · fix: move sensor-panel handle clear of End Drive button  _( 2026-06-27 )_
+- **T207** · docs: analytics dashboard design spec  _( 2026-06-27 )_
+- **T208** · docs: analytics dashboard implementation plan  _( 2026-06-27 )_
+- **T209** · feat: computeOverview analytics aggregator  _( 2026-06-27 )_
+- **T210** · feat: computeUserRows analytics aggregator  _( 2026-06-27 )_
+- **T211** · feat: admin-stats Netlify function (password-gated)  _( 2026-06-27 )_
+- **T212** · feat: admin dashboard page (overview + per-user drill-down)  _( 2026-06-27 )_
+- **T213** · chore: document ADMIN_PASSWORD env + bump cache to v103  _( 2026-06-27 )_
+- **T214** · fix: escape user-controlled name/email in admin dashboard (XSS)  _( 2026-06-27 )_
+
+## 2026-07
+- **T215** · Destination Drive: play against the ETA (two-axis scoring) (#21)  _( 2026-07-11 )_
+- **T216** · UX: surface the silent moments (critical-five fixes) (#23)  _( 2026-07-12 )_
+- **T217** · Sensor chart: per-axis lane graphs (#24)  _( 2026-07-12 )_
+- **T218** · UI: legible text + intentional sensor toggle (#25)  _( 2026-07-12 )_
+- **T219** · Destination Drive: find-on-map + Mapbox traffic-aware routing + arrival gate (#26)  _( 2026-07-16 )_
+- **T220** · Composite drive score: effective × efficient (#27)  _( 2026-07-17 )_
+- **T221** · feat: bigger driving-screen labels + large translucent countdown  _( 2026-07-17 )_
+- **T222** · HUD visual-review fixes: clear Sensors pill + colour the countdown  _( 2026-07-18 )_
+- **T223** · Record screen: G-force edge glows, drop heroes for countdown, panel handle, tighter gyro  _( 2026-07-19 )_
+- **T224** · docs: require visual verification of every UI change (operating rule)  _( 2026-07-17 )_
+- **T225** · feat: dedupe road corridors by name (same road, different entrances = one)  _( 2026-07-17 )_
+- **T226** · chore: gitignore .claude/ (agent worktrees + local settings)  _( 2026-07-18 )_
+- **T227** · Production catch-up: fold the feature line into claude-pwa (v114)  _( 2026-07-19 )_
+- **T228** · Live traffic-aware ETA + pit-stop detection  _( 2026-07-20 )_
+- **T229** · Post-drive recap: narrative story + momentum line + best stretch  _( 2026-07-20 )_
+- **T230** · Context-aware drive narrative — reads the shape of each trip  _( 2026-07-20 )_
+- **T231** · Tighten the drive narrative; pull the numbers into a facts row  _( 2026-07-20 )_
+- **T232** · Post-drive review fits one screen — no scrolling  _( 2026-07-20 )_
+
+## 2026-08
+- **T233** · Native iOS shell (Capacitor) — rebased onto current app, TestFlight-ready  _( 2026-08-06 )_
+- **T234** · Fix dead app on native: make startup resilient + boot-timing safe  _( 2026-08-07 )_
+- **T235** · Keep the iOS privacy strings in the repo, not just the generated project  _( 2026-08-13 )_
+- **T236** · Xcode Cloud: commit the iOS project + build the web app on the runner  _( 2026-08-13 )_
+- **T237** · latest commits  _( 2026-08-13 )_
+- **T238** · Pre-empt three failures waiting in the first Xcode Cloud build  _( 2026-08-13 )_
+- **T239** · Correct the iOS project type in the docs: SPM, not CocoaPods  _( 2026-08-14 )_
+- **T240** · Build and ship to TestFlight from GitHub Actions  _( 2026-08-14 )_
+- **T241** · Correct the App Store Connect API key role: Admin, not App Manager  _( 2026-08-14 )_
+- **T242** · Build against the newest Xcode — Apple requires the iOS 26 SDK  _( 2026-08-14 )_
+- **T243** · Restore drive history from the cloud (#42)  _( 2026-08-14 )_
+- **T244** · Make cloud restore reachable when drives already exist (#43)  _( 2026-08-14 )_
+- **T245** · Add real accounts: email sign-in that carries drive history (#44)  _( 2026-08-14 )_
+- **T246** · Survive a database that hasn't had the accounts migration applied (#45)  _( 2026-08-14 )_
+- **T247** · Set up Supabase over the Management API instead of the dashboard (#46)  _( 2026-08-15 )_
+- **T248** · Make main the production branch (#47)  _( 2026-08-15 )_
+- **T249** · Move the roadmap into the repo so any session can update it (#48)  _( 2026-08-15 )_
+- **T250** · Add HANDOFF.md consolidating cross-session state (#49)  _( 2026-08-15 )_
+- **T251** · Reconcile the roadmap, and record the blocked sign-in (#50)  _( 2026-08-15 )_
+- **T252** · Shorten the sign-in code to 4 digits and send mail through Resend  _( 2026-08-15 )_
+- **T253** · Bring the code down to 6 digits, not 4 — Supabase will not go lower  _( 2026-08-15 )_
+- **T254** · Tie identity to the account, and make scores impossible to assert  _( 2026-08-15 )_
+- **T255** · Create the citext extension before the column that uses it  _( 2026-08-15 )_
+- **T256** · Wire the garage to the account so it actually follows you  _( 2026-08-15 )_
+- **T257** · Read the car directly: OBD-II over BLE  _( 2026-08-16 )_
+- **T258** · Download the iOS platform when the runner lacks it  _( 2026-08-16 )_
+- **T259** · Show the OBD link on the Sensors pill, and spell out what's needed from you  _( 2026-08-16 )_
+- **T260** · Stop xcpretty swallowing the archive failure  _( 2026-08-16 )_
+- **T261** · Stop minting a new signing certificate on every build  _( 2026-08-16 )_
+- **T262** · Tie the in-app version to the build that produced it  _( 2026-08-16 )_
+- **T263** · Close the world-readable drives hole, and stop faking the leaderboard  _( 2026-08-16 )_
+- **T264** · Actually close the drives read hole — drop stray policies, don't rename one  _( 2026-08-16 )_
+- **T265** · Contain Leaflet's stacking context so the map stops bleeding through  _( 2026-08-16 )_
+- **T266** · Make the version badge and the TestFlight build the same string  _( 2026-08-16 )_
+- **T267** · Read horsepower, torque and gear from the car; live speed follows the OBD  _( 2026-08-16 )_
+- **T268** · Make ETAs traffic-aware, and stop padding them like they aren't  _( 2026-08-16 )_
+- **T269** · Read gear straight from the car (PID 0xA4), stop guessing it  _( 2026-08-16 )_
+- **T270** · Add a bootstrapping-CEO advisor subagent that briefs on every wake  _( 2026-08-19 )_
+- **T271** · Make the task ledger self-regenerating from git  _( 2026-08-19 )_
+- **T272** · Number the Just-shipped items too (T256-T269); flag the two unpushed ones  _( 2026-08-19 )_
+- **T273** · Delete the remove.bg integration entirely (T272 done)  _( 2026-08-19 )_
+- **T274** · Ship Sign in with Apple — add the native plugin (T274)  _( 2026-08-19 )_
