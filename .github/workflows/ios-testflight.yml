@@ -162,10 +162,18 @@ jobs:
           echo "Imported signing identities:"
           security find-identity -v -p codesigning "$KEYCHAIN"
 
+      # Archive WITHOUT signing, then sign only at export.
+      #
+      # The Xcode project pins CODE_SIGN_IDENTITY = "iPhone Developer", so a
+      # signed archive under automatic signing demands an iOS *Development*
+      # certificate + profile — and tries to mint a new one every build, which
+      # is what hits Apple's certificate cap and fails with "reached the maximum
+      # number of certificates". But a TestFlight build never needs a
+      # development identity: the export step below re-signs the app for App
+      # Store distribution using the imported distribution cert + the API key.
+      # So we archive unsigned (CODE_SIGNING_ALLOWED=NO) and let export own all
+      # signing. No dev cert, no minting, no cap — deterministic every run.
       - name: Archive
-        env:
-          KEY_ID:    ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
           # Raw output goes to a file, xcpretty only prettifies what's shown.
           # Piping straight into xcpretty means a failure prints nothing but
@@ -178,11 +186,9 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/App.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath ~/private_keys/AuthKey_${KEY_ID}.p8 \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID" \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
             2>&1 | tee "$RUNNER_TEMP/archive.log" | xcpretty || ARCHIVE_RC=$?
 
           if [ ! -d "$RUNNER_TEMP/App.xcarchive" ]; then
