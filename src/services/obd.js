@@ -129,6 +129,35 @@ export function decodeSupportedPids(raw){
 /** km/h from the car → m/s, the unit the scoring engine already speaks. */
 export const kmhToMps = kmh => (kmh * 1000) / 3600;
 
+// ── Adapter discovery filtering ─────────────────────────────────────────────
+// A blind BLE scan returns every radio in range — dozens of nameless phones,
+// earbuds, TVs and beacons. That flood of "unknown" entries is what makes the
+// stock picker unusable. An ELM327 OBD dongle almost always advertises a name
+// containing one of these tokens, or one of the known ELM327 service UUIDs.
+// Filtering on that turns 100 unknowns into the one or two that could be the car.
+const OBD_NAME_RE = /obd|elm327|veepeak|vlink|vgate|obdlink|konnwei|panlong|viecar|carista|nexas|icar|kw902|scan(tool|ner)/i;
+
+/** True when a scanned device's name or advertised services look like an ELM327. */
+export function isLikelyObd(name = '', uuids = []){
+  if (name && OBD_NAME_RE.test(name)) return true;
+  const known = KNOWN_SERVICES.map(s => s.toLowerCase());
+  return (uuids || []).some(u => known.includes(String(u).toLowerCase()));
+}
+
+/**
+ * Fold a new scan hit into the running candidate map (keyed by deviceId, keeping
+ * the strongest signal seen for each), and return a fresh array ordered the way
+ * a chooser should show them: likely-OBD first, then strongest signal. Pure, so
+ * the ranking is unit-tested without a radio.
+ */
+export function mergeScanResult(map, hit){
+  const prev = map.get(hit.deviceId);
+  if (!prev || (hit.rssi ?? -999) > (prev.rssi ?? -999)) map.set(hit.deviceId, hit);
+  return [...map.values()].sort((a, b) =>
+    (Number(b.likely) - Number(a.likely)) ||
+    ((b.rssi ?? -999) - (a.rssi ?? -999)));
+}
+
 // ── Transport ─────────────────────────────────────────────────────────────────
 
 const ELM_INIT = [
@@ -226,27 +255,23 @@ export function send(cmd, timeoutMs = 4000){
  * progress — connecting to a dongle in a car park with no feedback is the kind
  * of thing that reads as "broken".
  */
-export async function connect({ onStatus = () => {} } = {}){
-  onStatus('Looking for adapter…');
-  await BleClient.initialize();
+/**
+ * Once we hold a connected peripheral, negotiate the ELM327 session: find the
+ * write/notify pair, wake the adapter, and learn what the car supports. Shared
+ * by both the in-app scanner (connectTo) and the system-picker fallback
+ * (connect), so the two entry points can't drift apart.
+ */
+async function negotiate(deviceId, name, onStatus){
+  state.deviceId = deviceId;
 
-  const device = await BleClient.requestDevice({ services: [], allowDuplicates: false });
-  if (!device) throw new Error('no device chosen');
-
-  onStatus('Connecting…');
-  await BleClient.connect(device.deviceId, () => disconnect());
-  state.deviceId = device.deviceId;
-
-  const services = await BleClient.getServices(device.deviceId);
+  const services = await BleClient.getServices(deviceId);
   const pair = await discoverPair(services);
   if (!pair) { await disconnect(); throw new Error('not an ELM327 adapter'); }
 
   state.writeChar  = { service: pair.service, characteristic: pair.write };
   state.notifyChar = { service: pair.service, characteristic: pair.notify };
 
-  await BleClient.startNotifications(
-    device.deviceId, pair.service, pair.notify, onData,
-  );
+  await BleClient.startNotifications(deviceId, pair.service, pair.notify, onData);
 
   onStatus('Waking adapter…');
   for (const cmd of ELM_INIT) await send(cmd);
@@ -260,7 +285,62 @@ export async function connect({ onStatus = () => {} } = {}){
   state.gearSupported = gearProbe.supported;
 
   onStatus('Connected');
-  return { deviceId: device.deviceId, name: device.name || 'OBD adapter', supported: state.supported };
+  return { deviceId, name: name || 'OBD adapter', supported: state.supported };
+}
+
+/**
+ * Scan for nearby BLE adapters and stream filtered candidates to the caller.
+ *
+ * Uses requestLEScan (our own list) instead of requestDevice (the OS picker)
+ * precisely so we can drop the nameless noise: only devices with a name or a
+ * known ELM327 service reach onUpdate, ordered likely-OBD first. Remember to
+ * call stopScan() once a choice is made or the sheet is dismissed.
+ */
+export async function scanForAdapters({ onUpdate = () => {}, onStatus = () => {} } = {}){
+  onStatus('Scanning…');
+  await BleClient.initialize();
+  const found = new Map();
+  await BleClient.requestLEScan({ allowDuplicates: false }, (result) => {
+    const name  = result.device?.name || result.localName || '';
+    const uuids = result.uuids || result.device?.uuids || [];
+    const likely = isLikelyObd(name, uuids);
+    // The whole point: skip radios that are neither named nor OBD-shaped. That
+    // is the "100 unknowns" the stock picker drowns you in.
+    if (!name && !likely) return;
+    onUpdate(mergeScanResult(found, {
+      deviceId: result.device.deviceId,
+      name: name || null,
+      rssi: result.rssi ?? null,
+      likely,
+    }));
+  });
+}
+
+export async function stopScan(){ try { await BleClient.stopLEScan(); } catch {} }
+
+/** Connect to a specific device the user picked from the in-app scan list. */
+export async function connectTo(deviceId, name, { onStatus = () => {} } = {}){
+  onStatus('Connecting…');
+  await BleClient.initialize();
+  await BleClient.connect(deviceId, () => disconnect());
+  return negotiate(deviceId, name, onStatus);
+}
+
+/**
+ * Fallback path: hand off to the OS device picker. Kept for the rare adapter
+ * that advertises neither a name nor a known service and so never shows up in
+ * the filtered scan — better a wonky list than no way in at all.
+ */
+export async function connect({ onStatus = () => {} } = {}){
+  onStatus('Looking for adapter…');
+  await BleClient.initialize();
+
+  const device = await BleClient.requestDevice({ services: [], allowDuplicates: false });
+  if (!device) throw new Error('no device chosen');
+
+  onStatus('Connecting…');
+  await BleClient.connect(device.deviceId, () => disconnect());
+  return negotiate(device.deviceId, device.name, onStatus);
 }
 
 export async function disconnect(){

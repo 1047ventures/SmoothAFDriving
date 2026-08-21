@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   cleanResponse, isErrorResponse, extractBytes, decodePid,
   decodeSupportedPids, kmhToMps, discoverPair, KNOWN_SERVICES,
+  isLikelyObd, mergeScanResult,
 } from '../services/obd.js';
 
 // The transport needs a car. The decoding does not — and decoding is where a
@@ -140,5 +141,41 @@ describe('discoverPair', () => {
   it('survives empty or missing input', async () => {
     expect(await discoverPair([])).toBe(null);
     expect(await discoverPair(undefined)).toBe(null);
+  });
+});
+
+describe('isLikelyObd', () => {
+  it('matches common OBD adapter names', () => {
+    for (const n of ['OBDII', 'Veepeak', 'VEEPEAK OBDCheck', 'vLink', 'OBDLink LX', 'Vgate iCar Pro', 'ELM327-BLE']) {
+      expect(isLikelyObd(n, [])).toBe(true);
+    }
+  });
+
+  it('matches on a known ELM327 service UUID even with no name', () => {
+    expect(isLikelyObd('', [KNOWN_SERVICES[0].toUpperCase()])).toBe(true);
+  });
+
+  it('rejects unrelated named radios and nameless noise', () => {
+    expect(isLikelyObd('AirPods Pro', [])).toBe(false);
+    expect(isLikelyObd('Galaxy Buds', ['0000180f-0000-1000-8000-00805f9b34fb'])).toBe(false);
+    expect(isLikelyObd('', [])).toBe(false);
+  });
+});
+
+describe('mergeScanResult', () => {
+  it('dedupes by deviceId, keeping the strongest signal', () => {
+    const map = new Map();
+    mergeScanResult(map, { deviceId: 'a', name: 'OBDII', rssi: -80, likely: true });
+    const out = mergeScanResult(map, { deviceId: 'a', name: 'OBDII', rssi: -55, likely: true });
+    expect(out).toHaveLength(1);
+    expect(out[0].rssi).toBe(-55); // upgraded to the closer reading
+  });
+
+  it('orders likely-OBD first, then by signal strength', () => {
+    const map = new Map();
+    mergeScanResult(map, { deviceId: 'phone', name: 'Pixel', rssi: -40, likely: false });
+    mergeScanResult(map, { deviceId: 'far',   name: 'OBDII', rssi: -90, likely: true });
+    const out = mergeScanResult(map, { deviceId: 'near', name: 'Veepeak', rssi: -55, likely: true });
+    expect(out.map(d => d.deviceId)).toEqual(['near', 'far', 'phone']);
   });
 });

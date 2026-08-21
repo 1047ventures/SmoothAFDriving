@@ -313,6 +313,54 @@
 .obd-cell b{ font-size:17px; color:var(--cream, #F2E8D5); font-variant-numeric:tabular-nums; }
 .obd-cell i{ font-style:normal; margin-left:4px; opacity:.7; }
 
+/* ── In-app adapter scanner ──────────────────────────────────────────────────
+   Replaces the OS picker's flood of nameless radios with a short, filtered list
+   of likely OBD adapters. Lives inside the Sensors drawer, so it inherits the
+   14px inline gutter the readout uses. */
+.obd-scan{ margin-top:10px; padding-inline:14px; padding-bottom:12px; }
+.obd-scan.hidden{ display:none; }
+.obd-scan-list{ display:flex; flex-direction:column; gap:8px; }
+.obd-scan-empty{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--dim, #A99F8C); line-height:1.4; padding:6px 0; }
+.obd-scan-pulse{
+  flex:0 0 auto; width:8px; height:8px; border-radius:50%;
+  background:var(--tang, #E85D3A); animation:obd-pulse 1.1s ease-in-out infinite;
+}
+@keyframes obd-pulse{ 0%,100%{ opacity:.3; transform:scale(.8); } 50%{ opacity:1; transform:scale(1); } }
+@media(prefers-reduced-motion:reduce){ .obd-scan-pulse{ animation:none; opacity:.7; } }
+.obd-device{
+  display:flex; align-items:center; gap:10px; width:100%;
+  min-height:48px; padding:10px 12px;      /* comfortably over the 44px tap min */
+  background:rgba(242,232,213,.05);
+  border:1px solid rgba(242,232,213,.14);
+  border-radius:11px; cursor:pointer; text-align:left;
+}
+.obd-device:active{ background:rgba(242,232,213,.10); }
+.obd-device-name{
+  flex:1 1 auto; min-width:0; font-size:14px; color:var(--cream, #F2E8D5);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* Signal strength as a 3-bar glyph — an actual scale, not an on/off light.
+   Inactive bars stay dim-visible so a weak signal reads as "far", not "dead". */
+.obd-device-sig{ flex:0 0 auto; display:flex; align-items:flex-end; gap:2px; height:12px; }
+.obd-device-sig i{ width:3px; border-radius:1px; background:var(--tang, #E85D3A); opacity:.25; }
+.obd-device-sig i:nth-child(1){ height:5px; }
+.obd-device-sig i:nth-child(2){ height:8px; }
+.obd-device-sig i:nth-child(3){ height:12px; }
+.obd-device-sig.sig1 i:nth-child(-n+1),
+.obd-device-sig.sig2 i:nth-child(-n+2),
+.obd-device-sig.sig3 i:nth-child(-n+3){ opacity:1; }
+.obd-device-tag{
+  flex:0 0 auto; font-size:9.5px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--tang, #E85D3A);
+  background:rgba(232,93,58,.14); border-radius:5px; padding:3px 6px;
+}
+.obd-scan-fallback{
+  display:block; width:100%; margin-top:10px; padding:12px 0;
+  background:none; border:none; cursor:pointer;
+  font-size:12px; color:#8E8478; text-decoration:underline; text-underline-offset:2px;
+}
+.obd-scan-fallback:active{ color:var(--cream-dim, #C9BFAC); }
+
 /* Sensors pill gains an OBD badge while an adapter is live. The drawer is shut
    during a drive, so this is the only on-screen proof the car is talking. */
 .debug-handle.has-obd{ border-color:rgba(111,182,105,.45); }

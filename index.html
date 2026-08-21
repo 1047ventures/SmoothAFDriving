@@ -285,6 +285,11 @@
         <button id="obd-connect" class="obd-btn" type="button">Connect OBD</button>
         <span id="obd-status" class="obd-status">Not connected</span>
       </div>
+      <!-- In-app adapter chooser: filtered scan results, tap one to connect. -->
+      <div id="obd-scan" class="obd-scan hidden">
+        <div id="obd-scan-list" class="obd-scan-list"></div>
+        <button id="obd-scan-fallback" class="obd-scan-fallback" type="button">Don’t see it? Open full device list</button>
+      </div>
       <div id="obd-readout" class="obd-readout"></div>
     </div>
 

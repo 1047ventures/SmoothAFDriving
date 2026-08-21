@@ -7,13 +7,17 @@
  * this panel exists to answer.
  */
 
-import { connect, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
+import { connect, connectTo, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
 import { state } from '../state.js';
 
 const POLL_MS = 250;   // ~4Hz, about what an ELM327 sustains across four PIDs
 let timer = null;
+let scanTimer = null;
+let scanning = false;
 
 const el = id => document.getElementById(id);
+const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 function setStatus(text){
   const node = el('obd-status');
@@ -108,32 +112,107 @@ function stopPolling(){
   timer = null;
 }
 
-async function onConnectClick(){
-  const btn = el('obd-connect');
+function showScan(on){ el('obd-scan')?.classList.toggle('hidden', !on); }
 
-  if (isConnected()){
-    stopPolling();
-    await disconnect();
-    state.obd = null;
-    if (btn) btn.textContent = 'Connect OBD';
-    setStatus('Disconnected');
-    renderReadout();
-    setPill(false);
+/** Signal-strength dot: rssi runs ~ -40 (right next to you) to -95 (far). */
+function signalClass(rssi){
+  if (rssi == null)   return 'sig0';
+  if (rssi >= -60)    return 'sig3';
+  if (rssi >= -75)    return 'sig2';
+  return 'sig1';
+}
+
+function renderScanList(devices){
+  const list = el('obd-scan-list');
+  if (!list) return;
+  if (!devices.length){
+    // Status line already says "Scanning…" — here give the guidance, plus a
+    // pulsing dot so a slow scan reads as alive rather than hung.
+    list.innerHTML =
+      '<div class="obd-scan-empty"><span class="obd-scan-pulse"></span>' +
+      'No adapters yet — make sure the dongle is plugged in and the ignition is on.</div>';
     return;
   }
+  list.innerHTML = devices.map(d => `
+    <button class="obd-device" type="button" data-id="${escapeHtml(d.deviceId)}" data-name="${escapeHtml(d.name || '')}">
+      <span class="obd-device-sig ${signalClass(d.rssi)}"><i></i><i></i><i></i></span>
+      <span class="obd-device-name">${escapeHtml(d.name || 'Unknown adapter')}</span>
+      ${d.likely ? '<span class="obd-device-tag">OBD</span>' : ''}
+    </button>`).join('');
+}
 
-  if (btn) { btn.disabled = true; btn.textContent = 'Connecting…'; }
+/** Tear down an active scan (choice made, cancelled, or timed out). */
+async function endScan(){
+  scanning = false;
+  clearTimeout(scanTimer);
+  await stopScan();
+}
+
+async function startScan(){
+  const btn = el('obd-connect');
+  scanning = true;
+  showScan(true);
+  renderScanList([]);
+  if (btn){ btn.disabled = false; btn.textContent = 'Stop'; }
+  setStatus('Scanning for adapters…');
   try {
-    const info = await connect({ onStatus: setStatus });
+    await scanForAdapters({ onUpdate: renderScanList, onStatus: setStatus });
+  } catch (err){
+    await endScan();
+    showScan(false);
+    if (btn) btn.textContent = 'Connect OBD';
+    setStatus(`Couldn’t scan — ${err?.message || 'Bluetooth unavailable'}`);
+    return;
+  }
+  // The scan runs in the background via its callback; stop it after a while so
+  // the radio isn't left spinning. Whatever was found stays on screen.
+  clearTimeout(scanTimer);
+  scanTimer = setTimeout(async () => {
+    if (!scanning) return;
+    await endScan();
+    if (btn) btn.textContent = 'Rescan';
+    setStatus('Stopped scanning. Tap Rescan if the adapter isn’t listed.');
+  }, 20000);
+}
+
+/** A row was tapped — stop scanning and connect to that specific adapter. */
+async function connectChosen(deviceId, name){
+  await endScan();
+  const btn = el('obd-connect');
+  if (btn){ btn.disabled = true; btn.textContent = 'Connecting…'; }
+  try {
+    const info = await connectTo(deviceId, name, { onStatus: setStatus });
+    showScan(false);
     if (btn) btn.textContent = 'Disconnect';
-    // Naming what the car actually offered is the fastest way to tell a working
-    // adapter from one that connected but has nothing behind it.
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-  } catch (err) {
+  } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
       ? 'That device isn’t an OBD adapter'
+      : `Couldn’t connect — ${err?.message || 'unknown error'}`);
+    if (btn) btn.textContent = 'Connect OBD';
+    showScan(false);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+/** Escape hatch: hand off to the OS picker for an adapter the filter missed. */
+async function useSystemPicker(){
+  await endScan();
+  showScan(false);
+  const btn = el('obd-connect');
+  if (btn){ btn.disabled = true; btn.textContent = 'Connecting…'; }
+  try {
+    const info = await connect({ onStatus: setStatus });
+    if (btn) btn.textContent = 'Disconnect';
+    setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
+    setPill(true);
+    startPolling();
+  } catch (err){
+    setStatus(err?.message === 'no device chosen'
+      ? 'No device selected.'
       : `Couldn’t connect — ${err?.message || 'unknown error'}`);
     if (btn) btn.textContent = 'Connect OBD';
   } finally {
@@ -141,8 +220,38 @@ async function onConnectClick(){
   }
 }
 
+async function onConnectClick(){
+  if (isConnected()){
+    stopPolling();
+    await disconnect();
+    state.obd = null;
+    setStatus('Disconnected');
+    renderReadout();
+    setPill(false);
+    const btn = el('obd-connect');
+    if (btn) btn.textContent = 'Connect OBD';
+    return;
+  }
+  // Mid-scan: the button reads "Stop" — cancel rather than start another scan.
+  if (scanning){
+    await endScan();
+    showScan(false);
+    const btn = el('obd-connect');
+    if (btn) btn.textContent = 'Connect OBD';
+    setStatus('Not connected');
+    return;
+  }
+  await startScan();
+}
+
 export function wireObdPanel(){
   el('obd-connect')?.addEventListener('click', onConnectClick);
+  // Event delegation — the rows are re-rendered on every scan update.
+  el('obd-scan-list')?.addEventListener('click', (e) => {
+    const row = e.target.closest?.('.obd-device');
+    if (row) connectChosen(row.dataset.id, row.dataset.name || '');
+  });
+  el('obd-scan-fallback')?.addEventListener('click', useSystemPicker);
   renderReadout();
   setPill(isConnected());
 }
