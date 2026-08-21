@@ -80,8 +80,31 @@
   background:var(--bg2);
   border:1px solid rgba(242,232,213,.12);
   border-radius:20px;
-  padding:26px 20px 20px;
+  /* Clip the branded top accent to the rounded corners. */
+  overflow:hidden;
+  padding:30px 22px 22px;
   animation:auth-rise .22s ease-out;
+}
+/* A tangerine hairline across the top — the same brand signature the roadmap
+   header carries, so the sheet reads as part of the app, not a system dialog. */
+.auth-card::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0;
+  height:3px;
+  background:linear-gradient(90deg,var(--tang),var(--gold));
+}
+
+/* Brand kicker — small, gold, letter-spaced. Gives the signed-out screen a
+   header of its own so the two steps read as pages under one identity. */
+.auth-brand{
+  font-family:var(--sans);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:12px;
 }
 
 @keyframes auth-rise{
@@ -112,11 +135,21 @@
 
 .auth-title{
   font-family:var(--serif);
-  font-size:23px;
+  font-size:27px;
+  font-weight:700;
+  line-height:1.12;
+  letter-spacing:-.01em;
   color:var(--cream);
-  margin-bottom:5px;
+  margin-bottom:7px;
   /* Reserve the close button's corner so a longer title can't run under it. */
   padding-right:44px;
+}
+/* Smaller variant for the signed-in account row, where the title sits beside
+   the avatar rather than heading the whole card. */
+.auth-title--sm{
+  font-size:19px;
+  margin-bottom:2px;
+  padding-right:0;
 }
 .auth-sub{
   font-family:var(--sans);
@@ -131,7 +164,9 @@
   color:var(--gold);
   /* anywhere, not break-all — same overflow safety, better break points. */
   overflow-wrap:anywhere;
-  margin-bottom:16px;
+  /* No bottom margin: it now sits inside .auth-account, which owns the spacing
+     down to the status line. */
+  margin-bottom:0;
 }
 .auth-sent{
   font-family:var(--sans);
@@ -149,18 +184,22 @@
 .auth-input{
   width:100%;
   box-sizing:border-box;
-  background:rgba(0,0,0,.4);
-  border:1px solid rgba(242,232,213,.18);
+  /* Lift the fill a step off the card (bg2 #151212) so the field reads as an
+     input at a glance, not a flat panel — it sits below a loud Apple button and
+     was too easy to miss. */
+  background:#1C1818;
+  border:1px solid rgba(242,232,213,.22);
   border-radius:11px;
   color:var(--cream);
   font-family:var(--sans);
   /* 16px minimum — anything smaller makes iOS Safari zoom on focus. */
   font-size:16px;
-  padding:13px 14px;
+  padding:14px;
   margin-bottom:10px;
+  transition:border-color .12s;
 }
-.auth-input::placeholder{ color:var(--muted); }
-.auth-input:focus{ outline:none; border-color:rgba(196,169,98,.55); }
+.auth-input::placeholder{ color:#8A8073; }
+.auth-input:focus{ outline:none; border-color:var(--gold); }
 
 .auth-input-code{
   text-align:center;
@@ -192,39 +231,133 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
+  gap:9px;
   background:var(--cream);
   border:none;
-  border-radius:11px;
+  border-radius:13px;
   color:#0A0A0A;
   font-family:var(--sans);
-  font-size:15px;
+  font-size:16px;
   font-weight:600;
-  padding:14px;
+  letter-spacing:.01em;
+  /* The hero action. Taller than the email CTA and lifted off the card, so on a
+     glance Apple is the obvious primary and email the fallback below it. */
+  padding:15px;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
   cursor:pointer;
+  transition:filter .12s, transform .12s;
 }
-.auth-apple-btn:active{ filter:brightness(.9); }
-.auth-apple-logo{ width:15px; height:18px; display:block; flex:0 0 auto; }
+.auth-apple-btn:active{ filter:brightness(.9); transform:translateY(1px); }
+.auth-apple-logo{ width:16px; height:19px; display:block; flex:0 0 auto; margin-top:-2px; }
+
+/* ── Trust line ─────────────────────────────────────────────────────────────
+   A quiet reassurance under the form. The shield icon and the "never post"
+   copy answer the two silent objections to signing in on a driving app. */
+.auth-trust{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:15px;
+  font-family:var(--sans);
+  font-size:11.5px;
+  color:#8E8478;
+  text-align:center;
+}
+.auth-trust svg{ width:13px; height:13px; flex:0 0 auto; color:var(--sage); }
+
+/* ── Signed-in account row ──────────────────────────────────────────────────*/
+.auth-account{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin-bottom:16px;
+}
+.auth-avatar{
+  flex:0 0 auto;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(140deg,var(--tang),var(--gold));
+  color:#120C0A;
+  font-family:var(--serif);
+  font-weight:700;
+  font-size:21px;
+  line-height:1;
+  text-transform:uppercase;
+}
+.auth-account-meta{ min-width:0; }
+
+/* Back / resend live side by side under the code CTA — two ways forward on one
+   line instead of two stacked full-width links reading as more steps. Gold and
+   weighted so they read as tappable, each a full 44px target, with the dot
+   optically centred between them. */
+.auth-links{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  margin-top:6px;
+}
+.auth-links .auth-link{
+  width:auto;
+  min-height:44px;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
+  color:var(--gold);
+  font-weight:600;
+}
+.auth-links .auth-link:active{ color:var(--cream); }
+.auth-links-sep{ color:var(--muted); font-size:14px; align-self:center; }
+
+/* Sign out — a ghost pill rather than bare text, so it reads as an action under
+   the filled Sync button instead of drifting away as a caption. */
+.auth-link--center{ text-align:center; }
+#auth-signout{
+  margin-top:12px;
+  padding:12px 0;
+  border:1px solid rgba(242,232,213,.18);
+  border-radius:11px;
+  color:var(--cream-dim);
+}
+#auth-signout:active{ background:rgba(242,232,213,.06); color:var(--cream); }
 
 /* Separator, only when both methods are on screen. Without it the Apple button,
    the email field and the CTA read as one three-step form rather than two
-   independent ways in — the gap between the methods (16px) was barely larger
-   than the gap inside the email group (10px). */
-.auth-apple-btn:not(.hidden) + .auth-step::before{
-  content:"or";
-  display:block;
-  text-align:center;
+   independent ways in. A ruled divider (word flanked by hairlines) reads as an
+   intentional "or" rather than a floating stray word. Hidden with its
+   companion Apple button when the provider is off. */
+.auth-or{
+  display:flex;
+  align-items:center;
+  gap:12px;
   margin:18px 0;
+}
+.auth-or::before,
+.auth-or::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:rgba(196,169,98,.20);
+}
+.auth-or span{
   font-family:var(--sans);
   font-size:11px;
-  letter-spacing:.12em;
+  letter-spacing:.14em;
   text-transform:uppercase;
   color:#8E8478;
 }
+.auth-or.hidden{ display:none; }
 
 /* With Apple showing, the cream button is the primary. Demote the email CTA to
-   an outline so there aren't two competing primaries stacked on one card. */
-.auth-apple-btn:not(.hidden) + .auth-step .auth-submit{
+   an outline so there aren't two competing primaries stacked on one card.
+   Apple and the email CTA are now siblings inside the step, so target the CTA
+   that follows a visible Apple button. */
+#auth-apple-btn:not(.hidden) ~ .auth-submit{
   background:transparent;
   border:1px solid rgba(232,93,58,.65);
   color:var(--tang);

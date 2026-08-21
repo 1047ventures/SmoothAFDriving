@@ -33,7 +33,7 @@ const ANALYSIS = {
 describe('buildExportData', () => {
   it('produces the correct top-level keys', () => {
     const data = buildExportData(DRIVE, ANALYSIS);
-    expect(Object.keys(data)).toEqual(['meta', 'dims', 'events', 'samples']);
+    expect(Object.keys(data)).toEqual(['meta', 'dims', 'obd', 'events', 'samples']);
   });
 
   it('meta has required fields', () => {
@@ -70,6 +70,26 @@ describe('buildExportData', () => {
   it('handles null analysis gracefully', () => {
     const data = buildExportData(DRIVE, null);
     expect(data.dims).toBeNull();
+  });
+
+  // Regression: drives round-tripped through localStorage carry the abbreviated
+  // keys buildDriveFromState writes (la/ra/h), not the long names. The export
+  // must resolve those, or every acceleration column comes out undefined.
+  it('reads abbreviated persisted sample keys (la/ra/h)', () => {
+    const persisted = {
+      ...DRIVE,
+      samples: [
+        { t: 0, lat: 39.74, lon: -104.99, speed: 8.2, heading: 92,
+          la: 0.42, ra: -0.17, h: 1.9 },
+      ],
+    };
+    const { samples } = buildExportData(persisted, ANALYSIS);
+    expect(samples[0].longAccel).toBe(0.42);
+    expect(samples[0].latAccel).toBe(-0.17);
+    expect(samples[0].harshness).toBe(1.9);
+    // fields that simply aren't persisted come back as null, never undefined
+    expect(samples[0].jerk).toBeNull();
+    expect(samples[0].roadRoughness).toBeNull();
   });
 });
 

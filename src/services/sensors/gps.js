@@ -97,6 +97,34 @@ async function fetchAndCacheOsmLimit(lat, lon){
   } catch {}
 }
 
+// How stale an OBD reading may be before a sample is treated as OBD-less. The
+// poll loop runs ~4Hz, so 2s covers a couple of dropped frames without letting
+// a disconnected dongle's last value bleed across a whole drive.
+const OBD_FRESH_MS = 2000;
+
+/**
+ * Copy the latest fresh OBD reading onto a GPS sample.
+ *
+ * Exported for the unit tests; called from onGpsUpdate for every sample. Reads
+ * the shared `state.obd` that ui/obd.js publishes each poll. Only the channels
+ * the car actually answered are attached — a null stays absent rather than
+ * writing a column of nulls into every drive.
+ */
+export function attachObd(s, obd = state.obd, now = Date.now()){
+  if (!obd || obd.at == null || (now - obd.at) > OBD_FRESH_MS) return s;
+  if (obd.throttle   != null) s.throttle   = obd.throttle;
+  if (obd.rpm        != null) s.rpm        = obd.rpm;
+  if (obd.load       != null) s.load       = obd.load;
+  if (obd.gear       != null) s.gear       = obd.gear;
+  if (obd.gearRatio  != null) s.gearRatio  = obd.gearRatio;
+  if (obd.horsepower != null) s.horsepower = obd.horsepower;
+  if (obd.torqueNm   != null) s.torqueNm   = obd.torqueNm;
+  // The car's wheel-speed truth, kept beside the GPS speed rather than replacing
+  // it, so review can show both and scoring can choose.
+  if (obd.speedMps   != null) s.obdSpeed   = obd.speedMps;
+  return s;
+}
+
 export function processSample(s, prev){
   if (!prev){
     s.longAccel = 0;
@@ -204,6 +232,12 @@ export function onGpsUpdate(pos, callbacks = {}){
 
   // Store road roughness snapshot with each GPS sample
   s.roadRoughness = state.currentRoughness;
+
+  // Fold in the car's own numbers when a fresh OBD reading exists. Attached to
+  // the sample so the recorded drive carries throttle/RPM/gear alongside the GPS
+  // track — the raw material for OBD-aware scoring, export and review. A stale
+  // reading (dongle dropped) is left off rather than smeared forward.
+  attachObd(s);
 
   // ── Event detection ──────────────────────────────────────────────────────
   // After successful calibration, motion handler detects at 60Hz — skip here.

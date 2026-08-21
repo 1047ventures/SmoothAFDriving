@@ -740,17 +740,18 @@
 
       <!-- Signed out -->
       <div id="auth-signedout">
+        <div class="auth-brand" id="auth-brand">Smooth AF</div>
         <div class="auth-title" id="auth-title">Save your drives</div>
         <div class="auth-sub" id="auth-sub">Sign in so your score and history follow you to any phone.</div>
 
-        <button class="auth-apple-btn hidden" id="auth-apple-btn">
-          <svg class="auth-apple-logo" viewBox="0 0 17 20" fill="currentColor" aria-hidden="true">
-            <path d="M14.06 10.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.73-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM11.9 4.13c.6-.74 1.01-1.75.9-2.77-.87.04-1.93.58-2.56 1.31-.56.65-1.05 1.69-.92 2.69.97.07 1.97-.49 2.58-1.23z"/>
-          </svg>
-          <span>Sign in with Apple</span>
-        </button>
-
         <div class="auth-step" id="auth-step-email">
+          <button class="auth-apple-btn hidden" id="auth-apple-btn">
+            <svg class="auth-apple-logo" viewBox="0 0 17 20" fill="currentColor" aria-hidden="true">
+              <path d="M14.06 10.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.73-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71s1.7.71 2.87.69c1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM11.9 4.13c.6-.74 1.01-1.75.9-2.77-.87.04-1.93.58-2.56 1.31-.56.65-1.05 1.69-.92 2.69.97.07 1.97-.49 2.58-1.23z"/>
+            </svg>
+            <span>Sign in with Apple</span>
+          </button>
+          <div class="auth-or hidden" id="auth-or" aria-hidden="true"><span>or</span></div>
           <input class="auth-input" id="auth-email" type="email" inputmode="email"
                  placeholder="you@email.com" autocapitalize="off" autocorrect="off" spellcheck="false">
           <button class="auth-submit" id="auth-email-btn">Email me a code</button>
@@ -759,21 +760,34 @@
         <div class="auth-step hidden" id="auth-step-code">
           <div class="auth-sent" id="auth-sent"></div>
           <input class="auth-input auth-input-code" id="auth-code" type="text" inputmode="numeric"
-                 maxlength="6" placeholder="123456" autocomplete="one-time-code" autocorrect="off" spellcheck="false">
+                 maxlength="6" placeholder="0 0 0 0 0 0" autocomplete="one-time-code" autocorrect="off" spellcheck="false">
           <button class="auth-submit" id="auth-code-btn">Verify &amp; sign in</button>
-          <button class="auth-link" id="auth-back">Use a different email</button>
+          <div class="auth-links">
+            <button class="auth-link" id="auth-resend">Resend code</button>
+            <span class="auth-links-sep" aria-hidden="true">·</span>
+            <button class="auth-link" id="auth-back">Different email</button>
+          </div>
         </div>
 
         <div class="auth-status" id="auth-status" aria-live="polite"></div>
+        <div class="auth-trust" id="auth-trust">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5 4.5 5.8v5.4c0 4.7 3.2 8.3 7.5 9.8 4.3-1.5 7.5-5.1 7.5-9.8V5.8L12 2.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m8.8 12 2.3 2.3 4.1-4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Private by default — we never post anything.</span>
+        </div>
       </div>
 
       <!-- Signed in -->
       <div id="auth-signedin" class="hidden">
-        <div class="auth-title">Signed in</div>
-        <div class="auth-email" id="auth-who"></div>
+        <div class="auth-account">
+          <div class="auth-avatar" id="auth-avatar" aria-hidden="true"></div>
+          <div class="auth-account-meta">
+            <div class="auth-title auth-title--sm">You're signed in</div>
+            <div class="auth-email" id="auth-who"></div>
+          </div>
+        </div>
         <div class="auth-status" id="auth-status-in" aria-live="polite"></div>
         <button class="auth-submit" id="auth-sync-btn">Sync my drives</button>
-        <button class="auth-link" id="auth-signout">Sign out</button>
+        <button class="auth-link auth-link--center" id="auth-signout">Sign out</button>
       </div>
     </div>
   </div>
