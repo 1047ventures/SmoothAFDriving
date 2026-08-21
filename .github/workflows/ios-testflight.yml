@@ -189,6 +189,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=J55RP92WN6 \
             2>&1 | tee "$RUNNER_TEMP/archive.log" | xcpretty || ARCHIVE_RC=$?
 
           if [ ! -d "$RUNNER_TEMP/App.xcarchive" ]; then

@@ -11,6 +11,12 @@
     <key>method</key>
     <string>app-store-connect</string>
 
+    <!-- The archive is built unsigned (see the Archive step), so it carries no
+         team. Naming it here is what lets export resolve the signing team and
+         re-sign for distribution via the API key. -->
+    <key>teamID</key>
+    <string>J55RP92WN6</string>
+
     <key>destination</key>
     <string>export</string>
 
