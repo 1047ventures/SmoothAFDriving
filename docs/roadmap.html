@@ -276,7 +276,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 19, 2026 · 4:50 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 21, 2026 · 5:55 PM MDT</b>
     </div>
     
   </header>
@@ -286,10 +286,10 @@
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T274</span>Sign in with Apple works <span class="sub">native plugin wired; the button lights up now the provider's on</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T269</span>Gear read straight from the car <span class="sub">PID 0xA4 — no more guessing it</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T268</span>Traffic-aware ETAs <span class="sub">no more beating a 40-min drive by 14</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T267</span>Horsepower, torque &amp; gear off the OBD dongle</div>
+      <div class="lane-item"><span class="tn tn--ship">T281</span>TestFlight builds ship again <span class="sub">archive unsigned, sign at export — the cert-cap wall is gone; build 136 uploaded</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T279</span>In-app OBD scanner <span class="sub">filtered device picker, right inside the app</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T278</span>Sign-in / sign-up screens <span class="sub">the real auth UI, built out</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T276</span>Sign in with Apple works <span class="sub">native plugin wired; the button lights up now the provider's on</span></div>
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
@@ -306,7 +306,7 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 open</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
@@ -324,25 +324,7 @@
         </div>
       </details>
 
-      
-      <details class="wrow">
-        <summary class="wsum">
-          <span class="pill p-wait">Stops a repeat</span>
-          <span class="t"><span class="tn tn--wait">Q2</span>Export a signing cert so builds stop hitting Apple's cap <span class="tag">5 min</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Right now every CI build mints a fresh Apple distribution certificate, and the account caps them &mdash; that's what silently broke three builds earlier. The fix is in place but dormant until it has a cert to reuse:</p>
-          <ol>
-            <li>Xcode &rarr; Settings &rarr; Accounts &rarr; your Apple ID &rarr; <b>Manage Certificates</b> &rarr; <b>+</b> &rarr; Apple Distribution.</li>
-            <li>Keychain Access &rarr; find that cert &rarr; right-click &rarr; <b>Export</b> as <code>.p12</code> with a password.</li>
-            <li>Terminal: <code>base64 -i cert.p12 | pbcopy</code></li>
-            <li>Add two <a href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">repo secrets</a>: <code>IOS_DIST_CERT_P12</code> (paste) and <code>IOS_DIST_CERT_PASSWORD</code>.</li>
-          </ol>
-        </div>
-      </details>
 
-      
     </div>
   </section>
 

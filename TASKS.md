@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**274 tasks shipped** as of 2026-08-19.
+**281 tasks shipped** as of 2026-08-21.
 
 
 ## 2026-04
@@ -285,8 +285,15 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T267** · Read horsepower, torque and gear from the car; live speed follows the OBD  _( 2026-08-16 )_
 - **T268** · Make ETAs traffic-aware, and stop padding them like they aren't  _( 2026-08-16 )_
 - **T269** · Read gear straight from the car (PID 0xA4), stop guessing it  _( 2026-08-16 )_
-- **T270** · Add a bootstrapping-CEO advisor subagent that briefs on every wake  _( 2026-08-19 )_
-- **T271** · Make the task ledger self-regenerating from git  _( 2026-08-19 )_
-- **T272** · Number the Just-shipped items too (T256-T269); flag the two unpushed ones  _( 2026-08-19 )_
-- **T273** · Delete the remove.bg integration entirely (T272 done)  _( 2026-08-19 )_
-- **T274** · Ship Sign in with Apple — add the native plugin (T274)  _( 2026-08-19 )_
+- **T270** · Fix the drive JSON download: share sheet on iOS, real sample keys  _( 2026-08-19 )_
+- **T271** · Record OBD channels into each drive, and carry them to export  _( 2026-08-19 )_
+- **T272** · Add a bootstrapping-CEO advisor subagent that briefs on every wake  _( 2026-08-19 )_
+- **T273** · Make the task ledger self-regenerating from git  _( 2026-08-19 )_
+- **T274** · Number the Just-shipped items too (T256-T269); flag the two unpushed ones  _( 2026-08-19 )_
+- **T275** · Delete the remove.bg integration entirely (T272 done)  _( 2026-08-19 )_
+- **T276** · Ship Sign in with Apple — add the native plugin (T274)  _( 2026-08-19 )_
+- **T277** · Cap the Just-shipped lane at the 4 latest  _( 2026-08-19 )_
+- **T278** · Build out the sign-in / sign-up screens (UI/UX)  _( 2026-08-20 )_
+- **T279** · Replace the OBD device picker with a filtered in-app scanner  _( 2026-08-21 )_
+- **T280** · iOS: archive unsigned, sign at export — end the dev-cert cap failures  _( 2026-08-21 )_
+- **T281** · iOS: stamp team into unsigned archive so export can sign  _( 2026-08-21 )_
