@@ -50,7 +50,7 @@ function renderReadout(){
   if (!node) return;
   if (!isConnected()){ node.textContent = ''; return; }
 
-  const { rpm, speed, throttle, load, horsepower, torqueNm, gear, gearRatio } = getLatest();
+  const { rpm, throttle, load, horsepower, torqueNm, gear, gearRatio } = getLatest();
   const cell = (label, value, unit) =>
     `<span class="obd-cell"><b>${value == null ? '—' : Math.round(value)}</b>${unit}<i>${label}</i></span>`;
 
@@ -65,7 +65,9 @@ function renderReadout(){
   node.innerHTML =
     cell('throttle', throttle, '%') +
     cell('rpm',      rpm,      '')  +
-    cell('speed',    speed,    'km/h') +
+    // Speed is deliberately not shown here — the GPS mph up top already covers
+    // it, and a second km/h figure was just redundant clutter. Still recorded
+    // in state.obd (the car's speed is truer than GPS), just not displayed.
     cell('load',     load,     '%') +
     // Power/torque only appear once the car actually yields them, so a car that
     // reports no torque simply shows fewer cells rather than a row of dashes.
