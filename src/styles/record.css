@@ -272,7 +272,12 @@
   .debug-panel{
     position:absolute;left:0;right:0;bottom:0;
     height:45%;
-    background:rgba(10,8,8,.93);
+    /* Translucent + blurred rather than a near-opaque slab. Opening Sensors used
+       to black out the whole lower half of the drive; now the road, the map and
+       the edge-glow feedback stay visible through the panel while the readout
+       text keeps a dark, legible backing. */
+    background:rgba(10,8,8,.60);
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
     border-top:1px solid rgba(244,235,217,.1);
     display:flex;flex-direction:column;
     padding:10px 12px calc(env(safe-area-inset-bottom,0)+8px);
@@ -308,8 +313,18 @@
 }
 .obd-btn:disabled{ opacity:.55; cursor:default; }
 .obd-status{ font-size:12px; color:var(--dim, #A99F8C); line-height:1.35; min-width:0; }
-.obd-readout{ display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; padding-inline:14px; padding-bottom:12px; }
-.obd-cell{ display:flex; align-items:baseline; gap:3px; font-size:12px; color:var(--dim, #A99F8C); }
+/* Fixed 4-column grid, NOT flex-wrap. With wrapping, a metric growing a digit
+   (RPM 900 → 3500) widened its cell, pushed the row past the screen edge, and
+   bumped the last cell onto a new line — then back when it shrank. The readout
+   jittered every time the revs moved. A grid pins each cell to a stable column,
+   so the number changing width just fills its own cell and nothing reflows. */
+.obd-readout{
+  display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:12px 10px; margin-top:10px; padding-inline:14px; padding-bottom:12px;
+}
+.obd-cell{ display:flex; align-items:baseline; gap:3px; font-size:12px; color:var(--dim, #A99F8C); min-width:0; white-space:nowrap; }
+/* Reserve the width of the widest reading so the baseline row can't shift as
+   digits come and go; tabular-nums keeps the glyphs from dancing too. */
 .obd-cell b{ font-size:17px; color:var(--cream, #F2E8D5); font-variant-numeric:tabular-nums; }
 .obd-cell i{ font-style:normal; margin-left:4px; opacity:.7; }
 
