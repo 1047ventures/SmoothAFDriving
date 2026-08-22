@@ -21,6 +21,9 @@ export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
 export const SHARE_PROMPTED_KEY = 'smoothaf.share_prompted';
 export const CORRIDORS_KEY      = 'smoothaf.corridors';
 export const AUTH_KEY           = 'smoothaf.auth';
+// Last OBD adapter connected, so the app can silently reconnect to it next time
+// instead of making you re-pick from a scan every drive. Stores {deviceId,name}.
+export const OBD_DEVICE_KEY     = 'smoothaf.obd_device';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 // The anon key is public by design — it is the browser-facing key and carries no

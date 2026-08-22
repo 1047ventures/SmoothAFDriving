@@ -9,6 +9,23 @@
 
 import { connect, connectTo, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
 import { state } from '../state.js';
+import { OBD_DEVICE_KEY } from '../constants.js';
+
+/**
+ * Remember the last adapter we connected to, so the next drive can reconnect on
+ * its own. The recorded drives that missed OBD did so because the dongle was
+ * never manually reconnected — this closes that gap.
+ */
+function rememberDevice(deviceId, name){
+  if (!deviceId) return;
+  try { localStorage.setItem(OBD_DEVICE_KEY, JSON.stringify({ deviceId, name: name || '' })); } catch {}
+}
+function loadDevice(){
+  try { return JSON.parse(localStorage.getItem(OBD_DEVICE_KEY)) || null; } catch { return null; }
+}
+function forgetDevice(){
+  try { localStorage.removeItem(OBD_DEVICE_KEY); } catch {}
+}
 
 const POLL_MS = 250;   // ~4Hz, about what an ELM327 sustains across four PIDs
 let timer = null;
@@ -184,6 +201,7 @@ async function connectChosen(deviceId, name){
   if (btn){ btn.disabled = true; btn.textContent = 'Connecting…'; }
   try {
     const info = await connectTo(deviceId, name, { onStatus: setStatus });
+    rememberDevice(info.deviceId, info.name);
     showScan(false);
     if (btn) btn.textContent = 'Disconnect';
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
@@ -208,6 +226,7 @@ async function useSystemPicker(){
   if (btn){ btn.disabled = true; btn.textContent = 'Connecting…'; }
   try {
     const info = await connect({ onStatus: setStatus });
+    rememberDevice(info.deviceId, info.name);
     if (btn) btn.textContent = 'Disconnect';
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
@@ -227,6 +246,10 @@ async function onConnectClick(){
     stopPolling();
     await disconnect();
     state.obd = null;
+    // Manual disconnect is an explicit "I'm done with this dongle" — so don't
+    // silently reconnect to it next launch. (An out-of-range/car-off drop keeps
+    // the memory, so that case still auto-reconnects.)
+    forgetDevice();
     setStatus('Disconnected');
     renderReadout();
     setPill(false);
@@ -246,6 +269,38 @@ async function onConnectClick(){
   await startScan();
 }
 
+/**
+ * Silently reconnect to the last adapter we used, so the dongle is live before
+ * the drive starts without the driver having to remember to tap Connect. Best-
+ * effort: if the adapter is off, out of range, or Bluetooth isn't ready, it
+ * fails quietly and leaves the manual Connect button exactly as before.
+ */
+async function autoReconnect(){
+  if (isConnected() || scanning) return;
+  const saved = loadDevice();
+  if (!saved?.deviceId) return;
+
+  const btn = el('obd-connect');
+  const label = saved.name || 'last adapter';
+  setStatus(`Reconnecting to ${label}…`);
+  if (btn) btn.disabled = true;
+  try {
+    const info = await connectTo(saved.deviceId, saved.name, { onStatus: setStatus });
+    rememberDevice(info.deviceId, info.name);
+    if (btn) btn.textContent = 'Disconnect';
+    setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
+    setPill(true);
+    startPolling();
+  } catch {
+    // Don't nag or forget — the dongle may just not be powered yet. Next launch
+    // (or a manual tap) tries again.
+    setStatus('Not connected');
+    if (btn) btn.textContent = 'Connect OBD';
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 export function wireObdPanel(){
   el('obd-connect')?.addEventListener('click', onConnectClick);
   // Event delegation — the rows are re-rendered on every scan update.
@@ -256,4 +311,7 @@ export function wireObdPanel(){
   el('obd-scan-fallback')?.addEventListener('click', useSystemPicker);
   renderReadout();
   setPill(isConnected());
+  // Try the remembered adapter in the background — the whole point is that the
+  // driver doesn't have to think about it.
+  autoReconnect();
 }
