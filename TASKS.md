@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**286 tasks shipped** as of 2026-08-23.
+**288 tasks shipped** as of 2026-08-23.
 
 
 ## 2026-04
@@ -302,3 +302,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T284** · OBD: auto-reconnect to the last adapter so drives stop missing OBD  _( 2026-08-21 )_
 - **T285** · Add the customer journey map — discovery to retention, friction flagged  _( 2026-08-23 )_
 - **T286** · Add the first-run intro: visual, wordless, drive-first  _( 2026-08-23 )_
+- **T287** · Ship the Driving Trends screen (Q2)  _( 2026-08-23 )_
+- **T288** · Post-drive share & save card (Q4)  _( 2026-08-23 )_
