@@ -77,6 +77,7 @@
   .c-decide{background:rgba(232,93,58,.16);color:var(--tang)}
   .c-link{background:rgba(196,169,98,.16);color:var(--gold)}
   .c-cut{background:rgba(224,80,58,.16);color:var(--danger)}
+  .c-done{background:rgba(111,182,105,.16);color:#6FB669}
   .c-keep{background:rgba(111,182,105,.14);color:var(--good)}
 
   .keepers{display:flex;flex-wrap:wrap;gap:8px;padding:16px}
@@ -104,7 +105,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Home Screen Audit</h1>
     <p class="lede">Every element on the home screen, sorted by what should happen to it. Grouped by verdict rather than by position, because the useful question is what needs deciding — not what sits nearest the top.</p>
-    <p class="stamp">Reviewed <b>Aug 16, 2026</b> · against build <b>118</b></p>
+    <p class="stamp">Reviewed <b>Aug 22, 2026</b> · after the <b>Trends</b> + <b>first-run intro</b> ships</p>
 
     <div class="rule-card">
       <p>If it&rsquo;s on the home screen it should open something on tap. If there&rsquo;s nothing worth opening, it shouldn&rsquo;t be competing for the space.</p>
@@ -112,45 +113,38 @@
     </div>
   </header>
 
-  <!-- Decisions first: these are the only items that need the user, and both
-       are product calls rather than engineering ones. -->
+  <!-- The headline of this re-review: both decisions from last time are made,
+       and both landed on "finish" — they're shipped, not cut. -->
   <section>
-    <div class="s-head"><h2>Needs a decision</h2><span class="count">2 · product calls</span><span class="rule"></span></div>
-    <p class="s-note">Neither of these is a bug or an oversight. Both are features that were started and never finished, and the rule catches them precisely because half-built things fail it.</p>
+    <div class="s-head"><h2>Resolved since last review</h2><span class="count">2 · both shipped</span><span class="rule"></span></div>
+    <p class="s-note">Last review flagged two half-built features that failed the rule. Both are now finished &mdash; the home screen&rsquo;s two hardest failures are gone.</p>
     <div class="card">
       <div class="row">
-        <span class="chip c-decide">Finish or cut</span>
+        <span class="chip c-done">Shipped</span>
         <div>
           <div class="el">&ldquo;Driving Trends&rdquo; sparkline</div>
-          <div class="why">A chart you can&rsquo;t interrogate. It draws a real line from real drives, then refuses to explain any of it. Either tapping it opens a trends view worth the space, or the space goes to something that earns it.</div>
+          <div class="why">The chart you couldn&rsquo;t interrogate now opens the full <b>Driving Trends</b> screen: pick a metric (score, miles, hard braking/accel, sharp turns, full stops) and see whether you&rsquo;re improving. It earns its space now.</div>
         </div>
       </div>
       <div class="row">
-        <span class="chip c-decide">Finish or cut</span>
+        <span class="chip c-done">Shipped</span>
         <div>
-          <div class="el">The persona block <code>home-persona-title · home-persona-sub · home-unlock-text</code></div>
-          <div class="why">Hidden with inline <code>display:none</code>, but the code still writes content into all three every render. A feature that computes something nobody can see. Reviving it and deleting it are both defensible; leaving it is the one option that isn&rsquo;t.</div>
+          <div class="el">Lifetime Score</div>
+          <div class="why">The largest number on the screen used to do nothing. It now opens the lifetime breakdown sheet on tap &mdash; the exact fix the last audit called for.</div>
         </div>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="s-head"><h2>Give it somewhere to go</h2><span class="count">6 · straightforward</span><span class="rule"></span></div>
-    <p class="s-note">These already carry information the driver would reasonably want to pull on. None needs a new concept — most have a destination that already exists.</p>
+    <div class="s-head"><h2>Give it somewhere to go</h2><span class="count">4 · straightforward</span><span class="rule"></span></div>
+    <p class="s-note">These already carry information the driver would reasonably want to pull on. None needs a new concept &mdash; and Miles now has an obvious home that didn&rsquo;t exist before.</p>
     <div class="card">
       <div class="row">
         <span class="chip c-link">Link</span>
         <div>
-          <div class="el">Lifetime Score</div>
-          <div class="why">The largest number on the screen and it does nothing. The breakdown sheet it should open (<code>lifetime-sheet</code>) is already built &mdash; currently reachable only by tapping the drives count, which is not where anyone looks for it.</div>
-        </div>
-      </div>
-      <div class="row">
-        <span class="chip c-link">Link</span>
-        <div>
           <div class="el">Miles</div>
-          <div class="why">Sits between two stats that are both tappable and behaves differently from both. Pure inconsistency &mdash; the kind that teaches people the screen isn&rsquo;t worth touching.</div>
+          <div class="why">The lone dead stat between two tappable ones &mdash; Drives and Best both open something, Miles doesn&rsquo;t. Now that the Trends screen exists it has a natural target: open Trends on the <b>Miles</b> metric. One line, and the stat row stops teaching people the screen isn&rsquo;t worth touching.</div>
         </div>
       </div>
       <div class="row">
@@ -164,7 +158,7 @@
         <span class="chip c-link">Link</span>
         <div>
           <div class="el">Score sentence</div>
-          <div class="why">&ldquo;Start driving to build your score.&rdquo; It&rsquo;s coaching, and coaching invites a follow-up question. Opens the persona explanation &mdash; which ties it to the decision above.</div>
+          <div class="why">Now surfaces the persona inline (<em>Daily Driver &mdash; the ceiling is higher than this</em>), so the content the hidden persona block used to compute finally has a home. It&rsquo;s still not tappable; a tap could open the lifetime breakdown, same as the score above it. Low priority now that it reads as finished.</div>
         </div>
       </div>
       <div class="row">
@@ -185,13 +179,20 @@
   </section>
 
   <section>
-    <div class="s-head"><h2>Delete</h2><span class="count">1 · no argument</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Delete</h2><span class="count">2 · no argument</span><span class="rule"></span></div>
     <div class="card">
       <div class="row">
         <span class="chip c-cut">Cut</span>
         <div>
           <div class="el"><code>persona-badge</code></div>
           <div class="why">Hidden markup with <b>zero references anywhere in the code</b> &mdash; only a stylesheet rule keeping its corpse warm. Nothing reads it, nothing writes it, nobody can see it.</div>
+        </div>
+      </div>
+      <div class="row">
+        <span class="chip c-cut">Cut</span>
+        <div>
+          <div class="el">The hidden persona block <code>home-persona-title · home-persona-sub · home-unlock-text</code></div>
+          <div class="why">Last review this was a &ldquo;finish or cut&rdquo; call; it&rsquo;s now decided. The persona is surfaced in the score sentence, so these three <code>display:none</code> divs &mdash; and the <code>home.js</code> lines still writing <code>textContent</code> into title/sub every render &mdash; are pure dead duplicates. Delete the markup and the writes.</div>
         </div>
       </div>
     </div>
@@ -215,8 +216,9 @@
   </section>
 
   <div class="finding">
-    <h3>What the audit actually found</h3>
-    <p>Applied strictly, the rule doesn&rsquo;t produce a list of eight tap targets to bolt on. It produces <b>two unfinished features and one corpse</b>. The elements that fail hardest aren&rsquo;t clutter &mdash; they&rsquo;re the sparkline and the persona block, both of which were built partway and left. The linking work is a couple of hours; the decision about those two is the audit.</p>
+    <h3>Where it stands now</h3>
+    <p>Last review the rule produced <b>two unfinished features and one corpse</b>. This review, <b>both features are shipped</b> &mdash; the sparkline opens the Trends screen and the Lifetime Score opens its breakdown &mdash; and the persona-block decision is made: it&rsquo;s cut, because its content now lives in the score sentence.</p>
+    <p>What&rsquo;s left is small and unambiguous: <b>one real link</b> worth doing (Miles &rarr; Trends, now that Trends exists), a couple of optional ones, and a <b>dead-markup cleanup</b> (<code>persona-badge</code> plus the hidden persona block). The home screen went from half-built to wired, with a short tidy-up list &mdash; no product decisions outstanding.</p>
   </div>
 
   <footer>
