@@ -379,6 +379,34 @@
 /* Sensors pill gains an OBD badge while an adapter is live. The drawer is shut
    during a drive, so this is the only on-screen proof the car is talking. */
 .debug-handle.has-obd{ border-color:rgba(111,182,105,.45); }
+
+/* Auto-start nudge — the banner that offers to begin a drive the moment the
+   dongle links up while the app is open. Bottom-anchored, out of the way. */
+.obd-nudge{
+  position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0) + 18px);
+  transform:translate(-50%, 140%); z-index:110;
+  display:flex; align-items:center; gap:10px;
+  max-width:calc(100vw - 28px);
+  padding:10px 10px 10px 16px; border-radius:14px;
+  background:rgba(20,17,16,.96); border:1px solid rgba(111,182,105,.32);
+  box-shadow:0 16px 40px rgba(0,0,0,.5);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  transition:transform .26s cubic-bezier(.4,0,.2,1);
+}
+.obd-nudge.in{transform:translate(-50%, 0)}
+.obd-nudge-txt{font:600 14px/1.2 var(--sans, -apple-system); color:var(--cream, #F2E8D5); white-space:nowrap}
+.obd-nudge-go{
+  flex:0 0 auto; min-height:38px; padding:0 16px; border:0; border-radius:10px;
+  background:var(--tang, #E85D3A); color:#160b08; font:700 14px/1 var(--sans, -apple-system);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.obd-nudge-go:active{filter:brightness(.94)}
+.obd-nudge-x{
+  flex:0 0 auto; width:34px; height:38px; border:0; background:none;
+  color:var(--muted, #7A7060); font-size:22px; line-height:1; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+@media(prefers-reduced-motion:reduce){.obd-nudge{transition:none}}
 .pill-obd{
   display:inline-block; margin-left:6px; padding:1px 6px; border-radius:5px;
   background:rgba(111,182,105,.18); color:var(--good, #6FB669);

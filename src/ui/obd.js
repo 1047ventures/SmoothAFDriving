@@ -27,6 +27,42 @@ function forgetDevice(){
   try { localStorage.removeItem(OBD_DEVICE_KEY); } catch {}
 }
 
+/**
+ * The shippable half of auto-start: when the car's dongle links up while the app
+ * is open, offer to start the drive with one tap — so a dongle user doesn't have
+ * to remember. (Nudging when the app is *closed* needs iOS background modes +
+ * local notifications; that's the native tier, speced separately.)
+ *
+ * Unobtrusive by design: a dismissable banner, never a wall, suppressed if a
+ * drive is already running and not re-shown within a few minutes.
+ */
+let lastNudgeAt = 0;
+function nudgeStartDrive(){
+  if (state.recording) return;
+  if (document.getElementById('obd-nudge')) return;
+  const startBtn = document.getElementById('btn-start');
+  if (!startBtn) return;
+  const now = Date.now();
+  if (now - lastNudgeAt < 4 * 60 * 1000) return;   // don't re-nag within 4 min
+  lastNudgeAt = now;
+
+  const bar = document.createElement('div');
+  bar.id = 'obd-nudge';
+  bar.className = 'obd-nudge';
+  bar.innerHTML =
+    '<span class="obd-nudge-txt">Car linked &mdash; start your drive?</span>' +
+    '<button class="obd-nudge-go" type="button">Start</button>' +
+    '<button class="obd-nudge-x" type="button" aria-label="Dismiss">&times;</button>';
+  document.body.appendChild(bar);
+  requestAnimationFrame(() => bar.classList.add('in'));
+
+  const dismiss = () => { bar.classList.remove('in'); setTimeout(() => bar.remove(), 260); };
+  bar.querySelector('.obd-nudge-go').addEventListener('click', () => { dismiss(); startBtn.click(); });
+  bar.querySelector('.obd-nudge-x').addEventListener('click', dismiss);
+  // Auto-retire so it never lingers into the drive.
+  setTimeout(() => { if (document.body.contains(bar)) dismiss(); }, 11000);
+}
+
 const POLL_MS = 250;   // ~4Hz, about what an ELM327 sustains across four PIDs
 let timer = null;
 let scanTimer = null;
@@ -207,6 +243,7 @@ async function connectChosen(deviceId, name){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
+    nudgeStartDrive();
   } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
       ? 'That device isn’t an OBD adapter'
@@ -231,6 +268,7 @@ async function useSystemPicker(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
+    nudgeStartDrive();
   } catch (err){
     setStatus(err?.message === 'no device chosen'
       ? 'No device selected.'
@@ -291,6 +329,7 @@ async function autoReconnect(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
+    nudgeStartDrive();
   } catch {
     // Don't nag or forget — the dongle may just not be powered yet. Next launch
     // (or a manual tap) tries again.
