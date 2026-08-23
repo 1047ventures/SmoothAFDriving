@@ -676,6 +676,44 @@
 
   </section>
 
+  <!-- ═══════════════════════════ TRENDS ═══════════════════════════ -->
+  <section id="screen-trends" class="screen">
+    <div class="trends-topbar">
+      <button class="trends-back-btn" id="btn-trends-back" aria-label="Back">&#8249;</button>
+      <div class="trends-title">Driving Trends</div>
+      <div class="trends-window" id="trends-window"></div>
+    </div>
+
+    <div class="trends-metrics" id="trends-metrics" role="tablist"></div>
+
+    <div class="trends-chart-card">
+      <div class="trends-chart-hd">
+        <div class="trends-metric-name" id="trends-metric-name">Score</div>
+        <div class="trends-trend" id="trends-trend"></div>
+      </div>
+      <div class="trends-chart-wrap">
+        <svg class="trends-chart" id="trends-chart" width="100%" height="150" viewBox="0 0 320 150" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="trends-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--tang)" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="var(--tang)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <polygon id="trends-area" points="" fill="url(#trends-fill)"/>
+          <polyline id="trends-line" points="" fill="none" stroke="var(--tang)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle id="trends-dot" cx="0" cy="0" r="0" fill="var(--tang)"/>
+        </svg>
+        <div class="trends-empty" id="trends-empty" hidden>Take a few drives &mdash; your trend shows up here.</div>
+      </div>
+    </div>
+
+    <div class="trends-summary">
+      <div class="trends-sum"><div class="v" id="trends-avg">&mdash;</div><div class="l">Average</div></div>
+      <div class="trends-sum"><div class="v" id="trends-best">&mdash;</div><div class="l">Best</div></div>
+      <div class="trends-sum"><div class="v" id="trends-latest">&mdash;</div><div class="l">Latest</div></div>
+    </div>
+  </section>
+
   <section id="screen-rewards" class="screen">
 
     <div class="rw-topbar">

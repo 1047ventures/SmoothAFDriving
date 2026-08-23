@@ -20,6 +20,7 @@ import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
 import { wireObdPanel } from './ui/obd.js';
 import { showIntroIfNeeded } from './ui/intro.js';
+import { openTrends, wireTrends } from './ui/trends.js';
 
 // Export key init functions for DOMContentLoaded (wired below)
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
@@ -178,6 +179,9 @@ function boot(){
   // Garage sheet
   wireGarageButtons();
   wireObdPanel();
+  wireTrends();
+  // The home sparkline is the doorway into the full Trends screen.
+  document.querySelector('.home-sparkline')?.addEventListener('click', openTrends);
 
   // Swipe from left edge to go back
   let swipeStartX = 0, swipeStartY = 0;
@@ -197,6 +201,7 @@ function boot(){
       'screen-corridor':    'btn-corridor-back',
       'screen-leaderboard': 'btn-lb-back',
       'screen-rewards':     'btn-rw-back',
+      'screen-trends':      'btn-trends-back',
     }[active.id];
     const btn = backBtnId ? document.getElementById(backBtnId) : null;
     if (btn) btn.click();
