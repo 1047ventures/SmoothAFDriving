@@ -19,6 +19,7 @@ import { refreshIfNeeded, isSignedIn } from './services/auth.js';
 import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
 import { wireObdPanel } from './ui/obd.js';
+import { showIntroIfNeeded } from './ui/intro.js';
 
 // Export key init functions for DOMContentLoaded (wired below)
 export { migrateLifetimeScore, renderDriveList, renderCarDisplay };
@@ -201,6 +202,12 @@ function boot(){
     if (btn) btn.click();
     else { showScreen('home'); renderDriveList(); }
   }, { passive: true });
+
+  // First-run visual intro — shown once, on top of the ready home screen, so a
+  // brand-new driver gets the value + a permission prime before their first
+  // drive. No-op for anyone who's seen it. Last so nothing it overlays is still
+  // mid-wire.
+  safeInit('intro', showIntroIfNeeded);
 
   // Register service worker — web only. Inside a Capacitor WebView the shell is
   // served from the app bundle, and a network-first SW just causes stale-asset

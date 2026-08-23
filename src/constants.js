@@ -24,6 +24,9 @@ export const AUTH_KEY           = 'smoothaf.auth';
 // Last OBD adapter connected, so the app can silently reconnect to it next time
 // instead of making you re-pick from a scan every drive. Stores {deviceId,name}.
 export const OBD_DEVICE_KEY     = 'smoothaf.obd_device';
+// First-run visual intro shown once, before the first drive. Drive-first: it
+// primes permissions and sets expectations but never asks anyone to sign up.
+export const INTRO_SEEN_KEY     = 'smoothaf.intro_seen';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 // The anon key is public by design — it is the browser-facing key and carries no

@@ -1,0 +1,153 @@
+/* ── First-run intro ────────────────────────────────────────────────────────
+   A once-only visual welcome shown before the first drive. Deliberately almost
+   wordless: three quick value beats, then a one-tap permission prime. It never
+   asks anyone to sign up — that ask lives at the end of the first drive, where
+   the driver has felt the value and can share it. */
+
+.intro-overlay{
+  position:fixed; inset:0; z-index:120;
+  background:var(--bg);
+  background-image:radial-gradient(120% 68% at 50% 0%, rgba(232,93,58,.12), transparent 60%);
+  display:flex; flex-direction:column;
+  font-family:var(--sans); color:var(--cream);
+  overflow:hidden;
+  padding:calc(env(safe-area-inset-top,0) + 8px) 0 calc(env(safe-area-inset-bottom,0) + 22px);
+  opacity:1; transition:opacity .32s ease;
+}
+.intro-overlay.closing{opacity:0}
+
+.intro-skip{
+  position:absolute; top:calc(env(safe-area-inset-top,0) + 12px); right:12px; z-index:4;
+  background:none; border:0; color:var(--muted); cursor:pointer;
+  font:600 11px/1 var(--sans); letter-spacing:.16em; text-transform:uppercase; padding:12px;
+  -webkit-tap-highlight-color:transparent;
+}
+.intro-skip:active{color:var(--cream-dim)}
+
+/* Stage holds the stacked slides; only the active one is shown. */
+.intro-stage{position:relative; flex:1; min-height:0}
+.intro-slide{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:34px; padding:24px 34px; text-align:center;
+  background:var(--bg);
+  opacity:0; transform:translateY(16px); pointer-events:none;
+  /* No transition on the base: an outgoing slide snaps hidden instantly, so
+     only the incoming one animates. That avoids the two slides briefly stacking
+     mid-crossfade (both centered, both semi-transparent). */
+  transition:none;
+}
+.intro-slide.active{
+  opacity:1; transform:none; pointer-events:auto; z-index:2;
+  transition:opacity .42s ease, transform .42s ease;
+}
+
+.intro-art{height:220px; display:flex; align-items:center; justify-content:center; position:relative}
+.intro-copy{display:flex; flex-direction:column; gap:12px; align-items:center}
+.intro-h{
+  font-family:var(--serif); font-style:italic; font-weight:700;
+  font-size:clamp(30px,8.5vw,44px); line-height:1.02; margin:0; letter-spacing:-.015em;
+  text-wrap:balance; max-width:12ch; color:var(--cream);
+}
+.intro-h .hot{color:var(--tang)}
+.intro-sub{margin:0; color:var(--cream-dim); font-size:15px; line-height:1.5; max-width:26ch}
+.intro-sub b{color:var(--cream); font-weight:600}
+
+/* ── Slide 1 · the score ──────────────────────────────────────────────────*/
+.intro-glow{
+  position:absolute; width:230px; height:230px; border-radius:50%;
+  background:radial-gradient(circle, rgba(232,93,58,.30), transparent 62%);
+  filter:blur(6px);
+}
+.intro-score{
+  font-family:var(--serif); font-style:italic; font-weight:800;
+  font-size:150px; line-height:1; color:var(--cream); position:relative; z-index:2;
+  font-variant-numeric:tabular-nums; text-shadow:0 6px 40px rgba(0,0,0,.5);
+}
+.intro-cap{
+  position:relative; z-index:2; align-self:flex-end; margin-bottom:26px; margin-left:4px;
+  font-family:var(--serif); font-style:italic; font-size:22px; color:var(--gold);
+}
+
+/* ── Slide 2 · the live edge glow ─────────────────────────────────────────*/
+.intro-phone{
+  position:relative; width:118px; height:212px; border-radius:22px;
+  background:var(--bg2); border:1px solid rgba(242,232,213,.12);
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+.intro-phone .edge{position:absolute; border-radius:6px; opacity:.95}
+.intro-phone .edge.top{top:-3px; left:16px; right:16px; height:5px;
+  background:var(--danger); box-shadow:0 0 18px 3px var(--danger)}
+.intro-phone .edge.bottom{bottom:-3px; left:16px; right:16px; height:5px;
+  background:var(--good); box-shadow:0 0 18px 3px var(--good)}
+.intro-phone .edge.left{left:-3px; top:36px; bottom:36px; width:5px;
+  background:var(--gold); box-shadow:0 0 16px 3px var(--gold)}
+.intro-phone .edge.right{right:-3px; top:36px; bottom:36px; width:5px;
+  background:var(--gold); box-shadow:0 0 16px 3px var(--gold)}
+.intro-phone .glyph{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-style:italic; font-weight:800; font-size:52px; color:var(--cream-dim);
+}
+.intro-edge-labels{position:absolute; inset:-30px; pointer-events:none}
+.intro-edge-labels span{
+  position:absolute; font:700 9px/1 var(--sans); letter-spacing:.16em; text-transform:uppercase;
+}
+.intro-edge-labels .l-top{top:-6px; left:50%; transform:translateX(-50%); color:var(--danger)}
+.intro-edge-labels .l-bottom{bottom:-6px; left:50%; transform:translateX(-50%); color:var(--good)}
+.intro-edge-labels .l-side{top:50%; right:-4px; transform:translateY(-50%); color:var(--gold)}
+
+/* ── Slide 3 · mount & drive ──────────────────────────────────────────────*/
+.intro-mount{position:relative; width:170px; height:190px}
+.intro-mphone{
+  position:absolute; left:50%; top:6px; transform:translateX(-50%) rotate(-7deg);
+  width:96px; height:150px; border-radius:16px;
+  background:var(--bg2); border:1px solid rgba(242,232,213,.14);
+  box-shadow:0 16px 34px rgba(0,0,0,.5);
+}
+.intro-mphone::after{ /* a little live-score tick on the mounted phone */
+  content:"92"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-style:italic; font-weight:800; font-size:34px; color:var(--gold);
+}
+.intro-mbase{
+  position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+  width:120px; height:26px; border-radius:0 0 40px 40px / 0 0 26px 26px;
+  background:linear-gradient(180deg,#241b19,#150f0e); border:1px solid rgba(242,232,213,.08);
+}
+.intro-mbase::before{
+  content:""; position:absolute; left:50%; top:-16px; transform:translateX(-50%);
+  width:14px; height:22px; border-radius:4px; background:#150f0e; border:1px solid rgba(242,232,213,.08);
+}
+
+/* ── Slide 4 · permission prime ───────────────────────────────────────────*/
+.intro-badge{
+  width:118px; height:118px; border-radius:50%;
+  background:radial-gradient(circle at 50% 34%, rgba(232,93,58,.22), rgba(232,93,58,.06));
+  border:1.5px solid rgba(232,93,58,.5);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--tang); font-size:52px; box-shadow:0 0 40px rgba(232,93,58,.22);
+}
+
+/* ── Footer: progress dots + primary action ───────────────────────────────*/
+.intro-foot{flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:20px; padding:0 34px}
+.intro-dots{display:flex; gap:9px}
+.intro-dots i{
+  width:7px; height:7px; border-radius:50%; background:rgba(242,232,213,.22);
+  transition:width .3s ease, background .3s ease;
+}
+.intro-dots i.on{width:22px; border-radius:5px; background:var(--tang)}
+.intro-next{
+  width:100%; max-width:420px; min-height:54px; border:0; border-radius:15px;
+  background:var(--tang); color:#160b08; cursor:pointer;
+  font:700 16px/1 var(--sans); letter-spacing:.01em;
+  -webkit-tap-highlight-color:transparent; transition:transform .12s ease, filter .12s ease;
+}
+.intro-next:active{transform:translateY(1px); filter:brightness(.94)}
+.intro-next.cta{box-shadow:0 10px 30px rgba(232,93,58,.32)}
+
+@media(prefers-reduced-motion:reduce){
+  .intro-overlay,.intro-slide,.intro-dots i,.intro-next{transition:none}
+}
+@media(max-height:680px){
+  .intro-art{height:170px}
+  .intro-score{font-size:120px}
+}
