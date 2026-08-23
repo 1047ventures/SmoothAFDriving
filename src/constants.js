@@ -27,6 +27,10 @@ export const OBD_DEVICE_KEY     = 'smoothaf.obd_device';
 // First-run visual intro shown once, before the first drive. Drive-first: it
 // primes permissions and sets expectations but never asks anyone to sign up.
 export const INTRO_SEEN_KEY     = 'smoothaf.intro_seen';
+// Shown once, after a drive, to a signed-out driver: share this drive + sign in
+// to keep it. Deferred to here (not the first open) so the ask lands after the
+// value is felt and some social capital is on the line.
+export const FIRST_CTA_KEY      = 'smoothaf.first_cta';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 // The anon key is public by design — it is the browser-facing key and carries no

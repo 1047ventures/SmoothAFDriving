@@ -1,0 +1,60 @@
+/* ── Post-drive share & save card (Q4) ──────────────────────────────────────
+   Floats over the recap once, for a signed-out driver. Same dark, serif-score
+   identity as the rest of the app; share leads, sign-in follows. */
+
+.pdcta-overlay{
+  position:fixed; inset:0; z-index:130;
+  display:flex; align-items:flex-end; justify-content:center;
+  background:rgba(8,6,6,.62); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  padding:20px 16px calc(env(safe-area-inset-bottom,0) + 20px);
+  opacity:1; transition:opacity .24s ease;
+}
+.pdcta-overlay.closing{opacity:0}
+
+.pdcta-card{
+  width:100%; max-width:440px;
+  background:linear-gradient(180deg, rgba(232,93,58,.08), transparent 42%), var(--bg2);
+  border:1px solid rgba(242,232,213,.12); border-radius:22px;
+  padding:28px 22px 20px; text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,.55);
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  transform:translateY(0); animation:pdcta-rise .34s cubic-bezier(.4,0,.2,1);
+}
+@keyframes pdcta-rise{from{transform:translateY(24px); opacity:.4} to{transform:none; opacity:1}}
+@media(prefers-reduced-motion:reduce){.pdcta-card{animation:none}}
+
+.pdcta-score{display:flex; align-items:baseline; gap:3px; margin-bottom:2px}
+.pdcta-score b{
+  font-family:var(--serif); font-style:italic; font-weight:800; font-size:66px; line-height:.9;
+  color:var(--cream); font-variant-numeric:tabular-nums;
+}
+.pdcta-score i{font-family:var(--serif); font-style:italic; font-size:20px; color:var(--gold)}
+
+.pdcta-h{
+  font-family:var(--serif); font-style:italic; font-weight:700; font-size:28px;
+  color:var(--cream); margin:6px 0 0; letter-spacing:-.01em;
+}
+.pdcta-sub{
+  margin:8px 0 18px; color:var(--cream-dim); font-size:14.5px; line-height:1.5; max-width:30ch;
+}
+
+.pdcta-primary,.pdcta-secondary{
+  width:100%; min-height:52px; border-radius:14px; cursor:pointer;
+  font:700 15.5px/1 var(--sans); -webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease, filter .12s ease, background .14s ease;
+}
+.pdcta-primary{
+  border:0; background:var(--tang); color:#160b08; margin-bottom:10px;
+  box-shadow:0 10px 26px rgba(232,93,58,.30);
+}
+.pdcta-primary:active{transform:translateY(1px); filter:brightness(.95)}
+.pdcta-secondary{
+  background:transparent; color:var(--cream); border:1px solid rgba(242,232,213,.22);
+}
+.pdcta-secondary:active{background:rgba(242,232,213,.06)}
+.pdcta-skip{
+  margin-top:12px; background:none; border:0; cursor:pointer;
+  color:var(--muted); font:600 13px/1 var(--sans); letter-spacing:.02em; padding:8px 12px;
+  -webkit-tap-highlight-color:transparent;
+}
+.pdcta-skip:active{color:var(--cream-dim)}
