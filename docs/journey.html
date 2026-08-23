@@ -1,0 +1,480 @@
+<title>Zero to Scored Drive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500;1,6..72,600&display=swap">
+<style>
+  /* ── Smooth AF Driving &mdash; Customer Journey ──────────────────────────────────
+     Single dark world on purpose: this is the product's own skin (near-black
+     ground, cream type, tangerine signature, gold second). Every colour is
+     painted from a token and explicitly, so it holds on any host ground. */
+  :root{
+    --bg:#0A0908;
+    --panel:#141110;
+    --panel-2:#1B1614;
+    --line:rgba(242,232,213,.10);
+    --line-2:rgba(242,232,213,.18);
+    --cream:#F2E8D5;
+    --dim:#A99F8C;
+    --muted:#7C7364;
+    --tang:#E85D3A;
+    --tang-soft:rgba(232,93,58,.14);
+    --gold:#C4A962;
+    --good:#6FB669;
+    --warn:#E8A03A;
+    --danger:#E0503A;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--cream);
+    font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    background-image:
+      radial-gradient(130% 70% at 50% -8%,rgba(232,93,58,.09),transparent 58%),
+      radial-gradient(90% 60% at 100% 4%,rgba(196,169,98,.05),transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px 120px}
+
+  /* ── Header ──────────────────────────────────────────────────────────────*/
+  header{padding:64px 0 30px;position:relative}
+  .eyebrow{
+    font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--gold);font-weight:600;margin:0 0 18px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .eyebrow::before{content:"";width:34px;height:2px;background:var(--tang);border-radius:2px}
+  h1{
+    font-family:var(--serif);font-style:italic;font-weight:500;
+    font-size:clamp(38px,8vw,74px);line-height:.98;margin:0;
+    letter-spacing:-.015em;text-wrap:balance;color:var(--cream);
+  }
+  h1 em{font-style:italic;color:var(--tang);font-weight:600}
+  .lede{
+    margin:26px 0 0;max-width:60ch;color:var(--dim);
+    font-size:clamp(15px,2.4vw,17.5px);line-height:1.6;
+  }
+  .lede b{color:var(--cream);font-weight:600}
+
+  /* ── Stat band ───────────────────────────────────────────────────────────*/
+  .band{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    margin-top:40px;background:var(--line);
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  }
+  .band .cell{background:var(--panel);padding:22px 22px}
+  .band .n{
+    font-family:var(--serif);font-style:italic;font-weight:600;
+    font-size:clamp(30px,5vw,44px);line-height:1;color:var(--cream);
+    font-variant-numeric:tabular-nums;display:block;
+  }
+  .band .n.hot{color:var(--tang)}
+  .band .l{
+    display:block;margin-top:10px;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);line-height:1.4;
+  }
+
+  /* ── North star ──────────────────────────────────────────────────────────*/
+  .north{
+    margin-top:16px;padding:22px 24px;border-radius:16px;
+    background:linear-gradient(180deg,var(--tang-soft),transparent 90%),var(--panel);
+    border:1px solid rgba(232,93,58,.28);
+    display:flex;gap:16px;align-items:flex-start;
+  }
+  .north .star{font-size:22px;line-height:1.2;flex-shrink:0}
+  .north .txt{font-size:15.5px;color:var(--cream);line-height:1.55}
+  .north .txt b{color:var(--tang);font-weight:600}
+  .north .txt span{color:var(--dim)}
+
+  /* ── The route ───────────────────────────────────────────────────────────*/
+  .route{position:relative;margin-top:64px;padding-left:0}
+  .route-head{
+    display:flex;align-items:baseline;gap:14px;margin-bottom:8px;
+  }
+  .route-head h2{
+    font-family:var(--serif);font-style:italic;font-weight:500;
+    font-size:26px;margin:0;letter-spacing:-.01em;
+  }
+  .route-head .sub{font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+  .route-head .rule{flex:1;height:1px;background:var(--line);align-self:center}
+
+  /* The spine: one continuous line the waypoints hang on &mdash; the drive itself. */
+  .legs{position:relative;margin-top:30px}
+  .legs::before{
+    content:"";position:absolute;left:19px;top:14px;bottom:40px;width:2px;
+    background:linear-gradient(180deg,var(--tang),var(--gold) 55%,var(--line-2));
+    border-radius:2px;
+  }
+
+  .stage{position:relative;padding:0 0 30px 62px}
+  .stage:last-child{padding-bottom:0}
+  .dot{
+    position:absolute;left:8px;top:8px;width:24px;height:24px;border-radius:50%;
+    background:var(--bg);border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:var(--gold);
+    font-variant-numeric:tabular-nums;z-index:2;
+  }
+  .dot.hot{border-color:var(--tang);color:var(--tang);box-shadow:0 0 0 5px rgba(232,93,58,.10)}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:16px;padding:22px 22px 8px;
+  }
+  .card:hover{border-color:var(--line-2)}
+  .stage-name{
+    font-family:var(--serif);font-style:italic;font-weight:600;
+    font-size:23px;line-height:1.1;margin:0;color:var(--cream);letter-spacing:-.01em;
+  }
+  .moment{
+    margin:9px 0 0;font-size:14.5px;color:var(--gold);line-height:1.5;
+    font-style:italic;font-family:var(--serif);
+  }
+  .today{
+    margin:16px 0 4px;font-size:14px;color:var(--dim);line-height:1.6;
+    padding:13px 15px;background:var(--panel-2);border-radius:11px;
+    border-left:2px solid var(--line-2);
+  }
+  .today b{color:var(--cream);font-weight:600}
+  .today .tag{
+    display:inline-block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;margin-right:8px;
+  }
+
+  /* Friction items: severity chip + the snag &rarr; the cut. */
+  .frictions{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column}
+  .fr{
+    display:grid;grid-template-columns:auto 1fr;gap:12px;
+    padding:14px 2px;border-top:1px solid var(--line);align-items:start;
+  }
+  .sev{
+    font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;
+    padding:4px 8px;border-radius:6px;white-space:nowrap;margin-top:2px;
+    font-variant-numeric:tabular-nums;
+  }
+  .sev--high{background:rgba(224,80,58,.16);color:#FF7A62}
+  .sev--med{background:rgba(232,160,58,.15);color:var(--warn)}
+  .sev--low{background:rgba(111,182,105,.14);color:var(--good)}
+  .fr .body{min-width:0}
+  .fr .snag{font-size:14px;color:var(--cream);line-height:1.5}
+  .fr .snag code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em;
+    color:var(--warn);background:rgba(232,160,58,.08);padding:1px 5px;border-radius:4px;
+  }
+  .fr .fix{
+    margin-top:6px;font-size:13.5px;color:var(--dim);line-height:1.55;
+    display:flex;gap:8px;
+  }
+  .fr .fix::before{content:"\2192";color:var(--tang);font-weight:700;flex-shrink:0}
+  .fr .fix b{color:var(--cream);font-weight:600}
+
+  /* ── Fix-first list ──────────────────────────────────────────────────────*/
+  .priorities{margin-top:72px}
+  .priorities h2{
+    font-family:var(--serif);font-style:italic;font-weight:500;
+    font-size:clamp(26px,5vw,34px);margin:0 0 6px;letter-spacing:-.01em;
+  }
+  .priorities .psub{color:var(--dim);font-size:14.5px;margin:0 0 26px;max-width:56ch}
+  .plist{display:flex;flex-direction:column;gap:12px}
+  .p{
+    display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;
+  }
+  .p .rank{
+    font-family:var(--serif);font-style:italic;font-weight:600;font-size:30px;
+    color:var(--tang);font-variant-numeric:tabular-nums;line-height:1;min-width:36px;
+  }
+  .p .pbody .pt{font-size:15.5px;color:var(--cream);font-weight:600}
+  .p .pbody .pd{font-size:13px;color:var(--dim);margin-top:3px;line-height:1.5}
+  .p .stageref{
+    font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;white-space:nowrap;text-align:right;
+  }
+  @media(max-width:560px){
+    .p{grid-template-columns:auto 1fr}
+    .p .stageref{grid-column:2;text-align:left;margin-top:-4px}
+  }
+
+  footer{
+    margin-top:80px;padding-top:26px;border-top:1px solid var(--line);
+    color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;
+  }
+  footer b{color:var(--dim);font-weight:600}
+
+  a{color:var(--tang);text-decoration:none}
+  a:focus-visible,.p:focus-visible{outline:2px solid var(--tang);outline-offset:3px;border-radius:4px}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Smooth AF &middot; Customer Journey</p>
+    <h1>Zero to a scored drive they want to <em>share</em></h1>
+    <p class="lede">Every stage a new driver moves through &mdash; from first hearing about it to coming back for a fifth drive &mdash; read against what the app <b>actually does today</b>. Each waypoint names the moment they're in, the current reality, and the friction worth cutting to keep the path intuitive.</p>
+
+    <div class="band">
+      <div class="cell"><span class="n">8</span><span class="l">Stages, discovery<br>to retention</span></div>
+      <div class="cell"><span class="n">14</span><span class="l">Friction points<br>found in the flow</span></div>
+      <div class="cell"><span class="n hot">4</span><span class="l">Worth fixing<br>before more testers</span></div>
+    </div>
+
+    <div class="north">
+      <span class="star">&#127919;</span>
+      <p class="txt"><b>North star:</b> a stranger should get from <span>"what's this?"</span> to a scored drive they want to share &mdash; <b>without reading instructions or hitting a single wall.</b> Every friction below is measured against that.</p>
+    </div>
+  </header>
+
+  <section class="route" aria-label="The journey, stage by stage">
+    <div class="route-head">
+      <h2>The route</h2>
+      <span class="sub">chronological &mdash; the order a real driver hits them</span>
+      <span class="rule"></span>
+    </div>
+
+    <div class="legs">
+
+      <!-- 1 -->
+      <article class="stage">
+        <span class="dot hot">1</span>
+        <div class="card">
+          <h3 class="stage-name">Discovery</h3>
+          <p class="moment">"A friend beat my drive &mdash; what is this?"</p>
+          <p class="today"><span class="tag">Today</span>Word of mouth and a manual TestFlight invite. <b>smoothafdriving.com</b> is a marketing/brand site, and <b>/tracker</b> still serves a dead, stale tracker from the old codebase.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--high">High</span>
+              <div class="body">
+                <div class="snag">No App Store presence &mdash; installing means getting a TestFlight invite <em>and</em> owning the TestFlight app. That's two unfamiliar steps before the app even opens.</div>
+                <div class="fix"><span>Publish a <b>public TestFlight link</b> now; App Store submission as the real unlock. One tap, no invite chase.</span></div>
+              </div>
+            </li>
+            <li class="fr">
+              <span class="sev sev--med">Med</span>
+              <div class="body">
+                <div class="snag">The <code>/tracker</code> page looks broken &mdash; it's what made the app seem dead before. A curious visitor lands on a corpse.</div>
+                <div class="fix"><span>Turn <code>/tracker</code> into a <b>"Download the app"</b> page. Kill the confusion, capture the intent.</span></div>
+              </div>
+            </li>
+            <li class="fr">
+              <span class="sev sev--med">Med</span>
+              <div class="body">
+                <div class="snag">No built-in way to <em>share a score</em> &mdash; the most natural growth loop (brag &rarr; friend installs) isn't wired to the front door.</div>
+                <div class="fix"><span>Every shared score card carries an install link straight back to this stage. Close the loop.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 2 -->
+      <article class="stage">
+        <span class="dot hot">2</span>
+        <div class="card">
+          <h3 class="stage-name">First open</h3>
+          <p class="moment">"Okay, I'm in. Now what do I do?"</p>
+          <p class="today"><span class="tag">Today</span>Lands straight on the home screen &mdash; <b>"Hey, Driver."</b> No value intro, no "mount your phone," no permission priming. The first-run onboarding is designed but not built.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--high">High</span>
+              <div class="body">
+                <div class="snag">A cold drop onto home, with nothing framing what the app is for or what to do next. The only intro (a name + email prompt) doesn't appear until they try to drive.</div>
+                <div class="fix"><span>Build the <b>first-run intro</b>: three quick value cards &rarr; "mount your phone" &rarr; permission priming, <em>before</em> the first drive. Set the expectation, then earn it.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 3 -->
+      <article class="stage">
+        <span class="dot">3</span>
+        <div class="card">
+          <h3 class="stage-name">Identity</h3>
+          <p class="moment">"Do I have to sign up before I can even try it?"</p>
+          <p class="today"><span class="tag">Today</span>Anonymous use works &mdash; you can drive without an account, and drives get claimed to you the moment you sign in. <b>Sign in with Apple</b> is one tap; email is a 6-digit code.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--low">Low</span>
+              <div class="body">
+                <div class="snag">Good bones &mdash; no signup wall. But the <em>value</em> of signing in (your history follows you to any phone) is never sold, so most people won't.</div>
+                <div class="fix"><span>Lead with Apple. Offer sign-in <b>after the first great recap</b> &mdash; "keep this drive forever" at peak delight, not as a gate up front.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="stage">
+        <span class="dot">4</span>
+        <div class="card">
+          <h3 class="stage-name">Add your car</h3>
+          <p class="moment">"Which of these is my car? Do I need a photo?"</p>
+          <p class="today"><span class="tag">Today</span>A garage with eight vehicle types and an optional car photo. The prompt to add a car fires <b>as the first drive starts.</b></p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--med">Med</span>
+              <div class="body">
+                <div class="snag">The car prompt interrupts the exact moment they're trying to pull away and drive &mdash; the worst time to ask them to browse vehicle types.</div>
+                <div class="fix"><span>Move the car pick into the <b>calm first-run</b>, not the drive moment. Make the garage a reward, not a toll booth.</span></div>
+              </div>
+            </li>
+            <li class="fr">
+              <span class="sev sev--med">Med</span>
+              <div class="body">
+                <div class="snag">Car <em>photos</em> live only on the device &mdash; sign in on a new phone and your cars are there but their photos are gone.</div>
+                <div class="fix"><span>Sync car photos to the account alongside the garage, so identity is truly portable.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 5 -->
+      <article class="stage">
+        <span class="dot hot">5</span>
+        <div class="card">
+          <h3 class="stage-name">First-drive setup</h3>
+          <p class="moment">"I tapped record&hellip; why is it just sitting there?"</p>
+          <p class="today"><span class="tag">Today</span><b>"Acquiring GPS&hellip;"</b>, then location + motion permission prompts (iOS needs a tap for motion). Then a 10-second calibration while moving. If a permission is denied, the drive aborts with a toast.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--high">High</span>
+              <div class="body">
+                <div class="snag">Permissions are asked <em>cold</em>, at the worst moment, with no "why." Deny one and the drive dies on a toast &mdash; a dead end, not a recovery.</div>
+                <div class="fix"><span>Prime permissions in first-run with the reason. On denial, show an <b>inline "Enable location" button</b>, not a toast that strands them.</span></div>
+              </div>
+            </li>
+            <li class="fr">
+              <span class="sev sev--med">Med</span>
+              <div class="body">
+                <div class="snag">The 10-second calibration needs the car <em>moving</em> &mdash; a first-timer sitting in a parked car can read the wait as "stuck / broken."</div>
+                <div class="fix"><span>Say it plainly: <b>"Drive normally for 10 seconds while we calibrate."</b> Turn dead air into a clear instruction.</span></div>
+              </div>
+            </li>
+            <li class="fr">
+              <span class="sev sev--low">Low</span>
+              <div class="body">
+                <div class="snag">Location only runs in the foreground, so handing a destination to Maps would freeze recording. Background location isn't shipped yet.</div>
+                <div class="fix"><span>Add <b>Always-location</b> so recording survives a Maps handoff &mdash; unlocks the navigation flow.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 6 -->
+      <article class="stage">
+        <span class="dot">6</span>
+        <div class="card">
+          <h3 class="stage-name">The drive</h3>
+          <p class="moment">"Oh &mdash; the edges glow when I brake too hard. I get it."</p>
+          <p class="today"><span class="tag">Today</span>The strong part. A big live speed and score, screen edges glowing <b>green &rarr; amber &rarr; red</b> for how you're driving, an optional OBD sensor drawer, screen kept awake. Glanceable at speed, no reading required.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--low">Low</span>
+              <div class="body">
+                <div class="snag">Mostly solid. The Sensors drawer used to black out the drive and the OBD readout jittered as revs changed &mdash; both just fixed.</div>
+                <div class="fix"><span>Hold the line: keep it <b>glanceable</b>. Resist adding anything that needs reading while moving.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 7 -->
+      <article class="stage">
+        <span class="dot hot">7</span>
+        <div class="card">
+          <h3 class="stage-name">The recap</h3>
+          <p class="moment">"91. And it actually described how I drove."</p>
+          <p class="today"><span class="tag">Today</span>The payoff, and it lands: a score, seven dimensions, a map, and a coaching line that reads the <em>shape</em> of the trip &mdash; all on one screen. This is the peak emotional moment of the whole journey.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--high">High</span>
+              <div class="body">
+                <div class="snag">This peak is where two loops should close &mdash; <em>capture</em> (sign in to keep it) and <em>growth</em> (share the score) &mdash; but neither is front-and-centre here.</div>
+                <div class="fix"><span>Put <b>"Save this forever"</b> and <b>"Share your score"</b> right on the recap. Convert delight into an account and a referral in the same breath.</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 8 -->
+      <article class="stage">
+        <span class="dot">8</span>
+        <div class="card">
+          <h3 class="stage-name">Coming back</h3>
+          <p class="moment">"Am I actually getting smoother on my commute?"</p>
+          <p class="today"><span class="tag">Today</span>Drives group by road corridor, and there's a server-derived leaderboard. The Trends screen's data is built and tested &mdash; the tap-through UI is the missing piece. Goals aren't built yet.</p>
+          <ul class="frictions">
+            <li class="fr">
+              <span class="sev sev--med">Med</span>
+              <div class="body">
+                <div class="snag">The core retention hook &mdash; "am I improving?" &mdash; isn't visible yet. Trends data exists but has no screen, and the leaderboard shows empty "Corridors / Rivals" tabs.</div>
+                <div class="fix"><span>Ship the <b>Trends UI</b>; fill or hide the empty leaderboard tabs so nothing reads as broken.</span></div>
+              </div>
+            </li>
+            <li class="fr">
+              <span class="sev sev--low">Low</span>
+              <div class="body">
+                <div class="snag">Cross-device history works, but a resold or new phone won't pull back the detailed GPS map tracks &mdash; only the summaries.</div>
+                <div class="fix"><span>Fine for now; revisit if testers ask "where's my route from last week?"</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="priorities" aria-label="What to fix first">
+    <h2>Fix these four first</h2>
+    <p class="psub">Ranked by how much friction they remove per hour of work, with real testers about to arrive. Everything else can wait behind these.</p>
+    <div class="plist">
+      <div class="p">
+        <div class="rank">1</div>
+        <div class="pbody">
+          <div class="pt">Build the first-run intro + permission priming</div>
+          <div class="pd">The single biggest gap: new users are dropped cold and hit permission walls mid-drive. Value cards &rarr; mount &rarr; prime, before they ever tap record.</div>
+        </div>
+        <div class="stageref">Stages 2 &middot; 5</div>
+      </div>
+      <div class="p">
+        <div class="rank">2</div>
+        <div class="pbody">
+          <div class="pt">Put "Save" + "Share" on the recap</div>
+          <div class="pd">Capture identity and referrals at the emotional peak. This is the growth engine and the retention hook in one screen &mdash; and it feeds discovery.</div>
+        </div>
+        <div class="stageref">Stages 7 &rarr; 1</div>
+      </div>
+      <div class="p">
+        <div class="rank">3</div>
+        <div class="pbody">
+          <div class="pt">Make the front door real</div>
+          <div class="pd">Public TestFlight link, and turn the dead <code>/tracker</code> page into a download. Stop losing the curious before they install.</div>
+        </div>
+        <div class="stageref">Stage 1</div>
+      </div>
+      <div class="p">
+        <div class="rank">4</div>
+        <div class="pbody">
+          <div class="pt">Recover gracefully from denied permissions</div>
+          <div class="pd">Replace the dead-end toast with an inline "Enable location" action, and label the calibration wait. Rescue the drives you're losing at setup.</div>
+        </div>
+        <div class="stageref">Stage 5</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span><b>Smooth AF Driving</b> &middot; customer journey, grounded in the shipped app</span>
+    <span>Measured against one north star: zero to a shareable drive, no walls</span>
+  </footer>
+</div>
