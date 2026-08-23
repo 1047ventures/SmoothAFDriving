@@ -13,9 +13,15 @@ from a phone, and expects you to carry the detail.
   product/direction fork.
 - **Answer in three sections, needs-you first.** Lead every substantive reply
   with **🔴 NEEDS YOU** (things blocked on the owner — the ask, then why, one
-  line each; omit if nothing). Then **⚠️ PROBLEMS** (errors hit and what you did,
-  including your own mistakes). Then **✅ DONE** (completed work, one line each).
-  Detail, logs, and code are offered on request, not dumped by default.
+  line each). Then **⚠️ PROBLEMS** (errors hit and what you did, including your
+  own mistakes). Then **✅ DONE** (completed work, one line each). Detail, logs,
+  and code are offered on request, not dumped by default.
+  - **The red header is an alarm — only raise it for a real, current blocker.**
+    If nothing genuinely needs the owner, **omit the 🔴 NEEDS YOU section
+    entirely** — do not write "NEEDS YOU — nothing", and never put optional,
+    "worth a look", or FYI items under it. A red alert with nothing behind it
+    reads as manufactured urgency and erodes trust. Non-blocking suggestions go
+    in ✅ DONE or a plain closing line, not under the alarm.
 - **Verify against the running system, then say so plainly.** See the rule
   below. When something failed, report it with the evidence; don't smooth it
   over.
