@@ -172,6 +172,7 @@ const state = {
   deviceId:  null,
   writeChar: null,   // { service, characteristic }
   notifyChar:null,
+  writeNoResponse: false, // dongle's write char only supports write-without-response
   buffer:    '',
   pending:   null,   // { resolve, timer }
   queue:     Promise.resolve(),
@@ -195,13 +196,20 @@ export function isConnected(){ return Boolean(state.deviceId); }
 export async function discoverPair(services){
   const scan = (list) => {
     for (const svc of list || []){
-      let write = null, notify = null;
+      let write = null, notify = null, writeNoResponse = false;
       for (const ch of svc.characteristics || []){
         const p = ch.properties || {};
-        if (!write  && (p.write || p.writeWithoutResponse)) write  = ch.uuid;
-        if (!notify && (p.notify || p.indicate))            notify = ch.uuid;
+        if (!write  && (p.write || p.writeWithoutResponse)){
+          write = ch.uuid;
+          // Many ELM327 clones expose a write characteristic that ONLY supports
+          // write-without-response. Calling write-with-response on it means iOS
+          // never fires the write-completion, so the send hangs forever. Track
+          // which kind we got and let send() pick the matching BLE call.
+          writeNoResponse = !p.write && !!p.writeWithoutResponse;
+        }
+        if (!notify && (p.notify || p.indicate)) notify = ch.uuid;
       }
-      if (write && notify) return { service: svc.uuid, write, notify };
+      if (write && notify) return { service: svc.uuid, write, notify, writeNoResponse };
     }
     return null;
   };
@@ -231,20 +239,32 @@ function onData(value){
  * command sent before the first replies makes the two answers indistinguishable.
  */
 export function send(cmd, timeoutMs = 4000){
-  state.queue = state.queue.then(async () => {
-    if (!state.deviceId) throw new Error('not connected');
+  // The whole send is ONE promise that always settles — via the '>' prompt
+  // (onData), the timeout, or a failed/stalled write. Crucially the write is NOT
+  // awaited before the promise can settle: an ELM327 clone that never
+  // acknowledges a write used to hang this promise forever, and because the
+  // queue is a single chained promise, one hang wedged every future command
+  // (including reconnects). Now the timeout always frees the queue.
+  state.queue = state.queue.then(() => new Promise((resolve) => {
+    if (!state.deviceId || !state.writeChar){ resolve(''); return; }
     state.buffer = '';
-    const payload = new TextEncoder().encode(cmd + '\r');
-    const reply = new Promise((resolve) => {
-      const timer = setTimeout(() => { state.pending = null; resolve(''); }, timeoutMs);
-      state.pending = { resolve, timer };
-    });
-    await BleClient.write(
-      state.deviceId, state.writeChar.service, state.writeChar.characteristic,
-      new DataView(payload.buffer),
-    );
-    return reply;
-  }).catch(() => '');
+    const done = (val) => {
+      if (state.pending?.timer) clearTimeout(state.pending.timer);
+      state.pending = null;
+      resolve(val);
+    };
+    const timer = setTimeout(() => done(''), timeoutMs);
+    state.pending = { resolve: done, timer };
+
+    const payload = new DataView(new TextEncoder().encode(cmd + '\r').buffer);
+    const { service, characteristic } = state.writeChar;
+    const write = state.writeNoResponse
+      ? BleClient.writeWithoutResponse(state.deviceId, service, characteristic, payload)
+      : BleClient.write(state.deviceId, service, characteristic, payload);
+    // Fire-and-observe: a rejected write settles now instead of waiting out the
+    // timeout, but a stalled one still can't block — the timeout owns that.
+    Promise.resolve(write).catch(() => done(''));
+  })).catch(() => '');
   return state.queue;
 }
 
@@ -263,13 +283,19 @@ export function send(cmd, timeoutMs = 4000){
  */
 async function negotiate(deviceId, name, onStatus){
   state.deviceId = deviceId;
+  // Fresh transport for every connect — a queue left pending by an earlier
+  // failed/stalled attempt must never carry over and wedge this handshake.
+  state.queue   = Promise.resolve();
+  state.buffer  = '';
+  state.pending = null;
 
   const services = await BleClient.getServices(deviceId);
   const pair = await discoverPair(services);
   if (!pair) { await disconnect(); throw new Error('not an ELM327 adapter'); }
 
-  state.writeChar  = { service: pair.service, characteristic: pair.write };
-  state.notifyChar = { service: pair.service, characteristic: pair.notify };
+  state.writeChar       = { service: pair.service, characteristic: pair.write };
+  state.notifyChar      = { service: pair.service, characteristic: pair.notify };
+  state.writeNoResponse = !!pair.writeNoResponse;
 
   await BleClient.startNotifications(deviceId, pair.service, pair.notify, onData);
 
@@ -348,6 +374,7 @@ export async function disconnect(){
   state.deviceId = null;
   state.pending  = null;
   state.buffer   = '';
+  state.queue    = Promise.resolve();  // never carry a stalled command into the next session
   if (id) { try { await BleClient.disconnect(id); } catch {} }
 }
 

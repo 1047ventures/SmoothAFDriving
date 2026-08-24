@@ -124,13 +124,17 @@ describe('discoverPair', () => {
     expect(pair.service).toBe(KNOWN_SERVICES[0]);
     expect(pair.write).toBe('fff2');
     expect(pair.notify).toBe('fff1');
+    // fff2 supports write-with-response, so use it (not the no-response path).
+    expect(pair.writeNoResponse).toBe(false);
   });
 
-  it('falls back to any service exposing both write and notify', async () => {
+  it('falls back to any service exposing both write and notify, flagging a write-without-response char', async () => {
     const pair = await discoverPair([
       svc('custom', [ch('x', { writeWithoutResponse: true }), ch('y', { indicate: true })]),
     ]);
-    expect(pair).toEqual({ service: 'custom', write: 'x', notify: 'y' });
+    // The char only supports write-without-response — send() must use the
+    // matching BLE call or the write stalls and wedges the whole queue.
+    expect(pair).toEqual({ service: 'custom', write: 'x', notify: 'y', writeNoResponse: true });
   });
 
   it('returns null when nothing can both write and notify', async () => {
