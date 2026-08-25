@@ -266,7 +266,9 @@ file, then publish with **both** `file_path: docs/roadmap.html` and that `url` �
 publishing without the `url` creates a second artifact and orphans the link the
 user has bookmarked. Keep `favicon: 🏎️` stable, and **always re-stamp the
 "Updated" line in the header**; changing content without the date makes the page
-look stale to the user.
+look stale to the user. **Pull that stamp from the real clock — run `date` and
+use what it returns.** Do not guess or infer the date/time from context; that
+has already put a wrong date on the page.
 
 ## Home screen audit artifact
 
