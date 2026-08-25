@@ -276,7 +276,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Aug 22, 2026 · 12:30 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Aug 22, 2026 · 3:20 PM MDT</b>
     </div>
     
   </header>
@@ -286,10 +286,10 @@
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T293</span>OBD connect no longer wedges <span class="sub">a stalled BLE write used to poison every future reconnect — fixed; timeouts freed</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T291</span>Auto-start nudge <span class="sub">dongle links while the app's open → one-tap "start your drive?"</span></div>
       <div class="lane-item"><span class="tn tn--ship">T288</span>Post-drive share &amp; save <span class="sub">at the recap: share your drive, then sign in to keep it — value first, no wall</span></div>
       <div class="lane-item"><span class="tn tn--ship">T287</span>Driving Trends screen <span class="sub">tap the home sparkline — pick a metric, see if you're improving</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T286</span>First-run intro <span class="sub">a wordless, drive-first welcome that primes permissions — no signup wall</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T284</span>OBD auto-reconnect <span class="sub">reconnects to your last adapter on its own, so drives stop missing the data</span></div>
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
@@ -297,34 +297,46 @@
     </div>
     <div class="lane lane--next">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q3</span>Auto-start prompt <span class="sub">nudge to open the app when the phone hits CarPlay / the OBD dongle — every-drive habit</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q4</span>Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q5</span>Background location &rarr; Maps handoff <span class="sub">its own piece; keeps recording alive while you navigate</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q6</span>Redesign the car-type icons <span class="sub">flagged — the current set isn't it; not urgent</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q7</span>Home screen: link or cut what the audit flagged</div>
+      <div class="lane-item"><span class="tn tn--next">Q3</span>Native background foundation <span class="sub">Always-location + background mode + plugins — the keystone that unlocks both items below (your call; see Waiting on you)</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q4</span>Maps handoff, recording survives <span class="sub">hand a destination to Maps and keep scoring in the background — needs Q3</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q5</span>Closed-app auto-start nudge <span class="sub">a notification when you start driving — the rest of Q3's idea; needs Q3</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q6</span>Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q7</span>Redesign the car-type icons <span class="sub">flagged — the current set isn't it; not urgent</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q8</span>Home screen: link Miles &rarr; Trends, delete the dead persona markup <span class="sub">all that's left from the re-audit</span></div>
     </div>
   </section>
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">1 open</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
         <summary class="wsum">
           <span class="pill p-next">Next drive</span>
-          <span class="t"><span class="tn tn--wait">Q1</span>Two things to eyeball with the dongle in <span class="tag">2 min</span></span>
+          <span class="t"><span class="tn tn--wait">Q1</span>Connect the dongle, then eyeball two things <span class="tag">2 min</span></span>
           <span class="chev">&#9654;</span>
         </summary>
         <div class="wbody">
+          <p>Connection kept timing out; that's a real bug (a stalled write wedged the queue) and it's <b>fixed in the newest build</b> &mdash; on your current build, a force-quit + dongle power-cycle should get you connected. Once it's live:</p>
           <ol>
-            <li><b>Does the gear number match reality?</b> If it's consistently off in a fixed way (e.g. shows 64 in 4th), tell me the number &mdash; that locks the decode.</li>
+            <li><b>Does the gear number match reality?</b> If it's consistently off in a fixed way (e.g. shows 64 in 4th), tell me the number &mdash; that locks the decode. (If gear never shows, your car likely doesn't expose it over standard OBD-II — not a bug.)</li>
             <li><b>Do the <code>hp</code> and <code>nm</code> cells appear?</b> That's the only way to know if your car reports the torque PIDs.</li>
           </ol>
-          <p>Wait for the newest TestFlight build first &mdash; earlier ones don't have this.</p>
         </div>
       </details>
 
+      <details class="wrow">
+        <summary class="wsum">
+          <span class="pill p-block">Decision</span>
+          <span class="t"><span class="tn tn--wait">Q3</span>Approve the native background foundation? <span class="tag">unblocks 3 features</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <p>Researched: keeping the drive recording while you're in Maps (and nudging you when a drive starts with the app closed) is fully doable on iOS &mdash; it's how Strava works &mdash; but it needs an <b>&ldquo;Always Location&rdquo; permission</b> + a background-location plugin. Real tradeoffs: more battery, and App Store review scrutinises Always-location. It only tests on TestFlight, not the web preview.</p>
+          <p class="note"><b>The call:</b> greenlight it and I build the Strava-style core first, then the Maps handoff, then the closed-app nudge. Two hard limits found: CarPlay-connect specifically isn't available to this app category, and iOS never fully auto-<i>starts</i> from closed &mdash; a tappable notification is the ceiling.</p>
+        </div>
+      </details>
 
     </div>
   </section>
