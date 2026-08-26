@@ -135,7 +135,7 @@ export const kmhToMps = kmh => (kmh * 1000) / 3600;
 // stock picker unusable. An ELM327 OBD dongle almost always advertises a name
 // containing one of these tokens, or one of the known ELM327 service UUIDs.
 // Filtering on that turns 100 unknowns into the one or two that could be the car.
-const OBD_NAME_RE = /obd|elm327|veepeak|vlink|vgate|obdlink|konnwei|panlong|viecar|carista|nexas|icar|kw902|scan(tool|ner)/i;
+const OBD_NAME_RE = /obd|elm327|veepeak|vlink|vgate|obdlink|konnwei|panlong|viecar|carista|nexas|icar|kw902|ancel|bafx|topdon|foseal|lelink|kobra|vpecker|scan(tool|ner)/i;
 
 /** True when a scanned device's name or advertised services look like an ELM327. */
 export function isLikelyObd(name = '', uuids = []){
