@@ -254,7 +254,12 @@ export function updateLiveUI(){
   const scoreEl = document.getElementById('live-score');
   {
     const nowMs = Date.now();
-    if (!state._lastLiveScoreT || nowMs - state._lastLiveScoreT > 1000){
+    // analyzeDrive(buildDriveFromState()) re-maps EVERY sample + event into a
+    // fresh drive object and re-runs the 7-dimension analysis over the whole
+    // drive. That cost grows every minute, and at 1×/s it's the single biggest
+    // sustained CPU draw of the record screen. 2.5s keeps the number visibly
+    // live while cutting that work ~60%. (The final score at stop is unchanged.)
+    if (!state._lastLiveScoreT || nowMs - state._lastLiveScoreT > 2500){
       state._lastLiveScoreT = nowMs;
       if (state.samples.length >= 3){
         state.liveScore = analyzeDrive(buildDriveFromState()).score;
@@ -337,25 +342,34 @@ export function updateLiveUI(){
   // buffered ETA. Hidden entirely for normal (no-destination) drives.
   updatePaceStrip(last, now);
 
-  // Avg speed
-  const avgMph = state.samples.length
-    ? Math.round(state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length * 2.23694)
+  // Avg speed + distance share one pass over the samples. This reduce ran
+  // twice per tick (once here, once for distance), 5×/s, growing with the
+  // drive — now it runs once and both readouts derive from it.
+  const avgMps = state.samples.length
+    ? state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length
     : 0;
-  $('#live-avg-speed').textContent = avgMph;
+  $('#live-avg-speed').textContent = Math.round(avgMps * 2.23694);
 
-  // Distance (avg speed × elapsed time, converted to miles)
+  // Distance (avg speed × elapsed time, converted to miles) — reuses avgMps
+  // from the single pass above.
   const distEl = document.getElementById('live-distance');
   if (distEl){
     const elapsedSecs = (Date.now() - state.startTime) / 1000;
-    const avgMps = state.samples.length
-      ? state.samples.reduce((s, x) => s + (x.speed || 0), 0) / state.samples.length : 0;
     distEl.textContent = (avgMps * elapsedSecs / 1609.34).toFixed(1);
   }
 
   updateRoadUI();
-  pushDebugSample(state);
-  renderDebugChart(document.getElementById('debug-canvas'));
-  updateDebugLegend(document.getElementById('debug-legend'));
+
+  // Sensor debug chart: only sample + redraw while the panel is actually open.
+  // This was redrawing a hidden <canvas> 5×/s for the whole drive — a canvas
+  // clear + six lane traces every 200ms with nobody looking — which is pure
+  // heat. When collapsed (the normal driving state) it now does nothing.
+  const debugPanel = document.getElementById('debug-panel');
+  if (debugPanel && debugPanel.classList.contains('open')){
+    pushDebugSample(state);
+    renderDebugChart(document.getElementById('debug-canvas'));
+    updateDebugLegend(document.getElementById('debug-legend'));
+  }
 }
 
 export function startRecording(){
