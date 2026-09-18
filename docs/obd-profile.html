@@ -1,0 +1,373 @@
+<title>The Driving Fingerprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500;1,6..72,600&display=swap">
+<style>
+  /* ── Smooth AF &middot; The Driving Fingerprint ────────────────────────────────────
+     Single dark world, matching the app and the rest of the doc suite (roadmap,
+     journey, audit). Every colour painted from a token so the page holds on any
+     host ground. */
+  :root{
+    --bg:#0A0908;
+    --panel:#141110;
+    --panel-2:#1B1614;
+    --line:rgba(242,232,213,.10);
+    --line-2:rgba(242,232,213,.18);
+    --cream:#F2E8D5;
+    --dim:#A99F8C;
+    --muted:#7C7364;
+    --tang:#E85D3A;   /* accelerator pedal &mdash; the master input */
+    --gold:#C4A962;   /* lateral g &mdash; the corner itself */
+    --sky:#6FA6C4;    /* speed */
+    --good:#6FB669;
+    --warn:#E8A03A;
+    --danger:#E0503A;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Roboto Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--cream);
+    font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    background-image:radial-gradient(120% 60% at 50% -6%,rgba(232,93,58,.09),transparent 58%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px 120px}
+
+  /* ── Header ─────────────────────────────────────────────────────────────*/
+  header{padding:60px 0 8px}
+  .kicker{
+    font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);
+    font-weight:600;margin:0 0 16px;display:flex;align-items:center;gap:12px;
+  }
+  .kicker::before{content:"";width:32px;height:2px;background:var(--tang);border-radius:2px}
+  h1{
+    font-family:var(--serif);font-style:italic;font-weight:600;
+    font-size:clamp(36px,8vw,66px);line-height:1;margin:0;letter-spacing:-.015em;text-wrap:balance;
+  }
+  .lede{margin:24px 0 0;max-width:64ch;color:var(--dim);font-size:clamp(15px,2.3vw,18px);line-height:1.6}
+  .lede b{color:var(--cream);font-weight:600}
+  .lede .hot{color:var(--tang);font-weight:600}
+
+  section{margin-top:66px}
+  .s-head{display:flex;align-items:baseline;gap:14px;margin:0 0 8px}
+  .s-eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--tang);font-weight:700}
+  .s-head h2{font-family:var(--serif);font-style:italic;font-weight:600;font-size:clamp(24px,4vw,32px);margin:0;letter-spacing:-.01em}
+  .s-head .rule{flex:1;height:1px;background:var(--line);align-self:center}
+  .s-sub{margin:2px 0 26px;color:var(--muted);font-size:14.5px;max-width:64ch;line-height:1.6}
+
+  /* ── The corner: two traces ─────────────────────────────────────────────*/
+  .corners{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.corners{grid-template-columns:1fr}}
+  .corner{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:18px 18px 14px;display:flex;flex-direction:column;
+  }
+  .corner.good{border-color:rgba(111,182,105,.34);background:linear-gradient(180deg,rgba(111,182,105,.05),transparent 55%),var(--panel)}
+  .corner.bad{border-color:rgba(224,80,58,.30);background:linear-gradient(180deg,rgba(224,80,58,.05),transparent 55%),var(--panel)}
+  .corner-tag{
+    display:inline-flex;align-self:flex-start;align-items:center;gap:7px;
+    font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
+    padding:5px 10px;border-radius:7px;margin-bottom:4px;
+  }
+  .corner.bad  .corner-tag{background:rgba(224,80,58,.15);color:#FF7A62}
+  .corner.good .corner-tag{background:rgba(111,182,105,.15);color:var(--good)}
+  .corner h3{font-family:var(--serif);font-style:italic;font-weight:600;font-size:20px;margin:6px 0 2px;color:var(--cream)}
+  .corner p{margin:0 0 8px;font-size:13.5px;color:var(--dim);line-height:1.55}
+  .corner p b{color:var(--cream);font-weight:600}
+  .trace{width:100%;height:auto;display:block}
+  .trace text{font-family:var(--sans);fill:var(--muted)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px 18px;margin-top:14px;padding:14px 4px 2px;border-top:1px solid var(--line)}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--dim)}
+  .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+
+  /* ── Channel tables ─────────────────────────────────────────────────────*/
+  .tier{margin-top:22px}
+  .tier-head{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+  .tier-head h3{font-family:var(--serif);font-style:italic;font-weight:600;font-size:19px;margin:0;color:var(--cream)}
+  .tier-head .k{font-size:11.5px;color:var(--muted);letter-spacing:.03em}
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  table{width:100%;border-collapse:collapse;min-width:520px}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  tr:last-child td{border-bottom:0}
+  td .ch{color:var(--cream);font-weight:600}
+  td .pid{font-family:var(--mono);font-size:12px;color:var(--gold)}
+  td .what{color:var(--dim)}
+  .st{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 7px;border-radius:5px;white-space:nowrap}
+  .st-live{background:rgba(111,182,105,.15);color:var(--good)}
+  .st-new{background:rgba(196,169,98,.15);color:var(--gold)}
+  .st-phone{background:rgba(111,166,196,.16);color:var(--sky)}
+  .st-no{background:rgba(224,80,58,.14);color:#FF7A62}
+
+  /* ── Fusion / blind spots ───────────────────────────────────────────────*/
+  .fuse{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:680px){.fuse{grid-template-columns:1fr}}
+  .fusecard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .fusecard h3{font-family:var(--serif);font-style:italic;font-weight:600;font-size:19px;margin:0 0 4px;color:var(--cream)}
+  .fusecard .miss{font-size:12px;color:#FF7A62;font-weight:600;letter-spacing:.02em;margin-bottom:10px}
+  .fusecard p{margin:0;font-size:14px;color:var(--dim);line-height:1.6}
+  .fusecard .recipe{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px}
+  .fusecard .recipe .chan{background:var(--panel-2);border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;color:var(--cream)}
+  .fusecard .recipe .op{color:var(--tang);font-weight:700}
+  .fusecard .recipe .eq{color:var(--muted)}
+  .fusecard .recipe .out{background:rgba(232,93,58,.14);border:1px solid rgba(232,93,58,.34);border-radius:999px;padding:4px 11px;color:var(--tang);font-weight:600}
+
+  /* ── The profile dimensions ─────────────────────────────────────────────*/
+  .dims{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.dims{grid-template-columns:1fr}}
+  .dim{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:6px}
+  .dim-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .dim h4{font-size:15px;color:var(--cream);font-weight:600;margin:0}
+  .dim .badge{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 7px;border-radius:5px;white-space:nowrap}
+  .b-up{background:rgba(196,169,98,.15);color:var(--gold)}
+  .b-new{background:rgba(232,93,58,.14);color:var(--tang)}
+  .b-has{background:rgba(111,182,105,.14);color:var(--good)}
+  .dim p{margin:0;font-size:13px;color:var(--dim);line-height:1.55}
+  .dim .feeds{margin-top:2px;font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+
+  /* ── Reality band ───────────────────────────────────────────────────────*/
+  .reality{background:var(--panel-2);border:1px solid var(--line-2);border-radius:16px;padding:24px 24px 20px;margin-top:8px}
+  .reality h3{font-family:var(--serif);font-style:italic;font-weight:600;font-size:20px;margin:0 0 10px;color:var(--cream)}
+  .reality p{margin:0 0 14px;font-size:14px;color:var(--dim);line-height:1.6;max-width:70ch}
+  .reality p b{color:var(--cream)}
+  .phase{display:grid;grid-template-columns:auto 1fr;gap:12px 16px;align-items:baseline;margin-top:16px}
+  .phase .n{font-family:var(--serif);font-style:italic;font-weight:600;font-size:20px;color:var(--tang);font-variant-numeric:tabular-nums}
+  .phase .d{font-size:13.5px;color:var(--dim);line-height:1.5;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .phase .d:last-child{border-bottom:0}
+  .phase .d b{color:var(--cream);font-weight:600}
+
+  footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  code{font-family:var(--mono);font-size:.85em;color:var(--gold)}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Smooth AF &middot; what the car can tell us</p>
+    <h1>The Driving Fingerprint</h1>
+    <p class="lede">A score says <b>how</b> smooth. A fingerprint says <b>who</b> &mdash; the shape of your inputs, read a few times a second. The richest signal isn't any single number; it's the <span class="hot">accelerator pedal traced through a corner</span>, against the g-force the car is actually pulling. That one pairing separates a clean line from a clumsy one &mdash; so it's where this starts.</p>
+  </header>
+
+  <!-- HERO: reading a corner -->
+  <section aria-label="Reading a corner">
+    <div class="s-head"><span class="s-eyebrow">The thesis</span><h2>Reading a corner</h2><span class="rule"></span></div>
+    <p class="s-sub">Same bend, same speed limit, two drivers. The score engine today sees roughly equal peak g. The <b>pedal trace</b> is where they stop being equal &mdash; and a dongle plus the phone's motion sensors can watch it the whole way through.</p>
+
+    <div class="corners">
+
+      <!-- BAD: brake and gun -->
+      <div class="corner bad">
+        <span class="corner-tag">&#9679; Brake &amp; gun</span>
+        <h3>In too hot, then a stab</h3>
+        <p>Full lift off the gas, brake hard into the apex, then <b>slam the throttle</b> to haul it back out. The g-arc spikes late and lopsided; the car is never settled.</p>
+        <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Brake-and-gun corner: pedal drops to zero, spikes on exit; lateral g is a late, sharp spike">
+          <!-- grid + phase markers -->
+          <line x1="34" y1="176" x2="330" y2="176" stroke="rgba(242,232,213,.14)" stroke-width="1"/>
+          <line x1="118" y1="24" x2="118" y2="176" stroke="rgba(242,232,213,.08)" stroke-width="1" stroke-dasharray="3 4"/>
+          <line x1="200" y1="24" x2="200" y2="176" stroke="rgba(242,232,213,.08)" stroke-width="1" stroke-dasharray="3 4"/>
+          <line x1="282" y1="24" x2="282" y2="176" stroke="rgba(242,232,213,.08)" stroke-width="1" stroke-dasharray="3 4"/>
+          <text x="118" y="194" font-size="9.5" text-anchor="middle" letter-spacing="1">ENTRY</text>
+          <text x="200" y="194" font-size="9.5" text-anchor="middle" letter-spacing="1">APEX</text>
+          <text x="282" y="194" font-size="9.5" text-anchor="middle" letter-spacing="1">EXIT</text>
+          <!-- lateral g area -->
+          <polygon points="34,176 34,172 90,166 140,150 185,80 200,48 214,92 250,150 300,170 330,173 330,176"
+                   fill="rgba(196,169,98,.12)"/>
+          <polyline points="34,172 90,166 140,150 185,80 200,48 214,92 250,150 300,170 330,173"
+                    fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round"/>
+          <!-- speed -->
+          <polyline points="34,52 90,70 140,112 185,152 200,158 230,132 280,92 330,66"
+                    fill="none" stroke="var(--sky)" stroke-width="1.6" stroke-dasharray="1 5" stroke-linecap="round"/>
+          <!-- pedal -->
+          <polyline points="34,92 96,96 112,172 190,172 198,172 205,34 216,30 244,58 300,50 330,52"
+                    fill="none" stroke="var(--tang)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+          <text x="126" y="166" font-size="9.5" fill="#FF7A62" font-weight="700" letter-spacing=".5">full lift</text>
+          <text x="214" y="26" font-size="9.5" fill="#FF7A62" font-weight="700" letter-spacing=".5">SLAM</text>
+        </svg>
+      </div>
+
+      <!-- GOOD: racing line -->
+      <div class="corner good">
+        <span class="corner-tag">&#9679; Carry the line</span>
+        <h3>Steady in, smooth out</h3>
+        <p>Ease off the gas, trail a little speed to the apex on the racing line, then <b>roll the throttle back on</b> progressively. The g-arc is one clean, symmetric hump &mdash; the car stays planted.</p>
+        <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Racing-line corner: pedal eases to a steady low then rolls on smoothly; lateral g is a clean symmetric arc">
+          <line x1="34" y1="176" x2="330" y2="176" stroke="rgba(242,232,213,.14)" stroke-width="1"/>
+          <line x1="118" y1="24" x2="118" y2="176" stroke="rgba(242,232,213,.08)" stroke-width="1" stroke-dasharray="3 4"/>
+          <line x1="200" y1="24" x2="200" y2="176" stroke="rgba(242,232,213,.08)" stroke-width="1" stroke-dasharray="3 4"/>
+          <line x1="282" y1="24" x2="282" y2="176" stroke="rgba(242,232,213,.08)" stroke-width="1" stroke-dasharray="3 4"/>
+          <text x="118" y="194" font-size="9.5" text-anchor="middle" letter-spacing="1">ENTRY</text>
+          <text x="200" y="194" font-size="9.5" text-anchor="middle" letter-spacing="1">APEX</text>
+          <text x="282" y="194" font-size="9.5" text-anchor="middle" letter-spacing="1">EXIT</text>
+          <!-- lateral g area: clean symmetric arc -->
+          <polygon points="34,176 34,172 80,150 128,104 172,74 200,68 228,74 272,104 320,150 330,158 330,176"
+                   fill="rgba(196,169,98,.12)"/>
+          <polyline points="34,172 80,150 128,104 172,74 200,68 228,74 272,104 320,150 330,158"
+                    fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round"/>
+          <!-- speed: gentle dip, carried -->
+          <polyline points="34,60 90,80 140,100 190,110 200,112 240,104 290,86 330,66"
+                    fill="none" stroke="var(--sky)" stroke-width="1.6" stroke-dasharray="1 5" stroke-linecap="round"/>
+          <!-- pedal: smooth ease down to steady, smooth roll-on -->
+          <polyline points="34,96 78,120 122,138 168,144 200,145 236,128 278,86 330,58"
+                    fill="none" stroke="var(--tang)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+          <text x="182" y="160" font-size="9.5" fill="var(--good)" font-weight="700" letter-spacing=".5">steady, light</text>
+          <text x="300" y="50" font-size="9.5" fill="var(--good)" font-weight="700" letter-spacing=".5">roll-on</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--tang)"></i>Accelerator pedal <span style="color:var(--muted)">&mdash; OBD 0x49</span></span>
+      <span><i style="background:var(--gold)"></i>Lateral g <span style="color:var(--muted)">&mdash; phone motion</span></span>
+      <span><i style="background:var(--sky);height:2px"></i>Speed <span style="color:var(--muted)">&mdash; OBD 0x0D</span></span>
+    </div>
+    <p class="s-sub" style="margin-top:20px">The tell is <b>pedal jerk</b> &mdash; how violently the foot moves &mdash; read against where you are in the g-arc. A near-vertical pedal edge at corner exit is the "gun"; a smooth ramp on the same part of the arc is the racing line. Two drivers can post the same average and the same top speed; only the trace tells them apart.</p>
+  </section>
+
+  <!-- THE CHANNELS -->
+  <section aria-label="The channels">
+    <div class="s-head"><span class="s-eyebrow">The raw material</span><h2>Every channel we can read</h2><span class="rule"></span></div>
+    <p class="s-sub">A standard ELM327 dongle speaks OBD-II Mode 01 &mdash; a fixed menu of PIDs. Not everything you'd want is on that menu (brakes and steering aren't), so the phone's own sensors carry the rest. Three tiers, honestly labelled.</p>
+
+    <div class="tier">
+      <div class="tier-head"><h3>Tier 1 &middot; From the dongle</h3><span class="k">standard PIDs, most cars answer these</span></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Channel</th><th>PID</th><th>Status</th><th>What it tells us</th></tr></thead>
+          <tbody>
+            <tr><td><span class="ch">Accelerator pedal</span></td><td><span class="pid">0x49</span></td><td><span class="st st-new">Decode &rarr; record</span></td><td class="what">Your actual foot. The master input for technique &mdash; decoded today but not yet saved per-sample. This is the one to promote first.</td></tr>
+            <tr><td><span class="ch">Throttle body</span></td><td><span class="pid">0x11</span></td><td><span class="st st-live">Live</span></td><td class="what">How the ECU translated your pedal (drive-by-wire). Diverges from the pedal on traction control / eco maps &mdash; interesting on its own.</td></tr>
+            <tr><td><span class="ch">Engine RPM</span></td><td><span class="pid">0x0C</span></td><td><span class="st st-live">Live</span></td><td class="what">Where you are in the powerband; shift timing; lugging vs revving it out.</td></tr>
+            <tr><td><span class="ch">Vehicle speed</span></td><td><span class="pid">0x0D</span></td><td><span class="st st-live">Live</span></td><td class="what">True wheel speed &mdash; GPS lags and smooths, the car knows now.</td></tr>
+            <tr><td><span class="ch">Engine load</span></td><td><span class="pid">0x04</span></td><td><span class="st st-live">Live</span></td><td class="what">How hard the engine is actually working for a given input.</td></tr>
+            <tr><td><span class="ch">Torque + reference</span></td><td><span class="pid">0x62 &middot; 0x63</span></td><td><span class="st st-live">Live</span></td><td class="what">Feeds derived horsepower (&tau; &times; rpm &divide; 7127). Optional on many cars.</td></tr>
+            <tr><td><span class="ch">Transmission gear</span></td><td><span class="pid">0xA4</span></td><td><span class="st st-live">If supported</span></td><td class="what">Current gear &mdash; many cars simply don't expose it; then we fall back to the rpm &divide; speed ratio.</td></tr>
+            <tr><td><span class="ch">Fuel rate</span></td><td><span class="pid">0x5E</span></td><td><span class="st st-new">New</span></td><td class="what">Instantaneous litres/hour &mdash; the real cost of gunning it, and the efficiency half of the score.</td></tr>
+            <tr><td><span class="ch">Coolant / oil temp</span></td><td><span class="pid">0x05 &middot; 0x5C</span></td><td><span class="st st-new">New</span></td><td class="what">Mechanical sympathy: was the car warm before it got driven hard?</td></tr>
+            <tr><td><span class="ch">Intake air / MAF</span></td><td><span class="pid">0x0F &middot; 0x10</span></td><td><span class="st st-new">New</span></td><td class="what">Airflow &mdash; context that makes load and fuel readings meaningful.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head"><h3>Tier 2 &middot; From the phone</h3><span class="k">what fills the dongle's blind spots</span></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Channel</th><th>Source</th><th>Status</th><th>What it tells us</th></tr></thead>
+          <tbody>
+            <tr><td><span class="ch">Lateral g</span></td><td class="what">accelerometer + gyro</td><td><span class="st st-phone">Phone</span></td><td class="what">The corner itself &mdash; the g-arc through entry, apex and exit. This is your "racing line", measured.</td></tr>
+            <tr><td><span class="ch">Longitudinal g</span></td><td class="what">accelerometer</td><td><span class="st st-phone">Phone</span></td><td class="what">The <em>feel</em> of braking and acceleration &mdash; how sharp, how sudden, the jerk behind the number.</td></tr>
+            <tr><td><span class="ch">Yaw rate</span></td><td class="what">gyroscope</td><td><span class="st st-phone">Phone</span></td><td class="what">How fast the car rotated &mdash; a stand-in for how quickly you turned the wheel.</td></tr>
+            <tr><td><span class="ch">Position &amp; route</span></td><td class="what">GPS</td><td><span class="st st-phone">Phone</span></td><td class="what">Where the corner was &mdash; so the same bend can be compared against itself over time.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head"><h3>Tier 3 &middot; Not on a standard dongle</h3><span class="k">the honest limits</span></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Channel</th><th>Why not</th><th></th><th>What we do instead</th></tr></thead>
+          <tbody>
+            <tr><td><span class="ch">Brake pedal angle / pressure</span></td><td class="what">Lives on the chassis/ABS bus, not OBD-II. Manufacturer-specific at best.</td><td><span class="st st-no">Reconstruct</span></td><td class="what">Pedal at zero + speed falling + a negative g spike = a braking event, with its hardness and smoothness.</td></tr>
+            <tr><td><span class="ch">Steering angle</span></td><td class="what">Also chassis-bus; not in the standard PID menu.</td><td><span class="st st-no">Reconstruct</span></td><td class="what">Lateral g + yaw + speed already describe the turn the wheel produced.</td></tr>
+            <tr><td><span class="ch">Wheel speeds &middot; ABS &middot; stability</span></td><td class="what">Private CAN traffic a generic ELM327 can't see.</td><td><span class="st st-no">Skip</span></td><td class="what">Not needed for a driving-style profile; noted so we don't promise it.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUSION -->
+  <section aria-label="Filling the blind spots">
+    <div class="s-head"><span class="s-eyebrow">The trick</span><h2>Filling the blind spots</h2><span class="rule"></span></div>
+    <p class="s-sub">The two channels you'd most want for corner technique &mdash; brake and steering &mdash; are exactly the two a generic dongle can't read. It doesn't matter: the pedal (OBD) and the phone's motion sensors reconstruct both, and arguably describe the <em>driving</em> better than a raw sensor angle would.</p>
+    <div class="fuse">
+      <div class="fusecard">
+        <h3>Braking, without a brake sensor</h3>
+        <div class="miss">&#10005; no brake-pedal PID</div>
+        <p>You don't need the pedal angle to know a brake was hard or smooth. When the accelerator reads zero, the speed is dropping, and the phone feels a backward g, that <em>is</em> a braking event &mdash; and the shape of that g curve is exactly the "early and gentle" vs "late and hard" distinction.</p>
+        <div class="recipe"><span class="chan">pedal = 0</span><span class="op">+</span><span class="chan">speed &darr;</span><span class="op">+</span><span class="chan">&minus;g</span><span class="eq">&rarr;</span><span class="out">braking, graded</span></div>
+      </div>
+      <div class="fusecard">
+        <h3>The corner, without a steering sensor</h3>
+        <div class="miss">&#10005; no steering-angle PID</div>
+        <p>Lateral g is the turn as the car actually felt it, and yaw is how fast it rotated. Lay the pedal trace over that arc and you have the whole technique: what the gas did through entry, apex and exit, and whether the car stayed settled or got upset.</p>
+        <div class="recipe"><span class="chan">lateral g</span><span class="op">+</span><span class="chan">yaw</span><span class="op">+</span><span class="chan">speed</span><span class="op">+</span><span class="chan">pedal</span><span class="eq">&rarr;</span><span class="out">corner technique</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE PROFILE -->
+  <section aria-label="The profile">
+    <div class="s-head"><span class="s-eyebrow">The output</span><h2>What it all feeds</h2><span class="rule"></span></div>
+    <p class="s-sub">Today the score runs seven dimensions off the phone alone. Every channel above deepens one of them or adds a new one &mdash; the profile stops being "how harsh" and becomes "how you drive." <span style="color:var(--good)">Green = has it</span> &middot; <span style="color:var(--gold)">gold = deepen with OBD</span> &middot; <span style="color:var(--tang)">tangerine = new</span>.</p>
+    <div class="dims">
+      <div class="dim">
+        <div class="dim-top"><h4>Throttle discipline</h4><span class="badge b-new">New</span></div>
+        <p>Pedal jerk and pedal-slams &mdash; the "did you stab it or roll it" measure. The single biggest upgrade the pedal channel unlocks.</p>
+        <div class="feeds">pedal 0x49 &middot; long-g</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Corner technique</h4><span class="badge b-up">Deepen</span></div>
+        <p>The racing-line read from the hero: pedal trace against the g-arc, entry to exit. Upgrades today's "cornering" from a peak number to a shape.</p>
+        <div class="feeds">pedal &middot; lateral-g &middot; yaw &middot; speed</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Braking anticipation</h4><span class="badge b-up">Deepen</span></div>
+        <p>Early-and-gentle vs late-and-hard, from the reconstructed brake event &mdash; now confirmed by pedal-at-zero, not inferred from g alone.</p>
+        <div class="feeds">pedal &middot; speed &middot; long-g</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Shift &amp; gear sense</h4><span class="badge b-up">Deepen</span></div>
+        <p>Lugging the engine, bouncing off redline, short-shifting for smoothness &mdash; visible once rpm and gear ride every sample.</p>
+        <div class="feeds">rpm 0x0C &middot; gear 0xA4</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Momentum management</h4><span class="badge b-has">Have it</span></div>
+        <p>Carrying speed instead of brake-and-gun &mdash; now measured on true wheel speed rather than lagging GPS.</p>
+        <div class="feeds">speed 0x0D</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Mechanical sympathy</h4><span class="badge b-new">New</span></div>
+        <p>Revving a cold engine, sustained redline, lugging under load. The car's own health as part of "smooth."</p>
+        <div class="feeds">rpm &middot; coolant 0x05 &middot; load</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Efficiency</h4><span class="badge b-new">New</span></div>
+        <p>Fuel burned against pace &mdash; the honest cost of a heavy foot, and the "efficient" axis of the effective &times; efficient game.</p>
+        <div class="feeds">fuel 0x5E &middot; load &middot; speed</div>
+      </div>
+      <div class="dim">
+        <div class="dim-top"><h4>Peak harshness</h4><span class="badge b-has">Have it</span></div>
+        <p>The worst single moment of the drive &mdash; still the phone's job, now cross-checked against the pedal and g traces around it.</p>
+        <div class="feeds">long-g &middot; lateral-g &middot; pedal</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REALITY -->
+  <section aria-label="What it takes">
+    <div class="s-head"><span class="s-eyebrow">The catch, and the plan</span><h2>What it takes to get there</h2><span class="rule"></span></div>
+    <div class="reality">
+      <h3>One real constraint: the dongle is slow</h3>
+      <p>An ELM327 is a serial line pretending to be Bluetooth &mdash; one request, one reply, roughly <b>4&ndash;10 readings a second total</b>, shared across every PID you ask for. Poll ten channels and each one crawls. So the design is two-speed: a small <b>fast set</b> for technique &mdash; pedal, speed, rpm, plus the phone's 60 Hz motion &mdash; polled as hard as the adapter allows, and a <b>slow set</b> for context &mdash; temps, fuel, gear &mdash; sampled every few seconds where lag doesn't matter. The corner read lives entirely in the fast set.</p>
+      <div class="phase">
+        <div class="n">1</div><div class="d"><b>Record the pedal.</b> Promote <code>0x49</code> to a first-class fast channel and stamp it onto every sample, the way rpm and throttle already are. Nothing is visible yet &mdash; but from here on, every drive is banking the trace.</div>
+        <div class="n">2</div><div class="d"><b>Segment corners, read the trace.</b> Cut the drive into corner windows from the lateral-g arc, then score each on pedal jerk, roll-on smoothness and carried speed. This is the racing-line read shipping for real.</div>
+        <div class="n">3</div><div class="d"><b>Add the context dimensions.</b> Fold in the slow set &mdash; fuel, temps, gear &mdash; for mechanical sympathy and efficiency, rounding the score out from "how harsh" to a full fingerprint.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Smooth AF &middot; effective <b style="color:var(--gold)">&amp;</b> efficient</span>
+    <span>Vision doc &middot; linked from the Build Log &amp; Roadmap</span>
+  </footer>
+</div>
