@@ -1,7 +1,7 @@
 import { loadSocialHandles, saveSocialHandles, loadDriverName } from '../services/storage.js';
 import { metersToMiles, mpsToMph, fmtDuration } from '../utils/math.js';
 import { drivingStyleVerdict } from '../services/scoring.js';
-import { SHARE_PROMPTED_KEY } from '../constants.js';
+import { SHARE_PROMPTED_KEY, INSTALL_URL } from '../constants.js';
 
 function getDisplayHandle(){
   const h = loadSocialHandles();
@@ -270,7 +270,7 @@ export async function shareCurrentDrive(drive, analysis){
   const canvas = buildShareCanvas(drive, analysis);
   const mi = metersToMiles(drive.distanceMeters || 0).toFixed(1);
   const h = getDisplayHandle();
-  const text = `Scored ${analysis.score}/100 on a ${mi} mi drive${h ? ' ' + h : ''} 🚗 smoothafdriving.com/install #SmoothAF`;
+  const text = `Scored ${analysis.score}/100 on a ${mi} mi drive${h ? ' ' + h : ''} 🚗 ${INSTALL_URL} #SmoothAF`;
   await doShare(canvas, 'My Smooth AF Drive', text);
 }
 
@@ -279,6 +279,6 @@ export async function shareLifetimeScore(score, driverName, totalDrives, totalMi
   await ensureFontLoaded();
   const canvas = buildLifetimeCanvas(score, driverName, totalDrives, totalMiles);
   const h = getDisplayHandle();
-  const text = `My lifetime Smooth AF driving score: ${Math.round(score)}/100${h ? ' ' + h : ''} 🚗 smoothafdriving.com/install #SmoothAF`;
+  const text = `My lifetime Smooth AF driving score: ${Math.round(score)}/100${h ? ' ' + h : ''} 🚗 ${INSTALL_URL} #SmoothAF`;
   await doShare(canvas, 'My Smooth AF Lifetime Score', text);
 }

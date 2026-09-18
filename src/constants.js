@@ -4,6 +4,14 @@
 // non-Vite consumer working, since __APP_VERSION__ only exists after bundling.
 export const APP_VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
 
+// The one public link we hand out to share the app. It must point at the
+// LIVE PWA, not the marketing brand site: smoothafdriving.com currently serves
+// a separate Lovable marketing page with no funnel into the app, while the
+// pages.dev host serves the real installable app + /install landing page.
+// Centralized here so a future branded domain (e.g. app.smoothafdriving.com →
+// Cloudflare Pages) is a one-line swap, not a hunt through share strings.
+export const INSTALL_URL = 'https://smoothafdriving.pages.dev/install';
+
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
 export const DEVICE_KEY         = 'smoothaf.device_id';

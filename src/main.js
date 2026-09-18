@@ -1,4 +1,4 @@
-import { APP_VERSION } from './constants.js';
+import { APP_VERSION, INSTALL_URL } from './constants.js';
 import { migrateLifetimeScore } from './services/storage.js';
 import { checkRecoveredDrive } from './services/drive.js';
 import { syncPendingDrives } from './services/supabase.js';
@@ -157,7 +157,7 @@ function boot(){
   document.getElementById('btn-rewards')?.addEventListener('click', () => { renderRewards(); showScreen('rewards'); });
   document.getElementById('btn-rw-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-rw-explore')?.addEventListener('click', () => {
-    if (navigator.share) navigator.share({ title: 'Smooth AF', text: 'Check out Smooth AF — the driving score app!' }).catch(() => {});
+    if (navigator.share) navigator.share({ title: 'Smooth AF', text: 'Check out Smooth AF — the driving score app!', url: INSTALL_URL }).catch(() => {});
   });
 
   // Share drive button
