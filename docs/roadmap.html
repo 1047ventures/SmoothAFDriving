@@ -58,6 +58,12 @@
   .meta .sep{color:var(--muted)}
   .meta .lbl{color:var(--muted);letter-spacing:.03em}
   .meta b{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600}
+  .sharebar{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-top:14px;padding:10px 14px;
+            border:1px solid rgba(111,182,105,.3);background:rgba(111,182,105,.10);border-radius:10px;font-size:13px}
+  .sharebar .lbl{color:var(--muted);letter-spacing:.03em}
+  .sharebar a{color:var(--good);font-weight:600;text-decoration:none;font-size:15px;word-break:break-all}
+  .sharebar a:hover{text-decoration:underline}
+  .sharebar-note{color:var(--muted);font-size:12px}
 
 
 
@@ -278,7 +284,11 @@
       <span class="sep">·</span>
       <span class="lbl">Updated</span> <b>Sep 18, 2026</b>
     </div>
-    
+    <p class="sharebar">
+      <span class="lbl">Share the app</span>
+      <a href="https://smoothafdriving.pages.dev/install">smoothafdriving.pages.dev/install</a>
+      <span class="sharebar-note">— send this to anyone: opens the install page, no account or TestFlight needed</span>
+    </p>
   </header>
 
 
