@@ -5,6 +5,7 @@ import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
 import { loadDrives, loadDriverName } from '../services/storage.js';
+import { baseTiles } from '../utils/maptiles.js';
 import { showToast } from '../utils/toast.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
@@ -281,9 +282,7 @@ export function renderReview(drive){
   // ── Map ────────────────────────────────────────────────────────────────────
   if (!mapInstance){
     mapInstance = L.map('map', { zoomControl: true, attributionControl: true, preferCanvas: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 20, attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd',
-    }).addTo(mapInstance);
+    baseTiles().addTo(mapInstance);
   } else {
     mapLayers.forEach(l => mapInstance.removeLayer(l));
     mapLayers = [];

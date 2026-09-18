@@ -6,6 +6,7 @@
 // cache via getPendingDestination() AFTER resetState() to apply it.
 import { geocode, fetchRoute, reverseGeocode } from '../services/routing.js';
 import { etaBuffer } from '../services/routing.js';
+import { baseTiles } from '../utils/maptiles.js';
 import { showToast } from '../utils/toast.js';
 
 let picked = null; // { label, lat, lng } | null
@@ -123,8 +124,7 @@ function selectResult(r){
 function ensureDestMap(){
   if (destMap || typeof L === 'undefined') return destMap;
   destMap = L.map('dest-map', { zoomControl: true, attributionControl: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 })
-    .addTo(destMap);
+  baseTiles().addTo(destMap);
   destMap.setView([39.5, -98.35], 4); // continental-US default until we locate
   return destMap;
 }
