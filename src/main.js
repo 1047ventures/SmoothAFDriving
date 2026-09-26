@@ -1,5 +1,5 @@
 import { APP_VERSION, INSTALL_URL } from './constants.js';
-import { migrateLifetimeScore } from './services/storage.js';
+import { migrateLifetimeScore, getDeviceId } from './services/storage.js';
 import { checkRecoveredDrive } from './services/drive.js';
 import { syncPendingDrives } from './services/supabase.js';
 import { renderDriveList } from './ui/home.js';
@@ -76,7 +76,23 @@ function boot(){
   safeInit('syncUserProfile',      () => syncUserProfile());
   safeInit('renderCarDisplay',     () => renderCarDisplay());
   const verEl = document.querySelector('#app-version');
-  if (verEl) verEl.textContent = APP_VERSION;
+  if (verEl) {
+    verEl.textContent = APP_VERSION;
+    // Dev tool: tap the version tag to copy this device's ID. That ID is the key
+    // that lets a dev pull this device's full drives (samples + events) straight
+    // from Supabase via get_device_drives — no more exporting a JSON and sharing
+    // it by hand. The ID is an unguessable per-device UUID that appears nowhere
+    // else in the UI, so surfacing it here is harmless.
+    verEl.style.cursor = 'pointer';
+    verEl.title = 'Tap to copy device ID';
+    verEl.addEventListener('click', async () => {
+      const id = getDeviceId();
+      try { await navigator.clipboard.writeText(id); } catch {}
+      const prev = verEl.textContent;
+      verEl.textContent = 'id copied ✓';
+      setTimeout(() => { verEl.textContent = prev; }, 1400);
+    });
+  }
 
   // Re-acquire wake lock whenever app returns to foreground during a drive
   document.addEventListener('visibilitychange', () => {
