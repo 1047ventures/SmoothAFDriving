@@ -18,6 +18,7 @@
 --
 -- Paste-and-run: this whole file can be pasted into the Supabase SQL editor.
 
+-- (a) Keyed by device id — catches drives whether or not they've been claimed.
 create or replace function public.get_device_drives_dev(p_device_id text)
 returns setof public.drives
 language sql
@@ -36,3 +37,25 @@ grant execute on function public.get_device_drives_dev(text) to anon, authentica
 
 comment on function public.get_device_drives_dev is
   'DEV ONLY. Returns a device''s drives (claimed or not) for the local dev pull loop. Drop before public launch.';
+
+-- (b) Keyed by account (user_id) — the better key for a signed-in dev: stable
+-- forever and returns drives from ALL of that account's devices. This is the one
+-- the pull script prefers.
+create or replace function public.get_user_drives_dev(p_user_id uuid)
+returns setof public.drives
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select *
+    from public.drives
+   where user_id = p_user_id
+   order by start_time desc;
+$$;
+
+revoke all on function public.get_user_drives_dev(uuid) from public;
+grant execute on function public.get_user_drives_dev(uuid) to anon, authenticated;
+
+comment on function public.get_user_drives_dev is
+  'DEV ONLY. Returns an account''s drives across all devices for the local dev pull loop. Drop before public launch.';

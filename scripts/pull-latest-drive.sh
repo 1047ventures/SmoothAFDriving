@@ -12,39 +12,41 @@
 #     drives only. Used as a fallback (works only while signed out).
 # This script tries the dev RPC first and falls back to the public one.
 #
-# Usage:
-#   scripts/pull-latest-drive.sh <device_id>            # newest drive → stdout
-#   scripts/pull-latest-drive.sh <device_id> 3          # newest 3 drives
-#   DEVICE_ID=... scripts/pull-latest-drive.sh          # id from env instead
+# Usage (pick ONE key):
+#   USER_ID=<uuid>   scripts/pull-latest-drive.sh          # signed-in: all devices (preferred)
+#   USER_ID=<uuid>   scripts/pull-latest-drive.sh '' 3     # newest 3
+#   scripts/pull-latest-drive.sh <device_id>               # by device id
+#   scripts/pull-latest-drive.sh <device_id> 3             # newest 3
 #
-# Get <device_id> once by tapping the version tag on the home screen (top-left,
-# next to "Smooth AF") — it copies the id to the clipboard.
+# USER_ID is your Supabase account id (stable forever, catches every device).
+# device_id is the per-device UUID copied by tapping the home-screen version tag.
 
 set -euo pipefail
 
 SB_URL='https://dbreetxubxdxogmektxc.supabase.co'
 SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicmVldHh1YnhkeG9nbWVrdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjY5ODgsImV4cCI6MjA5MjkwMjk4OH0.hMeEhYpNNgZ67Nh9GnjwJvtSBbdQVhbdjiBBNNG5qe4'
 
+USER_ID="${USER_ID:-}"
 DEVICE_ID="${1:-${DEVICE_ID:-}}"
 LIMIT="${2:-1}"
 
-if [ -z "$DEVICE_ID" ]; then
-  echo "error: pass a device id (arg 1) or set DEVICE_ID. Tap the version tag on the home screen to copy yours." >&2
-  exit 1
-fi
-
-pull () {  # $1 = rpc name
+islist () { python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if isinstance(d,list) else 1)" 2>/dev/null; }
+rpc () {  # $1 = rpc name, $2 = json body
   curl -s "$SB_URL/rest/v1/rpc/$1" \
     -H "apikey: $SB_ANON" -H "Authorization: Bearer $SB_ANON" \
-    -H 'Content-Type: application/json' \
-    -d "{\"p_device_id\":\"$DEVICE_ID\"}"
+    -H 'Content-Type: application/json' -d "$2"
 }
 
-# Try the dev RPC first (returns claimed drives too); fall back to the public
-# unclaimed-only one if the dev migration hasn't been applied yet.
-OUT="$(pull get_device_drives_dev)"
-if ! echo "$OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if isinstance(d,list) else 1)" 2>/dev/null; then
-  OUT="$(pull get_device_drives)"
+if [ -n "$USER_ID" ]; then
+  # Preferred signed-in path: account id, all devices. Needs the dev migration.
+  OUT="$(rpc get_user_drives_dev "{\"p_user_id\":\"$USER_ID\"}")"
+elif [ -n "$DEVICE_ID" ]; then
+  # Try the dev device RPC (claimed too); fall back to the public unclaimed-only.
+  OUT="$(rpc get_device_drives_dev "{\"p_device_id\":\"$DEVICE_ID\"}")"
+  echo "$OUT" | islist || OUT="$(rpc get_device_drives "{\"p_device_id\":\"$DEVICE_ID\"}")"
+else
+  echo "error: set USER_ID=<uuid> (preferred) or pass a device id. Your USER_ID is JSON.parse(localStorage['smoothaf.auth']).user.id; device id copies from the home-screen version tag." >&2
+  exit 1
 fi
 
 echo "$OUT" \
