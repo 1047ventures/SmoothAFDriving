@@ -1,2 +1,5 @@
-/tracker  /index.html  200
-/install  /install.html  200
+/tracker  /  200
+# No /install rule on purpose: Cloudflare Pages "clean URLs" already serves
+# install.html at /install, and redirects /install.html → /install. An explicit
+# /install → /install.html rewrite fought that redirect and caused an infinite
+# 308 loop on the exact URL we share. Let the platform serve it.
