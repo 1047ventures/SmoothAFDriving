@@ -226,7 +226,8 @@
   .bot-stat--center{align-items:center}
   .bot-stat--right{align-items:flex-end}
   .bot-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
-  .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);letter-spacing:-.02em;line-height:1}
+  .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);letter-spacing:-.02em;line-height:1;white-space:nowrap}
+  .bot-val--time{font-variant-numeric:tabular-nums}
   .bot-unit{font-family:var(--sans);font-style:normal;font-size:13px;color:rgba(244,235,217,.86)}
   .fuel-segs{display:flex;gap:5px;align-items:center;margin-top:5px}
   .fuel-seg{height:5px;width:24px;border-radius:3px;background:rgba(244,235,217,.12)}

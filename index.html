@@ -170,10 +170,6 @@
         <div class="rec-dot"></div>
         <span class="rec-source" id="rec-source">GPS + Motion</span>
       </div>
-      <div class="rec-time-corner">
-        <div class="corner-lbl">Time</div>
-        <div class="corner-val" id="live-time">0:00</div>
-      </div>
     </div>
 
     <!-- Destination Drive: live pace strip (hidden unless a target ETA is set) -->
@@ -231,9 +227,13 @@
       </div>
     </div>
 
-    <!-- Bottom stats: Miles | Avg Speed | Efficiency -->
+    <!-- Bottom stats: Time | Miles | Avg Speed | Efficiency -->
     <div class="rec-bottom">
       <div class="bot-stat">
+        <div class="bot-lbl">Time</div>
+        <div class="bot-val bot-val--time" id="live-time">0:00:00</div>
+      </div>
+      <div class="bot-stat bot-stat--center">
         <div class="bot-lbl">Miles</div>
         <div class="bot-val"><span id="live-distance">0.0</span><span class="bot-unit"> mi</span></div>
       </div>

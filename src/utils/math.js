@@ -4,6 +4,13 @@ export const fmtDuration = ms => {
   const s = Math.max(0, Math.floor(ms / 1000));
   return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 };
+// Full clock — hours:minutes:seconds — for the live drive timer, which should
+// read as elapsed time on the road, not as minutes that silently pass 60.
+export const fmtClock = ms => {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+};
 export const fmtScore = n => Math.max(0, Math.min(100, Math.round(n)));
 
 export function haversine(a, b){

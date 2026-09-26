@@ -2,7 +2,7 @@ import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
 import { CFG, TIER_MULT, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
-import { mpsToMph, fmtDuration, clamp, haversine } from '../utils/math.js';
+import { mpsToMph, fmtDuration, fmtClock, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
 import { renderReview } from './review.js';
@@ -335,7 +335,7 @@ export function updateLiveUI(){
   if (needle){ needle.style.left = (50 + clamp(la / 6, -1, 1) * 44) + '%'; }
 
   // Duration
-  $('#live-time').textContent = fmtDuration(Date.now() - state.startTime);
+  $('#live-time').textContent = fmtClock(Date.now() - state.startTime);
 
   // Destination Drive: live pace strip — locked target clock time + a rough
   // ahead/behind estimate based on straight-line distance remaining vs. the
