@@ -344,11 +344,38 @@ export async function scanForAdapters({ onUpdate = () => {}, onStatus = () => {}
 
 export async function stopScan(){ try { await BleClient.stopLEScan(); } catch {} }
 
+/**
+ * Connect, but expect the first try to miss.
+ *
+ * BLE connects are flaky, and connecting to a peripheral discovered by a scan
+ * (the in-app scanner path) is the flakiest of all: on iOS the first attempt
+ * right after stopping the scan frequently times out before CoreBluetooth has
+ * re-latched the peripheral. One clumsy attempt used to read as "can't connect"
+ * and strand the driver. A couple of retries with a clean disconnect between
+ * them, plus a longer timeout, catches almost all of it — the same adapter that
+ * "wouldn't connect" links on the second go.
+ */
+async function connectWithRetry(deviceId, onDisconnect, onStatus = () => {}, attempts = 3){
+  let lastErr;
+  for (let i = 1; i <= attempts; i++){
+    try {
+      if (i > 1) onStatus(`Connecting… (try ${i})`);
+      await BleClient.connect(deviceId, onDisconnect, { timeout: 9000 });
+      return;
+    } catch (err){
+      lastErr = err;
+      try { await BleClient.disconnect(deviceId); } catch {}   // clear a half-open handle
+      if (i < attempts) await new Promise(r => setTimeout(r, 700));
+    }
+  }
+  throw lastErr || new Error('connect failed');
+}
+
 /** Connect to a specific device the user picked from the in-app scan list. */
 export async function connectTo(deviceId, name, { onStatus = () => {} } = {}){
   onStatus('Connecting…');
   await BleClient.initialize();
-  await BleClient.connect(deviceId, () => disconnect());
+  await connectWithRetry(deviceId, () => disconnect(), onStatus);
   return negotiate(deviceId, name, onStatus);
 }
 
@@ -365,7 +392,7 @@ export async function connect({ onStatus = () => {} } = {}){
   if (!device) throw new Error('no device chosen');
 
   onStatus('Connecting…');
-  await BleClient.connect(device.deviceId, () => disconnect());
+  await connectWithRetry(device.deviceId, () => disconnect(), onStatus);
   return negotiate(device.deviceId, device.name, onStatus);
 }
 

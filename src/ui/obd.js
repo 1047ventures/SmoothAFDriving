@@ -247,9 +247,11 @@ async function connectChosen(deviceId, name){
   } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
       ? 'That device isn’t an OBD adapter'
-      : `Couldn’t connect — ${err?.message || 'unknown error'}`);
-    if (btn) btn.textContent = 'Connect OBD';
-    showScan(false);
+      : 'Couldn’t connect — tap it again, or use “Open full device list” below');
+    if (btn) btn.textContent = 'Rescan';
+    // Keep the scan panel up on failure: hiding it also hid the "Open full
+    // device list" escape hatch, stranding the driver with no way forward.
+    showScan(true);
   } finally {
     if (btn) btn.disabled = false;
   }
