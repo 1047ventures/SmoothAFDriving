@@ -13,6 +13,17 @@ import {
   SCORE_MAX,
   PIT_SPEED_MPS,
   PIT_STOP_MS,
+  SMOOTH_LA_LO,
+  SMOOTH_LA_HI,
+  SMOOTH_JERK_LO,
+  SMOOTH_JERK_HI,
+  MOMENTUM_STOP_MAX,
+  SPEED_DIFF_LO_MPH,
+  SPEED_DIFF_HI_MPH,
+  SPEED_BONUS_MAX,
+  RIDE_RR_LO,
+  RIDE_RR_HI,
+  NO_RIDE_DATA_CEILING,
 } from '../constants.js';
 import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
 import { loadDrives } from './storage.js';
@@ -74,53 +85,55 @@ export function analyzeDrive(drive){
   const smp = drive.samples || [];
   const n   = smp.length;
   if (n < 3){
-    const dims = { peakHarshness:85, throttle:85, steering:85, braking:85, cornering:85, transitions:85, momentum:85 };
-    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0, stopMarkers:[] };
+    const dims = { smoothness:85, braking:85, momentum:85 };
+    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0, transitionScore:85, speedBonus:0, stopMarkers:[] };
   }
 
   const durationMin = (drive.durationMs || 0) / 60000;
   const distanceMi  = metersToMiles(drive.distanceMeters || 0);
 
-  // ── 1. Peak Harshness — p90 of harshness magnitude ───────────────────────
-  const hSorted = smp.map(s => s.h || 0).sort((a,b) => a - b);
-  const p90H    = pct(hSorted, 90);
-  const peakHarshness = Math.round(clamp(linMap(p90H, 0.3, 4.0, 100, 0), 0, 100));
+  // Moving samples only (speed > 2 m/s ≈ 4.5 mph) — GPS accel is noise below that.
+  const moving = smp.filter(s => (s.speed || 0) > 2);
 
-  // ── 2. Throttle Steadiness — rapid longitudinal sign-flip rate ───────────
-  const LONG_WIN  = 8;
-  const LONG_DEAD = 0.15;
-  let longFlips = 0, lastLSign = 0, lastLFlip = -Infinity;
-  for (let i = 0; i < n; i++){
-    const la = smp[i].la || 0;
-    if (Math.abs(la) < LONG_DEAD) continue;
-    const sg = la > 0 ? 1 : -1;
-    if (lastLSign !== 0 && sg !== lastLSign){
-      if (i - lastLFlip <= LONG_WIN) longFlips++;
-      lastLFlip = i;
-    }
-    lastLSign = sg;
+  // ── 1. Smoothness — LONGITUDINAL only ────────────────────────────────────
+  // Accel/brake, never lateral: lateral comes from GPS heading change, which
+  // jitters and used to manufacture phantom "sharp turns". Two honest signals:
+  //   · p85 of |longitudinal g| — how hard you push the car most of the time
+  //   · mean |jerk| — how abruptly you transition between pedal phases
+  const laSorted = moving.map(s => Math.abs(s.la || 0)).sort((a,b) => a - b);
+  const p85la    = pct(laSorted, 85);
+  const smoothLong = clamp(linMap(p85la, SMOOTH_LA_LO, SMOOTH_LA_HI, 100, 0), 0, 100);
+
+  let jerkSum = 0, jerkN = 0;
+  for (let i = 1; i < n; i++){
+    if ((smp[i].speed || 0) <= 2) continue;
+    const dt = Math.max(0.1, (smp[i].t - smp[i-1].t) / 1000);
+    jerkSum += Math.abs(((smp[i].la || 0) - (smp[i-1].la || 0)) / dt);
+    jerkN++;
   }
-  const longFlipsPerMin = durationMin > 0 ? longFlips / durationMin : 0;
-  const throttle = Math.round(clamp(linMap(longFlipsPerMin, 0, 8, 100, 0), 0, 100));
+  const meanJerk   = jerkN > 0 ? jerkSum / jerkN : 0;
+  const smoothJerk = clamp(linMap(meanJerk, SMOOTH_JERK_LO, SMOOTH_JERK_HI, 100, 0), 0, 100);
 
-  // ── 3. Steering Steadiness — rapid lateral sign-flip rate ────────────────
-  const LAT_WIN  = 6;
-  const LAT_DEAD = 0.15;
-  let latFlips = 0, lastRSign = 0, lastRFlip = -Infinity;
-  for (let i = 0; i < n; i++){
-    const ra = smp[i].ra || 0;
-    if (Math.abs(ra) < LAT_DEAD) continue;
-    const sg = ra > 0 ? 1 : -1;
-    if (lastRSign !== 0 && sg !== lastRSign){
-      if (i - lastRFlip <= LAT_WIN) latFlips++;
-      lastRFlip = i;
-    }
-    lastRSign = sg;
-  }
-  const latFlipsPerMin = durationMin > 0 ? latFlips / durationMin : 0;
-  const steering = Math.round(clamp(linMap(latFlipsPerMin, 0, 10, 100, 0), 0, 100));
+  // Ride composure — how calm the cabin actually was, from the 60 Hz accelerometer
+  // (vertical+pitch RMS stored per sample as `rr`). This is the passenger's-eye
+  // view: rumble strips, wind/truck buffeting and road texture all spike it, so a
+  // jostled ride can't score smooth even when the pedal inputs were gentle. It's
+  // present only when the motion sensor calibrated — a GPS-only drive has no `rr`,
+  // so ride quality goes unmeasured (and the composite is capped below, since we
+  // can't credit a calm we never sensed).
+  const rrVals  = moving.map(s => s.rr).filter(v => v != null && v > 0).sort((a,b) => a - b);
+  const hasRide = rrVals.length >= Math.max(10, moving.length * 0.3);
+  const rideComposure = hasRide
+    ? clamp(linMap(pct(rrVals, 85), RIDE_RR_LO, RIDE_RR_HI, 100, 0), 0, 100)
+    : null;
 
-  // ── 4. Braking Anticipation — approach quality for each stop ─────────────
+  // With a ride measurement, composure is a full quarter of smoothness — a rough
+  // ride visibly costs. Without it, the two pedal-based signals carry smoothness.
+  const smoothness = hasRide
+    ? Math.round(0.40 * smoothLong + 0.30 * smoothJerk + 0.30 * rideComposure)
+    : Math.round(0.60 * smoothLong + 0.40 * smoothJerk);
+
+  // ── 2. Braking Anticipation — approach quality for each stop ─────────────
   const STOP_ENTRY = 2.2;
   const STOP_EXIT  = 0.9;
   const LOOK_BACK  = 30;
@@ -146,27 +159,7 @@ export function analyzeDrive(drive){
     ? Math.round(stopScores.reduce((a,b) => a+b, 0) / stopScores.length)
     : 85;
 
-  // ── 5. Corner Composure — simultaneous braking + lateral force ───────────
-  const CORN_LA = -0.5;
-  const CORN_RA =  0.8;
-  let cornerCount = 0;
-  for (const s of smp){
-    if ((s.la || 0) < CORN_LA && Math.abs(s.ra || 0) > CORN_RA) cornerCount++;
-  }
-  const cornerPct = n > 0 ? cornerCount / n : 0;
-  const cornering = Math.round(clamp(linMap(cornerPct, 0, 0.08, 100, 0), 0, 100));
-
-  // ── 6. Transition Smoothness — mean jerk magnitude ───────────────────────
-  let jerkSum = 0, jerkN = 0;
-  for (let i = 1; i < n; i++){
-    const dt  = Math.max(0.1, (smp[i].t - smp[i-1].t) / 1000);
-    jerkSum  += Math.abs(((smp[i].la || 0) - (smp[i-1].la || 0)) / dt);
-    jerkN++;
-  }
-  const meanJerk  = jerkN > 0 ? jerkSum / jerkN : 0;
-  const transitions = Math.round(clamp(linMap(meanJerk, 0.3, 3.0, 100, 0), 0, 100));
-
-  // ── 7. Momentum Management — full stops per mile ─────────────────────────
+  // ── 3. Momentum Management — full stops per mile ─────────────────────────
   const STOP_SPD = 0.5;
   const STOP_MS  = 1500;
   let fullStops = 0, stopStartIdx = -1;
@@ -190,13 +183,27 @@ export function analyzeDrive(drive){
   }
   if (stopStartIdx >= 0) recordStop(stopStartIdx, n - 1);
   const stopsPerMile = distanceMi > 0 ? fullStops / distanceMi : 0;
-  const momentum = Math.round(clamp(linMap(stopsPerMile, 0, 6, 100, 0), 0, 100));
+  const momentum = Math.round(clamp(linMap(stopsPerMile, 0, MOMENTUM_STOP_MAX, 100, 0), 0, 100));
 
-  // ── Composite ─────────────────────────────────────────────────────────────
-  const dims = { peakHarshness, throttle, steering, braking, cornering, transitions, momentum };
-  const score = Math.round(
-    Object.entries(DIM_WEIGHTS).reduce((s, [k,w]) => s + (dims[k] || 0) * w, 0)
-  );
+  // ── Composite + speed difficulty multiplier ──────────────────────────────
+  const dims = { smoothness, braking, momentum };
+  const base = Object.entries(DIM_WEIGHTS).reduce((s, [k,w]) => s + (dims[k] || 0) * w, 0);
+  // Staying smooth at speed is harder, so it earns a bonus — gated by the base
+  // score so a sloppy-but-fast drive gets almost none.
+  const movAvgMph  = moving.length > 0 ? mpsToMph(moving.reduce((s,x) => s+(x.speed||0), 0) / moving.length) : 0;
+  const speedFactor = clamp(linMap(movAvgMph, SPEED_DIFF_LO_MPH, SPEED_DIFF_HI_MPH, 0, 1), 0, 1);
+  const speedBonus  = SPEED_BONUS_MAX * speedFactor * (base / 100);
+  // A perfect 100 is meant to be nearly impossible. A drive we couldn't measure
+  // for ride quality (GPS-only) can't be certified calm, so it's capped short of
+  // the top; only a drive the sensors confirmed as smooth can approach 100.
+  const ceiling = hasRide ? 100 : NO_RIDE_DATA_CEILING;
+  const score = Math.round(clamp(base + speedBonus, 0, ceiling));
+
+  // Kept for the review "Transitions" info stat (jerk quality) — informational,
+  // no longer a scored dimension.
+  const transitionScore = Math.round(smoothJerk);
+  // Legacy fields some UI/coaching still reads; lateral flips are no longer scored.
+  const longFlipsPerMin = 0, latFlipsPerMin = 0, p90H = p85la;
 
   // ── Extended stats ─────────────────────────────────────────────────────────
 
@@ -281,6 +288,9 @@ export function analyzeDrive(drive){
     longFlipsPerMin: +longFlipsPerMin.toFixed(1),
     latFlipsPerMin:  +latFlipsPerMin.toFixed(1),
     p90Harshness:    +p90H.toFixed(2),
+    transitionScore,
+    speedBonus:      +speedBonus.toFixed(1),
+    rideComposure,   // null on GPS-only drives (ride quality unmeasured)
     // extended
     peakBrakeG: brakeG.peak,  avgBrakeG: brakeG.avg,  peakBrakeEv: brakeG.peakEv,
     peakAccelG: accelG.peak,  avgAccelG: accelG.avg,  peakAccelEv: accelG.peakEv,
@@ -300,7 +310,7 @@ export function analyzeDrive(drive){
 }
 
 export function driveCoaching(analysis){
-  const { dims, stopsPerMile, longFlipsPerMin, latFlipsPerMin, p90Harshness, fullStops } = analysis;
+  const { dims, stopsPerMile, fullStops } = analysis;
   const cards = [];
 
   // Worst 2 dimensions below threshold → warning cards
@@ -309,19 +319,11 @@ export function driveCoaching(analysis){
   for (const [key, score] of ranked){
     if (warned >= 2 || score >= 70) break;
     const texts = {
-      peakHarshness: { title: 'Harsh inputs detected',
-        body: `Your 90th-percentile harshness was ${p90Harshness.toFixed(2)} m/s² — aim for under 0.8. Feather the brakes and smooth your turn entries.` },
-      throttle:      { title: 'Throttle pumping',
-        body: `You toggled between gas and brake ~${longFlipsPerMin.toFixed(1)}× per minute. Aim for under 3/min by coasting more and reading stops earlier.` },
-      steering:      { title: 'Frequent steering corrections',
-        body: `Lateral direction reversed ~${latFlipsPerMin.toFixed(1)}× per minute. Look further ahead — your hands follow your eyes.` },
-      braking:       { title: 'Late braking',
+      smoothness: { title: 'Harsh inputs detected',
+        body: `Your accel and braking ran firm — aim to feather the pedals and blend smoothly between them. Passengers feel every abrupt push.` },
+      braking:    { title: 'Late braking',
         body: `Stops came with short approach distances and sharp decel. Spot brake zones earlier and ease in gradually over a longer runway.` },
-      cornering:     { title: 'Braking mid-corner',
-        body: `Simultaneous braking and lateral force hurts balance. Brake before the apex, not through it.` },
-      transitions:   { title: 'Jerky pedal transitions',
-        body: `High jerk between pedal phases — blend smoothly between braking, coasting, and acceleration.` },
-      momentum:      { title: `${fullStops} full stop${fullStops !== 1 ? 's' : ''}`,
+      momentum:   { title: `${fullStops} full stop${fullStops !== 1 ? 's' : ''}`,
         body: `${stopsPerMile.toFixed(1)} stops/mile. Read lights and traffic to maintain a rolling pace — the goal is to never fully stop.` },
     };
     if (texts[key]){ cards.push({ type: 'warning', ...texts[key] }); warned++; }
@@ -331,26 +333,18 @@ export function driveCoaching(analysis){
   const [bestKey, bestScore] = ranked[ranked.length - 1];
   if (bestScore >= 80){
     const praise = {
-      peakHarshness: { title: 'Impressively smooth inputs',
-        body: `Your 90th-percentile harshness was just ${p90Harshness.toFixed(2)} m/s². Passengers felt barely a ripple.` },
-      throttle:      { title: 'Steady throttle control',
-        body: `Only ${longFlipsPerMin.toFixed(1)} throttle reversals per minute — smooth progressive pedal work.` },
-      steering:      { title: 'Committed steering lines',
-        body: `Lateral corrections at just ${latFlipsPerMin.toFixed(1)}/min — you tracked your intended path confidently.` },
-      braking:       { title: 'Excellent braking anticipation',
+      smoothness: { title: 'Impressively smooth inputs',
+        body: `Gentle on the accelerator and brakes, blended cleanly between them. Passengers felt barely a ripple.` },
+      braking:    { title: 'Excellent braking anticipation',
         body: `Long, gentle approaches to every stop — exactly what the car and your passengers want.` },
-      cornering:     { title: 'Clean corner exits',
-        body: `Minimal braking-while-cornering. Textbook corner entry technique.` },
-      transitions:   { title: 'Silky pedal transitions',
-        body: `Very low jerk between phases. Passengers won't even reach for the grab handle.` },
-      momentum:      { title: 'Excellent momentum management',
+      momentum:   { title: 'Excellent momentum management',
         body: `Only ${fullStops} full stop${fullStops !== 1 ? 's' : ''} (${stopsPerMile.toFixed(1)}/mile). You read the road and kept rolling.` },
     };
     if (praise[bestKey]) cards.push({ type: 'positive', ...praise[bestKey] });
   }
 
   if (!cards.length)
-    cards.push({ type: 'positive', title: 'Smooth AF', body: 'Strong across all seven dimensions. Your passengers felt the difference.' });
+    cards.push({ type: 'positive', title: 'Smooth AF', body: 'Strong across the board — smooth inputs, clean stops, steady momentum. Your passengers felt the difference.' });
 
   return cards;
 }
@@ -387,7 +381,7 @@ export function driveNarrative(drive, analysis, driverName, ctx = {}){
                  : isHighway ? 'Highway run'
                  :             'City drive';
   const pace = isHighway ? 'open and flowing' : stopAndGo ? 'stop-and-go' : 'steady and flowing';
-  const allHands = ['steering', 'braking', 'cornering', 'transitions'].every(k => (dims[k] ?? 0) >= 95);
+  const allHands = ['smoothness', 'braking'].every(k => (dims[k] ?? 0) >= 95);
   let smooth;
   if (allHands)        smooth = stopAndGo ? ', but your hands stayed dialed' : ', hands totally dialed';
   else if (eff >= 88)  smooth = ', kept it silky';

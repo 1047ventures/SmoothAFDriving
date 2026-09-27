@@ -152,6 +152,12 @@ export function processSample(s, prev){
     latAccel = 0;
     state.emaLatAccel = 0;
   }
+  // Plausibility cap. Lateral is derived from GPS heading change × speed, and a
+  // single-sample heading glitch at highway speed produces absurd values — the
+  // real drives held phantom "turns" of 100–276 m/s² (10–28 g), impossible in a
+  // road car. No street corner exceeds ~9 m/s² (~0.9 g), so anything past that is
+  // GPS noise, not driving. Clamp it so those phantoms can't fire turn events.
+  latAccel = clamp(latAccel, -LAT_ACCEL_CAP, LAT_ACCEL_CAP);
 
   const alpha = CFG.emaAlpha;
   state.emaLongAccel = alpha * rawLong  + (1-alpha) * state.emaLongAccel;

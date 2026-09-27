@@ -100,26 +100,58 @@ export const TIER_THRESH = { 1: 0.55, 2: 1.0,  3: 1.75, 4: 2.6 };
 // the raw score is weighted 50% — prevents 30-second test drives showing 100.
 export const CONFIDENCE_PRIOR = 120;
 
-// ── Seven-Dimension Scoring display ──────────────────────────────────────────
+// ── Three-Dimension Scoring display ──────────────────────────────────────────
+// Trimmed from seven to the three the phone's sensors actually resolve, weighted
+// by real signal. The four dropped (steering, cornering, transitions, throttle)
+// were computed from 1 Hz GPS-derived lateral/jerk/flip data too coarse to ever
+// move — they handed ~100 to every drive and only flattened the score. Lateral
+// is deliberately NOT a scored axis: GPS heading jitter makes it untrustworthy
+// (it was firing hundreds of phantom "sharp turns"). Smoothness rides the
+// LONGITUDINAL signal (accel/brake), which heading noise cannot corrupt.
 export const DIM_WEIGHTS = {
-  peakHarshness: 0.20,
-  throttle:      0.20,
-  steering:      0.10,
-  braking:       0.15,
-  cornering:     0.10,
-  transitions:   0.10,
-  momentum:      0.15,
+  smoothness: 0.50,
+  momentum:   0.30,
+  braking:    0.20,
 };
 
 export const DIM_DISPLAY = [
-  { key: 'peakHarshness', label: 'Peak Harshness'       },
-  { key: 'throttle',      label: 'Throttle Steadiness'  },
-  { key: 'steering',      label: 'Steering Steadiness'  },
-  { key: 'braking',       label: 'Braking Anticipation' },
-  { key: 'cornering',     label: 'Corner Composure'     },
-  { key: 'transitions',   label: 'Transition Smoothness'},
-  { key: 'momentum',      label: 'Momentum Management'  },
+  { key: 'smoothness', label: 'Smoothness'          },
+  { key: 'braking',    label: 'Braking Anticipation'},
+  { key: 'momentum',   label: 'Momentum Management' },
 ];
+
+// ── Scoring dials — calibrated against 25 real drives (median → ~80) ──────────
+// Smoothness = 0.6·longitudinal-g + 0.4·jerk, each mapped through these anchors.
+// Re-tune here as more varied drives come in. Targets: average 80–85, clean 90+,
+// genuinely rough (stop-and-go / jerky) 45–65, ultra-smooth highway 95–100.
+export const SMOOTH_LA_LO    = 0.15; // p85 |longitudinal g| (m/s²) scoring 100
+export const SMOOTH_LA_HI    = 1.2;  // p85 |longitudinal g| scoring 0
+export const SMOOTH_JERK_LO  = 0.05; // mean |jerk| (m/s³) scoring 100
+export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
+export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
+
+// Speed difficulty multiplier: holding the car smooth at speed is harder than at
+// a crawl, so a smooth fast drive earns a bonus the same smoothness at low speed
+// does not. Gated by the base score — sloppy-but-fast earns almost none.
+export const SPEED_DIFF_LO_MPH = 25;  // at/below this avg moving speed: no bonus
+export const SPEED_DIFF_HI_MPH = 65;  // at/above this: full bonus
+export const SPEED_BONUS_MAX   = 5;   // max points added for a smooth, fast drive
+
+// ── Ride Composure — how calm the cabin actually was ─────────────────────────
+// From the 60 Hz accelerometer's vertical+pitch RMS (state.currentRoughness),
+// stored per sample as `rr`. This is what the PASSENGER feels: rumble strips,
+// wind/truck buffeting, road texture, and sway you didn't counter all spike it —
+// a rougher ride than it could have been, whatever the cause. A smooth ride on a
+// glassy road scores high; the same inputs on a bus getting shoved around does
+// not. PROVISIONAL anchors — recalibrate once real mounted-phone drives land.
+export const RIDE_RR_LO = 0.4;  // vertical RMS (m/s²) that scores 100 (glassy calm)
+export const RIDE_RR_HI = 3.0;  // vertical RMS that scores 0 (rumble strips / heavy buffeting)
+
+// A perfect 100 is meant to be nearly impossible. Without a ride-quality
+// measurement (GPS-only drive, no mounted phone) we can't certify the cabin
+// stayed calm, so such a drive is capped here — the top of the range is reserved
+// for drives where the sensors actually confirmed a smooth ride.
+export const NO_RIDE_DATA_CEILING = 95;
 
 // ── Voice labels ──────────────────────────────────────────────────────────────
 export const VOICE_LABELS = { brake: 'Hard brake!', accel: 'Hard acceleration!', turn: 'Sharp turn!', shift: 'Rough shift!' };

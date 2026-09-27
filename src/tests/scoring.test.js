@@ -179,7 +179,7 @@ describe('driveNarrative', () => {
     targetEtaSec: 1500, movingSec: 1440, pitStopMs: 0, score: 91, effectiveness: 96, events: [],
   };
   const haulAnalysis = { avgSpeedMph: 36, fullStops: 1, stopsPerMile: 0.1,
-    dims: { cornering: 93, throttle: 90, braking: 82, steering: 88, transitions: 87, momentum: 85, peakHarshness: 84 } };
+    dims: { smoothness: 86, braking: 82, momentum: 85 } };
 
   // A short, slow, stop-and-go neighborhood hop (no destination) — the real trip
   const hop = {
@@ -191,7 +191,7 @@ describe('driveNarrative', () => {
     ],
   };
   const hopAnalysis = { avgSpeedMph: 13, fullStops: 6, stopsPerMile: 4.2,
-    dims: { steering: 100, braking: 100, cornering: 100, transitions: 100, momentum: 53, throttle: 86, peakHarshness: 85 } };
+    dims: { smoothness: 96, braking: 100, momentum: 53 } };
 
   it('is tight (at most 3 short lines) and carries no digits', () => {
     const s = driveNarrative(hop, hopAnalysis, 'Skelly');

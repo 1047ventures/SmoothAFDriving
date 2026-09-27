@@ -577,7 +577,7 @@ function buildAnalysisSheet(drive, analysis, verdict, vColor){
           <div class="as-stat-sub">${analysis.stopsPerMile != null ? analysis.stopsPerMile.toFixed(1) + '/mi' : ''}</div>
         </div>
         <div class="as-stat">
-          <div class="as-stat-val">${analysis.dims.transitions || '—'}</div>
+          <div class="as-stat-val">${analysis.transitionScore || '—'}</div>
           <div class="as-stat-lbl">Transitions</div>
           <div class="as-stat-sub">jerk score</div>
         </div>

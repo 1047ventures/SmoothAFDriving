@@ -182,6 +182,11 @@ export function buildDriveFromState(){
         la:      +((s.longAccel||0).toFixed(3)),
         ra:      +((s.latAccel||0).toFixed(3)),
       };
+      // Ride-quality signal: the 60 Hz accelerometer's vertical+pitch RMS at this
+      // point (rumble strips, buffeting, road texture). Only present once the
+      // motion sensor has calibrated, so a GPS-only drive stays in its old compact
+      // shape and the scorer knows ride quality was never measured.
+      if (s.roadRoughness) out.rr = +s.roadRoughness.toFixed(3);
       // OBD channels ride along only on the samples that actually carry them, so
       // a GPS-only drive keeps its old compact shape and a car-connected drive
       // gains throttle/RPM/gear/true-speed per point. Abbreviated to match the
