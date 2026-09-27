@@ -1,10 +1,7 @@
 import {
   CFG,
   TIER_MULT,
-  CONFIDENCE_PRIOR,
   DIM_WEIGHTS,
-  STORAGE_KEY,
-  EVENT_COOLDOWN_MS,
   ETA_BUFFER,
   PACE_PENALTY,
   CLOCK_MAX_SWING,
@@ -25,61 +22,7 @@ import {
   RIDE_RR_HI,
   NO_RIDE_DATA_CEILING,
 } from '../constants.js';
-import { clamp, linMap, pct, fmtScore, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
-import { loadDrives } from './storage.js';
-import { detectEventWithThresh } from './sensors/gps.js';
-
-export { detectEventWithThresh };
-
-export function scoreFromEvents(events, cfg, sampleCount){
-  cfg = cfg || CFG;
-  const basePenalty = { brake: cfg.penaltyBrake, accel: cfg.penaltyAccel, turn: cfg.penaltyTurn };
-  let score = 100;
-  for (const e of events){
-    if (e.type === 'shift') continue;  // informational only, never deduct points
-    const base     = basePenalty[e.type] || 3;
-    const tier     = TIER_MULT[e.tier || 2] || 1;
-    // Road roughness: up to 35% penalty reduction on very rough roads
-    const roughAdj = 1 - Math.min(0.35, (e.roadRoughness || 0) / 3.5);
-    score -= base * tier * (e.severity || 1) * roughAdj;
-  }
-  // Confidence weighting: short drives blend toward 100
-  if (sampleCount != null && sampleCount > 0){
-    score = (sampleCount * score + CONFIDENCE_PRIOR * 100) / (sampleCount + CONFIDENCE_PRIOR);
-  }
-  return fmtScore(score);
-}
-
-// Re-score a stored drive using new CFG (uses pre-computed la/ra per sample)
-export function rescoreDrive(drive, cfg){
-  const events = [];
-  let lastEventT = -Infinity;
-  for (const s of drive.samples){
-    if ((s.t - lastEventT) < EVENT_COOLDOWN_MS) continue;
-    const evt = detectEventWithThresh(s.la || 0, s.ra || 0, cfg, 0, s.speed || 0);
-    if (evt){
-      events.push({
-        ...evt,
-        t: s.t, lat: s.lat, lon: s.lon,
-        speedMph: Math.round(mpsToMph(s.speed || 0)),
-      });
-      lastEventT = s.t;
-    }
-  }
-  return {
-    ...drive,
-    events,
-    eventCount: events.length,
-    score: scoreFromEvents(events, cfg, drive.samples.length),
-  };
-}
-
-export function rescoreAllDrives(){
-  const all = loadDrives();
-  const rescored = all.map(d => rescoreDrive(d, CFG));
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(rescored)); } catch {}
-  return rescored;
-}
+import { clamp, linMap, pct, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
 
 export function analyzeDrive(drive){
   const smp = drive.samples || [];

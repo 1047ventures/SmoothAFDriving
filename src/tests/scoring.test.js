@@ -1,47 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { scoreFromEvents, analyzeDrive, getDriverPersona } from '../services/scoring.js';
+import { analyzeDrive, getDriverPersona } from '../services/scoring.js';
 import { effectivenessScore, destinationTier } from '../services/scoring.js';
 import { clockModifier, compositeScore, computePitStopMs, movingSeconds, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
-import { DEFAULTS } from '../constants.js';
-
-const cfg = { ...DEFAULTS };
-
-describe('scoreFromEvents', () => {
-  it('returns 100 for no events', () => {
-    expect(scoreFromEvents([], cfg, 300)).toBe(100);
-  });
-
-  it('deducts points for a tier-2 brake event', () => {
-    const events = [{ type: 'brake', tier: 2, severity: 1 }];
-    const score = scoreFromEvents(events, cfg, 300);
-    expect(score).toBeLessThan(100);
-    expect(score).toBeGreaterThan(0);
-  });
-
-  it('tier-3 deducts more than tier-2', () => {
-    const tier2 = scoreFromEvents([{ type: 'brake', tier: 2, severity: 1 }], cfg, 300);
-    const tier3 = scoreFromEvents([{ type: 'brake', tier: 3, severity: 1 }], cfg, 300);
-    expect(tier3).toBeLessThan(tier2);
-  });
-
-  it('blends toward 100 for short drives (low sample count)', () => {
-    const events = [{ type: 'brake', tier: 2, severity: 1 }];
-    const longDrive  = scoreFromEvents(events, cfg, 1000);
-    const shortDrive = scoreFromEvents(events, cfg, 10);
-    expect(shortDrive).toBeGreaterThan(longDrive);
-  });
-
-  it('skips shift events (informational only)', () => {
-    const shift = scoreFromEvents([{ type: 'shift', tier: 2, severity: 1 }], cfg, 300);
-    expect(shift).toBe(100);
-  });
-
-  it('applies road roughness reduction', () => {
-    const smooth = scoreFromEvents([{ type: 'brake', tier: 2, severity: 1, roadRoughness: 0 }], cfg, 300);
-    const rough  = scoreFromEvents([{ type: 'brake', tier: 2, severity: 1, roadRoughness: 3.5 }], cfg, 300);
-    expect(rough).toBeGreaterThan(smooth);
-  });
-});
 
 describe('analyzeDrive', () => {
   const makeDrive = (samples, events = []) => ({

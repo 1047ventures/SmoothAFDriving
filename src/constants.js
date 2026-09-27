@@ -74,11 +74,6 @@ export const DEFAULTS = {
   sharpTurn:     4.5,   // m/s² lateral — GPS heading jitter was causing false highway events
   emaAlpha:      0.25,  // more smoothing vs 0.32 — filters single-sample GPS spikes
   jerkThreshold: 5.5,   // m/s³ — gear-change / abrupt transmission event
-  // ── Tier-2 base penalties (multiplied by tier factor below) ─────────────
-  penaltyBrake:  4.5,
-  penaltyAccel:  3.2,
-  penaltyTurn:   4.0,
-  // ── Tier multipliers: tier1×0.14, tier2×1.0, tier3×2.4, tier4×4.0 ──────
 };
 
 // Mutable singleton — can be tuned at runtime
@@ -93,12 +88,11 @@ export const MOTION_BUF_SIZE     = 20;    // ring buffer depth (60Hz → ~330ms)
 
 // ── Scoring constants ─────────────────────────────────────────────────────────
 // Tier 1 subtle (55%) · tier 2 moderate (100%) · tier 3 harsh (175%) · tier 4 extreme (260%)
+// TIER_MULT still weights the momentum-series chart; TIER_THRESH gates live
+// event detection (the in-drive flashes). Both are display/feedback only now —
+// the headline score comes entirely from analyzeDrive's dimensions.
 export const TIER_MULT   = { 1: 0.14, 2: 1.0, 3: 2.4, 4: 4.0 };
 export const TIER_THRESH = { 1: 0.55, 2: 1.0,  3: 1.75, 4: 2.6 };
-// Confidence weighting: blend raw score toward 100 for short drives.
-// CONFIDENCE_PRIOR = 120 GPS samples ≈ 2 minutes. At exactly 2 min of data,
-// the raw score is weighted 50% — prevents 30-second test drives showing 100.
-export const CONFIDENCE_PRIOR = 120;
 
 // ── Three-Dimension Scoring display ──────────────────────────────────────────
 // Trimmed from seven to the three the phone's sensors actually resolve, weighted

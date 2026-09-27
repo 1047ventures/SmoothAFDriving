@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, DEFAULTS, CFG } from '../constants.js';
+import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, CFG } from '../constants.js';
 import {
   loadDrives,
   saveDrive,
@@ -9,7 +9,7 @@ import {
   loadDriverName,
   getSyncedIds,
 } from './storage.js';
-import { scoreFromEvents, analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
+import { analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
 import { isTrafficAware, etaBuffer } from './routing.js';
 import {
   pushDriveToSupabase, syncToLeaderboard, fetchCloudDrives, cloudRowToDrive,
@@ -34,6 +34,32 @@ function arrivedAtDestination(drive){
 import { detectCorridors } from './corridors.js';
 import { syncProfile } from './profile.js';
 
+// Map one in-memory sample to its compact stored shape (short keys, rounded).
+// Shared by the finalized drive and the 30s crash-recovery snapshot so a
+// recovered drive carries real GPS + motion samples and is scored by the same
+// analyzeDrive engine as everything else — no separate event-only scorer.
+function storeSample(s, startTime){
+  const out = {
+    t:       s.t - startTime,
+    lat:     +s.lat.toFixed(6),
+    lon:     +s.lon.toFixed(6),
+    speed:   +((s.speed||0).toFixed(2)),
+    heading: s.heading != null ? +s.heading.toFixed(1) : null,
+    h:       +((s.harshness||0).toFixed(2)),
+    la:      +((s.longAccel||0).toFixed(3)),
+    ra:      +((s.latAccel||0).toFixed(3)),
+  };
+  if (s.roadRoughness) out.rr = +s.roadRoughness.toFixed(3);
+  if (s.throttle   != null) out.thr = +s.throttle.toFixed(1);
+  if (s.rpm        != null) out.rpm = Math.round(s.rpm);
+  if (s.load       != null) out.ld  = +s.load.toFixed(1);
+  if (s.gear       != null) out.g   = s.gear;
+  if (s.obdSpeed   != null) out.os  = +s.obdSpeed.toFixed(2);
+  if (s.horsepower != null) out.hp  = Math.round(s.horsepower);
+  if (s.torqueNm   != null) out.nm  = Math.round(s.torqueNm);
+  return out;
+}
+
 export function persistActiveDrive(){
   if (!state.recording || state.simulated) return;
   try {
@@ -44,6 +70,9 @@ export function persistActiveDrive(){
       startScore: state.driveStartScore,
       events:     state.events,
       sampleCount:state.samples.length,
+      // Full mapped samples so a recovered drive is a real, scoreable drive
+      // (map + ride composure) rather than a sample-less event stub.
+      samples:    state.samples.map(s => storeSample(s, state.startTime)),
       distanceMeters: dist,
       topSpeedMps:    top,
       durationMs: Date.now() - state.startTime,
@@ -73,25 +102,26 @@ export function checkRecoveredDrive(callbacks = {}){
     const age = Date.now() - (saved.savedAt || 0);
     if (age > 4 * 60 * 60 * 1000) return; // ignore if >4h old
     if ((saved.sampleCount || 0) < 20)    return; // too short to bother
-    const cfg   = { ...DEFAULTS };
-    const score = scoreFromEvents(saved.events || [], cfg, saved.sampleCount);
     const drive = {
       id:             'rec_' + saved.startTs,
-      score:          Math.round(score),
+      score:          0,   // filled in by analyzeDrive below
       distanceMeters: saved.distanceMeters || 0,
       durationMs:     saved.durationMs     || 0,
       topSpeedMps:    saved.topSpeedMps    || 0,
       events:         saved.events         || [],
-      samples:        [],
+      samples:        saved.samples        || [],
       ts:             saved.startTs,
       recovered:      true,
       destination:    saved.destination || null,
       targetEtaSec:   saved.targetEtaSec || null,
       routeDistanceM: saved.routeDistanceM || null,
-      // Recovered drives keep no GPS samples, so arrival can't be verified —
+      // Recovered drives can't verify arrival at a destination reliably, so
       // don't award effectiveness we can't stand behind.
       effectiveness:  null,
     };
+    // Score through the same engine as every other drive. Older snapshots (from
+    // before samples were persisted) fall back to the neutral short-drive score.
+    drive.score = Math.round(analyzeDrive(drive).score);
     const all = loadDrives();
     if (all.find(d => d.startTime === saved.startTs || d.id === drive.id)) return; // already saved
     all.unshift(drive);
@@ -171,35 +201,7 @@ export function buildDriveFromState(){
     topSpeedLon: topSpeedLon != null ? +topSpeedLon.toFixed(6) : null,
     speedLimitMps: state.currentSpeedLimitMps || null,
     score: 0,  // filled in by caller via analyzeDrive
-    samples: samples.map(s => {
-      const out = {
-        t:       s.t - state.startTime,
-        lat:     +s.lat.toFixed(6),
-        lon:     +s.lon.toFixed(6),
-        speed:   +((s.speed||0).toFixed(2)),
-        heading: s.heading != null ? +s.heading.toFixed(1) : null,
-        h:       +((s.harshness||0).toFixed(2)),
-        la:      +((s.longAccel||0).toFixed(3)),
-        ra:      +((s.latAccel||0).toFixed(3)),
-      };
-      // Ride-quality signal: the 60 Hz accelerometer's vertical+pitch RMS at this
-      // point (rumble strips, buffeting, road texture). Only present once the
-      // motion sensor has calibrated, so a GPS-only drive stays in its old compact
-      // shape and the scorer knows ride quality was never measured.
-      if (s.roadRoughness) out.rr = +s.roadRoughness.toFixed(3);
-      // OBD channels ride along only on the samples that actually carry them, so
-      // a GPS-only drive keeps its old compact shape and a car-connected drive
-      // gains throttle/RPM/gear/true-speed per point. Abbreviated to match the
-      // la/ra/h convention that keeps drives under the localStorage quota.
-      if (s.throttle   != null) out.thr = +s.throttle.toFixed(1);
-      if (s.rpm        != null) out.rpm = Math.round(s.rpm);
-      if (s.load       != null) out.ld  = +s.load.toFixed(1);
-      if (s.gear       != null) out.g   = s.gear;
-      if (s.obdSpeed   != null) out.os  = +s.obdSpeed.toFixed(2);
-      if (s.horsepower != null) out.hp  = Math.round(s.horsepower);
-      if (s.torqueNm   != null) out.nm  = Math.round(s.torqueNm);
-      return out;
-    }),
+    samples: samples.map(s => storeSample(s, state.startTime)),
     obd: summarizeObd(samples),
     events: events.map(e => ({
       type: e.type, severity: +((e.severity||1).toFixed(2)),
