@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**293 tasks shipped** as of 2026-08-23.
+**309 tasks shipped** as of 2026-09-27.
 
 
 ## 2026-04
@@ -309,3 +309,21 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T291** · Auto-start nudge when the dongle links up (Q3, foreground slice)  _( 2026-08-23 )_
 - **T292** · Re-run the home-screen audit — both unfinished features now shipped  _( 2026-08-23 )_
 - **T293** · OBD: stop a stalled write from wedging every future connect  _( 2026-08-23 )_
+- **T294** · OBD: recognize Ancel (and more brands) in the adapter scan filter  _( 2026-08-26 )_
+
+## 2026-09
+- **T295** · Cut the record screen's sustained CPU/heat while driving  _( 2026-09-08 )_
+- **T296** · Point every in-app share link + install QR at the live app URL  _( 2026-09-18 )_
+- **T297** · Add 'The Driving Fingerprint' — the OBD channel + profile vision doc  _( 2026-09-18 )_
+- **T298** · Maps: switch base tiles off keyless CARTO (now watermarked) to Mapbox dark  _( 2026-09-18 )_
+- **T299** · Work in progress  _( 2026-09-21 )_
+- **T300** · Fix the /install redirect loop on the shared app link  _( 2026-09-25 )_
+- **T301** · chore: trigger Cloudflare production deploy (branch now main)  _( 2026-09-25 )_
+- **T302** · OBD: retry the connect (3x) + keep the escape hatch visible on failure  _( 2026-09-25 )_
+- **T303** · Drive HUD: timer to h:mm:ss, moved into the bottom stat strip  _( 2026-09-25 )_
+- **T304** · Dev: tap version tag to copy device ID; add pull-latest-drive.sh helper  _( 2026-09-25 )_
+- **T305** · Dev: get_device_drives_dev RPC + pull script fallback for signed-in drives  _( 2026-09-25 )_
+- **T306** · Dev: add get_user_drives_dev (account-keyed) + script USER_ID mode  _( 2026-09-25 )_
+- **T307** · Drive HUD: drop fuel-efficiency stat, spread Time/Miles/Avg into even thirds  _( 2026-09-27 )_
+- **T308** · Scoring redesign: 3 real dimensions + speed multiplier + ride composure  _( 2026-09-27 )_
+- **T309** · Cleanup: retire the orphaned event-penalty scoring engine  _( 2026-09-27 )_
