@@ -90,6 +90,14 @@ export function createMotionHandler(callbacks = {}){
         state.currentRoughness = Math.sqrt(
           state.roughnessBuf.reduce((s,v)=>s+(v-mean)**2,0)/state.roughnessBuf.length
         );
+        // Sharp jolt = the instantaneous vertical deviation from the rolling
+        // baseline. A pothole is one big spike; rumble strips a rapid burst — both
+        // stand well ABOVE ambient texture, which is exactly the signal that
+        // separates avoidable hits from a road you can't do anything about.
+        // Peak-held until the next GPS sample consumes and resets it (gps.js), so
+        // each recorded point carries the worst jolt in its ~1s window.
+        const jolt = Math.abs(vertAccel - mean);
+        if (jolt > state.peakVertJolt) state.peakVertJolt = jolt;
       }
     }
 

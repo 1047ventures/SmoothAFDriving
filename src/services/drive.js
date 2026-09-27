@@ -50,6 +50,7 @@ function storeSample(s, startTime){
     ra:      +((s.latAccel||0).toFixed(3)),
   };
   if (s.roadRoughness) out.rr = +s.roadRoughness.toFixed(3);
+  if (s.roadJolt)      out.rj = +s.roadJolt.toFixed(3);
   if (s.throttle   != null) out.thr = +s.throttle.toFixed(1);
   if (s.rpm        != null) out.rpm = Math.round(s.rpm);
   if (s.load       != null) out.ld  = +s.load.toFixed(1);

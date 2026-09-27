@@ -236,8 +236,14 @@ export function onGpsUpdate(pos, callbacks = {}){
     }
   }
 
-  // Store road roughness snapshot with each GPS sample
+  // Store road roughness snapshot with each GPS sample: the ambient baseline
+  // texture (roadRoughness) plus the worst sharp jolt in this ~1s window
+  // (roadJolt — potholes / rumble strips). Consume and reset the jolt peak-hold
+  // so each sample owns its own interval. Both are 0 until the motion sensor's
+  // vertical axis is known, so a GPS-only drive carries neither.
   s.roadRoughness = state.currentRoughness;
+  s.roadJolt = state.peakVertJolt || 0;
+  state.peakVertJolt = 0;
 
   // Fold in the car's own numbers when a fresh OBD reading exists. Attached to
   // the sample so the recorded drive carries throttle/RPM/gear alongside the GPS

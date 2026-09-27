@@ -43,7 +43,11 @@ export const state = {
   lastGpsPos: null,
   // Road roughness
   roughnessBuf: [],     // rolling buffer of vertical accel samples
-  currentRoughness: 0,  // RMS noise of vertical axis (m/s²)
+  currentRoughness: 0,  // RMS noise of vertical axis (m/s²) — ambient road texture (baseline)
+  peakVertJolt: 0,      // peak vertical jolt since the last GPS sample consumed it —
+                        // the sharp spikes (potholes, rumble strips) that stand ABOVE
+                        // the baseline. Phase-2 scoring will separate these from the
+                        // texture the driver can't help. Capture-only for now.
   // Stability / orientation
   stabBuf: [],          // pre-recording stability buffer [{x,y,z,gx,gy,gz}]
   gpsWatchId: null,
@@ -85,6 +89,7 @@ export function resetState(){
   state.lastGpsPos = null;
   state.roughnessBuf = [];
   state.currentRoughness = 0;
+  state.peakVertJolt = 0;
   state.stabBuf = [];
   state.currentSpeedLimitMps = null;
   state.rawAccel = { x: 0, y: 0, z: 0 };

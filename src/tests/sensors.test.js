@@ -10,7 +10,8 @@ vi.stubGlobal('localStorage', {
 });
 
 const { detectEventWithThresh } = await import('../services/sensors/gps.js');
-const { state, calib, resetCalib } = await import('../state.js');
+const { createMotionHandler } = await import('../services/sensors/motion.js');
+const { state, calib, resetCalib, resetState } = await import('../state.js');
 const { DEFAULTS } = await import('../constants.js');
 
 const cfg = { ...DEFAULTS };
@@ -128,5 +129,43 @@ describe('detectEventWithThresh', () => {
     expect(evtCapped).not.toBeNull();   // capped to suburban — fires
     expect(evtUncapped).toBeNull();     // uncapped highway — does not fire
     state.currentSpeedLimitMps = null;
+  });
+});
+
+describe('ride-jolt capture (Phase 2 data)', () => {
+  // gravity on +z so the handler derives its vertical axis from ~60 samples;
+  // motion rides on +z too, so once the axis is known vertAccel = z.
+  const motionEv = z => ({ accelerationIncludingGravity:{x:0,y:0,z:9.81},
+                           acceleration:{x:0,y:0,z:z}, rotationRate:null });
+
+  // ~1s to derive the up-axis + ~1s to fill the 60-sample roughness buffer, so
+  // feed a healthy warmup of gentle road texture before the event under test.
+  function warmup(h, n = 140){ for (let i = 0; i < n; i++) h(motionEv((Math.random() - 0.5) * 0.2)); }
+
+  beforeEach(() => {
+    resetState();
+    resetCalib();
+    state.recording  = true;
+    state.lastGpsPos = { lat:39.7, lon:-104.9, speed:12 };
+    calib.gyroAvail  = false;   // force the accelerometer vertical path
+  });
+
+  it('records a sharp pothole spike as a peak jolt above the baseline', () => {
+    const h = createMotionHandler({});
+    warmup(h);
+    const baseline = state.peakVertJolt;
+    h(motionEv(6.5));                               // pothole
+    expect(baseline).toBeLessThan(1);              // ambient road barely registers
+    expect(state.peakVertJolt).toBeGreaterThan(4); // the hit stands well above it
+  });
+
+  it('peak-holds the worst jolt until it is consumed', () => {
+    const h = createMotionHandler({});
+    warmup(h);
+    h(motionEv(7));   // big hit
+    const peak = state.peakVertJolt;
+    expect(peak).toBeGreaterThan(4);
+    h(motionEv(2));   // a smaller later bump must not lower the held peak
+    expect(state.peakVertJolt).toBe(peak);
   });
 });
