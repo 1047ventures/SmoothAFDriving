@@ -1,7 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, TIER_MULT, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
+import { CFG, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, fmtClock, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -299,7 +299,7 @@ export function updateLiveUI(){
     radar.classList.toggle('state-smooth', !isBrake && !isAccel);
   }
 
-  // Screen-level state class: drives glow, score color, efficiency color
+  // Screen-level state class: drives the edge-glow color (smooth/braking/accel)
   {
     const screenEl = document.getElementById('screen-record');
     if (screenEl){
@@ -315,20 +315,6 @@ export function updateLiveUI(){
   setEdgeGlow('eg-bottom', la > 0 ?  la : 0);
   setEdgeGlow('eg-right',  ra > 0 ?  ra : 0);
   setEdgeGlow('eg-left',   ra < 0 ? -ra : 0);
-
-  // Efficiency bar — 3 segments, based on cumulative penalty weight
-  {
-    const penalty = state.events.filter(e => e.type !== 'shift')
-      .reduce((s, e) => s + (TIER_MULT[e.tier || 2] || 1) * (e.severity || 1), 0);
-    const segs  = penalty < 2 ? 3 : penalty < 6 ? 2 : penalty < 14 ? 1 : 0;
-    const label = segs === 3 ? 'Eco' : segs === 2 ? 'Normal' : 'Heavy';
-    for (let i = 1; i <= 3; i++){
-      const seg = document.getElementById('fuel-seg-' + i);
-      if (seg) seg.classList.toggle('on', i <= segs);
-    }
-    const effEl = document.getElementById('live-efficiency');
-    if (effEl) effEl.textContent = label;
-  }
 
   // Off-screen needle — JS compat
   const needle = document.getElementById('live-g-needle');

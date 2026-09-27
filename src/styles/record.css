@@ -222,22 +222,13 @@
 
   /* bottom stats */
   .rec-bottom{position:absolute;bottom:calc(env(safe-area-inset-bottom,0) + 100px);left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:flex-end;padding:0 24px}
-  .bot-stat{display:flex;flex-direction:column}
+  .bot-stat{display:flex;flex-direction:column;flex:1}
   .bot-stat--center{align-items:center}
   .bot-stat--right{align-items:flex-end}
   .bot-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
   .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);letter-spacing:-.02em;line-height:1;white-space:nowrap}
   .bot-val--time{font-variant-numeric:tabular-nums}
   .bot-unit{font-family:var(--sans);font-style:normal;font-size:13px;color:rgba(244,235,217,.86)}
-  .fuel-segs{display:flex;gap:5px;align-items:center;margin-top:5px}
-  .fuel-seg{height:5px;width:24px;border-radius:3px;background:rgba(244,235,217,.12)}
-  #screen-record.smooth  .fuel-seg.on{background:var(--good)}
-  #screen-record.braking .fuel-seg.on{background:var(--danger)}
-  #screen-record.accel   .fuel-seg.on{background:var(--warn)}
-  .fuel-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;margin-top:4px}
-  #screen-record.smooth  .fuel-lbl{color:var(--good)}
-  #screen-record.braking .fuel-lbl{color:var(--danger)}
-  #screen-record.accel   .fuel-lbl{color:var(--warn)}
 
   /* event ticker + stop button */
   .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 112px);display:flex;justify-content:center;align-items:center;pointer-events:none}
