@@ -50,7 +50,27 @@ export const PIDS = {
   // rather than guessing when they're absent.
   torquePct: { pid: '62', bytes: 1, decode: a => a - 125 },   // % of reference, signed (offset 125)
   torqueRef: { pid: '63', bytes: 2, decode: (a, b) => (a * 256) + b }, // Nm
+  // ── Slower-changing channels ────────────────────────────────────────────
+  // These barely move second to second, so they're polled on a slow cadence
+  // (see SLOW_PIDS / poll()) rather than every loop. They're what turns a
+  // three-number readout into a real picture of what the engine is doing.
+  coolant:    { pid: '05', bytes: 1, decode: a => a - 40 },                 // °C
+  intakeTemp: { pid: '0F', bytes: 1, decode: a => a - 40 },                 // °C
+  ambientTemp:{ pid: '46', bytes: 1, decode: a => a - 40 },                 // °C
+  map:        { pid: '0B', bytes: 1, decode: a => a },                      // kPa (manifold abs. pressure)
+  baro:       { pid: '33', bytes: 1, decode: a => a },                      // kPa (barometric)
+  timingAdv:  { pid: '0E', bytes: 1, decode: a => (a / 2) - 64 },           // ° before TDC
+  maf:        { pid: '10', bytes: 2, decode: (a, b) => ((a * 256) + b) / 100 }, // g/s
+  fuelLevel:  { pid: '2F', bytes: 1, decode: a => (a * 100) / 255 },        // %
+  voltage:    { pid: '42', bytes: 2, decode: (a, b) => ((a * 256) + b) / 1000 }, // V (control module)
 };
+
+// Fast set — polled every loop, because scoring and the live gauge lean on them.
+const FAST_PIDS = ['throttle', 'rpm', 'speed', 'load', 'torquePct', 'torqueRef'];
+// Slow set — polled once every SLOW_EVERY loops so they don't steal cadence from
+// the fast set. Temps, fuel and voltage move on the scale of seconds to minutes.
+const SLOW_PIDS = ['coolant', 'intakeTemp', 'ambientTemp', 'map', 'baro', 'timingAdv', 'maf', 'fuelLevel', 'voltage'];
+const SLOW_EVERY = 8;   // ~ every 2s at a 250ms poll
 
 /**
  * Strip an ELM327 reply down to hex bytes.
@@ -178,9 +198,13 @@ const state = {
   queue:     Promise.resolve(),
   latest:    { rpm: null, speed: null, throttle: null, load: null,
                torquePct: null, torqueRef: null,
-               torqueNm: null, horsepower: null, gear: null, gearRatio: null, at: 0 },
+               torqueNm: null, horsepower: null, gear: null, gearRatio: null,
+               coolant: null, intakeTemp: null, ambientTemp: null,
+               map: null, baro: null, timingAdv: null, maf: null,
+               fuelLevel: null, voltage: null, at: 0 },
   supported: null,
   gearSupported: false,   // set once at connect by probing PID 0xA4
+  pollN:     0,           // loop counter, so slow PIDs poll every SLOW_EVERY loops
 };
 
 export function getLatest(){ return { ...state.latest }; }
@@ -330,9 +354,12 @@ export async function scanForAdapters({ onUpdate = () => {}, onStatus = () => {}
     const name  = result.device?.name || result.localName || '';
     const uuids = result.uuids || result.device?.uuids || [];
     const likely = isLikelyObd(name, uuids);
-    // The whole point: skip radios that are neither named nor OBD-shaped. That
-    // is the "100 unknowns" the stock picker drowns you in.
-    if (!name && !likely) return;
+    // Only ever surface devices that broadcast a real name. A nameless radio is
+    // the "unknown" noise — phones, beacons, earbuds, TVs — that made the list
+    // unusable; dropping every unnamed entry keeps the list to things you can
+    // actually identify. A genuinely nameless dongle still has the "Don't see
+    // yours?" system-picker fallback.
+    if (!name) return;
     onUpdate(mergeScanResult(found, {
       deviceId: result.device.deviceId,
       name: name || null,
@@ -416,10 +443,13 @@ export async function poll(){
   if (!state.deviceId) return null;
 
   const has = n => !state.supported?.length || state.supported.includes(parseInt(PIDS[n].pid, 16));
-  // Torque leads nothing — it's optional and slow — but the core four stay
-  // first so the scoring-relevant values keep their cadence even when the extra
-  // PIDs are being polled.
-  const wanted = ['throttle', 'rpm', 'speed', 'load', 'torquePct', 'torqueRef'].filter(has);
+  // The fast set leads every loop so the scoring-relevant values keep their
+  // cadence. The slow set (temps, fuel, voltage, pressures) is folded in once
+  // every SLOW_EVERY loops — it moves too slowly to be worth a slot each time,
+  // and querying it every loop would drag the whole ~4Hz budget down.
+  state.pollN = (state.pollN + 1) % SLOW_EVERY;
+  const wanted = FAST_PIDS.filter(has);
+  if (state.pollN === 0) wanted.push(...SLOW_PIDS.filter(has));
 
   for (const name of wanted){
     const reply = await send('01' + PIDS[name].pid);

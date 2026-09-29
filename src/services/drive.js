@@ -58,6 +58,14 @@ function storeSample(s, startTime){
   if (s.obdSpeed   != null) out.os  = +s.obdSpeed.toFixed(2);
   if (s.horsepower != null) out.hp  = Math.round(s.horsepower);
   if (s.torqueNm   != null) out.nm  = Math.round(s.torqueNm);
+  // Slower channels, abbreviated to hold the localStorage quota.
+  if (s.coolant    != null) out.ct  = Math.round(s.coolant);
+  if (s.intakeTemp != null) out.it  = Math.round(s.intakeTemp);
+  if (s.map        != null) out.map = Math.round(s.map);
+  if (s.timingAdv  != null) out.ta  = +s.timingAdv.toFixed(1);
+  if (s.maf        != null) out.maf = +s.maf.toFixed(1);
+  if (s.fuelLevel  != null) out.fl  = +s.fuelLevel.toFixed(1);
+  if (s.voltage    != null) out.v   = +s.voltage.toFixed(2);
   return out;
 }
 
@@ -154,10 +162,13 @@ export function summarizeObd(samples){
     const vals = samples.map(s => s[key]).filter(v => v != null);
     if (!vals.length) return null;
     const sum = vals.reduce((a, v) => a + v, 0);
-    return { avg: sum / vals.length, max: Math.max(...vals), n: vals.length };
+    return { avg: sum / vals.length, max: Math.max(...vals), min: Math.min(...vals), n: vals.length };
   };
   const rpm = stat('rpm'), throttle = stat('throttle'), load = stat('load'),
-        hp = stat('horsepower'), nm = stat('torqueNm'), obdSpeed = stat('obdSpeed');
+        hp = stat('horsepower'), nm = stat('torqueNm'), obdSpeed = stat('obdSpeed'),
+        coolant = stat('coolant'), intakeTemp = stat('intakeTemp'), map = stat('map'),
+        timingAdv = stat('timingAdv'), maf = stat('maf'), fuelLevel = stat('fuelLevel'),
+        voltage = stat('voltage');
   const withObd = samples.filter(s =>
     s.throttle != null || s.rpm != null || s.gear != null || s.obdSpeed != null).length;
   if (!withObd) return null;
@@ -176,6 +187,15 @@ export function summarizeObd(samples){
     peakTorqueNm: nm ? Math.round(nm.max) : null,
     topObdSpeedMps: obdSpeed ? +obdSpeed.max.toFixed(2) : null,
     gears:       gears.length ? gears : null,
+    // Slower channels — a single representative figure each, present only when
+    // the car reported that reading at all.
+    peakCoolant:  coolant ? Math.round(coolant.max) : null,
+    avgIntakeTemp: intakeTemp ? Math.round(intakeTemp.avg) : null,
+    peakMap:      map ? Math.round(map.max) : null,
+    peakTimingAdv: timingAdv ? Math.round(timingAdv.max) : null,
+    peakMaf:      maf ? +maf.max.toFixed(1) : null,
+    minFuelLevel: fuelLevel ? Math.round(fuelLevel.min) : null,
+    avgVoltage:   voltage ? +voltage.avg.toFixed(2) : null,
   };
 }
 

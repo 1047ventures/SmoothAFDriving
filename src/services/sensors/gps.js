@@ -119,6 +119,15 @@ export function attachObd(s, obd = state.obd, now = Date.now()){
   if (obd.gearRatio  != null) s.gearRatio  = obd.gearRatio;
   if (obd.horsepower != null) s.horsepower = obd.horsepower;
   if (obd.torqueNm   != null) s.torqueNm   = obd.torqueNm;
+  // Slower-changing channels — attached when present so the recorded drive and
+  // its review/export carry the fuller engine picture, not just the fast four.
+  if (obd.coolant    != null) s.coolant    = obd.coolant;
+  if (obd.intakeTemp != null) s.intakeTemp = obd.intakeTemp;
+  if (obd.map        != null) s.map        = obd.map;
+  if (obd.timingAdv  != null) s.timingAdv  = obd.timingAdv;
+  if (obd.maf        != null) s.maf        = obd.maf;
+  if (obd.fuelLevel  != null) s.fuelLevel  = obd.fuelLevel;
+  if (obd.voltage    != null) s.voltage    = obd.voltage;
   // The car's wheel-speed truth, kept beside the GPS speed rather than replacing
   // it, so review can show both and scoring can choose.
   if (obd.speedMps   != null) s.obdSpeed   = obd.speedMps;

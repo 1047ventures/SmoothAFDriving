@@ -899,6 +899,14 @@ export function buildExportData(drive, analysis) {
       if (obdSpeed               != null) out.obdSpeedMps = obdSpeed;
       if ((s.horsepower ?? s.hp) != null) out.horsepower  = s.horsepower ?? s.hp;
       if ((s.torqueNm   ?? s.nm) != null) out.torqueNm    = s.torqueNm   ?? s.nm;
+      // Slower channels — same abbreviated-first, long-name-fallback pattern.
+      if ((s.coolant    ?? s.ct)  != null) out.coolantC     = s.coolant    ?? s.ct;
+      if ((s.intakeTemp ?? s.it)  != null) out.intakeTempC  = s.intakeTemp ?? s.it;
+      if ((s.map        ?? s.map) != null) out.mapKpa       = s.map;
+      if ((s.timingAdv  ?? s.ta)  != null) out.timingAdvDeg = s.timingAdv  ?? s.ta;
+      if ((s.maf        ?? s.maf) != null) out.mafGs        = s.maf;
+      if ((s.fuelLevel  ?? s.fl)  != null) out.fuelLevelPct = s.fuelLevel  ?? s.fl;
+      if ((s.voltage    ?? s.v)   != null) out.voltageV     = s.voltage    ?? s.v;
       return out;
     }),
   };

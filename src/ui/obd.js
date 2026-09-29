@@ -103,9 +103,15 @@ function renderReadout(){
   if (!node) return;
   if (!isConnected()){ node.textContent = ''; return; }
 
-  const { rpm, throttle, load, horsepower, torqueNm, gear, gearRatio } = getLatest();
+  const { rpm, throttle, load, horsepower, torqueNm, gear, gearRatio,
+          coolant, intakeTemp, ambientTemp, map, baro, timingAdv, maf,
+          fuelLevel, voltage } = getLatest();
   const cell = (label, value, unit) =>
     `<span class="obd-cell"><b>${value == null ? '—' : Math.round(value)}</b>${unit}<i>${label}</i></span>`;
+  // A one-decimal variant for the readings where the integer would throw away
+  // what matters (12.4 V, 3.2 g/s).
+  const cell1 = (label, value, unit) =>
+    `<span class="obd-cell"><b>${value == null ? '—' : value.toFixed(1)}</b>${unit}<i>${label}</i></span>`;
 
   // Gear comes straight from the car (PID 0xA4). Show the gear number when the
   // transmission reports one; otherwise the actual ratio if it offers that; and
@@ -115,6 +121,9 @@ function renderReadout(){
   if (gear != null)      gearCell = `<span class="obd-cell"><b>${gear}</b><i>gear</i></span>`;
   else if (gearRatio != null) gearCell = `<span class="obd-cell"><b>${gearRatio.toFixed(2)}</b><i>ratio</i></span>`;
 
+  // Every cell is conditional on the car actually answering that PID, so a car
+  // that reports six channels shows six and one that reports twelve shows
+  // twelve — no rows of dashes for readings this car doesn't expose.
   node.innerHTML =
     cell('throttle', throttle, '%') +
     cell('rpm',      rpm,      '')  +
@@ -122,11 +131,18 @@ function renderReadout(){
     // it, and a second km/h figure was just redundant clutter. Still recorded
     // in state.obd (the car's speed is truer than GPS), just not displayed.
     cell('load',     load,     '%') +
-    // Power/torque only appear once the car actually yields them, so a car that
-    // reports no torque simply shows fewer cells rather than a row of dashes.
     (horsepower != null ? cell('hp',  horsepower, '')   : '') +
     (torqueNm   != null ? cell('nm',  torqueNm,   '')   : '') +
-    gearCell;
+    gearCell +
+    (coolant    != null ? cell('coolant',  coolant,    '°') : '') +
+    (intakeTemp != null ? cell('intake',   intakeTemp, '°') : '') +
+    (ambientTemp!= null ? cell('ambient',  ambientTemp,'°') : '') +
+    (map        != null ? cell('MAP',      map,        '')  : '') +
+    (baro       != null ? cell('baro',     baro,       '')  : '') +
+    (timingAdv  != null ? cell('timing',   timingAdv,  '°') : '') +
+    (maf        != null ? cell1('MAF',     maf,        '')  : '') +
+    (fuelLevel  != null ? cell('fuel',     fuelLevel,  '%') : '') +
+    (voltage    != null ? cell1('volts',   voltage,    '')  : '');
 }
 
 /**
@@ -137,7 +153,9 @@ function renderReadout(){
  * score. Getting them visible and recorded is this build's job.
  */
 function publish(){
-  const { throttle, rpm, speed, load, horsepower, torqueNm, gear, gearRatio } = getLatest();
+  const { throttle, rpm, speed, load, horsepower, torqueNm, gear, gearRatio,
+          coolant, intakeTemp, ambientTemp, map, baro, timingAdv, maf,
+          fuelLevel, voltage } = getLatest();
   state.obd = {
     throttle,
     rpm,
@@ -146,6 +164,15 @@ function publish(){
     torqueNm,
     gear,
     gearRatio,
+    coolant,
+    intakeTemp,
+    ambientTemp,
+    map,
+    baro,
+    timingAdv,
+    maf,
+    fuelLevel,
+    voltage,
     // The car's speed is truth; GPS is a lagging derivative of position. Stored
     // in m/s so it is directly comparable with the GPS figure beside it.
     speedMps: speed == null ? null : kmhToMps(speed),

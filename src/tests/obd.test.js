@@ -80,6 +80,35 @@ describe('decodePid', () => {
     // RPM needs two bytes; one is not "half an answer", it's no answer.
     expect(decodePid('rpm', '410C1A')).toBe(null);
   });
+
+  it('decodes coolant/intake temp with the −40 offset', () => {
+    // 0x7B = 123 → 123 − 40 = 83 °C
+    expect(decodePid('coolant', '41057B')).toBe(83);
+    expect(decodePid('intakeTemp', '410F28')).toBe(0);   // 40 − 40
+  });
+
+  it('decodes manifold pressure as a raw kPa byte', () => {
+    expect(decodePid('map', '410B65')).toBe(101);        // ~sea-level idle
+  });
+
+  it('decodes timing advance as A/2 − 64', () => {
+    // 0x90 = 144 → 144/2 − 64 = 8° before TDC
+    expect(decodePid('timingAdv', '410E90')).toBe(8);
+  });
+
+  it('decodes MAF as ((A*256)+B)/100 g/s', () => {
+    // 0x0A0F = 2575 → 25.75 g/s
+    expect(decodePid('maf', '41100A0F')).toBeCloseTo(25.75, 2);
+  });
+
+  it('decodes fuel level as a percentage of 255', () => {
+    expect(decodePid('fuelLevel', '412F80')).toBeCloseTo(50.2, 1);
+  });
+
+  it('decodes control-module voltage as ((A*256)+B)/1000 V', () => {
+    // 0x3039 = 12345 → 12.345 V
+    expect(decodePid('voltage', '41423039')).toBeCloseTo(12.345, 3);
+  });
 });
 
 describe('decodeSupportedPids', () => {
