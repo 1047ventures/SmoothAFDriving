@@ -19,7 +19,8 @@ async function handle(context) {
   const SECRET = env.DIGEST_SECRET;
   const TO = env.DIGEST_EMAIL || 'skellyslife@gmail.com';
   const FROM = env.DIGEST_FROM || 'Smooth AF <digest@smoothafdriving.com>';
-  const TZ = env.DIGEST_TZ || 'America/Denver';
+  // Local-day offset in hours for bounding "today" (default US Mountain).
+  const TZ_OFFSET = Number(env.DIGEST_TZ_OFFSET ?? -6);
 
   // Shared-secret gate: header or ?key=, constant nothing-clever compare.
   const supplied = request.headers.get('x-digest-key') || url.searchParams.get('key') || '';
@@ -38,9 +39,9 @@ async function handle(context) {
   try {
     const [users, drives] = await Promise.all([
       sbGet('users?select=device_id,name,email,updated_at&limit=10000'),
-      sbGet('drives?select=device_id,user_id,start_time,distance_meters,score,event_count,simulated&limit=100000'),
+      sbGet('drives?select=device_id,user_id,start_time,distance_meters,score,event_count,simulated&limit=10000'),
     ]);
-    digest = computeDailyDigest(users, drives, Date.now(), TZ);
+    digest = computeDailyDigest(users, drives, Date.now(), TZ_OFFSET);
   } catch (err) {
     console.error('daily-digest db error:', err.message);
     return json(500, { ok: false, error: 'db_error' });

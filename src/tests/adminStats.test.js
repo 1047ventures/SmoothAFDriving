@@ -163,7 +163,7 @@ describe('identity merge (one person, many device ids)', () => {
 });
 
 describe('computeDailyDigest', () => {
-  const tz = 'UTC'; // deterministic: local midnight == UTC midnight
+  const tzOffset = 0; // deterministic: local midnight == UTC midnight
   const NOON = Date.parse('2026-09-30T12:00:00Z');
   const users = [{ device_id: 'a', name: 'A', email: 'a@x.com', updated_at: '2026-09-29T09:00:00Z' }];
   const drives = [
@@ -171,7 +171,7 @@ describe('computeDailyDigest', () => {
     { device_id: 'a', start_time: Date.parse('2026-09-29T09:00:00Z'), score: 60, distance_meters: 1609.34, event_count: 1, simulated: false }, // yesterday
     { device_id: 'a', start_time: Date.parse('2026-09-30T10:00:00Z'), score: 0, distance_meters: 9999, event_count: 50, simulated: true },     // excluded
   ];
-  const dg = computeDailyDigest(users, drives, NOON, tz);
+  const dg = computeDailyDigest(users, drives, NOON, tzOffset);
 
   it('separates today from all-time (simulated excluded)', () => {
     expect(dg.drivesToday).toBe(1);

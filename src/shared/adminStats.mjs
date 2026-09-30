@@ -147,34 +147,38 @@ export function summarizeFlags(events) {
   return out;
 }
 
-// The instant of local midnight for `tz`, derived by subtracting the wall-clock
-// time-of-day from now — correct across time zones and DST without hardcoding an
-// offset. Used to bound "today" in the owner's time zone, not UTC.
-function localDayStartMs(nowMs, tz) {
-  const dtf = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const p = Object.fromEntries(dtf.formatToParts(new Date(nowMs)).map(x => [x.type, x.value]));
-  const secs = (Number(p.hour) % 24) * 3600 + Number(p.minute) * 60 + Number(p.second);
-  return nowMs - secs * 1000;
-}
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
 /**
- * The end-of-day digest: all-time totals plus today's deltas, in the owner's
- * time zone. Aggregate only — counts and sums, never a user row — so it is safe
- * to email and safe to expose behind a shared secret.
+ * The end-of-day digest: all-time totals plus today's deltas, with "today"
+ * bounded in the owner's local day via a fixed UTC offset (in hours).
+ *
+ * Deliberately offset-based arithmetic rather than Intl named time zones: the
+ * Cloudflare Workers runtime is unreliable with `Intl.DateTimeFormat`
+ * timeZone/dateStyle, and a digest boundary that's an hour off across a DST
+ * switch twice a year doesn't matter for daily counts. Aggregate only — counts
+ * and sums, never a user row.
  */
-export function computeDailyDigest(users, drives, nowMs, tz = 'America/Denver') {
+export function computeDailyDigest(users, drives, nowMs, tzOffsetHours = -6) {
   const real = realDrives(drives);
   const ov = computeOverview(users, drives, nowMs);
   const rows = computeUserRows(users, drives);
-  const dayStart = localDayStartMs(nowMs, tz);
+
+  const offsetMs = tzOffsetHours * 3600 * 1000;
+  const localNow = nowMs + offsetMs;                        // shift to local wall clock
+  const localMidnight = Math.floor(localNow / 864e5) * 864e5;
+  const dayStart = localMidnight - offsetMs;               // back to the real (UTC) instant
+  const ld = new Date(localMidnight);                      // its UTC Y/M/D are the local date
 
   const todays = real.filter(d => d.start_time >= dayStart);
   const milesToday = miles(todays.reduce((s, d) => s + (d.distance_meters || 0), 0));
   const scoresToday = todays.map(d => d.score).filter(s => s != null);
 
   return {
-    date: new Intl.DateTimeFormat('en-US', { timeZone: tz, dateStyle: 'full' }).format(new Date(nowMs)),
-    tz,
+    date: `${DAY_NAMES[ld.getUTCDay()]}, ${MONTH_NAMES[ld.getUTCMonth()]} ${ld.getUTCDate()}, ${ld.getUTCFullYear()}`,
+    tzOffsetHours,
     // today
     newDriversToday: rows.filter(r => r.firstSeen != null && r.firstSeen >= dayStart).length,
     activeToday:     rows.filter(r => r.lastSeen != null && r.lastSeen >= dayStart).length,

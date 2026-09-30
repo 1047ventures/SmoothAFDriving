@@ -24,7 +24,15 @@ jobs:
             echo "DIGEST_SECRET repo secret not set — skipping (add it to enable the digest)."
             exit 0
           fi
-          curl --fail --silent --show-error -X POST \
+          # Capture body + status so a failure prints the actual error, not just
+          # curl exit 22.
+          resp=$(curl --silent --show-error -X POST \
             "https://smoothafdriving.pages.dev/api/daily-digest" \
             -H "x-digest-key: $DIGEST_SECRET" \
-            -w "\nHTTP %{http_code}\n"
+            -w $'\n%{http_code}')
+          echo "$resp"
+          code=$(printf '%s' "$resp" | tail -n1)
+          if [ "$code" != "200" ]; then
+            echo "::error::daily-digest returned HTTP $code"
+            exit 1
+          fi
