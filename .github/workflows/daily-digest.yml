@@ -1,0 +1,30 @@
+name: Daily digest
+
+# Fires the end-of-day operator digest email. The work (query + compute + send)
+# happens in the Cloudflare function /api/daily-digest; this just pokes it once a
+# day with the shared secret. Kept as a scheduled Action because Cloudflare Pages
+# Functions have no cron of their own.
+
+on:
+  schedule:
+    # 05:00 UTC ≈ end of day US Mountain (11pm MDT / 10pm MST).
+    # GitHub cron can drift a few minutes; fine for a daily email.
+    - cron: '0 5 * * *'
+  workflow_dispatch: {} # allow a manual run from the Actions tab
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger digest email
+        env:
+          DIGEST_SECRET: ${{ secrets.DIGEST_SECRET }}
+        run: |
+          if [ -z "$DIGEST_SECRET" ]; then
+            echo "DIGEST_SECRET repo secret not set — skipping (add it to enable the digest)."
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST \
+            "https://smoothafdriving.pages.dev/api/daily-digest" \
+            -H "x-digest-key: $DIGEST_SECRET" \
+            -w "\nHTTP %{http_code}\n"

@@ -147,6 +147,51 @@ export function summarizeFlags(events) {
   return out;
 }
 
+// The instant of local midnight for `tz`, derived by subtracting the wall-clock
+// time-of-day from now — correct across time zones and DST without hardcoding an
+// offset. Used to bound "today" in the owner's time zone, not UTC.
+function localDayStartMs(nowMs, tz) {
+  const dtf = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const p = Object.fromEntries(dtf.formatToParts(new Date(nowMs)).map(x => [x.type, x.value]));
+  const secs = (Number(p.hour) % 24) * 3600 + Number(p.minute) * 60 + Number(p.second);
+  return nowMs - secs * 1000;
+}
+
+/**
+ * The end-of-day digest: all-time totals plus today's deltas, in the owner's
+ * time zone. Aggregate only — counts and sums, never a user row — so it is safe
+ * to email and safe to expose behind a shared secret.
+ */
+export function computeDailyDigest(users, drives, nowMs, tz = 'America/Denver') {
+  const real = realDrives(drives);
+  const ov = computeOverview(users, drives, nowMs);
+  const rows = computeUserRows(users, drives);
+  const dayStart = localDayStartMs(nowMs, tz);
+
+  const todays = real.filter(d => d.start_time >= dayStart);
+  const milesToday = miles(todays.reduce((s, d) => s + (d.distance_meters || 0), 0));
+  const scoresToday = todays.map(d => d.score).filter(s => s != null);
+
+  return {
+    date: new Intl.DateTimeFormat('en-US', { timeZone: tz, dateStyle: 'full' }).format(new Date(nowMs)),
+    tz,
+    // today
+    newDriversToday: rows.filter(r => r.firstSeen != null && r.firstSeen >= dayStart).length,
+    activeToday:     rows.filter(r => r.lastSeen != null && r.lastSeen >= dayStart).length,
+    drivesToday:     todays.length,
+    milesToday,
+    avgScoreToday:   scoresToday.length ? Math.round(scoresToday.reduce((a, b) => a + b, 0) / scoresToday.length) : null,
+    flagsToday:      todays.reduce((s, d) => s + (d.event_count || 0), 0),
+    // all-time
+    totalUsers:      ov.totalUsers,
+    totalDevices:    ov.totalDevices,
+    totalDrives:     ov.totalDrives,
+    totalMiles:      ov.totalMiles,
+    avgScore:        ov.avgScore,
+    activeUsers7d:   ov.activeUsers7d,
+  };
+}
+
 export function computeUserRows(users, drives) {
   const groups = groupByIdentity(users, drives);
   const rows = [];
