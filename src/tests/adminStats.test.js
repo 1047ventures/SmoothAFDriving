@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeOverview, computeUserRows } from '../../netlify/functions/_lib/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags } from '../../netlify/functions/_lib/adminStats.mjs';
 
 const DAY = 864e5;
 const NOW = 1_700_000_000_000;            // fixed "now" for deterministic windows
@@ -88,5 +88,53 @@ describe('computeUserRows', () => {
     expect(d.firstSeen).toBeNull();
     expect(d.totalMiles).toBe(0);
     expect(d.lastSeen).toBe(Date.parse('2023-11-10T00:00:00Z'));
+    expect(d.flags).toBe(0);
+    expect(d.flagsPerMile).toBeNull(); // no distance → no rate, not a divide-by-zero
+  });
+});
+
+describe('flags / behaviour aggregation', () => {
+  const NOW2 = 1_700_000_000_000;
+  const DRV = [
+    // dev-X: 2 real drives, 6 flags over 2 miles → 3 flags/mi
+    { device_id: 'dev-X', start_time: NOW2, score: 80, distance_meters: 1609.34, event_count: 4, simulated: false },
+    { device_id: 'dev-X', start_time: NOW2 + 1, score: 90, distance_meters: 1609.34, event_count: 2, simulated: false },
+    // simulated is excluded from flag math too
+    { device_id: 'dev-X', start_time: NOW2 + 2, score: 0, distance_meters: 9999, event_count: 99, simulated: true },
+  ];
+
+  it('sums flags and computes per-mile on real drives only', () => {
+    const row = computeUserRows([], DRV).find(r => r.deviceId === 'dev-X');
+    expect(row.flags).toBe(6);
+    expect(row.flagsPerMile).toBe(3);
+  });
+
+  it('rolls flags into the overview', () => {
+    const ov = computeOverview([], DRV, NOW2);
+    expect(ov.totalFlags).toBe(6);
+    expect(ov.flagsPerMile).toBe(3);
+  });
+});
+
+describe('summarizeFlags', () => {
+  it('counts a drive\'s events by type and severity tier', () => {
+    const events = [
+      { type: 'brake', tier: 3 }, { type: 'brake', tier: 2 },
+      { type: 'accel', tier: 2 }, { type: 'turn', tier: 4 },
+    ];
+    const f = summarizeFlags(events);
+    expect(f.total).toBe(4);
+    expect(f.byType.brake).toBe(2);
+    expect(f.byType.accel).toBe(1);
+    expect(f.byType.turn).toBe(1);
+    expect(f.byTier[2]).toBe(2);
+    expect(f.byTier[3]).toBe(1);
+    expect(f.byTier[4]).toBe(1);
+  });
+
+  it('is safe on empty / missing input and defaults a missing tier to 2', () => {
+    expect(summarizeFlags([]).total).toBe(0);
+    expect(summarizeFlags(undefined).total).toBe(0);
+    expect(summarizeFlags([{ type: 'accel' }]).byTier[2]).toBe(1);
   });
 });

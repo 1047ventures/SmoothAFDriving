@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { computeOverview, computeUserRows } from './_lib/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags } from './_lib/adminStats.mjs';
 
 const SB_URL = process.env.SUPABASE_URL;
 const SB_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -51,10 +51,26 @@ export default async (req) => {
       const enc = encodeURIComponent(body.device_id);
       // NOTE: 10000-row cap is far above current volume; pagination is a future task.
       const all = await sbGet(
-        `drives?device_id=eq.${enc}&select=start_time,duration_ms,distance_meters,score,event_count,simulated&order=start_time.desc&limit=10000`
+        `drives?device_id=eq.${enc}&select=start_time,duration_ms,distance_meters,score,efficiency,effectiveness,dims,obd,event_count,dest_label,simulated&order=start_time.desc&limit=10000`
       );
       const drives = all.filter(d => !d.simulated);
       return json(200, { ok: true, drives });
+    }
+
+    if (view === 'drive') {
+      if (!body.device_id || body.start_time == null) {
+        return json(400, { ok: false, error: 'missing device_id or start_time' });
+      }
+      const enc = encodeURIComponent(body.device_id);
+      const st = encodeURIComponent(body.start_time);
+      const rows = await sbGet(
+        `drives?device_id=eq.${enc}&start_time=eq.${st}&select=start_time,score,efficiency,effectiveness,dims,obd,distance_meters,duration_ms,dest_label,events&limit=1`
+      );
+      const d = rows[0];
+      if (!d) return json(404, { ok: false, error: 'not found' });
+      // Flags derived from stored events, so historical drives work too.
+      const { events, ...meta } = d;
+      return json(200, { ok: true, drive: { ...meta, flags: summarizeFlags(events), events: events || [] } });
     }
 
     const [users, drives] = await Promise.all([

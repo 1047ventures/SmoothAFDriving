@@ -8,7 +8,7 @@
 // Reuses the tested pure aggregators; only the transport differs. Password
 // hashing uses Web Crypto (crypto.subtle) rather than node:crypto, since the
 // Workers runtime provides that globally and not Node's crypto by default.
-import { computeOverview, computeUserRows } from '../../netlify/functions/_lib/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags } from '../../netlify/functions/_lib/adminStats.mjs';
 
 const json = (status, obj) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
@@ -69,10 +69,27 @@ export async function onRequestPost(context) {
       if (!body.device_id) return json(400, { ok: false, error: 'missing device_id' });
       const enc = encodeURIComponent(body.device_id);
       const all = await sbGet(
-        `drives?device_id=eq.${enc}&select=start_time,duration_ms,distance_meters,score,event_count,simulated&order=start_time.desc&limit=10000`
+        `drives?device_id=eq.${enc}&select=start_time,duration_ms,distance_meters,score,efficiency,effectiveness,dims,obd,event_count,dest_label,simulated&order=start_time.desc&limit=10000`
       );
       const drives = all.filter((d) => !d.simulated);
       return json(200, { ok: true, drives });
+    }
+
+    if (view === 'drive') {
+      if (!body.device_id || body.start_time == null) {
+        return json(400, { ok: false, error: 'missing device_id or start_time' });
+      }
+      const enc = encodeURIComponent(body.device_id);
+      const st = encodeURIComponent(body.start_time);
+      const rows = await sbGet(
+        `drives?device_id=eq.${enc}&start_time=eq.${st}&select=start_time,score,efficiency,effectiveness,dims,obd,distance_meters,duration_ms,dest_label,events&limit=1`
+      );
+      const d = rows[0];
+      if (!d) return json(404, { ok: false, error: 'not found' });
+      // Flags derived from the stored events, so this works on historical drives
+      // that predate the detail columns. Events pass through for the list/map.
+      const { events, ...meta } = d;
+      return json(200, { ok: true, drive: { ...meta, flags: summarizeFlags(events), events: events || [] } });
     }
 
     const [users, drives] = await Promise.all([

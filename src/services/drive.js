@@ -262,7 +262,14 @@ export function finalizeAndReview(callbacks = {}){
 
   const drive = buildDriveFromState();
   const analysis = analyzeDrive(drive);
-  drive.dims  = analysis.dims;
+  // Keep the full scoring breakdown on the drive (not just the 3 sub-scores) so
+  // it can be stored and shown in the operator dashboard: ride composure and the
+  // speed-difficulty multiplier are part of how the number was reached.
+  drive.dims  = {
+    ...analysis.dims,
+    rideComposure: analysis.rideComposure ?? null,
+    speedBonus:    analysis.speedBonus ?? null,
+  };
   // Destination Drive: only score effectiveness if you actually REACHED the
   // destination — otherwise ending short of it looks like arriving early. No
   // arrival → unfinished (renders like a normal drive, no effectiveness).

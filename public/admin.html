@@ -29,6 +29,16 @@
     tr.user-row:hover { background:#161212; }
     .anon { color:var(--dim); font-style:italic; }
     .drilldown td { background:#0f0c0c; font-size:12px; color:var(--dim); }
+    .drive-line { padding:7px 6px; border-bottom:1px solid var(--line); cursor:pointer; color:var(--cream); }
+    .drive-line:last-child { border-bottom:0; }
+    .drive-line:hover { background:#161212; }
+    .drive-line b { font-weight:600; }
+    .drive-detail { padding:8px 6px 12px; background:#080606; }
+    .dd-section { margin:6px 0; }
+    .dd-h { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); margin-bottom:5px; }
+    .chip { display:inline-block; background:#1a1515; border:1px solid var(--line); border-radius:999px;
+            padding:3px 9px; margin:0 5px 5px 0; font-size:12px; color:var(--cream); }
+    .chip b { font-weight:700; }
   </style>
 </head>
 <body>
@@ -45,7 +55,7 @@
     <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="none"></svg>
     <table>
       <thead>
-        <tr><th>User</th><th>Drives</th><th>Avg</th><th>Miles</th><th>First seen</th><th>Last seen</th></tr>
+        <tr><th>User</th><th>Drives</th><th>Avg</th><th>Miles</th><th>Flags/mi</th><th>First seen</th><th>Last seen</th></tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
@@ -107,23 +117,87 @@
           : `${r.name ? esc(r.name) : '—'}<br><span class="anon">${esc(r.email || '')}</span>`;
         return `<tr class="user-row" data-device="${esc(r.deviceId)}">
           <td>${who}</td><td>${r.driveCount}</td><td>${r.avgScore ?? '—'}</td>
-          <td>${r.totalMiles}</td><td>${fmtDate(r.firstSeen)}</td><td>${fmtDate(r.lastSeen)}</td></tr>`;
+          <td>${r.totalMiles}</td><td>${r.flagsPerMile ?? '—'}</td>
+          <td>${fmtDate(r.firstSeen)}</td><td>${fmtDate(r.lastSeen)}</td></tr>`;
       }).join('');
       document.querySelectorAll('.user-row').forEach(tr =>
         tr.addEventListener('click', () => toggleDrill(tr)));
+    }
+
+    const mi = (m) => (m / 1609.34).toFixed(1);
+
+    // One drive summarised as a clickable line; the breakdown loads on expand.
+    function driveLine(device, d) {
+      const dims = d.dims || {};
+      const bits = [];
+      if (dims.smoothness != null) bits.push(`sm ${dims.smoothness}`);
+      if (dims.braking != null)    bits.push(`br ${dims.braking}`);
+      if (dims.momentum != null)   bits.push(`mo ${dims.momentum}`);
+      const breakdown = bits.length ? ` <span class="anon">(${bits.join(' · ')})</span>` : '';
+      const eff = d.effectiveness != null ? ` · ${d.effectiveness}% vs ETA` : '';
+      const dest = d.dest_label ? ` → ${esc(d.dest_label)}` : '';
+      const flags = d.event_count ? ` · ${d.event_count} flag${d.event_count === 1 ? '' : 's'}` : '';
+      return `<div class="drive-line" data-device="${esc(device)}" data-start="${esc(String(d.start_time))}">
+        ${fmtDate(d.start_time)} · <b>score ${d.score ?? '—'}</b>${breakdown} · ${mi(d.distance_meters)} mi · ${Math.round((d.duration_ms || 0) / 60000)} min${flags}${eff}${dest}
+      </div>`;
+    }
+
+    // The expanded detail for one drive: scoring breakdown, flag counts, OBD.
+    function driveDetail(drive) {
+      const dims = drive.dims || {};
+      const f = drive.flags || { total: 0, byType: {}, byTier: {} };
+      const o = drive.obd || null;
+      const scoreRow = [
+        ['Smoothness', dims.smoothness], ['Braking', dims.braking], ['Momentum', dims.momentum],
+        ['Ride composure', dims.rideComposure], ['Speed mult', dims.speedBonus],
+        ['Efficiency', drive.efficiency], ['vs ETA', drive.effectiveness != null ? drive.effectiveness + '%' : null],
+      ].filter(([, v]) => v != null && v !== '')
+       .map(([l, v]) => `<span class="chip">${l}: <b>${v}</b></span>`).join('') || '<span class="anon">No breakdown stored (older drive).</span>';
+
+      const t = f.byType || {};
+      const flagRow = f.total
+        ? `<span class="chip">${f.total} flags</span>` +
+          (t.brake ? `<span class="chip">🛑 ${t.brake} brake</span>` : '') +
+          (t.accel ? `<span class="chip">⚡ ${t.accel} accel</span>` : '') +
+          (t.turn  ? `<span class="chip">↩︎ ${t.turn} turn</span>` : '') +
+          ` <span class="anon">tiers 1/2/3/4: ${[1,2,3,4].map(n => (f.byTier?.[n] || 0)).join('/')}</span>`
+        : '<span class="anon">No harsh events flagged.</span>';
+
+      const obdRow = o
+        ? [['OBD coverage', o.coverage != null ? Math.round(o.coverage * 100) + '%' : null],
+           ['Peak rpm', o.peakRpm], ['Avg throttle', o.avgThrottle != null ? o.avgThrottle + '%' : null],
+           ['Peak hp', o.peakHp], ['Peak Nm', o.peakTorqueNm], ['Peak coolant', o.peakCoolant != null ? o.peakCoolant + '°' : null]]
+          .filter(([, v]) => v != null).map(([l, v]) => `<span class="chip">${l}: <b>${v}</b></span>`).join('')
+        : '<span class="anon">No OBD (no dongle connected).</span>';
+
+      return `<div class="dd-section"><div class="dd-h">Scoring</div>${scoreRow}</div>
+        <div class="dd-section"><div class="dd-h">Flags</div>${flagRow}</div>
+        <div class="dd-section"><div class="dd-h">Engine</div>${obdRow}</div>`;
     }
 
     async function toggleDrill(tr) {
       const next = tr.nextElementSibling;
       if (next && next.classList.contains('drilldown')) { next.remove(); return; }
       const data = await call('user', { device_id: tr.dataset.device });
-      const list = data.drives.map(d =>
-        `${fmtDate(d.start_time)} · score ${d.score ?? '—'} · ${(d.distance_meters / 1609.34).toFixed(1)} mi · ${Math.round((d.duration_ms || 0) / 60000)} min`
-      ).join('<br>') || 'No drives.';
+      const list = data.drives.length
+        ? data.drives.map(d => driveLine(tr.dataset.device, d)).join('')
+        : 'No drives.';
       const row = document.createElement('tr');
       row.className = 'drilldown';
-      row.innerHTML = `<td colspan="6">${list}</td>`;
+      row.innerHTML = `<td colspan="7">${list}</td>`;
       tr.after(row);
+      row.querySelectorAll('.drive-line').forEach(line =>
+        line.addEventListener('click', () => toggleDriveDetail(line)));
+    }
+
+    async function toggleDriveDetail(line) {
+      const nxt = line.nextElementSibling;
+      if (nxt && nxt.classList.contains('drive-detail')) { nxt.remove(); return; }
+      const data = await call('drive', { device_id: line.dataset.device, start_time: Number(line.dataset.start) });
+      const div = document.createElement('div');
+      div.className = 'drive-detail';
+      div.innerHTML = driveDetail(data.drive);
+      line.after(div);
     }
 
     async function load() {

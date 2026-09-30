@@ -53,17 +53,43 @@ export function computeOverview(users, drives, nowMs) {
     .map(([day, count]) => ({ day, count }))
     .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
 
+  const totalFlags = real.reduce((s, d) => s + (d.event_count || 0), 0);
+  const fleetMiles = real.reduce((s, d) => s + (d.distance_meters || 0), 0) / METERS_PER_MILE;
+
   return {
     totalUsers: (users || []).length,
     totalDevices: devices.size,
     totalDrives: real.length,
     avgScore: mean(real.map(d => d.score).filter(s => s != null)),
     totalMiles: miles(real.reduce((s, d) => s + (d.distance_meters || 0), 0)),
+    totalFlags,
+    // Fleet-wide harsh moments per mile — a single number for "how rough is the
+    // driving overall", comparable across users regardless of how far they drove.
+    flagsPerMile: fleetMiles > 0.1 ? +(totalFlags / fleetMiles).toFixed(2) : null,
     activeUsers7d: active7.size,
     activeUsers30d: active30.size,
     returningUsers,
     installsByDay,
   };
+}
+
+/**
+ * Break a drive's harsh-event list into counts by type and severity tier.
+ *
+ * These are the "flags": the brake/accel/turn/shift moments the engine caught.
+ * Pure and defensive — every drive already stores its events array, so this
+ * works on historical drives too, no new column required.
+ */
+export function summarizeFlags(events) {
+  const out = { total: 0, byType: { brake: 0, accel: 0, turn: 0, shift: 0 }, byTier: { 1: 0, 2: 0, 3: 0, 4: 0 } };
+  for (const e of events || []) {
+    out.total++;
+    const type = e && e.type;
+    if (type) out.byType[type] = (out.byType[type] || 0) + 1;
+    const tier = (e && e.tier) || 2;
+    out.byTier[tier] = (out.byTier[tier] || 0) + 1;
+  }
+  return out;
 }
 
 export function computeUserRows(users, drives) {
@@ -90,6 +116,9 @@ export function computeUserRows(users, drives) {
       const parsed = Date.parse(u.updated_at);
       lastSeen = Number.isNaN(parsed) ? null : parsed;
     }
+    const meters = ds.reduce((s, d) => s + (d.distance_meters || 0), 0);
+    const flags = ds.reduce((s, d) => s + (d.event_count || 0), 0);
+    const mi = meters / METERS_PER_MILE;
     rows.push({
       deviceId,
       name: u ? (u.name || null) : null,
@@ -99,7 +128,12 @@ export function computeUserRows(users, drives) {
       firstSeen,
       lastSeen,
       avgScore: mean(ds.map(d => d.score).filter(s => s != null)),
-      totalMiles: miles(ds.reduce((s, d) => s + (d.distance_meters || 0), 0)),
+      totalMiles: miles(meters),
+      // Behaviour: total harsh moments and how often they happen per mile — the
+      // per-mile figure is the fair cross-user comparison (a long calm highway
+      // drive shouldn't look worse than a short jumpy one just for being longer).
+      flags,
+      flagsPerMile: mi > 0.1 ? +(flags / mi).toFixed(2) : null,
     });
   }
 

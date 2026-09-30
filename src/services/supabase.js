@@ -27,6 +27,12 @@ export async function pushDriveToSupabase(drive){
       distance_meters: drive.distanceMeters,
       top_speed_mps:   drive.topSpeedMps,
       score:           drive.score,
+      // Scoring breakdown + OBD summary for the operator dashboard. Columns added
+      // in 20260930120000_drive_detail_columns.sql; a DB that predates them 400s
+      // on the unknown column, handled by the same retry that drops user_id below.
+      dims:            drive.dims ?? null,
+      efficiency:      drive.efficiency ?? null,
+      obd:             drive.obd ?? null,
       event_count:     drive.eventCount,
       simulated:       !!drive.simulated,
       settings:        drive.settingsSnapshot || null,
@@ -39,17 +45,26 @@ export async function pushDriveToSupabase(drive){
       target_eta_sec:   drive.targetEtaSec ?? null,
       effectiveness:    drive.effectiveness ?? null,
     };
-    let res = await postDrive(payload);
+    let body = payload;
+    let res = await postDrive(body);
 
-    // The accounts migration may not have reached this database yet, in which
-    // case PostgREST rejects the unknown user_id column (PGRST204 / 400). The
-    // drive itself is still perfectly valid without it, and this function
-    // swallows failures — so without this retry a signed-in driver would just
-    // silently stop syncing. Drop the column and send it as an anonymous row;
-    // signing in again later claims it via claimDeviceDrives().
-    if (!res.ok && uid && await mentionsUserIdColumn(res)){
-      const { user_id, ...withoutUser } = payload;
-      res = await postDrive(withoutUser);
+    // A migration may not have reached this database yet, in which case
+    // PostgREST rejects the unknown column (PGRST204 / 400). The drive is still
+    // valid without the optional columns, and this function swallows failures —
+    // so without these retries a driver would silently stop syncing. Strip the
+    // offending optional columns and resend. Two independent migrations can lag:
+    //   • dims/efficiency/obd (the drive-detail columns), and
+    //   • user_id (the accounts migration).
+    if (!res.ok && await mentionsColumn(res, /dims|efficiency|obd/)){
+      const { dims, efficiency, obd, ...rest } = body;
+      body = rest;
+      res = await postDrive(body);
+    }
+    if (!res.ok && uid && await mentionsColumn(res, /user_id/)){
+      // Send as an anonymous row; signing in later claims it via claimDeviceDrives().
+      const { user_id, ...rest } = body;
+      body = rest;
+      res = await postDrive(body);
     }
 
     if (res.ok) markSynced(driveId);
@@ -68,11 +83,11 @@ function postDrive(payload){
   });
 }
 
-/** True when a failed response blames the user_id column specifically. */
-async function mentionsUserIdColumn(res){
+/** True when a failed response's body mentions the given column pattern. */
+async function mentionsColumn(res, re){
   try {
     const body = await res.clone().text();
-    return /user_id/.test(body);
+    return re.test(body);
   } catch { return false; }
 }
 
