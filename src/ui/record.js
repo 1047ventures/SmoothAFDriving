@@ -458,7 +458,7 @@ export function stopRecording(){
     // with no feedback (finalizeAndReview returned early, silently).
     onTooShort: () => {
       showScreen('home');
-      showToast('Drive too short to score', 'error');
+      showToast('Drive too short to save — under 0.3 mi', 'error');
     },
   });
   showCarPromptIfNeeded();

@@ -17,7 +17,7 @@ import {
 } from './supabase.js';
 import { isSignedIn } from './auth.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
-import { ARRIVAL_RADIUS_M } from '../constants.js';
+import { ARRIVAL_RADIUS_M, MIN_DRIVE_METERS } from '../constants.js';
 
 // Did the drive actually end at the destination? Effectiveness must NOT be
 // awarded otherwise — ending short (e.g. a gas stop halfway) would look like
@@ -254,6 +254,7 @@ export function buildDriveFromState(){
  */
 export function finalizeAndReview(callbacks = {}){
   const { onReview, onListUpdate, onTooShort } = callbacks;
+  // Need at least two fixes to measure any distance at all.
   if (state.samples.length < 2){
     if (onTooShort) onTooShort();
     if (onListUpdate) onListUpdate();
@@ -261,6 +262,15 @@ export function finalizeAndReview(callbacks = {}){
   }
 
   const drive = buildDriveFromState();
+  // Distance is the gate, not sample count: a drive counts once it covers at
+  // least MIN_DRIVE_METERS (0.3 mi). Anything shorter is a driveway roll, not a
+  // drive, and shouldn't clutter history or the score.
+  if ((drive.distanceMeters || 0) < MIN_DRIVE_METERS){
+    if (onTooShort) onTooShort();
+    if (onListUpdate) onListUpdate();
+    return;
+  }
+
   const analysis = analyzeDrive(drive);
   // Keep the full scoring breakdown on the drive (not just the 3 sub-scores) so
   // it can be stored and shown in the operator dashboard: ride composure and the

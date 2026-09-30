@@ -184,6 +184,12 @@ export const ETA_BUFFER         = 1.2;    // OSRM: free-flow, needs real padding
 export const ETA_BUFFER_TRAFFIC = 1.05;   // Mapbox driving-traffic: already realistic; a hair for final approach/parking
 export const PACE_PENALTY     = 180;      // effectiveness points lost per unit of over-fraction
 export const ARRIVAL_RADIUS_M = 200;      // must end within this of the destination for effectiveness to count
+
+// A drive counts (is saved + scored) once it covers at least this far. Below it,
+// there isn't enough road to say anything meaningful — a roll out of the driveway
+// and back shouldn't land in your history. 0.3 mi is the floor.
+export const MIN_DRIVE_MILES  = 0.3;
+export const MIN_DRIVE_METERS = MIN_DRIVE_MILES * 1609.34;   // ≈ 483 m
 export const CLOCK_MAX_SWING = 15;   // max ± points the clock can move the score
 export const CLOCK_BEAT_FULL = 0.20; // beating the (buffered) ETA by 20% = full +bonus
 export const CLOCK_LATE_FULL = 0.20; // 20% over the (buffered) ETA = full -penalty
