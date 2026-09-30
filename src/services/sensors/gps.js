@@ -5,6 +5,7 @@ import {
   CALIB_MIN_SPEED_MPS,
   CALIB_DURATION_MS,
   TIER_THRESH,
+  LAT_ACCEL_CAP,
 } from '../../constants.js';
 import { clamp, mpsToMph } from '../../utils/math.js';
 import { getOsmLimit, setOsmLimit } from '../storage.js';

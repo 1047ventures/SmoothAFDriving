@@ -94,6 +94,13 @@ export const MOTION_BUF_SIZE     = 20;    // ring buffer depth (60Hz → ~330ms)
 export const TIER_MULT   = { 1: 0.14, 2: 1.0, 3: 2.4, 4: 4.0 };
 export const TIER_THRESH = { 1: 0.55, 2: 1.0,  3: 1.75, 4: 2.6 };
 
+// Plausibility cap on GPS-derived lateral acceleration (m/s²). Lateral is
+// heading-change × speed, and a single-sample heading glitch at highway speed
+// produces absurd phantom "turns" (10–28 g were seen in real drives). No street
+// corner exceeds ~9 m/s² (~0.9 g), so we clamp to that and treat anything beyond
+// it as GPS noise rather than driving. (See gps.js processSample.)
+export const LAT_ACCEL_CAP = 9;
+
 // ── Three-Dimension Scoring display ──────────────────────────────────────────
 // Trimmed from seven to the three the phone's sensors actually resolve, weighted
 // by real signal. The four dropped (steering, cornering, transitions, throttle)
