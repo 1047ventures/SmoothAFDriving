@@ -23,11 +23,9 @@ Then open http://localhost:8000 in a browser and click **Replay demo drive**. Re
 
 ## Install on your iPhone
 
-iOS requires **HTTPS** for DeviceMotion, Geolocation, and the PWA manifest. So pick one of these to host:
-
-- **Netlify Drop** (easiest): drag this folder onto https://app.netlify.com/drop → get a URL in seconds
-- **GitHub Pages**: push this folder to a repo, enable Pages from the repo settings
-- **Vercel / Cloudflare Pages**: same idea, drag-and-drop or git-connect
+iOS requires **HTTPS** for DeviceMotion, Geolocation, and the PWA manifest. The
+app is hosted on **Cloudflare Pages** (the live install link is
+`https://smoothafdriving.pages.dev/install`).
 
 Once hosted, on your iPhone:
 

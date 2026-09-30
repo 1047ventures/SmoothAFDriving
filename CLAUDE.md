@@ -296,10 +296,18 @@ npm run test:coverage # Coverage report → coverage/
 
 ## Deploy
 
-All three hosts (Netlify, Vercel, Cloudflare) run `npm run build` and serve from `dist/`. Config:
-- `netlify.toml` — `command = "npm run build"`, `publish = "dist"`
-- `vercel.json` — `buildCommand`, `outputDirectory = "dist"`
-- `.github/workflows/deploy.yml` — installs, builds, tests, deploys to Netlify
+**Cloudflare Pages is the one and only host.** It runs `npm run build`, serves
+`dist/`, auto-detects the `functions/` directory at the repo root for serverless
+endpoints (`/api/*`), and applies `public/_redirects`. Netlify and Vercel were
+retired (the old `netlify.toml`, `vercel.json`, `netlify/` functions and the
+Netlify deploy workflow are gone) — the app, the `/api/*` functions, the admin
+dashboard and signup capture all run on Cloudflare.
+
+- Serverless endpoints: `functions/api/*.js` (Cloudflare Pages Functions). Env
+  vars (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ADMIN_PASSWORD`, optional
+  `RESEND_*`) are set in the Cloudflare Pages project settings, not in the repo.
+- Shared pure logic used by functions + tests lives in `src/shared/`.
+- Redirects (`/tracker`, etc.) live in `public/_redirects`.
 
 ## Branches
 - `main` — production

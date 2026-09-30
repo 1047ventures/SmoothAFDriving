@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeOverview, computeUserRows, summarizeFlags } from '../../netlify/functions/_lib/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags } from '../shared/adminStats.mjs';
 
 const DAY = 864e5;
 const NOW = 1_700_000_000_000;            // fixed "now" for deterministic windows

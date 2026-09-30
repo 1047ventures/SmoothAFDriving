@@ -1,14 +1,12 @@
 // Cloudflare Pages Function — /api/admin-stats
 //
-// The app is served from Cloudflare Pages, so the admin dashboard's data needs
-// to live here too (the Netlify copy at /.netlify/functions/admin-stats only
-// answers on the Netlify deploy). Same contract as that function: POST a
-// password, get the overview + per-user rows, or one user's drives.
+// The operator dashboard's data endpoint. POST a password, get the overview +
+// per-user rows, one user's drives, or one drive's detail.
 //
-// Reuses the tested pure aggregators; only the transport differs. Password
-// hashing uses Web Crypto (crypto.subtle) rather than node:crypto, since the
-// Workers runtime provides that globally and not Node's crypto by default.
-import { computeOverview, computeUserRows, summarizeFlags } from '../../netlify/functions/_lib/adminStats.mjs';
+// Reuses the tested pure aggregators; password hashing uses Web Crypto
+// (crypto.subtle) rather than node:crypto, since the Workers runtime provides
+// that globally and not Node's crypto by default.
+import { computeOverview, computeUserRows, summarizeFlags } from '../../src/shared/adminStats.mjs';
 
 const json = (status, obj) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });

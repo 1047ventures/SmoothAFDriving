@@ -2,10 +2,7 @@
 //
 // Captures a driver's name + email into the Supabase `users` table (and, when
 // configured, a Resend audience) so the admin dashboard can show who signed up
-// rather than a wall of anonymous device ids. Mirrors the Netlify function of
-// the same name; it has to live here too because the app is served from
-// Cloudflare Pages, where /.netlify/functions/* does not exist — so on the
-// shared pages.dev build this is the endpoint that actually fires.
+// rather than a wall of anonymous device ids.
 const json = (status, obj) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
 
