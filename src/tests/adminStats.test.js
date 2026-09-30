@@ -116,6 +116,52 @@ describe('flags / behaviour aggregation', () => {
   });
 });
 
+describe('identity merge (one person, many device ids)', () => {
+  it('folds two device ids sharing an email into a single row', () => {
+    const users = [
+      { device_id: 'web',    name: 'Skelly', email: 'skelly@x.com', updated_at: '2023-08-05T00:00:00Z' },
+      { device_id: 'native', name: 'Skelly', email: 'SKELLY@x.com', updated_at: '2023-11-14T00:00:00Z' },
+    ];
+    const drives = [
+      { device_id: 'web',    start_time: 1000, score: 80, distance_meters: 1609.34, event_count: 2, simulated: false },
+      { device_id: 'native', start_time: 2000, score: 90, distance_meters: 1609.34, event_count: 4, simulated: false },
+    ];
+    const rows = computeUserRows(users, drives);
+    expect(rows.length).toBe(1);
+    const r = rows[0];
+    expect(r.email).toBe('skelly@x.com');       // case-normalised, both devices merged
+    expect(r.deviceCount).toBe(2);
+    expect(r.deviceIds.sort()).toEqual(['native', 'web']);
+    expect(r.driveCount).toBe(2);
+    expect(r.flags).toBe(6);
+  });
+
+  it('merges devices that share an account user_id even without an email', () => {
+    const drives = [
+      { device_id: 'phoneA', user_id: 'u1', start_time: 1, score: 70, distance_meters: 1609.34, simulated: false },
+      { device_id: 'phoneB', user_id: 'u1', start_time: 2, score: 90, distance_meters: 1609.34, simulated: false },
+    ];
+    const rows = computeUserRows([], drives);
+    expect(rows.length).toBe(1);
+    expect(rows[0].deviceCount).toBe(2);
+    expect(rows[0].avgScore).toBe(80);
+  });
+
+  it('counts a merged person once in the overview', () => {
+    const users = [{ device_id: 'web', name: 'Skelly', email: 's@x.com', updated_at: '2023-01-01T00:00:00Z' }];
+    const drives = [
+      { device_id: 'web',    start_time: 1, score: 80, distance_meters: 1609.34, simulated: false },
+      { device_id: 'native', start_time: 2, score: 90, distance_meters: 1609.34, simulated: false }, // no user row → device-only
+    ];
+    // 'native' isn't labelled, so it's a separate anonymous identity here; the
+    // labelled one is the single KNOWN user.
+    const ov = computeOverview(users, drives, 3);
+    expect(ov.totalUsers).toBe(1);        // known people
+    expect(ov.totalIdentities).toBe(2);   // known + one anonymous device
+    expect(ov.totalDevices).toBe(2);
+  });
+});
+
 describe('summarizeFlags', () => {
   it('counts a drive\'s events by type and severity tier', () => {
     const events = [

@@ -112,10 +112,12 @@
 
     function renderRows(rows) {
       $('rows').innerHTML = rows.map(r => {
+        const devNote = r.deviceCount > 1 ? ` <span class="anon">· ${r.deviceCount} devices</span>` : '';
         const who = r.isAnonymous
-          ? `<span class="anon">Anonymous · ${esc(shortId(r.deviceId))}</span>`
-          : `${r.name ? esc(r.name) : '—'}<br><span class="anon">${esc(r.email || '')}</span>`;
-        return `<tr class="user-row" data-device="${esc(r.deviceId)}">
+          ? `<span class="anon">Anonymous · ${esc(shortId(r.deviceId || ''))}</span>${devNote}`
+          : `${r.name ? esc(r.name) : '—'}${devNote}<br><span class="anon">${esc(r.email || '')}</span>`;
+        const devices = esc(JSON.stringify(r.deviceIds || [r.deviceId]));
+        return `<tr class="user-row" data-devices='${devices}'>
           <td>${who}</td><td>${r.driveCount}</td><td>${r.avgScore ?? '—'}</td>
           <td>${r.totalMiles}</td><td>${r.flagsPerMile ?? '—'}</td>
           <td>${fmtDate(r.firstSeen)}</td><td>${fmtDate(r.lastSeen)}</td></tr>`;
@@ -127,7 +129,9 @@
     const mi = (m) => (m / 1609.34).toFixed(1);
 
     // One drive summarised as a clickable line; the breakdown loads on expand.
-    function driveLine(device, d) {
+    // Each drive carries its own device_id (a merged person spans several).
+    function driveLine(d) {
+      const device = d.device_id || '';
       const dims = d.dims || {};
       const bits = [];
       if (dims.smoothness != null) bits.push(`sm ${dims.smoothness}`);
@@ -178,9 +182,11 @@
     async function toggleDrill(tr) {
       const next = tr.nextElementSibling;
       if (next && next.classList.contains('drilldown')) { next.remove(); return; }
-      const data = await call('user', { device_id: tr.dataset.device });
+      let deviceIds = [];
+      try { deviceIds = JSON.parse(tr.dataset.devices) || []; } catch { deviceIds = []; }
+      const data = await call('user', { device_ids: deviceIds });
       const list = data.drives.length
-        ? data.drives.map(d => driveLine(tr.dataset.device, d)).join('')
+        ? data.drives.map(d => driveLine(d)).join('')
         : 'No drives.';
       const row = document.createElement('tr');
       row.className = 'drilldown';

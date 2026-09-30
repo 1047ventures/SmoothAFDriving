@@ -47,11 +47,15 @@ export default async (req) => {
     const view = body.view || 'overview';
 
     if (view === 'user') {
-      if (!body.device_id) return json(400, { ok: false, error: 'missing device_id' });
-      const enc = encodeURIComponent(body.device_id);
+      // Accept a whole identity's device-id list (merged person), or a single id.
+      const ids = (Array.isArray(body.device_ids) && body.device_ids.length ? body.device_ids
+                   : (body.device_id ? [body.device_id] : []))
+                  .map(String).filter(id => /^[\w-]+$/.test(id));
+      if (!ids.length) return json(400, { ok: false, error: 'missing device_id(s)' });
+      const inList = ids.join(',');
       // NOTE: 10000-row cap is far above current volume; pagination is a future task.
       const all = await sbGet(
-        `drives?device_id=eq.${enc}&select=start_time,duration_ms,distance_meters,score,efficiency,effectiveness,dims,obd,event_count,dest_label,simulated&order=start_time.desc&limit=10000`
+        `drives?device_id=in.(${inList})&select=device_id,start_time,duration_ms,distance_meters,score,efficiency,effectiveness,dims,obd,event_count,dest_label,simulated&order=start_time.desc&limit=10000`
       );
       const drives = all.filter(d => !d.simulated);
       return json(200, { ok: true, drives });
@@ -75,7 +79,7 @@ export default async (req) => {
 
     const [users, drives] = await Promise.all([
       sbGet('users?select=device_id,name,email,updated_at&limit=10000'),
-      sbGet('drives?select=device_id,start_time,duration_ms,distance_meters,score,event_count,simulated&limit=10000'),
+      sbGet('drives?select=device_id,user_id,start_time,duration_ms,distance_meters,score,event_count,simulated&limit=10000'),
     ]);
     const nowMs = Date.now();
     return json(200, {
