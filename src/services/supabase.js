@@ -121,7 +121,7 @@ export async function fetchLeaderboard(){
 
 export async function registerUser({ name, email, device_id }) {
   try {
-    const res = await fetch('/.netlify/functions/register-user', {
+    const res = await fetch('/api/register-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, device_id }),

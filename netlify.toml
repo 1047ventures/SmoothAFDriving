@@ -5,6 +5,14 @@
 [functions]
   node_bundler = "esbuild"
 
+# The client calls host-neutral /api/* paths. On Cloudflare Pages those are
+# served by functions/api/*; on Netlify, map them back to the Netlify functions
+# so the same build works on either host.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 [[redirects]]
   from = "/tracker"
   to = "/"

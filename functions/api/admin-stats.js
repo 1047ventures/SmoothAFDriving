@@ -1,0 +1,98 @@
+// Cloudflare Pages Function — /api/admin-stats
+//
+// The app is served from Cloudflare Pages, so the admin dashboard's data needs
+// to live here too (the Netlify copy at /.netlify/functions/admin-stats only
+// answers on the Netlify deploy). Same contract as that function: POST a
+// password, get the overview + per-user rows, or one user's drives.
+//
+// Reuses the tested pure aggregators; only the transport differs. Password
+// hashing uses Web Crypto (crypto.subtle) rather than node:crypto, since the
+// Workers runtime provides that globally and not Node's crypto by default.
+import { computeOverview, computeUserRows } from '../../netlify/functions/_lib/adminStats.mjs';
+
+const json = (status, obj) =>
+  new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
+
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(s)));
+  return new Uint8Array(buf);
+}
+
+// Constant-time compare over two equal-length SHA-256 digests.
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+async function passwordOk(supplied, expected) {
+  if (!expected) return false;
+  const [a, b] = await Promise.all([sha256(supplied || ''), sha256(expected)]);
+  return timingSafeEqual(a, b);
+}
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const SB_URL = env.SUPABASE_URL;
+  const SB_SERVICE_KEY = env.SUPABASE_SERVICE_KEY;
+  const ADMIN_PASSWORD = env.ADMIN_PASSWORD;
+
+  let body;
+  try { body = await request.json(); }
+  catch { return new Response('Bad Request', { status: 400 }); }
+
+  if (!SB_URL || !SB_SERVICE_KEY || !ADMIN_PASSWORD) {
+    console.error('admin-stats misconfigured: missing SUPABASE_URL / SUPABASE_SERVICE_KEY / ADMIN_PASSWORD');
+    return json(500, { ok: false, error: 'misconfigured' });
+  }
+
+  if (!(await passwordOk(body.password, ADMIN_PASSWORD))) {
+    await delay(500); // blunt brute-forcing
+    return json(401, { ok: false, error: 'unauthorized' });
+  }
+
+  const sbGet = async (path) => {
+    const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
+      headers: { apikey: SB_SERVICE_KEY, Authorization: `Bearer ${SB_SERVICE_KEY}` },
+    });
+    if (!res.ok) throw new Error(`supabase ${res.status}`);
+    return res.json();
+  };
+
+  try {
+    const view = body.view || 'overview';
+
+    if (view === 'user') {
+      if (!body.device_id) return json(400, { ok: false, error: 'missing device_id' });
+      const enc = encodeURIComponent(body.device_id);
+      const all = await sbGet(
+        `drives?device_id=eq.${enc}&select=start_time,duration_ms,distance_meters,score,event_count,simulated&order=start_time.desc&limit=10000`
+      );
+      const drives = all.filter((d) => !d.simulated);
+      return json(200, { ok: true, drives });
+    }
+
+    const [users, drives] = await Promise.all([
+      sbGet('users?select=device_id,name,email,updated_at&limit=10000'),
+      sbGet('drives?select=device_id,start_time,duration_ms,distance_meters,score,event_count,simulated&limit=10000'),
+    ]);
+    const nowMs = Date.now();
+    return json(200, {
+      ok: true,
+      overview: computeOverview(users, drives, nowMs),
+      users: computeUserRows(users, drives),
+    });
+  } catch (err) {
+    console.error('admin-stats db error:', err.message);
+    return json(500, { ok: false, error: 'db_error' });
+  }
+}
+
+// A GET (or anything non-POST) gets a clear 405 rather than a confusing 404.
+export function onRequest(context) {
+  if (context.request.method === 'POST') return onRequestPost(context);
+  return new Response('Method Not Allowed', { status: 405 });
+}

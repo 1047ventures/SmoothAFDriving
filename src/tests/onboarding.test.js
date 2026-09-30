@@ -23,11 +23,11 @@ beforeEach(() => {
 });
 
 describe('registerUser', () => {
-  it('POSTs to /.netlify/functions/register-user with correct payload', async () => {
+  it('POSTs to /api/register-user with correct payload', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true });
     await registerUser({ name: 'Alex', email: 'alex@test.com', device_id: 'dev1' });
     expect(mockFetch).toHaveBeenCalledWith(
-      '/.netlify/functions/register-user',
+      '/api/register-user',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
@@ -71,7 +71,7 @@ describe('syncUserProfile', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('calls /.netlify/functions/register-user when onboarded but not synced', async () => {
+  it('calls /api/register-user when onboarded but not synced', async () => {
     store[ONBOARDED_KEY]   = '1';
     store[DRIVER_NAME_KEY] = 'Alex';
     store[USER_EMAIL_KEY]  = 'alex@test.com';
@@ -79,7 +79,7 @@ describe('syncUserProfile', () => {
     mockFetch.mockResolvedValueOnce({ ok: true });
     await syncUserProfile();
     expect(mockFetch).toHaveBeenCalledWith(
-      '/.netlify/functions/register-user',
+      '/api/register-user',
       expect.objectContaining({ method: 'POST' }),
     );
   });

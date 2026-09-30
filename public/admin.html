@@ -62,7 +62,7 @@
 
     async function call(view, extra = {}) {
       const password = sessionStorage.getItem(PW_KEY) || '';
-      const res = await fetch('/.netlify/functions/admin-stats', {
+      const res = await fetch('/api/admin-stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password, view, ...extra }),
