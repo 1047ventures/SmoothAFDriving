@@ -27,6 +27,10 @@
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
     th { color:var(--dim); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+    th[data-sort] { cursor:pointer; user-select:none; white-space:nowrap; }
+    th[data-sort]:hover { color:var(--cream); }
+    th .arrow { opacity:.9; font-size:10px; }
+    th[data-sort]:not(.sorted) .arrow { opacity:0; }
     tr.user-row { cursor:pointer; }
     tr.user-row:hover { background:#161212; }
     .anon { color:var(--dim); font-style:italic; }
@@ -67,7 +71,15 @@
     <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="none"></svg>
     <table>
       <thead>
-        <tr><th>User</th><th>Drives</th><th>Avg</th><th>Miles</th><th>Flags/mi</th><th>First seen</th><th>Last seen</th></tr>
+        <tr id="head-row">
+          <th data-sort="name">User <span class="arrow"></span></th>
+          <th data-sort="driveCount">Drives <span class="arrow"></span></th>
+          <th data-sort="avgScore">Avg <span class="arrow"></span></th>
+          <th data-sort="totalMiles">Miles <span class="arrow"></span></th>
+          <th data-sort="flagsPerMile">Flags/mi <span class="arrow"></span></th>
+          <th data-sort="firstSeen">First seen <span class="arrow"></span></th>
+          <th data-sort="lastSeen">Last seen <span class="arrow"></span></th>
+        </tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
@@ -124,7 +136,52 @@
       }).join('');
     }
 
-    function renderRows(rows) {
+    // Table sort state. Default is Last seen, newest first — matches how the
+    // server already orders, and what you want to glance at first.
+    let allRows = [];
+    let sortKey = 'lastSeen';
+    let sortDir = -1; // 1 asc, -1 desc
+    const NUMERIC = new Set(['driveCount', 'avgScore', 'totalMiles', 'flagsPerMile', 'firstSeen', 'lastSeen']);
+
+    function sortValue(r, key) {
+      if (key === 'name') return (r.name || r.email || r.deviceId || '').toLowerCase();
+      return r[key];
+    }
+
+    function sortedRows() {
+      const rows = allRows.slice();
+      rows.sort((a, b) => {
+        const va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
+        // Missing values (no drives yet, anon with no score) always sink to the
+        // bottom regardless of direction.
+        const na = va == null || va === '', nb = vb == null || vb === '';
+        if (na && nb) return 0;
+        if (na) return 1;
+        if (nb) return -1;
+        if (va < vb) return -1 * sortDir;
+        if (va > vb) return 1 * sortDir;
+        return 0;
+      });
+      return rows;
+    }
+
+    function updateHeadArrows() {
+      document.querySelectorAll('#head-row th[data-sort]').forEach(th => {
+        const active = th.dataset.sort === sortKey;
+        th.classList.toggle('sorted', active);
+        th.querySelector('.arrow').textContent = active ? (sortDir === 1 ? '▲' : '▼') : '';
+      });
+    }
+
+    function onHeadClick(key) {
+      if (key === sortKey) { sortDir = -sortDir; }
+      else { sortKey = key; sortDir = NUMERIC.has(key) ? -1 : 1; } // numbers big-first, names A→Z
+      renderRows();
+    }
+
+    function renderRows() {
+      const rows = sortedRows();
+      updateHeadArrows();
       $('rows').innerHTML = rows.map(r => {
         const devNote = r.deviceCount > 1 ? ` <span class="anon">· ${r.deviceCount} devices</span>` : '';
         const who = r.isAnonymous
@@ -270,7 +327,8 @@
         $('dash').classList.remove('hidden');
         renderTiles(data.overview);
         renderInstalls(data.overview.installsByDay);
-        renderRows(data.users);
+        allRows = data.users;
+        renderRows();
         $('purge-note').textContent = data.purgedEmpty
           ? `🧹 auto-removed ${data.purgedEmpty} empty drive${data.purgedEmpty === 1 ? '' : 's'} (0 mi · 0 flags)`
           : '';
@@ -284,6 +342,10 @@
       load();
     });
     $('pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('unlock').click(); });
+
+    // Click a column header to sort by it; click again to flip direction.
+    document.querySelectorAll('#head-row th[data-sort]').forEach(th =>
+      th.addEventListener('click', () => onHeadClick(th.dataset.sort)));
 
     if (sessionStorage.getItem(PW_KEY)) load(); else showGate('');
   </script>
