@@ -64,6 +64,17 @@
   .sharebar a{color:var(--good);font-weight:600;text-decoration:none;font-size:15px;word-break:break-all}
   .sharebar a:hover{text-decoration:underline}
   .sharebar-note{color:var(--muted);font-size:12px}
+  .lane-sub a{color:var(--gold);text-decoration:none}
+  .lane-sub a:hover{text-decoration:underline}
+  /* The bet + the numbers — the founder's-glance block up top. */
+  .bet{margin-top:24px}
+  .vision{font-family:var(--serif);font-style:italic;font-size:clamp(18px,3.2vw,23px);line-height:1.32;color:var(--cream);margin:0;text-wrap:balance}
+  .vision em{color:var(--tang)}
+  .betline{margin:9px 0 0;font-size:13.5px;color:var(--dim);line-height:1.5}
+  .betline b{color:var(--gold);font-weight:600}
+  .now-metrics{margin-top:26px}
+  .metric-note{margin:12px 0 0;font-size:12.5px;color:var(--dim);line-height:1.5}
+  .metric-note b{color:var(--cream)}
 
 
 
@@ -282,28 +293,46 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Sep 30, 2026 · 10:30 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Sep 30, 2026 · 10:47 PM MDT</b>
     </div>
     <p class="sharebar">
-      <span class="lbl">Share the app</span>
+      <span class="lbl">Share</span>
       <a href="https://smoothafdriving.pages.dev/install">smoothafdriving.pages.dev/install</a>
-      <span class="sharebar-note">— send this to anyone: opens the install page, no account or TestFlight needed</span>
     </p>
   </header>
 
+  <!-- THE BET -->
+  <section class="bet">
+    <p class="vision">Make people genuinely smoother, safer drivers — an app they actually <em>want</em> to open.</p>
+    <p class="betline"><b>The bet:</b> consumer app first. Nail the loop, earn the habit, grow by word of mouth. Data upside comes later, off scale.</p>
+    <p class="betline"><b>Open call:</b> who do we build for first — teens + parents, enthusiasts, or paid drivers (rideshare/delivery)?</p>
+  </section>
+
+  <!-- THE NUMBERS -->
+  <section class="now-metrics" aria-label="Where we are">
+    <div class="lane-head"><span class="lane-dot" style="background:var(--gold)"></span><span class="lane-title">Where we are</span><span class="lane-sub"><a href="https://smoothafdriving.pages.dev/admin.html">live → /admin</a></span></div>
+    <div class="statband">
+      <div class="stat"><span class="n">4</span><span class="l">Returning<br>drivers ★</span></div>
+      <div class="stat"><span class="n">3</span><span class="l">Active<br>7 days</span></div>
+      <div class="stat"><span class="n">322</span><span class="l">Drives<br>logged</span></div>
+      <div class="stat"><span class="n">2.2<span class="u">k mi</span></span><span class="l">Scored</span></div>
+      <div class="stat"><span class="n">88</span><span class="l">Avg<br>score</span></div>
+    </div>
+    <p class="metric-note">★ The number that decides everything: <b>do they come back?</b> Right now it's mostly you + a handful of testers — real week-2 retention is the whole game. (Snapshot; live at /admin.)</p>
+  </section>
 
   <!-- THE GLANCE — three lanes, the whole point of the page -->
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T315</span>Speed stopped stuttering &amp; sticking <span class="sub">iOS intermittently withholds its speed reading mid-drive; the app used to freeze on the last value then snap — which also dragged the score, since cornering-G and event detection scale by speed. Now it derives speed from how far you actually moved between fixes, so it stays live and the score stays honest</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T314</span>Deleting a bad drive fixes your score <span class="sub">delete used to leave the overall (lifetime) score stale — it never recomputed, and the home number didn't repaint. Now it recomputes on delete and updates on screen. Note: the overall score is a rolling average of your 10 most recent drives, so deleting one older than that won't move it by design</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T313</span>Nightly ops digest email <span class="sub">an end-of-day email (new drivers, active drivers, drives, miles, avg score, flags today + all-time totals), computed server-side and sent via Resend, fired by a daily job. Aggregate only — no personal data leaves</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T312</span>An operator dashboard you can actually read <span class="sub">see who's driving at <code>/admin.html</code> — people merged across their many device-ids into one row (by account/email), per-drive scoring breakdown + harsh-event flags + OBD, and flags-per-mile. Signup name/email capture fixed (the <code>users</code> table never existed); whole thing moved onto Cloudflare and Netlify/Vercel retired</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T315</span>Speed stutter killed <span class="sub">iOS drops its speed reading mid-drive; it used to freeze and skew the score — now derived from distance moved</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T314</span>Delete fixes your score <span class="sub">deleting a bad drive now recomputes the overall score instead of leaving it stale</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T313</span>Nightly ops digest email <span class="sub">end-of-day numbers — new/active drivers, drives, miles, avg score. Aggregate only</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T312</span>Operator dashboard <span class="sub">see who's driving at /admin — merged per person, per-drive scores, flags &amp; OBD. Now on Cloudflare</span></div>
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
-      <div class="lane-item"><span class="tn tn--prog">Q4</span>Scoring Phase 2 — the road's fault vs yours <span class="sub">capture the sharp pothole/rumble jolts separately from baseline road texture, then penalize the <i>avoidable</i> roughness (bad lane, drifting onto rumble strips, smashing potholes) while leaving unavoidable rough roads alone. Foundation (jolt capture) is the next commit; calibration needs a few mounted-phone drives</span></div>
+      <div class="lane-item"><span class="tn tn--prog">Q4</span>Road's fault vs yours <span class="sub">penalize avoidable roughness (bad lane, rumble strips, potholes), not roads you can't help — needs a few mounted-phone drives</span></div>
     </div>
     <div class="lane lane--next">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
