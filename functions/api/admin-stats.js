@@ -60,14 +60,18 @@ export async function onRequestPost(context) {
     return res.json();
   };
 
-  // Purge junk drives: zero distance AND zero flags — empty rows left by crash
-  // recovery or pre-gate saves. Both conditions required so a legit short-but-
-  // flagged or long-but-clean drive is never touched. The nested and/or filter
+  // Purge junk drives: ~zero distance AND zero flags — empty rows left by crash
+  // recovery or pre-gate saves (GPS jitter while parked logs a few meters, which
+  // shows as "0.0 mi"). "Zero miles" means what the dashboard shows: under 80 m,
+  // i.e. rounds to 0.0 mi. The live finalize gate is 0.3 mi (~483 m), so nothing
+  // under 80 m is ever a real drive. Both conditions required so a short-but-
+  // flagged or a longer clean drive is never touched. The nested and/or filter
   // is mandatory; a DELETE with no filter would wipe the table, so we never send
   // one. Returns how many rows were removed.
+  const ZERO_MI_METERS = 80; // < 0.05 mi → renders as "0.0 mi"
   const purgeEmptyDrives = async () => {
     const filter =
-      'and=(or(distance_meters.is.null,distance_meters.eq.0),or(event_count.is.null,event_count.eq.0))';
+      `and=(or(distance_meters.is.null,distance_meters.lt.${ZERO_MI_METERS}),or(event_count.is.null,event_count.eq.0))`;
     const res = await fetch(`${SB_URL}/rest/v1/drives?${filter}`, {
       method: 'DELETE',
       headers: {
