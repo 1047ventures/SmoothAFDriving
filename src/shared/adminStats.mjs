@@ -196,6 +196,22 @@ export function computeDailyDigest(users, drives, nowMs, tzOffsetHours = -6) {
   };
 }
 
+/**
+ * Thin a drive's GPS samples to at most `max` [lat, lon] points, for plotting a
+ * route overlay without shipping thousands of coordinates. Keeps the first and
+ * last point so the line's endpoints (home/destination) stay put.
+ */
+export function downsamplePath(samples, max = 48) {
+  const pts = (Array.isArray(samples) ? samples : [])
+    .filter((s) => s && Number.isFinite(s.lat) && Number.isFinite(s.lon))
+    .map((s) => [s.lat, s.lon]);
+  if (pts.length <= max) return pts;
+  const step = (pts.length - 1) / (max - 1);
+  const out = [];
+  for (let i = 0; i < max; i++) out.push(pts[Math.round(i * step)]);
+  return out;
+}
+
 export function computeUserRows(users, drives) {
   const groups = groupByIdentity(users, drives);
   const rows = [];

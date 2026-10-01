@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeOverview, computeUserRows, summarizeFlags, computeDailyDigest } from '../shared/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags, computeDailyDigest, downsamplePath } from '../shared/adminStats.mjs';
 
 const DAY = 864e5;
 const NOW = 1_700_000_000_000;            // fixed "now" for deterministic windows
@@ -185,6 +185,26 @@ describe('computeDailyDigest', () => {
   it('new vs active today keys off first/last seen', () => {
     expect(dg.newDriversToday).toBe(0); // first drove yesterday
     expect(dg.activeToday).toBe(1);     // drove again today
+  });
+});
+
+describe('downsamplePath', () => {
+  it('returns all points as [lat,lon] when under the cap', () => {
+    const s = [{ lat: 1, lon: 2 }, { lat: 3, lon: 4 }];
+    expect(downsamplePath(s, 48)).toEqual([[1, 2], [3, 4]]);
+  });
+
+  it('thins to the cap and keeps first + last', () => {
+    const s = Array.from({ length: 500 }, (_, i) => ({ lat: i, lon: -i }));
+    const out = downsamplePath(s, 48);
+    expect(out.length).toBe(48);
+    expect(out[0]).toEqual([0, -0]);
+    expect(out[47]).toEqual([499, -499]);
+  });
+
+  it('drops malformed points and is safe on junk', () => {
+    expect(downsamplePath([{ lat: 1, lon: 2 }, { lat: null, lon: 5 }, {}], 48)).toEqual([[1, 2]]);
+    expect(downsamplePath(undefined)).toEqual([]);
   });
 });
 

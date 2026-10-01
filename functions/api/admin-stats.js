@@ -6,7 +6,7 @@
 // Reuses the tested pure aggregators; password hashing uses Web Crypto
 // (crypto.subtle) rather than node:crypto, since the Workers runtime provides
 // that globally and not Node's crypto by default.
-import { computeOverview, computeUserRows, summarizeFlags } from '../../src/shared/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags, downsamplePath } from '../../src/shared/adminStats.mjs';
 
 const json = (status, obj) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
@@ -92,6 +92,29 @@ export async function onRequestPost(context) {
       // that predate the detail columns. Events pass through for the list/map.
       const { events, ...meta } = d;
       return json(200, { ok: true, drive: { ...meta, flags: summarizeFlags(events), events: events || [] } });
+    }
+
+    if (view === 'tracks') {
+      // Every drive's path (downsampled), for overlaying a person's routes on one
+      // map — the roads they drive often show up as the darkest overlapping lines.
+      const ids = (Array.isArray(body.device_ids) && body.device_ids.length ? body.device_ids
+                   : (body.device_id ? [body.device_id] : []))
+                  .map(String).filter((id) => /^[\w-]+$/.test(id));
+      if (!ids.length) return json(400, { ok: false, error: 'missing device_id(s)' });
+      const inList = ids.join(',');
+      const all = await sbGet(
+        `drives?device_id=in.(${inList})&select=start_time,score,distance_meters,samples,simulated&order=start_time.desc&limit=300`
+      );
+      const tracks = all
+        .filter((d) => !d.simulated)
+        .map((d) => ({
+          t: d.start_time,
+          score: d.score,
+          mi: d.distance_meters ? +(d.distance_meters / 1609.34).toFixed(1) : 0,
+          path: downsamplePath(d.samples),
+        }))
+        .filter((x) => x.path.length > 1);
+      return json(200, { ok: true, tracks });
     }
 
     const [users, drives] = await Promise.all([

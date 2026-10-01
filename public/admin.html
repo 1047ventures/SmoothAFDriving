@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>SmoothAF · Admin</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root { --bg:#0a0808; --cream:#f4ebd9; --dim:rgba(244,235,217,.55); --line:rgba(244,235,217,.12); }
     * { box-sizing:border-box; }
@@ -39,6 +41,13 @@
     .chip { display:inline-block; background:#1a1515; border:1px solid var(--line); border-radius:999px;
             padding:3px 9px; margin:0 5px 5px 0; font-size:12px; color:var(--cream); }
     .chip b { font-weight:700; }
+    .dd-routes { margin:6px 0 10px; }
+    .routes-btn { font:inherit; font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--line);
+                  background:#1a1515; color:var(--cream); cursor:pointer; }
+    .routes-btn:hover { background:#241c1c; }
+    .routes-map { display:none; margin-top:8px; }
+    .rmap { height:300px; border-radius:10px; overflow:hidden; border:1px solid var(--line); }
+    .rmap .leaflet-container { background:#0a0808; }
   </style>
 </head>
 <body>
@@ -190,10 +199,48 @@
         : 'No drives.';
       const row = document.createElement('tr');
       row.className = 'drilldown';
-      row.innerHTML = `<td colspan="7">${list}</td>`;
+      row.innerHTML =
+        `<td colspan="7">
+          <div class="dd-routes"><button type="button" class="routes-btn">🗺 Show routes</button><div class="routes-map"></div></div>
+          ${list}
+        </td>`;
       tr.after(row);
+      row.querySelector('.routes-btn').addEventListener('click', (e) =>
+        toggleRoutes(e.currentTarget, row.querySelector('.routes-map'), deviceIds));
       row.querySelectorAll('.drive-line').forEach(line =>
         line.addEventListener('click', () => toggleDriveDetail(line)));
+    }
+
+    let _mapSeq = 0;
+    async function toggleRoutes(btn, container, deviceIds) {
+      if (container.dataset.loaded) { // toggle visibility
+        const show = container.style.display === 'none';
+        container.style.display = show ? 'block' : 'none';
+        btn.textContent = show ? '🗺 Hide routes' : '🗺 Show routes';
+        if (show && container._map) container._map.invalidateSize();
+        return;
+      }
+      btn.textContent = 'Loading routes…';
+      const { tracks } = await call('tracks', { device_ids: deviceIds });
+      container.dataset.loaded = '1';
+      container.style.display = 'block';
+      if (!tracks || !tracks.length) { container.innerHTML = '<div class="anon" style="padding:10px">No GPS tracks stored for these drives.</div>'; btn.textContent = '🗺 Routes'; return; }
+      if (typeof L === 'undefined') { container.innerHTML = '<div class="anon" style="padding:10px">Map library didn\'t load — check your connection and reopen.</div>'; btn.textContent = '🗺 Routes'; return; }
+      const id = 'map' + (++_mapSeq);
+      container.innerHTML = `<div id="${id}" class="rmap"></div><div class="anon" style="margin-top:6px">${tracks.length} drive${tracks.length === 1 ? '' : 's'} · darker lines = roads driven more often</div>`;
+      const map = L.map(id, { attributionControl: false, zoomControl: true });
+      container._map = map;
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      const all = [];
+      for (const trk of tracks) {
+        if (!trk.path || trk.path.length < 2) continue;
+        // Low opacity so overlapping (frequently-driven) roads stack into brighter lines.
+        L.polyline(trk.path, { color: '#E85D3A', weight: 3, opacity: 0.22 }).addTo(map);
+        all.push(...trk.path);
+      }
+      if (all.length) map.fitBounds(L.latLngBounds(all).pad(0.1));
+      setTimeout(() => map.invalidateSize(), 60);
+      btn.textContent = '🗺 Hide routes';
     }
 
     async function toggleDriveDetail(line) {
