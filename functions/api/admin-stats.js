@@ -144,12 +144,14 @@ export async function onRequestPost(context) {
       if (!d) return json(404, { ok: false, error: 'not found' });
       // Flags derived from the stored events, so this works on historical drives
       // that predate the detail columns. Events pass through for the list/map.
-      // The GPS track is downsampled to a route path so this one drive can be
-      // mapped on its own (raw samples are dropped to keep the payload small).
+      // The GPS track becomes a route path for this one drive's map. A high cap
+      // (vs the 48 the multi-drive overlay uses) keeps enough points to follow
+      // the road's curves instead of chording across them — it's one drive on
+      // demand, so the payload is still small.
       const { events, samples, ...meta } = d;
       return json(200, {
         ok: true,
-        drive: { ...meta, flags: summarizeFlags(events), events: events || [], path: downsamplePath(samples) },
+        drive: { ...meta, flags: summarizeFlags(events), events: events || [], path: downsamplePath(samples, 2000) },
       });
     }
 
@@ -170,7 +172,9 @@ export async function onRequestPost(context) {
           t: d.start_time,
           score: d.score,
           mi: d.distance_meters ? +(d.distance_meters / 1609.34).toFixed(1) : 0,
-          path: downsamplePath(d.samples),
+          // Enough points to trace the road's curves (so overlapping drives line
+          // up on the same roads); the 48 default chorded across bends.
+          path: downsamplePath(d.samples, 200),
         }))
         .filter((x) => x.path.length > 1);
       return json(200, { ok: true, tracks });
