@@ -13,6 +13,42 @@ const json = (status, obj) =>
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Thin an [[lat,lon],…] list to at most `max` points, keeping first and last.
+function thinPairs(pts, max) {
+  if (pts.length <= max) return pts;
+  const step = (pts.length - 1) / (max - 1);
+  const out = [];
+  for (let i = 0; i < max; i++) out.push(pts[Math.round(i * step)]);
+  return out;
+}
+
+/**
+ * Snap a raw GPS trace onto the road network via OSRM, so a sparse or jumpy
+ * recording still draws a line that follows the roads instead of chording
+ * straight across them. Routes through the trace's points as waypoints and
+ * returns the road-following geometry as [[lat,lon],…], or null on any failure
+ * (the caller then falls back to the raw trace — no worse than before).
+ */
+async function snapToRoads(path) {
+  try {
+    const pts = (path || []).filter((p) => Array.isArray(p) && p.length === 2);
+    if (pts.length < 2) return null;
+    // OSRM caps how many coordinates one request may carry; thin to a safe count.
+    const wp = thinPairs(pts, 90);
+    const coords = wp.map(([lat, lon]) => `${lon},${lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const geo = data && data.routes && data.routes[0] && data.routes[0].geometry;
+    const coordsOut = geo && geo.coordinates;
+    if (!Array.isArray(coordsOut) || coordsOut.length < 2) return null;
+    return coordsOut.map(([lon, lat]) => [lat, lon]);
+  } catch {
+    return null;
+  }
+}
+
 async function sha256(s) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(s)));
   return new Uint8Array(buf);
@@ -149,9 +185,20 @@ export async function onRequestPost(context) {
       // the road's curves instead of chording across them — it's one drive on
       // demand, so the payload is still small.
       const { events, samples, ...meta } = d;
+      const raw = downsamplePath(samples, 2000);
+      // Snap the trace onto real roads (handles sparse/jumpy recordings that
+      // otherwise draw as straight chords). Falls back to the raw trace.
+      const snapped = await snapToRoads(raw);
+      const usedSnap = !!(snapped && snapped.length > 1);
       return json(200, {
         ok: true,
-        drive: { ...meta, flags: summarizeFlags(events), events: events || [], path: downsamplePath(samples, 2000) },
+        drive: {
+          ...meta,
+          flags: summarizeFlags(events),
+          events: events || [],
+          path: usedSnap ? snapped : raw,
+          snapped: usedSnap,
+        },
       });
     }
 

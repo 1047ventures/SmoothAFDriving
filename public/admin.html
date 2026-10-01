@@ -434,7 +434,8 @@
         rbtn.addEventListener('click', () =>
           toggleMap(rbtn, rmap, { show: '🗺 Show route', hide: '🗺 Hide route', loading: 'Loading route…' },
             async () => drawRouteMap(rmap, [{ path: data.drive.path, score: data.drive.score }],
-              { opacity: 0.95, weight: 5, arrows: true })));
+              { opacity: 0.95, weight: 5, arrows: true,
+                caption: data.drive.snapped ? 'snapped to roads' : '' })));
       }
     }
 
