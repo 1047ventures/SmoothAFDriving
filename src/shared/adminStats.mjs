@@ -93,6 +93,17 @@ export function computeOverview(users, drives, nowMs) {
     .map(([day, count]) => ({ day, count }))
     .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
 
+  // Miles driven per UTC day across all real drives — the chart the operator
+  // actually wants to watch (how much the fleet is driving over time).
+  const milesByDayMap = new Map();
+  for (const d of real) {
+    const k = dayKey(d.start_time);
+    milesByDayMap.set(k, (milesByDayMap.get(k) || 0) + (d.distance_meters || 0));
+  }
+  const milesByDay = [...milesByDayMap.entries()]
+    .map(([day, meters]) => ({ day, miles: miles(meters) }))
+    .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+
   // Person-level metrics roll up per identity, so one human with two phones
   // counts once — the whole point of the merge.
   let active7 = 0, active30 = 0, returningUsers = 0, knownUsers = 0;
@@ -125,6 +136,7 @@ export function computeOverview(users, drives, nowMs) {
     activeUsers30d: active30,
     returningUsers,
     installsByDay,
+    milesByDay,
   };
 }
 

@@ -36,16 +36,22 @@
     tr.user-row:hover { background:#161212; }
     .anon { color:var(--dim); font-style:italic; }
     .drilldown td { background:#0f0c0c; font-size:12px; color:var(--dim); }
-    .drive-line { padding:7px 6px; border-bottom:1px solid var(--line); cursor:pointer; color:var(--cream); }
-    .drive-line:last-child { border-bottom:0; }
-    .drive-line:hover { background:#161212; }
-    .drive-line b { font-weight:600; }
+    .dd-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .dd-table th { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em;
+                   padding:4px 8px; border-bottom:1px solid var(--line); }
+    .dd-table td { padding:6px 8px; border-bottom:1px solid var(--line); color:var(--cream); white-space:nowrap; }
+    .dd-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+    .dd-table .dest { white-space:normal; color:var(--dim); }
+    tr.drive-line { cursor:pointer; }
+    tr.drive-line:hover > td { background:#161212; }
+    tr.drive-line b { font-weight:600; }
     .drive-detail { padding:8px 6px 12px; background:#080606; }
     .dd-section { margin:6px 0; }
     .dd-h { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); margin-bottom:5px; }
     .chip { display:inline-block; background:#1a1515; border:1px solid var(--line); border-radius:999px;
             padding:3px 9px; margin:0 5px 5px 0; font-size:12px; color:var(--cream); }
     .chip b { font-weight:700; }
+    .chart-cap { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:4px 0 2px; }
     .dd-routes { margin:6px 0 10px; }
     .routes-btn { font:inherit; font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--line);
                   background:#1a1515; color:var(--cream); cursor:pointer; }
@@ -69,7 +75,8 @@
   <div id="dash" class="hidden">
     <div id="tiles" class="tiles"></div>
     <div id="purge-note" class="anon" style="margin:2px 0 8px"></div>
-    <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="none"></svg>
+    <div id="installs-cap" class="chart-cap"></div>
+    <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="xMinYMid meet"></svg>
     <table>
       <thead>
         <tr id="head-row">
@@ -125,15 +132,25 @@
         `<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
     }
 
-    function renderInstalls(byDay) {
+    // Miles/day: one bar per UTC day, height ∝ total miles driven that day.
+    // Fixed-width bars (not stretched to fill), so a handful of days reads as a
+    // few small bars instead of giant slabs. The <title> must be a CHILD of the
+    // <rect> or the hover tooltip binds to the wrong bar.
+    function renderMilesChart(byDay) {
       const svg = $('installs');
-      if (!byDay.length) { svg.innerHTML = ''; return; }
-      const max = Math.max(...byDay.map(d => d.count), 1);
-      const w = 600, h = 80, bw = w / byDay.length;
+      byDay = byDay || [];
+      if (!byDay.length) { svg.innerHTML = ''; $('installs-cap').textContent = ''; return; }
+      const total = byDay.reduce((s, d) => s + d.miles, 0);
+      $('installs-cap').innerHTML =
+        `Miles / day <span class="anon">· ${total.toFixed(1)} mi across ${byDay.length} day${byDay.length === 1 ? '' : 's'}</span>`;
+      const max = Math.max(...byDay.map(d => d.miles), 0.1);
+      const bar = 18, h = 80;
+      svg.setAttribute('viewBox', `0 0 ${Math.max(byDay.length * bar, bar)} ${h}`);
+      svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
       svg.innerHTML = byDay.map((d, i) => {
-        const bh = (d.count / max) * (h - 16);
-        return `<rect x="${i * bw + 1}" y="${h - bh}" width="${Math.max(1, bw - 2)}" height="${bh}" fill="#c4a962"></rect>` +
-               `<title>${d.day}: ${d.count}</title>`;
+        const bh = Math.max(2, (d.miles / max) * (h - 16));
+        return `<rect x="${i * bar + 1}" y="${h - bh}" width="${bar - 3}" height="${bh}" rx="1" fill="#c4a962">` +
+               `<title>${d.day}: ${d.miles.toFixed(1)} mi</title></rect>`;
       }).join('');
     }
 
@@ -202,24 +219,31 @@
 
     const mi = (m) => (m / 1609.34).toFixed(1);
 
-    // One drive summarised as a clickable line; the breakdown loads on expand.
-    // Each drive carries its own device_id (a merged person spans several).
-    function driveLine(d) {
+    // One drive as a table row; the full breakdown (OBD, flag tiers) loads on
+    // click. Each drive carries its own device_id (a merged person spans several).
+    const DD_COLS = 7;
+    function driveRow(d) {
       const device = d.device_id || '';
-      const dims = d.dims || {};
-      const bits = [];
-      if (dims.smoothness != null) bits.push(`sm ${dims.smoothness}`);
-      if (dims.braking != null)    bits.push(`br ${dims.braking}`);
-      if (dims.momentum != null)   bits.push(`mo ${dims.momentum}`);
-      const breakdown = bits.length ? ` <span class="anon">(${bits.join(' · ')})</span>` : '';
-      const eff = d.effectiveness != null ? ` · ${d.effectiveness}% vs ETA` : '';
-      const dest = d.dest_label ? ` → ${esc(d.dest_label)}` : '';
-      const flags = d.event_count ? ` · ${d.event_count} flag${d.event_count === 1 ? '' : 's'}` : '';
       const stop = d.start_time != null && d.duration_ms ? d.start_time + d.duration_ms : null;
-      const when = `${fmtDate(d.start_time)} · ${fmtTime(d.start_time)}–${fmtTime(stop)}`;
-      return `<div class="drive-line" data-device="${esc(device)}" data-start="${esc(String(d.start_time))}">
-        ${when} · <b>score ${d.score ?? '—'}</b>${breakdown} · ${mi(d.distance_meters)} mi · ${Math.round((d.duration_ms || 0) / 60000)} min${flags}${eff}${dest}
-      </div>`;
+      const time = `${fmtTime(d.start_time)}–${fmtTime(stop)}`;
+      const dest = d.dest_label ? esc(d.dest_label) : '';
+      return `<tr class="drive-line" data-device="${esc(device)}" data-start="${esc(String(d.start_time))}">
+        <td>${fmtDate(d.start_time)}</td>
+        <td>${time}</td>
+        <td class="num"><b>${d.score ?? '—'}</b></td>
+        <td class="num">${mi(d.distance_meters)}</td>
+        <td class="num">${Math.round((d.duration_ms || 0) / 60000)}</td>
+        <td class="num">${d.event_count || 0}</td>
+        <td class="dest">${dest}</td>
+      </tr>`;
+    }
+
+    function driveTable(drives) {
+      const head = `<thead><tr>
+        <th>Date</th><th>Time</th><th class="num">Score</th><th class="num">Mi</th>
+        <th class="num">Min</th><th class="num">Flags</th><th>Dest</th>
+      </tr></thead>`;
+      return `<table class="dd-table">${head}<tbody>${drives.map(driveRow).join('')}</tbody></table>`;
     }
 
     // The expanded detail for one drive: scoring breakdown, flag counts, OBD.
@@ -262,8 +286,8 @@
       try { deviceIds = JSON.parse(tr.dataset.devices) || []; } catch { deviceIds = []; }
       const data = await call('user', { device_ids: deviceIds });
       const list = data.drives.length
-        ? data.drives.map(d => driveLine(d)).join('')
-        : 'No drives.';
+        ? driveTable(data.drives)
+        : '<div class="anon" style="padding:8px 6px">No drives.</div>';
       const row = document.createElement('tr');
       row.className = 'drilldown';
       row.innerHTML =
@@ -317,10 +341,10 @@
       const nxt = line.nextElementSibling;
       if (nxt && nxt.classList.contains('drive-detail')) { nxt.remove(); return; }
       const data = await call('drive', { device_id: line.dataset.device, start_time: Number(line.dataset.start) });
-      const div = document.createElement('div');
-      div.className = 'drive-detail';
-      div.innerHTML = driveDetail(data.drive);
-      line.after(div);
+      const tr = document.createElement('tr');
+      tr.className = 'drive-detail';
+      tr.innerHTML = `<td colspan="${DD_COLS}">${driveDetail(data.drive)}</td>`;
+      line.after(tr);
     }
 
     async function load() {
@@ -329,7 +353,7 @@
         $('gate').classList.add('hidden');
         $('dash').classList.remove('hidden');
         renderTiles(data.overview);
-        renderInstalls(data.overview.installsByDay);
+        renderMilesChart(data.overview.milesByDay);
         allRows = data.users;
         renderRows();
         $('purge-note').textContent = data.purgedEmpty

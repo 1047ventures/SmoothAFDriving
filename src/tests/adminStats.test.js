@@ -48,6 +48,17 @@ describe('computeOverview', () => {
       { day: day(NOW - 2 * DAY),   count: 1 },
     ]);
   });
+
+  it('sums miles per UTC day across real drives, sorted ascending', () => {
+    // dev-A: 1mi (NOW-2d), 2mi (NOW-1d); dev-B: 1mi (NOW-10d); dev-C: 0mi (NOW-100d).
+    // The simulated drive on NOW is excluded.
+    expect(ov.milesByDay).toEqual([
+      { day: day(NOW - 100 * DAY), miles: 0 },
+      { day: day(NOW - 10 * DAY),  miles: 1 },
+      { day: day(NOW - 2 * DAY),   miles: 1 },
+      { day: day(NOW - 1 * DAY),   miles: 2 },
+    ]);
+  });
 });
 
 describe('computeUserRows', () => {
