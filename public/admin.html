@@ -349,11 +349,15 @@
       `<div class="rlegend"><span>rough</span><span class="bar"></span><span>smooth</span>` +
       `<span class="dot" style="margin-left:10px">▲</span> direction</div>`;
 
+    const HEAT_RED = '#E0431F';
     let _mapSeq = 0;
-    // Draw route polylines into a container, coloured by each drive's score.
-    // Reused by the per-user overlay (many lines) and the per-drive view (one
-    // line, with direction arrows). `routes` is [{ path:[[lat,lon],…], score }].
-    function drawRouteMap(container, routes, { weight = 4, opacity = 0.75, caption = '', arrows = false } = {}) {
+    // Draw route polylines into a container. Two modes:
+    //   • byScore:false (the per-user overlay) — every line the same red at low
+    //     opacity, so frequently-driven roads stack into darker lines.
+    //   • byScore:true (the per-drive view) — colour the one line by its score
+    //     (red→green) and draw direction arrows, with a legend.
+    // `routes` is [{ path:[[lat,lon],…], score }].
+    function drawRouteMap(container, routes, { weight = 4, opacity = 0.75, caption = '', arrows = false, byScore = true } = {}) {
       if (typeof L === 'undefined') {
         container.innerHTML = '<div class="anon" style="padding:10px">Map library didn\'t load — check your connection and reopen.</div>';
         return false;
@@ -364,17 +368,19 @@
         return false;
       }
       const id = 'map' + (++_mapSeq);
-      container.innerHTML = `<div id="${id}" class="rmap"></div>` +
-        `<div class="rmap-cap">${SCORE_LEGEND}${caption ? `<span class="anon"> · ${caption}</span>` : ''}</div>`;
+      const cap = byScore
+        ? `${SCORE_LEGEND}${caption ? `<span class="anon"> · ${caption}</span>` : ''}`
+        : (caption ? `<span class="anon">${caption}</span>` : '');
+      container.innerHTML = `<div id="${id}" class="rmap"></div>` + (cap ? `<div class="rmap-cap">${cap}</div>` : '');
       const map = L.map(id, { zoomControl: true });
       container._map = map;
       // Keyless OpenStreetMap tiles — the admin page is standalone and has no
       // Mapbox token (that's bundled into the app only). The basemap is greyed
-      // via CSS so the coloured route lines read clearly on it.
+      // via CSS so the route lines read clearly on it.
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
       const all = [];
       for (const r of valid) {
-        const color = scoreColor(r.score);
+        const color = byScore ? scoreColor(r.score) : HEAT_RED;
         L.polyline(r.path, { color, weight, opacity }).addTo(map);
         if (arrows) addDirArrows(map, r.path, color, Math.min(6, Math.max(2, Math.floor(r.path.length / 8))));
         all.push(...r.path);
@@ -407,8 +413,8 @@
           const { tracks } = await call('tracks', { device_ids: deviceIds });
           const routes = (tracks || []).map(t => ({ path: t.path, score: t.score }));
           return drawRouteMap(container, routes, {
-            opacity: 0.6, weight: 4,
-            caption: routes.length ? `${routes.length} drive${routes.length === 1 ? '' : 's'}, coloured by score` : '',
+            byScore: false, opacity: 0.3, weight: 4,
+            caption: routes.length ? `${routes.length} drive${routes.length === 1 ? '' : 's'} · darker lines = roads driven more often` : '',
           });
         });
     }
