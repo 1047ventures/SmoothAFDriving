@@ -61,8 +61,14 @@
     .routes-map { display:none; margin-top:8px; }
     .rmap { height:300px; border-radius:10px; overflow:hidden; border:1px solid var(--line); }
     .rmap .leaflet-container { background:#0a0808; }
-    /* Mute the basemap so the red route lines are what the eye lands on. */
+    /* Mute the basemap so the coloured route lines are what the eye lands on. */
     .rmap .leaflet-tile { filter:grayscale(1) brightness(.72) contrast(.9); }
+    .dir-arrow { font-size:13px; line-height:1; text-align:center; text-shadow:0 0 2px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9); }
+    .rmap-cap { display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:6px; font-size:11px; color:var(--dim); }
+    .rlegend { display:inline-flex; align-items:center; gap:6px; }
+    .rlegend .bar { width:70px; height:8px; border-radius:4px;
+                    background:linear-gradient(90deg,#E0431F,#E8B53A,#3FAE52); }
+    .rlegend .dot { color:var(--cream); }
   </style>
 </head>
 <body>
@@ -311,33 +317,67 @@
         line.addEventListener('click', () => toggleDriveDetail(line)));
     }
 
+    // Traffic-light colour for a drive score: green = smooth, red = rough.
+    function scoreColor(s) {
+      if (s == null) return '#9aa0a6';   // grey when a drive has no score
+      if (s >= 85) return '#3FAE52';      // green
+      if (s >= 70) return '#E8B53A';      // amber
+      return '#E0431F';                   // red
+    }
+
+    // Place arrowheads along a path so the direction of travel is clear.
+    // A divIcon ▲ points north by default; rotate it to the local bearing.
+    function addDirArrows(map, pts, color, count) {
+      const n = pts.length;
+      for (let k = 1; k <= count; k++) {
+        const idx = Math.round((k / (count + 1)) * (n - 1));
+        const a = pts[Math.max(0, idx - 1)], b = pts[Math.min(n - 1, idx + 1)];
+        if (!a || !b) continue;
+        const dy = b[0] - a[0];
+        const dx = (b[1] - a[1]) * Math.cos(((a[0] + b[0]) / 2) * Math.PI / 180);
+        const ang = Math.atan2(dx, dy) * 180 / Math.PI;   // 0 = north, clockwise
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="dir-arrow" style="transform:rotate(${ang}deg);color:${color}">▲</div>`,
+          iconSize: [16, 16], iconAnchor: [8, 8],
+        });
+        L.marker(pts[idx], { icon, interactive: false, keyboard: false }).addTo(map);
+      }
+    }
+
+    const SCORE_LEGEND =
+      `<div class="rlegend"><span>rough</span><span class="bar"></span><span>smooth</span>` +
+      `<span class="dot" style="margin-left:10px">▲</span> direction</div>`;
+
     let _mapSeq = 0;
-    // Draw a set of route polylines into a container. One map, reused by the
-    // per-user overlay (many faint lines that stack where roads repeat) and the
-    // per-drive view (a single solid line). `paths` is an array of [lat,lon][].
-    function drawRouteMap(container, paths, { opacity = 0.3, weight = 4, caption = '' } = {}) {
+    // Draw route polylines into a container, coloured by each drive's score.
+    // Reused by the per-user overlay (many lines) and the per-drive view (one
+    // line, with direction arrows). `routes` is [{ path:[[lat,lon],…], score }].
+    function drawRouteMap(container, routes, { weight = 4, opacity = 0.75, caption = '', arrows = false } = {}) {
       if (typeof L === 'undefined') {
         container.innerHTML = '<div class="anon" style="padding:10px">Map library didn\'t load — check your connection and reopen.</div>';
         return false;
       }
-      const valid = (paths || []).filter(p => Array.isArray(p) && p.length >= 2);
+      const valid = (routes || []).filter(r => r && Array.isArray(r.path) && r.path.length >= 2);
       if (!valid.length) {
         container.innerHTML = '<div class="anon" style="padding:10px">No GPS track stored for this drive.</div>';
         return false;
       }
       const id = 'map' + (++_mapSeq);
       container.innerHTML = `<div id="${id}" class="rmap"></div>` +
-        (caption ? `<div class="anon" style="margin-top:6px">${caption}</div>` : '');
+        `<div class="rmap-cap">${SCORE_LEGEND}${caption ? `<span class="anon"> · ${caption}</span>` : ''}</div>`;
       const map = L.map(id, { zoomControl: true });
       container._map = map;
       // Keyless OpenStreetMap tiles — the admin page is standalone and has no
       // Mapbox token (that's bundled into the app only). The basemap is greyed
-      // via CSS so the orange route lines read clearly on it.
+      // via CSS so the coloured route lines read clearly on it.
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
       const all = [];
-      for (const p of valid) {
-        L.polyline(p, { color: '#E0431F', weight, opacity }).addTo(map);
-        all.push(...p);
+      for (const r of valid) {
+        const color = scoreColor(r.score);
+        L.polyline(r.path, { color, weight, opacity }).addTo(map);
+        if (arrows) addDirArrows(map, r.path, color, Math.min(6, Math.max(2, Math.floor(r.path.length / 8))));
+        all.push(...r.path);
       }
       if (all.length) map.fitBounds(L.latLngBounds(all).pad(0.1));
       setTimeout(() => map.invalidateSize(), 60);
@@ -365,10 +405,10 @@
       return toggleMap(btn, container, { show: '🗺 Show routes', hide: '🗺 Hide routes', loading: 'Loading routes…' },
         async () => {
           const { tracks } = await call('tracks', { device_ids: deviceIds });
-          const paths = (tracks || []).map(t => t.path);
-          return drawRouteMap(container, paths, {
-            opacity: 0.3, weight: 4,
-            caption: tracks && tracks.length ? `${tracks.length} drive${tracks.length === 1 ? '' : 's'} · darker lines = roads driven more often` : '',
+          const routes = (tracks || []).map(t => ({ path: t.path, score: t.score }));
+          return drawRouteMap(container, routes, {
+            opacity: 0.6, weight: 4,
+            caption: routes.length ? `${routes.length} drive${routes.length === 1 ? '' : 's'}, coloured by score` : '',
           });
         });
     }
@@ -387,7 +427,8 @@
         const rmap = tr.querySelector('.drive-route-map');
         rbtn.addEventListener('click', () =>
           toggleMap(rbtn, rmap, { show: '🗺 Show route', hide: '🗺 Hide route', loading: 'Loading route…' },
-            async () => drawRouteMap(rmap, [data.drive.path], { opacity: 0.9, weight: 4 })));
+            async () => drawRouteMap(rmap, [{ path: data.drive.path, score: data.drive.score }],
+              { opacity: 0.95, weight: 5, arrows: true })));
       }
     }
 
