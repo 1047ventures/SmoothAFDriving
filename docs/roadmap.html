@@ -293,7 +293,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 1, 2026 · 5:35 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 1, 2026 · 5:51 PM MDT</b>
     </div>
     <p class="sharebar">
       <span class="lbl">Share</span>
@@ -332,13 +332,13 @@
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
+      <div class="lane-item"><span class="tn tn--prog">Q3</span>Native background GPS <span class="sub"><b>now the priority.</b> Backgrounding throttles iOS location → sparse traces, straight-line routes, and unreliable scores (confirmed on Kevin's drive). Keep full-rate GPS alive in the background: Always-location + background mode + plugin. Strava-style core first, then Maps handoff + closed-app nudge.</span></div>
       <div class="lane-item"><span class="tn tn--prog">Q4</span>Road's fault vs yours <span class="sub">penalize avoidable roughness (bad lane, rumble strips, potholes), not roads you can't help — needs a few mounted-phone drives</span></div>
     </div>
     <div class="lane lane--next">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
       <div class="lane-item"><span class="tn tn--next">Q5</span>OBD readings into the score <span class="sub">throttle &amp; torque from the car — after the dongle's validated (Q1)</span></div>
       <div class="lane-item"><span class="tn tn--next">Q6</span>Car Health: scan for fault codes <span class="sub">Mode-03 DTC read — <b>the Concierge unlock</b>; needs the dongle reliable</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q3</span>Native background foundation <span class="sub">Always-location + background mode + plugins — keystone for the two below (your call; see Waiting on you)</span></div>
       <div class="lane-item"><span class="tn tn--next">Q7</span>Maps handoff, recording survives <span class="sub">hand a destination to Maps and keep scoring in the background — needs Q3</span></div>
       <div class="lane-item"><span class="tn tn--next">Q8</span>Closed-app auto-start nudge <span class="sub">a notification when you start driving — needs Q3</span></div>
       <div class="lane-item"><span class="tn tn--next">Q9</span>Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
@@ -349,7 +349,7 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 open</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
     <div class="card full">
 
       <details class="wrow" open>
@@ -376,18 +376,6 @@
             <li><b>Does the gear number match reality?</b> If it's consistently off in a fixed way (e.g. shows 64 in 4th), tell me the number &mdash; that locks the decode. (If gear never shows, your car likely doesn't expose it over standard OBD-II — not a bug.)</li>
             <li><b>Do the <code>hp</code> and <code>nm</code> cells appear?</b> That's the only way to know if your car reports the torque PIDs.</li>
           </ol>
-        </div>
-      </details>
-
-      <details class="wrow">
-        <summary class="wsum">
-          <span class="pill p-block">Decision</span>
-          <span class="t"><span class="tn tn--wait">Q3</span>Approve the native background foundation? <span class="tag">unblocks 3 features</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Researched: keeping the drive recording while you're in Maps (and nudging you when a drive starts with the app closed) is fully doable on iOS &mdash; it's how Strava works &mdash; but it needs an <b>&ldquo;Always Location&rdquo; permission</b> + a background-location plugin. Real tradeoffs: more battery, and App Store review scrutinises Always-location. It only tests on TestFlight, not the web preview.</p>
-          <p class="note"><b>The call:</b> greenlight it and I build the Strava-style core first, then the Maps handoff, then the closed-app nudge. Two hard limits found: CarPlay-connect specifically isn't available to this app category, and iOS never fully auto-<i>starts</i> from closed &mdash; a tappable notification is the ceiling.</p>
         </div>
       </details>
 
