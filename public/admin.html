@@ -48,6 +48,8 @@
     .routes-map { display:none; margin-top:8px; }
     .rmap { height:300px; border-radius:10px; overflow:hidden; border:1px solid var(--line); }
     .rmap .leaflet-container { background:#0a0808; }
+    /* Mute the basemap so the red route lines are what the eye lands on. */
+    .rmap .leaflet-tile { filter:grayscale(1) brightness(.72) contrast(.9); }
   </style>
 </head>
 <body>
@@ -61,6 +63,7 @@
 
   <div id="dash" class="hidden">
     <div id="tiles" class="tiles"></div>
+    <div id="purge-note" class="anon" style="margin:2px 0 8px"></div>
     <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="none"></svg>
     <table>
       <thead>
@@ -75,6 +78,8 @@
     const $ = (id) => document.getElementById(id);
     const PW_KEY = 'saf_admin_pw';
     const fmtDate = (ms) => ms == null ? '—' : new Date(ms).toLocaleDateString();
+    const fmtTime = (ms) => ms == null ? '—' :
+      new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     const shortId = (id) => id.slice(0, 8);
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -150,8 +155,10 @@
       const eff = d.effectiveness != null ? ` · ${d.effectiveness}% vs ETA` : '';
       const dest = d.dest_label ? ` → ${esc(d.dest_label)}` : '';
       const flags = d.event_count ? ` · ${d.event_count} flag${d.event_count === 1 ? '' : 's'}` : '';
+      const stop = d.start_time != null && d.duration_ms ? d.start_time + d.duration_ms : null;
+      const when = `${fmtDate(d.start_time)} · ${fmtTime(d.start_time)}–${fmtTime(stop)}`;
       return `<div class="drive-line" data-device="${esc(device)}" data-start="${esc(String(d.start_time))}">
-        ${fmtDate(d.start_time)} · <b>score ${d.score ?? '—'}</b>${breakdown} · ${mi(d.distance_meters)} mi · ${Math.round((d.duration_ms || 0) / 60000)} min${flags}${eff}${dest}
+        ${when} · <b>score ${d.score ?? '—'}</b>${breakdown} · ${mi(d.distance_meters)} mi · ${Math.round((d.duration_ms || 0) / 60000)} min${flags}${eff}${dest}
       </div>`;
     }
 
@@ -264,6 +271,9 @@
         renderTiles(data.overview);
         renderInstalls(data.overview.installsByDay);
         renderRows(data.users);
+        $('purge-note').textContent = data.purgedEmpty
+          ? `🧹 auto-removed ${data.purgedEmpty} empty drive${data.purgedEmpty === 1 ? '' : 's'} (0 mi · 0 flags)`
+          : '';
       } catch (e) {
         if (e.message !== 'unauthorized') $('dash-err').textContent = e.message;
       }

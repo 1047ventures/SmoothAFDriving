@@ -60,6 +60,27 @@ export async function onRequestPost(context) {
     return res.json();
   };
 
+  // Purge junk drives: zero distance AND zero flags — empty rows left by crash
+  // recovery or pre-gate saves. Both conditions required so a legit short-but-
+  // flagged or long-but-clean drive is never touched. The nested and/or filter
+  // is mandatory; a DELETE with no filter would wipe the table, so we never send
+  // one. Returns how many rows were removed.
+  const purgeEmptyDrives = async () => {
+    const filter =
+      'and=(or(distance_meters.is.null,distance_meters.eq.0),or(event_count.is.null,event_count.eq.0))';
+    const res = await fetch(`${SB_URL}/rest/v1/drives?${filter}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: SB_SERVICE_KEY,
+        Authorization: `Bearer ${SB_SERVICE_KEY}`,
+        Prefer: 'return=representation',
+      },
+    });
+    if (!res.ok) throw new Error(`supabase delete ${res.status}`);
+    const gone = await res.json();
+    return Array.isArray(gone) ? gone.length : 0;
+  };
+
   try {
     const view = body.view || 'overview';
 
@@ -117,6 +138,8 @@ export async function onRequestPost(context) {
       return json(200, { ok: true, tracks });
     }
 
+    // Sweep out empty drives before reading, so the dashboard never counts them.
+    const purgedEmpty = await purgeEmptyDrives();
     const [users, drives] = await Promise.all([
       sbGet('users?select=device_id,name,email,updated_at&limit=10000'),
       sbGet('drives?select=device_id,user_id,start_time,duration_ms,distance_meters,score,event_count,simulated&limit=10000'),
@@ -124,6 +147,7 @@ export async function onRequestPost(context) {
     const nowMs = Date.now();
     return json(200, {
       ok: true,
+      purgedEmpty,
       overview: computeOverview(users, drives, nowMs),
       users: computeUserRows(users, drives),
     });
