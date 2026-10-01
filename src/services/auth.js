@@ -129,7 +129,7 @@ export function isValidEmail(addr){
  * Inert until the Apple provider is enabled in the Supabase dashboard; see
  * isAppleConfigured().
  */
-export async function signInWithAppleToken(identityToken, nonce){
+export async function signInWithAppleToken(identityToken, nonce, profile){
   if (!identityToken) return { ok: false, error: 'Apple sign-in was cancelled.' };
   const body = { provider: 'apple', id_token: identityToken };
   if (nonce) body.nonce = nonce;
@@ -138,7 +138,39 @@ export async function signInWithAppleToken(identityToken, nonce){
   const session = trimSession(res.data);
   if (!session) return { ok: false, error: 'Sign-in failed — try again.' };
   saveSession(session);
+  // Apple only sends the person's name on the FIRST consent, out-of-band from
+  // the token. Persist it to the account's metadata the one time we get it, so
+  // it survives into every later sign-in (where Apple omits it) and the operator
+  // dashboard can show a real name instead of just a relay email.
+  const given  = (profile?.givenName  || '').trim();
+  const family = (profile?.familyName || '').trim();
+  if (given || family) {
+    const name = [given, family].filter(Boolean).join(' ');
+    await updateUserMetadata({ given_name: given, family_name: family, name });
+    session.user.name = name || session.user.name;
+    saveSession(session);
+  }
   return { ok: true, data: session };
+}
+
+/**
+ * Write fields into the signed-in account's user_metadata (GoTrue PUT /user).
+ * Best-effort: a failure here never fails sign-in — the session is already
+ * saved. Used to store the Apple-provided name on the account itself.
+ */
+export async function updateUserMetadata(data){
+  const s = getSession();
+  if (!s?.access_token) return { ok: false };
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/user`, {
+      method:  'PUT',
+      headers: { apikey: SB_ANON, Authorization: `Bearer ${s.access_token}`, 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ data }),
+    });
+    return { ok: res.ok };
+  } catch {
+    return { ok: false };
+  }
 }
 
 /**

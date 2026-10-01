@@ -61,7 +61,7 @@ function groupByIdentity(users, drives, authById = new Map()) {
   const groups = new Map();
   const ensure = (key) => {
     let g = groups.get(key);
-    if (!g) { g = { key, devices: new Set(), drives: [], name: null, email: null, updatedAts: [], signedIn: false }; groups.set(key, g); }
+    if (!g) { g = { key, devices: new Set(), drives: [], name: null, email: null, firstName: null, lastName: null, updatedAts: [], signedIn: false }; groups.set(key, g); }
     return g;
   };
 
@@ -84,8 +84,12 @@ function groupByIdentity(users, drives, authById = new Map()) {
     const a = authLabel(authById, d.user_id);
     if (a) {
       g.signedIn = true;
-      if (a.name && !g.name) g.name = a.name;
+      if (a.firstName && !g.firstName) g.firstName = a.firstName;
+      if (a.lastName && !g.lastName) g.lastName = a.lastName;
       if (a.email && !g.email) g.email = String(a.email).toLowerCase();
+      // Prefer a composed first+last over any single stored name.
+      const composed = [g.firstName, g.lastName].filter(Boolean).join(' ');
+      if (!g.name) g.name = composed || a.name || null;
     }
   }
   return groups;
@@ -264,6 +268,8 @@ export function computeUserRows(users, drives, authById = new Map()) {
       deviceId: devices[0] || null,   // first device — kept for back-compatible callers
       deviceCount: devices.length,
       name: g.name || null,
+      firstName: g.firstName || null,
+      lastName: g.lastName || null,
       email: g.email || null,
       isAnonymous: !g.name && !g.email,
       signedIn: !!g.signedIn,   // has a real auth account (Apple / email)

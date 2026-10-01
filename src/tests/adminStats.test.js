@@ -165,7 +165,7 @@ describe('identity merge (one person, many device ids)', () => {
       { device_id: 'zvi-ios', user_id: 'u-zvi', start_time: 10, score: 80, distance_meters: 1609.34, event_count: 1, simulated: false },
       { device_id: 'zvi-ios', user_id: 'u-zvi', start_time: 20, score: 90, distance_meters: 1609.34, event_count: 1, simulated: false },
     ];
-    const authById = new Map([['u-zvi', { email: 'ZVI@x.com', name: 'Zvi' }]]);
+    const authById = new Map([['u-zvi', { email: 'ZVI@x.com', name: null, firstName: 'Zvi', lastName: 'Mowshowitz' }]]);
 
     const anon = computeUserRows([], drives)[0];
     expect(anon.isAnonymous).toBe(true);          // no label without auth data
@@ -173,7 +173,9 @@ describe('identity merge (one person, many device ids)', () => {
     const rows = computeUserRows([], drives, authById);
     expect(rows.length).toBe(1);
     expect(rows[0].isAnonymous).toBe(false);
-    expect(rows[0].name).toBe('Zvi');
+    expect(rows[0].firstName).toBe('Zvi');
+    expect(rows[0].lastName).toBe('Mowshowitz');
+    expect(rows[0].name).toBe('Zvi Mowshowitz');   // composed from first + last
     expect(rows[0].email).toBe('zvi@x.com');       // case-normalised
     expect(rows[0].signedIn).toBe(true);
     expect(rows[0].driveCount).toBe(2);

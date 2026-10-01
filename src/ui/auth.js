@@ -207,7 +207,8 @@ export function initAuthUI(){
       setStatus('Apple sign-in isn’t available on this device yet.', true);
       return;
     }
-    const res = await signInWithAppleToken(cred.identityToken, cred.nonce);
+    const res = await signInWithAppleToken(cred.identityToken, cred.nonce,
+      { givenName: cred.givenName, familyName: cred.familyName });
     if (!res.ok){ setStatus(res.error, true); return; }
     await afterSignIn();
   });
@@ -246,8 +247,12 @@ async function requestAppleCredential(){
   if (!plugin?.authorize) return null;
   try {
     const res = await plugin.authorize({ scopes: 'email name' });
-    const token = res?.response?.identityToken;
-    return token ? { identityToken: token, nonce: res?.response?.nonce } : null;
+    const r = res?.response || {};
+    // givenName/familyName are present only on the first consent — forward them
+    // so the account can keep the name; they're undefined on every later sign-in.
+    return r.identityToken
+      ? { identityToken: r.identityToken, nonce: r.nonce, givenName: r.givenName, familyName: r.familyName, email: r.email }
+      : null;
   } catch {
     return null;
   }

@@ -77,7 +77,11 @@ export async function onRequestPost(context) {
       for (const u of list) {
         if (!u || !u.id) continue;
         const md = u.user_metadata || {};
-        map.set(u.id, { email: u.email || null, name: md.name || md.full_name || null });
+        const firstName = md.given_name || md.givenName || null;
+        const lastName  = md.family_name || md.familyName || null;
+        const name = md.name || md.full_name ||
+          ([firstName, lastName].filter(Boolean).join(' ') || null);
+        map.set(u.id, { email: u.email || null, name, firstName, lastName });
       }
     } catch (e) {
       console.error('admin-stats auth users error:', e.message);
