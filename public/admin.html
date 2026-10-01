@@ -51,6 +51,8 @@
     .chip { display:inline-block; background:#1a1515; border:1px solid var(--line); border-radius:999px;
             padding:3px 9px; margin:0 5px 5px 0; font-size:12px; color:var(--cream); }
     .chip b { font-weight:700; }
+    .badge-acct { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.05em;
+                  color:#8fcaff; border:1px solid #2b4a66; background:#122232; border-radius:4px; padding:1px 5px; vertical-align:middle; }
     .chart-cap { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:4px 0 2px; }
     .dd-routes { margin:6px 0 10px; }
     .routes-btn { font:inherit; font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--line);
@@ -204,9 +206,10 @@
       updateHeadArrows();
       $('rows').innerHTML = rows.map(r => {
         const devNote = r.deviceCount > 1 ? ` <span class="anon">· ${r.deviceCount} devices</span>` : '';
+        const acct = r.signedIn ? ` <span class="badge-acct">account</span>` : '';
         const who = r.isAnonymous
           ? `<span class="anon">Anonymous · ${esc(shortId(r.deviceId || ''))}</span>${devNote}`
-          : `${r.name ? esc(r.name) : '—'}${devNote}<br><span class="anon">${esc(r.email || '')}</span>`;
+          : `${r.name ? esc(r.name) : '—'}${acct}${devNote}<br><span class="anon">${esc(r.email || '')}</span>`;
         const devices = esc(JSON.stringify(r.deviceIds || [r.deviceId]));
         return `<tr class="user-row" data-devices='${devices}'>
           <td>${who}</td><td>${r.driveCount}</td><td>${r.avgScore ?? '—'}</td>

@@ -3,6 +3,8 @@ import {
   signOut, isAppleConfigured, signInWithAppleToken,
 } from '../services/auth.js';
 import { restoreDrivesForUser } from '../services/drive.js';
+import { registerUser } from '../services/supabase.js';
+import { getDeviceId } from '../services/storage.js';
 import { renderDriveList } from './home.js';
 
 /**
@@ -117,6 +119,13 @@ export function refreshAccountButton(){
 async function afterSignIn(){
   renderSheet();
   refreshAccountButton();
+  // Copy the account's identity into the users label table so the operator
+  // dashboard shows this driver by name/email instead of "anonymous". Best-
+  // effort and fire-and-forget — it must never block the drive sync below.
+  const u = currentUser();
+  if (u && (u.email || u.name)) {
+    registerUser({ name: u.name || '', email: u.email || '', device_id: getDeviceId() });
+  }
   setStatus('Syncing your drives…');
   const result = await restoreDrivesForUser();
   if (!result){

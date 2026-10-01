@@ -60,6 +60,31 @@ export async function onRequestPost(context) {
     return res.json();
   };
 
+  // Auth accounts (Apple / email sign-in) from GoTrue's admin API, keyed by
+  // user_id. This is what de-anonymises a signed-in driver whose identity was
+  // never copied into the `users` label table — their name/email live only here.
+  // Best-effort: if the admin endpoint is unavailable the dashboard still renders
+  // (those drivers just read anonymous, as before), so a failure never 500s.
+  const fetchAuthUsers = async () => {
+    const map = new Map();
+    try {
+      const res = await fetch(`${SB_URL}/auth/v1/admin/users?per_page=1000`, {
+        headers: { apikey: SB_SERVICE_KEY, Authorization: `Bearer ${SB_SERVICE_KEY}` },
+      });
+      if (!res.ok) { console.error('admin-stats auth users:', res.status); return map; }
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (Array.isArray(data?.users) ? data.users : []);
+      for (const u of list) {
+        if (!u || !u.id) continue;
+        const md = u.user_metadata || {};
+        map.set(u.id, { email: u.email || null, name: md.name || md.full_name || null });
+      }
+    } catch (e) {
+      console.error('admin-stats auth users error:', e.message);
+    }
+    return map;
+  };
+
   // Purge junk drives: ~zero distance AND zero flags — empty rows left by crash
   // recovery or pre-gate saves (GPS jitter while parked logs a few meters, which
   // shows as "0.0 mi"). "Zero miles" means what the dashboard shows: under 80 m,
@@ -149,16 +174,17 @@ export async function onRequestPost(context) {
 
     // Sweep out empty drives before reading, so the dashboard never counts them.
     const purgedEmpty = await purgeEmptyDrives();
-    const [users, drives] = await Promise.all([
+    const [users, drives, authById] = await Promise.all([
       sbGet('users?select=device_id,name,email,updated_at&limit=10000'),
       sbGet('drives?select=device_id,user_id,start_time,duration_ms,distance_meters,score,event_count,simulated&limit=10000'),
+      fetchAuthUsers(),
     ]);
     const nowMs = Date.now();
     return json(200, {
       ok: true,
       purgedEmpty,
-      overview: computeOverview(users, drives, nowMs),
-      users: computeUserRows(users, drives),
+      overview: computeOverview(users, drives, nowMs, authById),
+      users: computeUserRows(users, drives, authById),
     });
   } catch (err) {
     console.error('admin-stats db error:', err.message);

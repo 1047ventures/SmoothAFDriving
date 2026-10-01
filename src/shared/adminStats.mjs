@@ -43,15 +43,25 @@ function identityKey(deviceId, userId, emailByDevice) {
   return 'dev:' + deviceId;
 }
 
-// Returns Map<identityKey, { key, devices:Set, drives:[], name, email, updatedAts:[] }>.
-function groupByIdentity(users, drives) {
+// A person can be labelled three ways, in priority order: the operator's own
+// `users` table (email/name), their auth account (Apple / email sign-in, keyed
+// by user_id), or not at all (anonymous). `authById` maps a user_id to the auth
+// account's { email, name } — the bridge that stops a signed-in driver like Zvi
+// from reading as anonymous just because nothing copied his Apple identity into
+// the users table.
+function authLabel(authById, userId) {
+  return (userId && authById && authById.get) ? authById.get(userId) : null;
+}
+
+// Returns Map<identityKey, { key, devices:Set, drives:[], name, email, updatedAts:[], signedIn }>.
+function groupByIdentity(users, drives, authById = new Map()) {
   const real = realDrives(drives);
   const emailByDevice = emailByDeviceMap(users);
   const usersByDevice = new Map((users || []).map(u => [u.device_id, u]));
   const groups = new Map();
   const ensure = (key) => {
     let g = groups.get(key);
-    if (!g) { g = { key, devices: new Set(), drives: [], name: null, email: null, updatedAts: [] }; groups.set(key, g); }
+    if (!g) { g = { key, devices: new Set(), drives: [], name: null, email: null, updatedAts: [], signedIn: false }; groups.set(key, g); }
     return g;
   };
 
@@ -69,14 +79,22 @@ function groupByIdentity(users, drives) {
     g.drives.push(d);
     const u = usersByDevice.get(d.device_id);
     if (u) { if (u.name && !g.name) g.name = u.name; if (u.email && !g.email) g.email = String(u.email).toLowerCase(); }
+    // Signed-in driver: fill name/email from their auth account when the users
+    // table didn't already label them.
+    const a = authLabel(authById, d.user_id);
+    if (a) {
+      g.signedIn = true;
+      if (a.name && !g.name) g.name = a.name;
+      if (a.email && !g.email) g.email = String(a.email).toLowerCase();
+    }
   }
   return groups;
 }
 
-export function computeOverview(users, drives, nowMs) {
+export function computeOverview(users, drives, nowMs, authById = new Map()) {
   const real = realDrives(drives);
   const devices = new Set(real.map(d => d.device_id));
-  const groups = groupByIdentity(users, drives);
+  const groups = groupByIdentity(users, drives, authById);
 
   // Installs are counted per DEVICE (an install is a device), not per person.
   const firstSeenDev = new Map();
@@ -224,8 +242,8 @@ export function downsamplePath(samples, max = 48) {
   return out;
 }
 
-export function computeUserRows(users, drives) {
-  const groups = groupByIdentity(users, drives);
+export function computeUserRows(users, drives, authById = new Map()) {
+  const groups = groupByIdentity(users, drives, authById);
   const rows = [];
 
   for (const g of groups.values()) {
@@ -248,6 +266,7 @@ export function computeUserRows(users, drives) {
       name: g.name || null,
       email: g.email || null,
       isAnonymous: !g.name && !g.email,
+      signedIn: !!g.signedIn,   // has a real auth account (Apple / email)
       driveCount: ds.length,
       firstSeen,
       lastSeen,

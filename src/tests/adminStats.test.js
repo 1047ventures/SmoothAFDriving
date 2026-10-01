@@ -158,6 +158,31 @@ describe('identity merge (one person, many device ids)', () => {
     expect(rows[0].avgScore).toBe(80);
   });
 
+  it('labels a signed-in driver from their auth account (not anonymous)', () => {
+    // Zvi: drives carry a user_id (claimed on Apple sign-in) but there's no
+    // users-table row, so without auth enrichment he reads as anonymous.
+    const drives = [
+      { device_id: 'zvi-ios', user_id: 'u-zvi', start_time: 10, score: 80, distance_meters: 1609.34, event_count: 1, simulated: false },
+      { device_id: 'zvi-ios', user_id: 'u-zvi', start_time: 20, score: 90, distance_meters: 1609.34, event_count: 1, simulated: false },
+    ];
+    const authById = new Map([['u-zvi', { email: 'ZVI@x.com', name: 'Zvi' }]]);
+
+    const anon = computeUserRows([], drives)[0];
+    expect(anon.isAnonymous).toBe(true);          // no label without auth data
+
+    const rows = computeUserRows([], drives, authById);
+    expect(rows.length).toBe(1);
+    expect(rows[0].isAnonymous).toBe(false);
+    expect(rows[0].name).toBe('Zvi');
+    expect(rows[0].email).toBe('zvi@x.com');       // case-normalised
+    expect(rows[0].signedIn).toBe(true);
+    expect(rows[0].driveCount).toBe(2);
+
+    // And he counts as a known user in the overview.
+    const ov = computeOverview([], drives, 30, authById);
+    expect(ov.totalUsers).toBe(1);
+  });
+
   it('counts a merged person once in the overview', () => {
     const users = [{ device_id: 'web', name: 'Skelly', email: 's@x.com', updated_at: '2023-01-01T00:00:00Z' }];
     const drives = [
