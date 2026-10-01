@@ -274,9 +274,15 @@
           .filter(([, v]) => v != null).map(([l, v]) => `<span class="chip">${l}: <b>${v}</b></span>`).join('')
         : '<span class="anon">No OBD (no dongle connected).</span>';
 
+      const hasRoute = Array.isArray(drive.path) && drive.path.length >= 2;
+      const routeRow = hasRoute
+        ? `<div class="dd-routes"><button type="button" class="drive-route-btn routes-btn">🗺 Show route</button><div class="routes-map drive-route-map"></div></div>`
+        : '<span class="anon">No GPS track stored for this drive.</span>';
+
       return `<div class="dd-section"><div class="dd-h">Scoring</div>${scoreRow}</div>
         <div class="dd-section"><div class="dd-h">Flags</div>${flagRow}</div>
-        <div class="dd-section"><div class="dd-h">Engine</div>${obdRow}</div>`;
+        <div class="dd-section"><div class="dd-h">Engine</div>${obdRow}</div>
+        <div class="dd-section"><div class="dd-h">Route</div>${routeRow}</div>`;
     }
 
     async function toggleDrill(tr) {
@@ -303,38 +309,65 @@
     }
 
     let _mapSeq = 0;
-    async function toggleRoutes(btn, container, deviceIds) {
-      if (container.dataset.loaded) { // toggle visibility
-        const show = container.style.display === 'none';
-        container.style.display = show ? 'block' : 'none';
-        btn.textContent = show ? '🗺 Hide routes' : '🗺 Show routes';
-        if (show && container._map) container._map.invalidateSize();
-        return;
+    // Draw a set of route polylines into a container. One map, reused by the
+    // per-user overlay (many faint lines that stack where roads repeat) and the
+    // per-drive view (a single solid line). `paths` is an array of [lat,lon][].
+    function drawRouteMap(container, paths, { opacity = 0.3, weight = 4, caption = '' } = {}) {
+      if (typeof L === 'undefined') {
+        container.innerHTML = '<div class="anon" style="padding:10px">Map library didn\'t load — check your connection and reopen.</div>';
+        return false;
       }
-      btn.textContent = 'Loading routes…';
-      const { tracks } = await call('tracks', { device_ids: deviceIds });
-      container.dataset.loaded = '1';
-      container.style.display = 'block';
-      if (!tracks || !tracks.length) { container.innerHTML = '<div class="anon" style="padding:10px">No GPS tracks stored for these drives.</div>'; btn.textContent = '🗺 Routes'; return; }
-      if (typeof L === 'undefined') { container.innerHTML = '<div class="anon" style="padding:10px">Map library didn\'t load — check your connection and reopen.</div>'; btn.textContent = '🗺 Routes'; return; }
+      const valid = (paths || []).filter(p => Array.isArray(p) && p.length >= 2);
+      if (!valid.length) {
+        container.innerHTML = '<div class="anon" style="padding:10px">No GPS track stored for this drive.</div>';
+        return false;
+      }
       const id = 'map' + (++_mapSeq);
-      container.innerHTML = `<div id="${id}" class="rmap"></div><div class="anon" style="margin-top:6px">${tracks.length} drive${tracks.length === 1 ? '' : 's'} · darker lines = roads driven more often</div>`;
+      container.innerHTML = `<div id="${id}" class="rmap"></div>` +
+        (caption ? `<div class="anon" style="margin-top:6px">${caption}</div>` : '');
       const map = L.map(id, { zoomControl: true });
       container._map = map;
       // Keyless OpenStreetMap tiles — the admin page is standalone and has no
-      // Mapbox token (that's bundled into the app only). Light basemap, but the
-      // orange route lines read fine on it and it never shows "API KEY REQUIRED".
+      // Mapbox token (that's bundled into the app only). The basemap is greyed
+      // via CSS so the orange route lines read clearly on it.
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
       const all = [];
-      for (const trk of tracks) {
-        if (!trk.path || trk.path.length < 2) continue;
-        // Low opacity so overlapping (frequently-driven) roads stack into brighter lines.
-        L.polyline(trk.path, { color: '#E0431F', weight: 4, opacity: 0.3 }).addTo(map);
-        all.push(...trk.path);
+      for (const p of valid) {
+        L.polyline(p, { color: '#E0431F', weight, opacity }).addTo(map);
+        all.push(...p);
       }
       if (all.length) map.fitBounds(L.latLngBounds(all).pad(0.1));
       setTimeout(() => map.invalidateSize(), 60);
-      btn.textContent = '🗺 Hide routes';
+      return true;
+    }
+
+    // Generic show/hide toggle for a lazily-rendered map. `render()` runs once on
+    // first reveal and returns true if it mounted a map.
+    async function toggleMap(btn, container, labels, render) {
+      if (container.dataset.loaded) {
+        const show = container.style.display === 'none';
+        container.style.display = show ? 'block' : 'none';
+        btn.textContent = show ? labels.hide : labels.show;
+        if (show && container._map) container._map.invalidateSize();
+        return;
+      }
+      btn.textContent = labels.loading;
+      container.style.display = 'block';
+      container.dataset.loaded = '1';
+      const ok = await render();
+      btn.textContent = ok ? labels.hide : labels.show;
+    }
+
+    function toggleRoutes(btn, container, deviceIds) {
+      return toggleMap(btn, container, { show: '🗺 Show routes', hide: '🗺 Hide routes', loading: 'Loading routes…' },
+        async () => {
+          const { tracks } = await call('tracks', { device_ids: deviceIds });
+          const paths = (tracks || []).map(t => t.path);
+          return drawRouteMap(container, paths, {
+            opacity: 0.3, weight: 4,
+            caption: tracks && tracks.length ? `${tracks.length} drive${tracks.length === 1 ? '' : 's'} · darker lines = roads driven more often` : '',
+          });
+        });
     }
 
     async function toggleDriveDetail(line) {
@@ -345,6 +378,14 @@
       tr.className = 'drive-detail';
       tr.innerHTML = `<td colspan="${DD_COLS}">${driveDetail(data.drive)}</td>`;
       line.after(tr);
+      // This one drive's route, mapped on demand (path already came back above).
+      const rbtn = tr.querySelector('.drive-route-btn');
+      if (rbtn) {
+        const rmap = tr.querySelector('.drive-route-map');
+        rbtn.addEventListener('click', () =>
+          toggleMap(rbtn, rmap, { show: '🗺 Show route', hide: '🗺 Hide route', loading: 'Loading route…' },
+            async () => drawRouteMap(rmap, [data.drive.path], { opacity: 0.9, weight: 4 })));
+      }
     }
 
     async function load() {

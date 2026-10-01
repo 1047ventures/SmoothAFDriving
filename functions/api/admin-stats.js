@@ -109,14 +109,19 @@ export async function onRequestPost(context) {
       const enc = encodeURIComponent(body.device_id);
       const st = encodeURIComponent(body.start_time);
       const rows = await sbGet(
-        `drives?device_id=eq.${enc}&start_time=eq.${st}&select=start_time,score,efficiency,effectiveness,dims,obd,distance_meters,duration_ms,dest_label,events&limit=1`
+        `drives?device_id=eq.${enc}&start_time=eq.${st}&select=start_time,score,efficiency,effectiveness,dims,obd,distance_meters,duration_ms,dest_label,events,samples&limit=1`
       );
       const d = rows[0];
       if (!d) return json(404, { ok: false, error: 'not found' });
       // Flags derived from the stored events, so this works on historical drives
       // that predate the detail columns. Events pass through for the list/map.
-      const { events, ...meta } = d;
-      return json(200, { ok: true, drive: { ...meta, flags: summarizeFlags(events), events: events || [] } });
+      // The GPS track is downsampled to a route path so this one drive can be
+      // mapped on its own (raw samples are dropped to keep the payload small).
+      const { events, samples, ...meta } = d;
+      return json(200, {
+        ok: true,
+        drive: { ...meta, flags: summarizeFlags(events), events: events || [], path: downsamplePath(samples) },
+      });
     }
 
     if (view === 'tracks') {
