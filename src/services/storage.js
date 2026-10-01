@@ -112,6 +112,10 @@ export function deleteDrive(idx, callbacks = {}){
   const all = loadDrives();
   all.splice(idx, 1);
   saveDrives(all);
+  // Deleting a drive changes the drive set the lifetime score is averaged from,
+  // so recompute it — otherwise the stored score goes stale and the home number
+  // doesn't move when you remove a bad drive.
+  recomputeLifetimeScore();
   callbacks.onUpdate?.();
 }
 

@@ -111,6 +111,16 @@ describe('deleteDrive', () => {
     expect(loadDrives()).toHaveLength(1);
     expect(onUpdate).toHaveBeenCalledOnce();
   });
+
+  it('recomputes the lifetime score after deleting a drive', () => {
+    saveDrive({ startTime: 1000, score: 60 });
+    saveDrive({ startTime: 2000, score: 60 });
+    saveDrive({ startTime: 3000, score: 90 }); // newest, idx 0
+    saveLifetimeScore(70); // pretend a stale stored value
+    deleteDrive(1, {});    // remove one of the 60s
+    // remaining scores are 90 and 60 → avg 75, not the stale 70
+    expect(loadLifetimeScore()).toBe(75);
+  });
 });
 
 describe('OSM speed-limit cache', () => {

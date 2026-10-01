@@ -245,7 +245,7 @@ ${restoreBoxHtml()}
     btn.addEventListener('click', e => {
       e.stopPropagation();
       if (btn.dataset.confirm === '1'){
-        deleteDrive(Number(btn.dataset.idx), { onUpdate: () => renderDriveList() });
+        deleteDrive(Number(btn.dataset.idx), { onUpdate: () => { renderDriveList(); renderHomeStats(); } });
       } else {
         btn.dataset.confirm = '1';
         btn.textContent = 'Delete?';
