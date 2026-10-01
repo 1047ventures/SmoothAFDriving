@@ -228,14 +228,17 @@
       if (typeof L === 'undefined') { container.innerHTML = '<div class="anon" style="padding:10px">Map library didn\'t load — check your connection and reopen.</div>'; btn.textContent = '🗺 Routes'; return; }
       const id = 'map' + (++_mapSeq);
       container.innerHTML = `<div id="${id}" class="rmap"></div><div class="anon" style="margin-top:6px">${tracks.length} drive${tracks.length === 1 ? '' : 's'} · darker lines = roads driven more often</div>`;
-      const map = L.map(id, { attributionControl: false, zoomControl: true });
+      const map = L.map(id, { zoomControl: true });
       container._map = map;
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      // Keyless OpenStreetMap tiles — the admin page is standalone and has no
+      // Mapbox token (that's bundled into the app only). Light basemap, but the
+      // orange route lines read fine on it and it never shows "API KEY REQUIRED".
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
       const all = [];
       for (const trk of tracks) {
         if (!trk.path || trk.path.length < 2) continue;
         // Low opacity so overlapping (frequently-driven) roads stack into brighter lines.
-        L.polyline(trk.path, { color: '#E85D3A', weight: 3, opacity: 0.22 }).addTo(map);
+        L.polyline(trk.path, { color: '#E0431F', weight: 4, opacity: 0.3 }).addTo(map);
         all.push(...trk.path);
       }
       if (all.length) map.fitBounds(L.latLngBounds(all).pad(0.1));
