@@ -28,8 +28,21 @@ set_string(){
 
 set_string NSLocationWhenInUseUsageDescription \
   "Smooth AF uses your location to score your drive and track your route."
+# Always-location: required for background drive recording. Without it the GPS
+# watch dies the moment the app is backgrounded (screen off / in Maps), and the
+# drive comes back as a sparse straight line with an unreliable score.
+set_string NSLocationAlwaysAndWhenInUseUsageDescription \
+  "Smooth AF keeps tracking your drive in the background so your route and score stay accurate even with the screen off or while you're navigating in Maps."
 set_string NSMotionUsageDescription \
   "Smooth AF uses motion sensors to measure how smoothly you accelerate, brake, and corner."
+
+# Background mode: the "location" capability lets iOS keep delivering GPS fixes
+# while the app is backgrounded during a drive. UIBackgroundModes is an ARRAY,
+# so rebuild it cleanly (delete → add array → add the one entry).
+"$PB" -c "Delete :UIBackgroundModes" "$PLIST" >/dev/null 2>&1 || true
+"$PB" -c "Add :UIBackgroundModes array" "$PLIST"
+"$PB" -c "Add :UIBackgroundModes:0 string location" "$PLIST"
+echo "[ios-privacy] set UIBackgroundModes=[location]"
 
 # Bluetooth: the OBD-II dongle. iOS kills the app on first CoreBluetooth call
 # without this string, exactly like location and motion above.

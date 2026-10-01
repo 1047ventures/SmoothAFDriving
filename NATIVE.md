@@ -69,6 +69,32 @@ Then, in **Xcode**:
 npm run cap:ios          # rebuild web, sync into iOS, open Xcode → Archive again
 ```
 
+## Background GPS — drive recording survives backgrounding (Q3)
+
+The web `navigator.geolocation` watch dies the moment iOS suspends a backgrounded
+web view, so a drive recorded with the screen off or while in Maps came back as a
+handful of points and a straight-line route (and a scoreless/unreliable score).
+Fixed with **`@capacitor-community/background-geolocation`**:
+
+- `src/services/sensors/location.js` routes the watch through the plugin on native
+  (full-rate GPS in the background) and falls back to `watchPosition` on web. The
+  sample shape is unchanged, so the scoring pipeline didn't move.
+- `scripts/ios-privacy.sh` now also writes **`NSLocationAlwaysAndWhenInUseUsageDescription`**
+  and **`UIBackgroundModes = [location]`** — both re-applied by CI on every build.
+- `cap sync` wires the native plugin from `node_modules` (it's in `package.json`).
+
+**What you must do to verify (it only works on a real device, not the web preview):**
+1. Rebuild to TestFlight (push to `main`, or `npm run cap:ios` on the Mac).
+2. On the phone, when prompted, grant location **"Always"** (not just "While Using").
+   If you tapped "While Using" first, switch it in Settings → Smooth AF → Location → Always.
+3. Start a drive, **lock the screen / open Maps**, drive a few minutes, come back and
+   stop. The route should now follow the roads with dense points, and `/admin`'s
+   per-drive map should show a full track (no straight-line chord).
+
+Two honest limits (from the research): App Store review scrutinises Always-location
+(the usage string explains why, which satisfies it), and background GPS costs more
+battery — acceptable for an app whose whole job is recording a drive.
+
 ## Notes / next phases
 
 - **Icon quality:** replace `assets/icon.png` with a 1024×1024 version and re-run

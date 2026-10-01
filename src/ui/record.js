@@ -13,6 +13,7 @@ import { analyzeDrive, computePitStopMs } from '../services/scoring.js';
 import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
+import { startLocationWatch, stopLocationWatch } from '../services/sensors/location.js';
 import { showCarPromptIfNeeded } from './modals.js';
 import { runPostDrivePrompts } from './postdrive.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
@@ -407,7 +408,11 @@ export function startRecording(){
     stopRecording();
     return;
   }
-  state.gpsWatchId = navigator.geolocation.watchPosition(
+  // Background-aware location: on native this keeps full-rate GPS alive even
+  // when the app is backgrounded (screen off, in Maps), so a drive no longer
+  // comes back as a sparse straight line. Web falls back to watchPosition.
+  state.gpsWatchActive = true;
+  startLocationWatch(
     pos => onGpsUpdate(pos, {
       flashEvent,
       setCalibUI,
@@ -421,7 +426,6 @@ export function startRecording(){
         stopRecording();
       }
     },
-    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
   );
 
   // Initialise peak-hold window to now
@@ -439,9 +443,9 @@ export function startRecording(){
 export function stopRecording(){
   state.recording = false;   // set immediately so persistActiveDrive can't re-save
   clearActiveDrive();
-  if (state.gpsWatchId != null){
-    navigator.geolocation.clearWatch(state.gpsWatchId);
-    state.gpsWatchId = null;
+  if (state.gpsWatchActive){
+    stopLocationWatch();
+    state.gpsWatchActive = false;
   }
   if (state.motionHandler){
     window.removeEventListener('devicemotion', state.motionHandler);
