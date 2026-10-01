@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**325 tasks shipped** as of 2026-10-01.
+**335 tasks shipped** as of 2026-10-01.
 
 
 ## 2026-04
@@ -345,3 +345,13 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T323** · Admin: map a user's routes — overlay all their drive tracks  _( 2026-10-01 )_
 - **T324** · Admin routes map: keyless OSM tiles (CARTO now demands a key)  _( 2026-10-01 )_
 - **T325** · admin: grey out routes basemap, show drive start–stop time, auto-purge empty drives  _( 2026-10-01 )_
+- **T326** · Fix ledger: regen from full history (325 tasks), undo shallow-clone undercount  _( 2026-10-01 )_
+- **T327** · admin: purge 0.0-mi junk drives, not just exactly-0-meter ones  _( 2026-10-01 )_
+- **T328** · admin: click column headers to sort the user table  _( 2026-10-01 )_
+- **T329** · admin: show a dim sort hint on every column header  _( 2026-10-01 )_
+- **T330** · admin: miles/day chart, columned drill-down, fixed bar tooltips  _( 2026-10-01 )_
+- **T331** · admin: add per-drive 'Show route' map  _( 2026-10-01 )_
+- **T332** · admin: de-anonymize signed-in drivers (Apple/email accounts)  _( 2026-10-01 )_
+- **T333** · auth: capture Apple first/last name and store it on the account  _( 2026-10-01 )_
+- **T334** · install: tagline + link-preview OG tags  _( 2026-10-01 )_
+- **T335** · feat: 'what's your name, Driver?' post-drive name capture  _( 2026-10-01 )_
