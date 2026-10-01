@@ -41,7 +41,26 @@ def commits():
         yield d, s
 
 
+def is_shallow():
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--is-shallow-repository"], text=True).strip()
+        return out == "true"
+    except Exception:
+        return False
+
+
 def main():
+    # A shallow clone (common in cloud/CI containers) only has the most recent
+    # slice of history, so T-numbers would be wildly undercounted and overwrite
+    # the real ledger. Refuse rather than silently corrupt it — run
+    # `git fetch --unshallow` first. (This already bit us once: a shallow clone
+    # regenerated 325 tasks down to 61.)
+    if is_shallow():
+        raise SystemExit(
+            "Refusing to build ledger: this is a SHALLOW clone and would "
+            "undercount every task number.\nRun `git fetch --unshallow` first, "
+            "then re-run this script.")
     tasks = list(commits())
     out = [
         "# Task Ledger — Smooth AF Driving",
