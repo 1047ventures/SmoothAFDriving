@@ -180,6 +180,31 @@ export function processSample(s, prev){
   return s;
 }
 
+/**
+ * Speed for a GPS fix, in m/s.
+ *
+ * iOS Core Location frequently withholds `coords.speed` (returns null or -1)
+ * even while moving. The old code reused the PREVIOUS sample's speed in that
+ * case, so the number froze for seconds and then snapped — the stutter/stick
+ * that also corrupted the score (lateral-G and event gating are scaled by
+ * speed). Instead, when the reading is missing, derive speed from how far the
+ * position actually moved since the last fix. A missing reading now yields a
+ * live value that tracks real movement, not a frozen one.
+ */
+export function deriveSpeed(c, prev, now = Date.now()){
+  if (c.speed != null && !Number.isNaN(c.speed) && c.speed >= 0) return Math.max(0, c.speed);
+  if (!prev) return 0;
+  const dtSec = Math.max(0.1, (now - prev.t) / 1000);
+  const dLat = (c.latitude - prev.lat) * 111111;
+  const dLon = (c.longitude - prev.lon) * 111111 * Math.cos(prev.lat * Math.PI / 180);
+  const movedM = Math.hypot(dLat, dLon);
+  // GPS scatter while parked is a few metres; ignore sub-~4.5mph movement so a
+  // stopped car reads 0 instead of twitching, and cap absurd jumps (a GPS
+  // glitch) at ~157 mph so one bad fix can't spike the score.
+  if (movedM < 2) return 0;
+  return clamp(movedM / dtSec, 0, 70);
+}
+
 export function detectEvent(s, nowT){
   const lastEvent = state.events[state.events.length - 1];
   if (lastEvent && (nowT - lastEvent.t) < EVENT_COOLDOWN_MS) return null;
@@ -207,7 +232,7 @@ export function onGpsUpdate(pos, callbacks = {}){
     if (currentSpeed > 3 && deltaMeters > 5 && Math.abs(dLat) + Math.abs(dLon) > 1e-7)
       heading = (Math.atan2(dLon, dLat) * 180/Math.PI + 360) % 360;
   }
-  const speed = c.speed != null && !Number.isNaN(c.speed) ? Math.max(0, c.speed) : (prev ? prev.speed : 0);
+  const speed = deriveSpeed(c, prev);
   const s = processSample({ t: Date.now(), lat: c.latitude, lon: c.longitude, speed, heading }, prev);
   state.samples.push(s);
   if (wasFirstSample && onFirstSample) onFirstSample();

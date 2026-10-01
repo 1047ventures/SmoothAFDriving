@@ -9,7 +9,33 @@ vi.stubGlobal('localStorage', {
   clear:      () => Object.keys(store).forEach(k => delete store[k]),
 });
 
-const { detectEventWithThresh } = await import('../services/sensors/gps.js');
+const { detectEventWithThresh, deriveSpeed } = await import('../services/sensors/gps.js');
+
+describe('deriveSpeed', () => {
+  const prev = { t: 1000, lat: 39.0, lon: -104.0 };
+
+  it('uses the GPS-reported speed when present', () => {
+    expect(deriveSpeed({ speed: 12.3, latitude: 39.0, longitude: -104.0 }, prev, 2000)).toBeCloseTo(12.3, 2);
+  });
+
+  it('derives speed from distance moved when the reading is missing', () => {
+    // ~111.1 m north of prev in 1s → ~111 m/s raw, but capped at 70.
+    const far = { speed: null, latitude: 39.001, longitude: -104.0 };
+    expect(deriveSpeed(far, prev, 2000)).toBe(70); // cap swallows the glitch
+    // ~15.6 m north in 1s → ~15.6 m/s (~35 mph), a realistic reading, not capped.
+    const real = { speed: -1, latitude: 39.00014, longitude: -104.0 };
+    expect(deriveSpeed(real, prev, 2000)).toBeCloseTo(15.55, 1);
+  });
+
+  it('reads 0 (not a twitch) when parked and GPS only jitters a metre', () => {
+    const jitter = { speed: null, latitude: 39.00001, longitude: -104.00001 };
+    expect(deriveSpeed(jitter, prev, 2000)).toBe(0);
+  });
+
+  it('returns 0 with no previous fix and no reading', () => {
+    expect(deriveSpeed({ speed: null, latitude: 39.0, longitude: -104.0 }, null)).toBe(0);
+  });
+});
 const { createMotionHandler } = await import('../services/sensors/motion.js');
 const { state, calib, resetCalib, resetState } = await import('../state.js');
 const { DEFAULTS } = await import('../constants.js');
