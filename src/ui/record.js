@@ -14,7 +14,7 @@ import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { showCarPromptIfNeeded } from './modals.js';
-import { showFirstDriveCTAIfNeeded } from './postdrive.js';
+import { runPostDrivePrompts } from './postdrive.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
 import { getPendingDestination } from './destination.js';
 
@@ -462,9 +462,10 @@ export function stopRecording(){
     },
   });
   showCarPromptIfNeeded();
-  // Post-drive share & save (Q4) — replaces the old name+email prompt. Delayed
-  // so the recap paints first and the card lands on top of a real score.
-  setTimeout(() => showFirstDriveCTAIfNeeded(), 900);
+  // Post-drive prompts (Q4): share & save for signed-out first drives, else a
+  // light "what's your name?" capture. Delayed so the recap paints first and the
+  // card lands on top of a real score.
+  setTimeout(() => runPostDrivePrompts(), 900);
 }
 
 export function startSimulatedDrive(){

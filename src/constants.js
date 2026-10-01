@@ -18,6 +18,8 @@ export const DEVICE_KEY         = 'smoothaf.device_id';
 export const SYNCED_KEY         = 'smoothaf.synced_ids';
 export const LIFETIME_SCORE_KEY = 'smoothaf.lifetime_score';
 export const DRIVER_NAME_KEY    = 'smoothaf.driver_name';
+export const DRIVER_FIRST_KEY   = 'smoothaf.driver_first';
+export const DRIVER_LAST_KEY    = 'smoothaf.driver_last';
 export const USER_EMAIL_KEY     = 'smoothaf.user_email';
 export const ONBOARDED_KEY      = 'smoothaf.onboarded';
 export const PROFILE_SYNCED_KEY = 'smoothaf.profile_synced';
@@ -39,6 +41,10 @@ export const INTRO_SEEN_KEY     = 'smoothaf.intro_seen';
 // to keep it. Deferred to here (not the first open) so the ask lands after the
 // value is felt and some social capital is on the line.
 export const FIRST_CTA_KEY      = 'smoothaf.first_cta';
+// Shown once, after a drive, to a driver with no name yet: "what's your name,
+// Driver?" — a lightweight first/last capture for people who skipped full
+// sign-up, so the leaderboard and operator view show a name, not a number.
+export const NAME_PROMPTED_KEY  = 'smoothaf.name_prompted';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 // The anon key is public by design — it is the browser-facing key and carries no

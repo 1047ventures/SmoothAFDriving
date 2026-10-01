@@ -4,6 +4,8 @@ import {
   SYNCED_KEY,
   LIFETIME_SCORE_KEY,
   DRIVER_NAME_KEY,
+  DRIVER_FIRST_KEY,
+  DRIVER_LAST_KEY,
   MAX_STORED_DRIVES,
   ACTIVE_DRIVE_KEY,
   OSM_SPEED_CACHE,
@@ -28,6 +30,26 @@ export function loadDriverName(){
 }
 export function saveDriverName(n){
   try { localStorage.setItem(DRIVER_NAME_KEY, n.trim()); } catch {}
+}
+export function loadDriverFirst(){
+  try { return localStorage.getItem(DRIVER_FIRST_KEY) || ''; } catch { return ''; }
+}
+export function loadDriverLast(){
+  try { return localStorage.getItem(DRIVER_LAST_KEY) || ''; } catch { return ''; }
+}
+/**
+ * Save a first/last name together. Keeps the split (for the operator view and
+ * the account metadata) and the composed "First Last" in DRIVER_NAME_KEY, which
+ * is the single name the rest of the app already reads.
+ */
+export function saveDriverIdentity(first, last){
+  const f = (first || '').trim();
+  const l = (last || '').trim();
+  try {
+    localStorage.setItem(DRIVER_FIRST_KEY, f);
+    localStorage.setItem(DRIVER_LAST_KEY, l);
+    localStorage.setItem(DRIVER_NAME_KEY, [f, l].filter(Boolean).join(' '));
+  } catch {}
 }
 
 // ── Migration ─────────────────────────────────────────────────────────────────

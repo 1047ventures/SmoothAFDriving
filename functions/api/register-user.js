@@ -24,10 +24,20 @@ export async function onRequestPost(context) {
 
   const { name = '', device_id = '' } = body;
   const email = (body.email || '').trim().toLowerCase();
-  if (!email || !device_id) return new Response('Missing required fields', { status: 400 });
+  // A name alone is enough now: the "what's your name, Driver?" prompt captures
+  // a name from drivers who never did the full email sign-up, so the dashboard
+  // shows a name instead of an anonymous device id. Only device_id is required,
+  // plus at least one of name/email — an empty call is still rejected.
+  if (!device_id || (!name.trim() && !email)) {
+    return new Response('Missing required fields', { status: 400 });
+  }
 
   // 1. Upsert to the Supabase users table (service role key bypasses RLS).
+  // email is omitted when absent (name-only capture) rather than written blank,
+  // so a later real sign-up can fill it without colliding with an empty string.
   try {
+    const row = { device_id, name: name.trim(), updated_at: new Date().toISOString() };
+    if (email) row.email = email;
     const sbRes = await fetch(`${SB_URL}/rest/v1/users`, {
       method: 'POST',
       headers: {
@@ -36,12 +46,7 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json',
         Prefer: 'resolution=merge-duplicates',
       },
-      body: JSON.stringify({
-        device_id,
-        name: name.trim(),
-        email,
-        updated_at: new Date().toISOString(),
-      }),
+      body: JSON.stringify(row),
     });
     if (!sbRes.ok) {
       const detail = await sbRes.text().catch(() => '');
@@ -53,8 +58,9 @@ export async function onRequestPost(context) {
     return json(500, { ok: false, error: 'db_error' });
   }
 
-  // 2. Best-effort Resend contact (skipped cleanly when Resend isn't configured).
-  if (RESEND_KEY && RESEND_AUD) {
+  // 2. Best-effort Resend contact (skipped when Resend isn't configured, or when
+  // there's no email yet — a name-only capture has nothing to add to an audience).
+  if (RESEND_KEY && RESEND_AUD && email) {
     try {
       const parts = name.trim().split(' ');
       await fetch(`https://api.resend.com/audiences/${RESEND_AUD}/contacts`, {

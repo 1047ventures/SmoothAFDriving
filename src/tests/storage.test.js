@@ -12,7 +12,7 @@ vi.stubGlobal('localStorage', localStorageMock);
 
 // Import after stubbing globals
 const { loadLifetimeScore, saveLifetimeScore, loadDrives, saveDrive, saveDrives,
-        loadDriverName, saveDriverName, migrateLifetimeScore,
+        loadDriverName, saveDriverName, saveDriverIdentity, loadDriverFirst, loadDriverLast, migrateLifetimeScore,
         toggleFavoriteDrive, deleteDrive, getOsmLimit, setOsmLimit,
 } = await import('../services/storage.js');
 const { OSM_CACHE_TTL, OSM_SPEED_CACHE } = await import('../constants.js');
@@ -40,6 +40,20 @@ describe('loadDriverName', () => {
   it('trims whitespace on save', () => {
     saveDriverName('  Jo  ');
     expect(loadDriverName()).toBe('Jo');
+  });
+});
+
+describe('saveDriverIdentity', () => {
+  it('stores first/last and composes the full name', () => {
+    saveDriverIdentity('  Zvi ', ' Mowshowitz ');
+    expect(loadDriverFirst()).toBe('Zvi');
+    expect(loadDriverLast()).toBe('Mowshowitz');
+    expect(loadDriverName()).toBe('Zvi Mowshowitz');
+  });
+  it('handles a first name only (no trailing space)', () => {
+    saveDriverIdentity('Skelly', '');
+    expect(loadDriverName()).toBe('Skelly');
+    expect(loadDriverLast()).toBe('');
   });
 });
 

@@ -58,3 +58,14 @@
   -webkit-tap-highlight-color:transparent;
 }
 .pdcta-skip:active{color:var(--cream-dim)}
+
+/* Name-prompt fields — first/last, stacked. */
+.pdcta-fields{ width:100%; display:flex; flex-direction:column; gap:10px; margin:4px 0 16px; }
+.pdcta-input{
+  width:100%; min-height:50px; padding:0 16px; border-radius:14px;
+  background:rgba(242,232,213,.05); border:1px solid rgba(242,232,213,.18);
+  color:var(--cream); font:500 16px/1 var(--sans); text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.pdcta-input::placeholder{ color:var(--muted) }
+.pdcta-input:focus{ outline:none; border-color:var(--tang); background:rgba(242,232,213,.08) }
