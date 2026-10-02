@@ -105,26 +105,49 @@ export function analyzeDrive(drive){
   // ── 3. Momentum Management — full stops per mile ─────────────────────────
   const STOP_SPD = 0.5;
   const STOP_MS  = 1500;
+  // A "full stop" is a stop BETWEEN stretches of real driving — the thing you can
+  // avoid by timing a light. So a stationary period only counts when:
+  //   · the car had been at driving speed (> STOP_ENTRY) before it — which drops
+  //     the wait before you pull away at the start of a drive;
+  //   · it then actually resumed driving speed afterwards — which drops the
+  //     arrival (the final stop) and the creep/shuffle of parking;
+  //   · and creeping through a jam (never getting back to driving speed between
+  //     dips) is one stop, not a stop per dip.
+  // Before this, the start wait and the parking maneuver were counted, which
+  // cost every short town drive ~5 points for stops nobody could have avoided.
+  const STOP_RESUME = 2.2;     // m/s (~5 mph) — back at driving speed
   let fullStops = 0, stopStartIdx = -1;
+  let armed = false;           // at driving speed since the last counted stop?
+  let startedArmed = false;    // was `armed` when the current stationary period began
+  let cand = null;             // a stop awaiting proof the car drove off afterwards
   const stopMarkers = [];
-  function recordStop(startIdx, endIdx){
-    const durMs = smp[endIdx].t - smp[startIdx].t;
-    if (durMs < STOP_MS) return;
+  function confirm(c){
     fullStops++;
-    const mid = Math.round((startIdx + endIdx) / 2);
-    const approachIdx = Math.max(0, startIdx - 1);
+    const mid = Math.round((c.startIdx + c.endIdx) / 2);
+    const approachIdx = Math.max(0, c.startIdx - 1);
     stopMarkers.push({
       lat: smp[mid].lat, lon: smp[mid].lon,
-      t: smp[startIdx].t, durationMs: durMs,
+      t: smp[c.startIdx].t, durationMs: smp[c.endIdx].t - smp[c.startIdx].t,
       speedMph: Math.round(mpsToMph(smp[approachIdx].speed || 0))
     });
   }
   for (let i = 0; i < n; i++){
     const spd = smp[i].speed || 0;
-    if (spd < STOP_SPD && stopStartIdx < 0)  stopStartIdx = i;
-    if (spd >= STOP_SPD && stopStartIdx >= 0){ recordStop(stopStartIdx, i); stopStartIdx = -1; }
+    if (spd > STOP_RESUME){
+      armed = true;
+      if (cand){ confirm(cand); cand = null; }   // it drove off — the stop was real
+    }
+    if (spd < STOP_SPD && stopStartIdx < 0){ stopStartIdx = i; startedArmed = armed; }
+    if (spd >= STOP_SPD && stopStartIdx >= 0){
+      const durMs = smp[i].t - smp[stopStartIdx].t;
+      if (startedArmed && durMs >= STOP_MS){
+        cand = { startIdx: stopStartIdx, endIdx: i };
+        armed = false;                            // further dips in this jam aren't new stops
+      }
+      stopStartIdx = -1;
+    }
   }
-  if (stopStartIdx >= 0) recordStop(stopStartIdx, n - 1);
+  // Any stop still pending, or stationary at the very end, was an arrival — not counted.
   const stopsPerMile = distanceMi > 0 ? fullStops / distanceMi : 0;
   const momentum = Math.round(clamp(linMap(stopsPerMile, 0, MOMENTUM_STOP_MAX, 100, 0), 0, 100));
 

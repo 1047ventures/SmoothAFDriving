@@ -131,8 +131,14 @@ export const DIM_DISPLAY = [
 // Smoothness = 0.6·longitudinal-g + 0.4·jerk, each mapped through these anchors.
 // Re-tune here as more varied drives come in. Targets: average 80–85, clean 90+,
 // genuinely rough (stop-and-go / jerky) 45–65, ultra-smooth highway 95–100.
-export const SMOOTH_LA_LO    = 0.15; // p85 |longitudinal g| (m/s²) scoring 100
-export const SMOOTH_LA_HI    = 1.2;  // p85 |longitudinal g| scoring 0
+// Pedal-force anchors, re-fit against 21 real drives (Oct 2026). The old 0.15→1.2
+// scale hit ZERO at 1.2 m/s² — below the app's own tier-1 "harsh" line (~2.2) — so
+// any drive with ordinary speed changes (every town drive) was scored as if it were
+// violent: smooth town drives sat at 59-75 while the highway read 95+. 0.30→2.5
+// puts zero just past the harsh line; highway drives are unchanged (their p85 is
+// ~0.1) and a genuinely rough drive still scores low.
+export const SMOOTH_LA_LO    = 0.30; // p85 |longitudinal accel| (m/s²) scoring 100
+export const SMOOTH_LA_HI    = 2.5;  // p85 |longitudinal accel| scoring 0
 export const SMOOTH_JERK_LO  = 0.05; // mean |jerk| (m/s³) scoring 100
 export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
 export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0

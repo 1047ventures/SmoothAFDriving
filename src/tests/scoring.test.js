@@ -36,6 +36,66 @@ describe('analyzeDrive', () => {
   });
 });
 
+describe('full-stop counting — only stops BETWEEN stretches of real driving', () => {
+  // Build a drive from [speed, seconds] segments at 1 Hz.
+  const build = (segs) => {
+    const samples = []; let t = 0;
+    for (const [speed, secs] of segs) for (let i = 0; i < secs; i++, t++)
+      samples.push({ t: t * 1000, speed, lat: 39.7, lon: -104.9, la: 0, ra: 0, h: 0 });
+    return { samples, events: [], durationMs: t * 1000, distanceMeters: 4000, topSpeedMps: 15 };
+  };
+
+  it('counts a real stop: driving, stopped at a light, driving again', () => {
+    expect(analyzeDrive(build([[12, 20], [0, 15], [12, 20]])).fullStops).toBe(1);
+  });
+
+  it('ignores the wait before you pull away at the start of a drive', () => {
+    // Real drives began with 16-38 s stationary and were charged a stop for it.
+    expect(analyzeDrive(build([[0, 30], [12, 40]])).fullStops).toBe(0);
+  });
+
+  it('ignores arrival: stopping at the end is not a stop you could have rolled through', () => {
+    expect(analyzeDrive(build([[12, 40], [0, 30]])).fullStops).toBe(0);
+  });
+
+  it('ignores the parking shuffle (stop, creep, stop) after the last real driving', () => {
+    // The 98%/99% "stops" in the real drives: creeping into a spot, never back at speed.
+    expect(analyzeDrive(build([[12, 40], [0, 7], [1, 4], [0, 5]])).fullStops).toBe(0);
+  });
+
+  it('counts a stop-and-go crawl as one stop, not one per dip', () => {
+    // Speed never gets back above driving speed (2.2 m/s) between the dips.
+    const r = analyzeDrive(build([[12, 20], [0, 5], [1, 3], [0, 5], [1, 3], [0, 5], [12, 20]]));
+    expect(r.fullStops).toBe(1);
+  });
+
+  it('counts two lights as two stops when you drive off between them', () => {
+    expect(analyzeDrive(build([[12, 20], [0, 10], [12, 20], [0, 10], [12, 20]])).fullStops).toBe(2);
+  });
+});
+
+describe('smoothness calibration — ordinary town driving is not "violent"', () => {
+  // A gentle town drive: lots of speed changes at ~0.9 m/s², low jerk. With the old
+  // 0.15→1.2 scale this scored smoothness ~30 on the pedal half; it must read as smooth.
+  const town = () => {
+    const samples = Array.from({ length: 300 }, (_, i) => {
+      const phase = Math.floor(i / 15) % 2 ? 1 : -1;            // gentle accel/decel every 15 s
+      return { t: i * 1000, speed: 8 + 3 * Math.sin(i / 10), lat: 39.7, lon: -104.9, la: 0.9 * phase * 0.9, ra: 0, h: 0 };
+    });
+    return { samples, events: [], durationMs: 300000, distanceMeters: 4800, topSpeedMps: 12 };
+  };
+
+  it('scores gentle ~0.8 m/s² town driving well above the old harsh-scale result', () => {
+    expect(analyzeDrive(town()).dims.smoothness).toBeGreaterThanOrEqual(70);
+  });
+
+  it('still punishes genuinely hard acceleration/braking', () => {
+    const hard = town();
+    hard.samples = hard.samples.map((s, i) => ({ ...s, la: (i % 2 ? 3.2 : -3.2) }));
+    expect(analyzeDrive(hard).dims.smoothness).toBeLessThan(40);
+  });
+});
+
 describe('getDriverPersona', () => {
   it('returns null for fewer than 2 drives', () => {
     expect(getDriverPersona([])).toBeNull();
