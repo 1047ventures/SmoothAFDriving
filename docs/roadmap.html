@@ -72,6 +72,31 @@
   .vision em{color:var(--tang)}
   .betline{margin:9px 0 0;font-size:13.5px;color:var(--dim);line-height:1.5}
   .betline b{color:var(--gold);font-weight:600}
+
+  /* NEEDS YOU — the first thing on the page. Amber when something is waiting, green when clear. */
+  .needs{margin-top:22px;border:1px solid rgba(232,93,58,.45);background:linear-gradient(180deg,rgba(232,93,58,.09),transparent 70%),var(--panel);border-radius:14px;padding:6px 4px 8px}
+  .needs--clear{border-color:rgba(111,182,105,.4);background:linear-gradient(180deg,rgba(111,182,105,.08),transparent 70%),var(--panel)}
+  .needs-head{display:flex;align-items:baseline;gap:10px;padding:10px 14px 4px}
+  .needs-head h2{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--tang);font-weight:700}
+  .needs--clear .needs-head h2{color:var(--good)}
+  .needs-head .count{font-size:12px;color:var(--dim)}
+  .need{padding:12px 14px;border-top:1px solid var(--line)}
+  .need:first-of-type{border-top:0}
+  .need-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .need .t{font-size:15px;font-weight:600;color:var(--cream);line-height:1.3}
+  .need .d{margin-top:3px;font-size:13px;color:var(--dim);line-height:1.5}
+  .need .d b{color:var(--cream);font-weight:600}
+  /* Glance band: five numbers in ONE row, even on a phone — it's a scan, not a section. */
+  .glance .statband{grid-template-columns:repeat(5,1fr);margin-bottom:8px}
+  .glance .statband .stat:last-child{grid-column:auto}
+  .glance .statband .stat{padding:11px 4px;text-align:center}
+  .glance .stat .n{font-size:21px}
+  .glance .stat .l{font-size:8px;letter-spacing:.08em;line-height:1.3}
+  .glance{margin-top:22px}
+  .now-lines{margin:0 0 14px;padding:0;list-style:none;font-size:13.5px;line-height:1.5;color:var(--dim)}
+  .now-lines li{padding:3px 0}
+  .now-lines b{color:var(--cream)}
+  .more-q{margin:10px 2px 0;font-size:12.5px;color:var(--muted)}
   .now-metrics{margin-top:26px}
   .metric-note{margin:12px 0 0;font-size:12.5px;color:var(--dim);line-height:1.5}
   .metric-note b{color:var(--cream)}
@@ -289,96 +314,62 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span><span class="lbl">Live in production</span> &nbsp;<span class="ver">build 118</span></span>
+      <span class="lbl">Updated</span> <b>Oct 2, 2026 · 5:33 PM MDT</b>
       <span class="sep">·</span>
-      <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
-      <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 2, 2026 · 5:30 PM MDT</b>
+      <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
-    <p class="sharebar">
-      <span class="lbl">Share</span>
-      <a href="https://smoothafdriving.pages.dev/install">smoothafdriving.pages.dev/install</a>
-    </p>
   </header>
 
-  <!-- THE BET -->
-  <section class="bet">
-    <p class="vision">Make people smoother, more <em>efficient</em> drivers — systems thinkers who read the whole road — an app they actually want to open.</p>
-    <p class="betline"><b>The bet:</b> consumer app first. Nail the loop, earn the habit, grow by word of mouth. Data upside comes later, off scale.</p>
-    <p class="betline"><b>Built for, first:</b> drivers who already think they're smooth af, read Google's ETA as a dare, and love their own data. The loop for them: <b>prove the flex, beat the clock, climb the board</b> — smoothness vs the ETA is the puzzle they reopen the app to solve.</p>
+  <!-- NEEDS YOU — first thing on the page -->
+  <section class="needs" aria-label="Needs you">
+    <div class="needs-head"><h2>Needs you</h2><span class="count">5 open</span></div>
+      <div class="need"><div class="need-top"><span class="pill p-block">Now</span></div><div class="t">Install the new TestFlight build, then drive</div><div class="d">Check three things: a town drive scores higher &middot; OBD connects on its own &middot; with <b>Always</b> location, a screen-locked drive still records densely. Tell me what you see.</div></div>
+      <div class="need"><div class="need-top"><span class="pill p-next">Decision</span></div><div class="t">Rescore your saved drives with the new scoring?</div><div class="d">Your 59 becomes ~75. <b>Changes your lifetime score</b> &mdash; yes or no.</div></div>
+      <div class="need"><div class="need-top"><span class="pill p-wait">Soon</span></div><div class="t">Rotate the admin password</div><div class="d">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.</div></div>
+      <div class="need"><div class="need-top"><span class="pill p-next">Next drives</span><span class="tn tn--wait">Q2</span></div><div class="t">Mount the phone for a few drives</div><div class="d">Unlocks ride-quality scoring. Mix it up: smooth, a rough road, stop-and-go.</div></div>
+      <div class="need"><div class="need-top"><span class="pill p-next">Next drive</span><span class="tn tn--wait">Q1</span></div><div class="t">OBD: do hp and nm show?</div><div class="d">Gear won&rsquo;t &mdash; a 2008 X3 predates that PID. Expected.</div></div>
   </section>
 
-  <!-- THE NUMBERS -->
-  <section class="now-metrics" aria-label="Where we are">
-    <div class="lane-head"><span class="lane-dot" style="background:var(--gold)"></span><span class="lane-title">Where we are</span><span class="lane-sub"><a href="https://smoothafdriving.pages.dev/admin.html">live → /admin</a></span></div>
+  <!-- RIGHT NOW + live numbers -->
+  <section class="glance" aria-label="Where we are">
+    <div class="lane-head"><span class="lane-dot" style="background:var(--gold)"></span><span class="lane-title">Right now</span><span class="lane-sub"><a href="https://smoothafdriving.pages.dev/admin.html">live &rarr; /admin</a></span></div>
+    <ul class="now-lines">
+      <li><b>Web + /admin:</b> live (deploys were broken for a day &mdash; fixed).</li>
+      <li><b>iPhone:</b> scoring + OBD build is uploaded (Apple is processing it); the stoplight-labels build is compiling.</li>
+      <li><b>Unconfirmed on a real drive:</b> background GPS (Q3) &mdash; item 1 above.</li>
+    </ul>
     <div class="statband">
-      <div class="stat"><span class="n">4</span><span class="l">Returning<br>drivers ★</span></div>
-      <div class="stat"><span class="n">3</span><span class="l">Active<br>7 days</span></div>
-      <div class="stat"><span class="n">322</span><span class="l">Drives<br>logged</span></div>
+      <div class="stat"><span class="n">2</span><span class="l">Returning<br>drivers &#9733;</span></div>
+      <div class="stat"><span class="n">5</span><span class="l">Active<br>7 days</span></div>
+      <div class="stat"><span class="n">195</span><span class="l">Drives<br>logged</span></div>
       <div class="stat"><span class="n">2.2<span class="u">k mi</span></span><span class="l">Scored</span></div>
-      <div class="stat"><span class="n">88</span><span class="l">Avg<br>score</span></div>
+      <div class="stat"><span class="n">86</span><span class="l">Avg<br>score</span></div>
     </div>
-    <p class="metric-note">★ The number that decides everything: <b>do they come back?</b> Right now it's mostly you + a handful of testers — real week-2 retention is the whole game. (Snapshot; live at /admin.)</p>
+    <p class="metric-note">&#9733; Do they come back? Live from /admin at update time.</p>
   </section>
 
-  <!-- THE GLANCE — three lanes, the whole point of the page -->
+  <!-- THE GLANCE — three lanes -->
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T347</span>"Why you stopped" in the recap <span class="sub">each stop labelled: at a light, in the queue for one (signal ahead of you), at a stop sign, or nothing nearby &mdash; from OpenStreetMap signal data. Informational; score unchanged</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T346</span>Town drives scored fairly <span class="sub">found from real GPS: the old scale scored ordinary speed changes as violent. Re-fit it, and stops now count only between stretches of driving (not the start wait or parking). Your 59 &rarr; 75, 73 &rarr; 85; highway unchanged</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T344</span>Deploys fixed <span class="sub">Cloudflare had silently failed every build since the background-GPS change (a stale lockfile) &mdash; web app and /admin were frozen on old code</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T343</span>OBD connect list fixed <span class="sub">list no longer rebuilds under your finger (taps were lost); only OBD adapters shown; auto-reconnect keeps retrying until the ignition powers the dongle</span></div>
-      </div>
+      <div class="lane-item"><span class="tn tn--ship">T347</span>"Why you stopped" in the recap <span class="sub">each stop: at a light / in a light&rsquo;s queue / stop sign / none. Score unchanged</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T346</span>Town drives scored fairly <span class="sub">town driving was scored as violent; re-fit. Your 59 &rarr; ~75</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T344</span>Deploys fixed <span class="sub">Cloudflare failed every deploy for a day; web + /admin were frozen</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T343</span>OBD connect list fixed <span class="sub">list holds still, OBD-only, auto-reconnect keeps retrying</span></div>
+    </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
-      <div class="lane-item"><span class="tn tn--prog">Q3</span>Native background GPS <span class="sub"><b>now the priority.</b> Backgrounding throttles iOS location → sparse traces, straight-line routes, and unreliable scores (confirmed on Kevin's drive). Keep full-rate GPS alive in the background: Always-location + background mode + plugin. Strava-style core first, then Maps handoff + closed-app nudge.</span></div>
-      <div class="lane-item"><span class="tn tn--prog">Q4</span>Road's fault vs yours <span class="sub">penalize avoidable roughness (bad lane, rumble strips, potholes), not roads you can't help — needs a few mounted-phone drives</span></div>
+      <div class="lane-item"><span class="tn tn--prog">Q3</span>Background GPS <span class="sub">shipped; waiting on your real-drive check (item 1). Fixes the sparse-GPS drives</span></div>
+      <div class="lane-item"><span class="tn tn--prog">Q4</span>Road&rsquo;s fault vs yours <span class="sub">don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece; needs the mounted-phone drives (Q2)</span></div>
     </div>
     <div class="lane lane--next">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Up next</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q5</span>OBD readings into the score <span class="sub">throttle &amp; torque from the car — after the dongle's validated (Q1)</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q6</span>Car Health: scan for fault codes <span class="sub">Mode-03 DTC read — <b>the Concierge unlock</b>; needs the dongle reliable</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q7</span>Maps handoff, recording survives <span class="sub">hand a destination to Maps and keep scoring in the background — needs Q3</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q8</span>Closed-app auto-start nudge <span class="sub">a notification when you start driving — needs Q3</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q9</span>Goals <span class="sub">pick goals that tune how the app coaches you</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q10</span>Home screen: link Miles &rarr; Trends, delete the dead persona markup <span class="sub">all that's left from the re-audit</span></div>
-      <div class="lane-item"><span class="tn tn--next">Q11</span>Redesign the car-type icons <span class="sub">flagged — the current set isn't it; not urgent</span></div>
-    </div>
-  </section>
-
-  <!-- 1 · WAITING ON YOU -->
-  <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
-    <div class="card full">
-
-                  <details class="wrow" open>
-        <summary class="wsum">
-          <span class="pill p-next">Next drives</span>
-          <span class="t"><span class="tn tn--wait">Q2</span>Mount the phone for your next few drives <span class="tag">unlocks ride scoring</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>The new <b>Ride Composure</b> score reads the phone's 60&nbsp;Hz accelerometer — that's what feels rumble strips, wind/truck buffeting and road texture. It only works with the phone <b>mounted</b> (and it needs ~10s of driving to calibrate each trip). Your 159 saved drives were GPS-only, so ride quality is still <i>uncalibrated</i>.</p>
-          <p class="note"><b>The ask:</b> do a few normal mounted-phone drives — ideally a mix (a smooth stretch, a rough road, a bit of stop-and-go). I'll pull them and lock the ride-quality dials to reality, then build the pothole/rumble deciphering (Q4).</p>
-        </div>
-      </details>
-
-      <details class="wrow">
-        <summary class="wsum">
-          <span class="pill p-next">Next drive</span>
-          <span class="t"><span class="tn tn--wait">Q1</span>Connect the dongle, then eyeball two things <span class="tag">2 min</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Connection kept timing out; that's a real bug (a stalled write wedged the queue) and it's <b>fixed in the newest build</b> &mdash; on your current build, a force-quit + dongle power-cycle should get you connected. Once it's live:</p>
-          <ol>
-            <li><b>Does the gear number match reality?</b> If it's consistently off in a fixed way (e.g. shows 64 in 4th), tell me the number &mdash; that locks the decode. (If gear never shows, your car likely doesn't expose it over standard OBD-II — not a bug.)</li>
-            <li><b>Do the <code>hp</code> and <code>nm</code> cells appear?</b> That's the only way to know if your car reports the torque PIDs.</li>
-          </ol>
-        </div>
-      </details>
-
+      <div class="lane-item"><span class="tn tn--next">Q5</span>OBD readings into the score <span class="sub">throttle &amp; torque, once the dongle&rsquo;s validated (Q1)</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q6</span>Car Health: fault codes <span class="sub">Mode-03 read &mdash; the Concierge unlock</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q7</span>Maps handoff, recording survives <span class="sub">needs Q3 confirmed</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q8</span>Closed-app auto-start nudge <span class="sub">needs Q3</span></div>
+      <div class="lane-item"><span class="tn tn--next">Q9</span>Goals <span class="sub">tune how the app coaches you</span></div>
+      <p class="more-q">Also queued: Q10 home-screen cleanup &middot; Q11 car-icon redesign (not urgent)</p>
     </div>
   </section>
 
@@ -419,6 +410,10 @@
   <section>
     <div class="s-head"><h2>Where this is going</h2><span class="count">Make better drivers</span><span class="rule"></span></div>
     <p class="s-note" style="margin:-6px 0 18px;font-size:13.5px;color:var(--dim);max-width:66ch;line-height:1.55">The mission is bigger than a score: <b style="color:var(--cream)">make people genuinely better, smoother drivers.</b> US roads suck because driving is treated as a skill you got at 16 and never revisit. The <b style="color:var(--cream)">Concierge</b> &mdash; maps, score, car health, media in one honest app &mdash; is how we earn a place in the car; <b style="color:var(--cream)">coaching</b> is how we actually change how people drive. OBD isn&rsquo;t a feature; it&rsquo;s the platform underneath all of it.</p>
+    <div style="margin:0 0 18px">
+      <p class="vision">Make people smoother, more <em>efficient</em> drivers — systems thinkers who read the whole road — an app they actually want to open.</p>
+      <p class="betline"><b>The bet:</b> consumer app first. Nail the loop, earn the habit, grow by word of mouth. Data upside comes later, off scale.</p><p class="betline"><b>Built for, first:</b> drivers who already think they're smooth af, read Google's ETA as a dare, and love their own data. The loop for them: <b>prove the flex, beat the clock, climb the board</b> — smoothness vs the ETA is the puzzle they reopen the app to solve.</p>
+    </div>
     <div class="grid">
       <div class="card">
         <div class="row"><span class="pill p-ship">The unlock</span><div class="body"><div class="t">Car Health &mdash; codes read every drive</div><div class="d">Every drive quietly scans for fault codes (OBD <b>Mode 03</b> &mdash; universal on every car since &rsquo;96, the most reliable OBD feature there is). A code pops &rarr; a plain-English alert <i>before</i> the dashboard light &rarr; a DIY video, or book a local mobile mechanic. That fork is a real marketplace, not bolted-on ads.</div></div></div>
