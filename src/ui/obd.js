@@ -7,7 +7,7 @@
  * this panel exists to answer.
  */
 
-import { connect, connectTo, reconnectSaved, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
+import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
 import { state } from '../state.js';
 import { OBD_DEVICE_KEY } from '../constants.js';
 
@@ -204,23 +204,63 @@ function signalClass(rssi){
   return 'sig1';
 }
 
-function renderScanList(devices){
+/**
+ * Render the scan list WITHOUT ever rebuilding a row that's already there.
+ *
+ * This used to assign `list.innerHTML` on every scan callback (many per second).
+ * That destroys and recreates the button under the driver's finger mid-tap, so
+ * the press never completes — taps were silently eaten and the only thing that
+ * ever worked was the OS picker. Now each device owns one persistent button,
+ * keyed by deviceId: new devices are appended, existing rows only have their
+ * signal bars patched in place, and nothing is reordered or removed.
+ *
+ * Only OBD-looking adapters are listed (see visibleAdapters); everything else —
+ * phones, TVs, earbuds, unnamed radios — is hidden and just counted.
+ */
+let lastScanDevices = [];
+const cssEsc = (v) => (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&');
+export function renderScanList(allDevices){
+  lastScanDevices = allDevices || [];
   const list = el('obd-scan-list');
   if (!list) return;
+  const devices = visibleAdapters(lastScanDevices);
+  const hidden  = lastScanDevices.length - devices.length;
+
+  // Empty state (and the "N hidden" note) live in their own nodes so they can
+  // come and go without touching the device rows.
+  let empty = list.querySelector('.obd-scan-empty');
   if (!devices.length){
-    // Status line already says "Scanning…" — here give the guidance, plus a
-    // pulsing dot so a slow scan reads as alive rather than hung.
-    list.innerHTML =
-      '<div class="obd-scan-empty"><span class="obd-scan-pulse"></span>' +
-      'No adapters yet — make sure the dongle is plugged in and the ignition is on.</div>';
+    if (!empty){
+      empty = document.createElement('div');
+      empty.className = 'obd-scan-empty';
+      list.appendChild(empty);
+    }
+    empty.innerHTML = '<span class="obd-scan-pulse"></span>' +
+      'No OBD adapter found yet — plug it in and turn the ignition on.' +
+      (hidden > 0 ? ` <i>(${hidden} other Bluetooth device${hidden === 1 ? '' : 's'} hidden)</i>` : '');
     return;
   }
-  list.innerHTML = devices.map(d => `
-    <button class="obd-device" type="button" data-id="${escapeHtml(d.deviceId)}" data-name="${escapeHtml(d.name || '')}">
-      <span class="obd-device-sig ${signalClass(d.rssi)}"><i></i><i></i><i></i></span>
-      <span class="obd-device-name">${escapeHtml(d.name || 'Unknown adapter')}</span>
-      ${d.likely ? '<span class="obd-device-tag">OBD</span>' : ''}
-    </button>`).join('');
+  empty?.remove();
+
+  for (const d of devices){
+    let row = list.querySelector(`.obd-device[data-id="${cssEsc(d.deviceId)}"]`);
+    if (!row){
+      row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'obd-device';
+      row.dataset.id = d.deviceId;
+      row.dataset.name = d.name || '';
+      row.innerHTML =
+        '<span class="obd-device-sig"><i></i><i></i><i></i></span>' +
+        `<span class="obd-device-name">${escapeHtml(d.name || 'OBD adapter')}</span>` +
+        '<span class="obd-device-tag">OBD</span>';
+      list.appendChild(row);          // append only — a device keeps its slot
+    }
+    // Patch just the signal class; touching nothing else keeps a mid-press intact.
+    const sig = row.querySelector('.obd-device-sig');
+    const cls = `obd-device-sig ${signalClass(d.rssi)}`;
+    if (sig && sig.className !== cls) sig.className = cls;
+  }
 }
 
 /** Tear down an active scan (choice made, cancelled, or timed out). */
@@ -234,6 +274,8 @@ async function startScan(){
   const btn = el('obd-connect');
   scanning = true;
   showScan(true);
+  const listEl = el('obd-scan-list');
+  if (listEl) listEl.innerHTML = '';      // fresh scan = fresh rows (render is append-only)
   renderScanList([]);
   if (btn){ btn.disabled = false; btn.textContent = 'Stop'; }
   setStatus('Scanning for adapters…');
@@ -380,6 +422,17 @@ export function wireObdPanel(){
   renderReadout();
   setPill(isConnected());
   // Try the remembered adapter in the background — the whole point is that the
-  // driver doesn't have to think about it.
+  // driver doesn't have to think about it. One attempt at launch isn't enough: the
+  // dongle is usually unpowered until the ignition comes on, which happens AFTER
+  // the app opens. So keep trying — on every return to the app, and on a slow
+  // timer for a few minutes — and stop the moment it connects.
   autoReconnect();
+  let tries = 0;
+  const retry = setInterval(() => {
+    if (isConnected() || !loadDevice() || ++tries > 10){ clearInterval(retry); return; }
+    autoReconnect();
+  }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !isConnected()) autoReconnect();
+  });
 }

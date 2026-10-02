@@ -170,12 +170,32 @@ export function isLikelyObd(name = '', uuids = []){
  * a chooser should show them: likely-OBD first, then strongest signal. Pure, so
  * the ranking is unit-tested without a radio.
  */
+/**
+ * Fold one scan hit into the running device map and return the list to show.
+ *
+ * ORDER IS FIRST-SEEN AND NEVER CHANGES. This used to sort by signal strength,
+ * and signal strength jitters on every advertisement, so rows swapped places
+ * several times a second — the list "spazzed" and a tap landed on whatever row
+ * had just slid under the finger. A device keeps its slot; only its signal bars
+ * update (in place — see the keyed render in ui/obd.js).
+ */
 export function mergeScanResult(map, hit){
   const prev = map.get(hit.deviceId);
-  if (!prev || (hit.rssi ?? -999) > (prev.rssi ?? -999)) map.set(hit.deviceId, hit);
-  return [...map.values()].sort((a, b) =>
-    (Number(b.likely) - Number(a.likely)) ||
-    ((b.rssi ?? -999) - (a.rssi ?? -999)));
+  if (!prev) {
+    map.set(hit.deviceId, { ...hit });
+  } else {
+    // Keep the original slot (Map preserves insertion order); take the latest
+    // reading so the bars track reality, and never lose a name or a "likely" flag.
+    prev.rssi   = hit.rssi ?? prev.rssi;
+    prev.name   = hit.name || prev.name;
+    prev.likely = prev.likely || hit.likely;
+  }
+  return [...map.values()];
+}
+
+/** The list shown to the driver: only adapters that look like OBD dongles. */
+export function visibleAdapters(devices){
+  return (devices || []).filter(d => d.likely);
 }
 
 // ── Transport ─────────────────────────────────────────────────────────────────

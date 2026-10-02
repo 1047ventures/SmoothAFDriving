@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   cleanResponse, isErrorResponse, extractBytes, decodePid,
   decodeSupportedPids, kmhToMps, discoverPair, KNOWN_SERVICES,
-  isLikelyObd, mergeScanResult,
+  isLikelyObd, mergeScanResult, visibleAdapters,
 } from '../services/obd.js';
 
 // The transport needs a car. The decoding does not — and decoding is where a
@@ -196,19 +196,44 @@ describe('isLikelyObd', () => {
 });
 
 describe('mergeScanResult', () => {
-  it('dedupes by deviceId, keeping the strongest signal', () => {
+  it('dedupes by deviceId and tracks the latest signal', () => {
     const map = new Map();
     mergeScanResult(map, { deviceId: 'a', name: 'OBDII', rssi: -80, likely: true });
     const out = mergeScanResult(map, { deviceId: 'a', name: 'OBDII', rssi: -55, likely: true });
     expect(out).toHaveLength(1);
-    expect(out[0].rssi).toBe(-55); // upgraded to the closer reading
+    expect(out[0].rssi).toBe(-55);
   });
 
-  it('orders likely-OBD first, then by signal strength', () => {
+  it('keeps first-seen order forever, even as signal strengths swap', () => {
+    // Regression: sorting by rssi made rows trade places several times a second,
+    // so taps landed on the wrong (or a vanishing) row.
     const map = new Map();
-    mergeScanResult(map, { deviceId: 'phone', name: 'Pixel', rssi: -40, likely: false });
-    mergeScanResult(map, { deviceId: 'far',   name: 'OBDII', rssi: -90, likely: true });
-    const out = mergeScanResult(map, { deviceId: 'near', name: 'Veepeak', rssi: -55, likely: true });
-    expect(out.map(d => d.deviceId)).toEqual(['near', 'far', 'phone']);
+    mergeScanResult(map, { deviceId: 'far',  name: 'OBDII',   rssi: -90, likely: true });
+    mergeScanResult(map, { deviceId: 'near', name: 'Veepeak', rssi: -55, likely: true });
+    let out = mergeScanResult(map, { deviceId: 'far', name: 'OBDII', rssi: -30, likely: true }); // far is now stronger
+    expect(out.map(d => d.deviceId)).toEqual(['far', 'near']);
+    out = mergeScanResult(map, { deviceId: 'near', name: 'Veepeak', rssi: -20, likely: true });
+    expect(out.map(d => d.deviceId)).toEqual(['far', 'near']);
+  });
+
+  it('never loses a name or the likely flag to a later sparse advertisement', () => {
+    const map = new Map();
+    mergeScanResult(map, { deviceId: 'a', name: 'ANCEL BD310', rssi: -60, likely: true });
+    const out = mergeScanResult(map, { deviceId: 'a', name: null, rssi: -62, likely: false });
+    expect(out[0].name).toBe('ANCEL BD310');
+    expect(out[0].likely).toBe(true);
+  });
+});
+
+describe('visibleAdapters', () => {
+  it('lists only OBD-looking adapters — no phones, TVs, earbuds or unknowns', () => {
+    const all = [
+      { deviceId: '1', name: 'Pixel 8',      likely: false },
+      { deviceId: '2', name: 'ANCEL BD310',  likely: true  },
+      { deviceId: '3', name: '[TV] Samsung', likely: false },
+      { deviceId: '4', name: 'Veepeak',      likely: true  },
+    ];
+    expect(visibleAdapters(all).map(d => d.deviceId)).toEqual(['2', '4']);
+    expect(visibleAdapters(null)).toEqual([]);
   });
 });
