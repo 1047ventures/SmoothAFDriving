@@ -293,7 +293,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 2, 2026 · 5:25 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 2, 2026 · 5:30 PM MDT</b>
     </div>
     <p class="sharebar">
       <span class="lbl">Share</span>
@@ -325,11 +325,11 @@
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T347</span>"Why you stopped" in the recap <span class="sub">each stop labelled: at a light, in the queue for one (signal ahead of you), at a stop sign, or nothing nearby &mdash; from OpenStreetMap signal data. Informational; score unchanged</span></div>
       <div class="lane-item"><span class="tn tn--ship">T346</span>Town drives scored fairly <span class="sub">found from real GPS: the old scale scored ordinary speed changes as violent. Re-fit it, and stops now count only between stretches of driving (not the start wait or parking). Your 59 &rarr; 75, 73 &rarr; 85; highway unchanged</span></div>
       <div class="lane-item"><span class="tn tn--ship">T344</span>Deploys fixed <span class="sub">Cloudflare had silently failed every build since the background-GPS change (a stale lockfile) &mdash; web app and /admin were frozen on old code</span></div>
       <div class="lane-item"><span class="tn tn--ship">T343</span>OBD connect list fixed <span class="sub">list no longer rebuilds under your finger (taps were lost); only OBD adapters shown; auto-reconnect keeps retrying until the ignition powers the dongle</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T340</span>Background GPS <span class="sub">drive recording survives screen-off / Maps &mdash; needs a real-drive check on the phone</span></div></div>
-    </div>
+      </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
       <div class="lane-item"><span class="tn tn--prog">Q3</span>Native background GPS <span class="sub"><b>now the priority.</b> Backgrounding throttles iOS location → sparse traces, straight-line routes, and unreliable scores (confirmed on Kevin's drive). Keep full-rate GPS alive in the background: Always-location + background mode + plugin. Strava-style core first, then Maps handoff + closed-app nudge.</span></div>
@@ -349,25 +349,10 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 open</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
     <div class="card full">
 
-            <details class="wrow" open>
-        <summary class="wsum">
-          <span class="pill p-block">Blocking</span>
-          <span class="t"><span class="tn tn--wait">Q0</span>Accept Apple's updated license agreement <span class="tag">unblocks all iOS builds</span></span>
-          <span class="chev">&#9654;</span>
-        </summary>
-        <div class="wbody">
-          <p>Every TestFlight build since Oct 2 fails at <b>Export .ipa</b> with <code>PLA Update available</code> &mdash; Apple won't issue signing profiles until the <b>Account Holder</b> accepts the new Program License Agreement. Until then your phone has none of the recent fixes (new scoring, OBD connect list, background GPS tuning).</p>
-          <ol>
-            <li>Sign in at <b>developer.apple.com/account</b> as the Account Holder and accept the banner agreement (also check <b>App Store Connect &rarr; Business</b>).</li>
-            <li>GitHub &rarr; Actions &rarr; latest <b>iOS &rarr; TestFlight</b> run &rarr; <b>Re-run all jobs</b>.</li>
-          </ol>
-        </div>
-      </details>
-
-      <details class="wrow" open>
+                  <details class="wrow" open>
         <summary class="wsum">
           <span class="pill p-next">Next drives</span>
           <span class="t"><span class="tn tn--wait">Q2</span>Mount the phone for your next few drives <span class="tag">unlocks ride scoring</span></span>

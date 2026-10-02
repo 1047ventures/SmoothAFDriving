@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**346 tasks shipped** as of 2026-10-02.
+**347 tasks shipped** as of 2026-10-02.
 
 
 ## 2026-04
@@ -366,3 +366,4 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T344** · fix(deploy): resync bun.lock — Cloudflare was failing every build since 442fc77  _( 2026-10-02 )_
 - **T345** · docs: two-lockfile rule (bun.lock for Cloudflare, package-lock for iOS)  _( 2026-10-02 )_
 - **T346** · scoring: stop counting only real stops; re-fit pedal-force scale (town drives were scored as violent)  _( 2026-10-02 )_
+- **T347** · recap: say WHY each stop happened (light / queue for a light / stop sign / none)  _( 2026-10-02 )_
