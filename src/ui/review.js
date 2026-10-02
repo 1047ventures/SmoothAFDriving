@@ -6,6 +6,7 @@ import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
 import { loadDrives, loadDriverName } from '../services/storage.js';
 import { baseTiles } from '../utils/maptiles.js';
+import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
 import { showToast } from '../utils/toast.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
@@ -16,6 +17,42 @@ let mapLayers = [];
 let reviewEventMarkers = { brake: [], accel: [], turn: [], stop: [] };
 export let reviewDrive = null;
 export let reviewAnalysis = null;
+
+/**
+ * Say WHY each stop happened — at a light, in the queue for one, at a stop sign,
+ * or nothing on the map nearby — using OpenStreetMap's signal positions. Runs
+ * after the recap has painted and fails soft: offline or blocked just means no
+ * labels. Informational only; it does not change the score.
+ */
+let _causeToken = 0;
+async function annotateStopCauses(drive, analysis){
+  const token = ++_causeToken;
+  document.getElementById('rv-stopcauses')?.remove();
+  const markers = analysis.stopMarkers || [];
+  if (!markers.length || !drive.samples?.length) return;
+
+  const features = await fetchStopFeatures(drive.startTime, markers);
+  if (token !== _causeToken || features == null) return;          // a newer recap opened, or no data
+  const causes = classifyStops(markers, drive.samples, features);
+
+  // Per-stop wording on the map markers.
+  causes.forEach((k, i) => {
+    const m = reviewEventMarkers.stop[i], s = markers[i];
+    if (!m || !s) return;
+    const secs = (s.durationMs / 1000).toFixed(s.durationMs < 10000 ? 1 : 0);
+    m.setPopupContent(`<b>${escapeHtml(describeCause(k))}</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
+  });
+
+  // One line under the fact chips.
+  const text = describeCauses(countCauses(causes));
+  const factsEl = document.getElementById('rv-facts');
+  if (!text || !factsEl) return;
+  const note = document.createElement('div');
+  note.id = 'rv-stopcauses';
+  note.className = 'rv-stopcauses';
+  note.textContent = `Why you stopped: ${text}`;
+  factsEl.insertAdjacentElement('afterend', note);
+}
 
 export function renderReview(drive){
   showScreen('review');
@@ -350,6 +387,7 @@ export function renderReview(drive){
     mapLayers.push(m);
     reviewEventMarkers.stop.push(m);
   }
+  annotateStopCauses(drive, analysis);
   for (const e of drive.events){
     if (e.type === 'shift') continue;
     if ((e.tier || 2) < 3) continue; // only worst moments on map

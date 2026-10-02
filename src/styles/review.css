@@ -186,6 +186,8 @@
   /* Numbers extracted from the story — compact fact chips */
   .rv-facts{display:flex;flex-wrap:wrap;gap:7px;flex-shrink:0}
   .rv-facts:empty{display:none}
+  /* Why each stop happened (light / queue / sign / none) — a quiet one-liner under the chips */
+  .rv-stopcauses{font-family:var(--sans);font-size:11.5px;line-height:1.4;color:rgba(244,235,217,.6);margin-top:-2px;flex-shrink:0}
   .rv-fact{display:inline-flex;align-items:baseline;gap:3px;padding:5px 10px;border-radius:8px;background:rgba(244,235,217,.055);border:1px solid rgba(244,235,217,.08)}
   .rv-fact-v{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;color:var(--cream);line-height:1}
   .rv-fact-u{font-family:var(--sans);font-size:10px;color:rgba(244,235,217,.55)}
