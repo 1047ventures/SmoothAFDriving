@@ -293,7 +293,7 @@
       <span class="sep">·</span>
       <span class="lbl">Native app</span> &nbsp;<span class="ver" style="color:var(--good)">running on device ✓</span>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 2, 2026 · 5:15 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 2, 2026 · 5:25 PM MDT</b>
     </div>
     <p class="sharebar">
       <span class="lbl">Share</span>
@@ -349,8 +349,23 @@
 
   <!-- 1 · WAITING ON YOU -->
   <section>
-    <div class="s-head"><h2>Waiting on you</h2><span class="count">2 open</span><span class="rule"></span></div>
+    <div class="s-head"><h2>Waiting on you</h2><span class="count">3 open</span><span class="rule"></span></div>
     <div class="card full">
+
+            <details class="wrow" open>
+        <summary class="wsum">
+          <span class="pill p-block">Blocking</span>
+          <span class="t"><span class="tn tn--wait">Q0</span>Accept Apple's updated license agreement <span class="tag">unblocks all iOS builds</span></span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="wbody">
+          <p>Every TestFlight build since Oct 2 fails at <b>Export .ipa</b> with <code>PLA Update available</code> &mdash; Apple won't issue signing profiles until the <b>Account Holder</b> accepts the new Program License Agreement. Until then your phone has none of the recent fixes (new scoring, OBD connect list, background GPS tuning).</p>
+          <ol>
+            <li>Sign in at <b>developer.apple.com/account</b> as the Account Holder and accept the banner agreement (also check <b>App Store Connect &rarr; Business</b>).</li>
+            <li>GitHub &rarr; Actions &rarr; latest <b>iOS &rarr; TestFlight</b> run &rarr; <b>Re-run all jobs</b>.</li>
+          </ol>
+        </div>
+      </details>
 
       <details class="wrow" open>
         <summary class="wsum">
