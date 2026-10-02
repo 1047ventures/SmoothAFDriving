@@ -185,6 +185,12 @@ export async function onRequestPost(context) {
       // the road's curves instead of chording across them — it's one drive on
       // demand, so the payload is still small.
       const { events, samples, ...meta } = d;
+      // Diagnostics: `raw:true` returns the stored GPS samples untouched (time,
+      // speed, accel, heading) so a bad score can be traced to the actual fixes
+      // instead of guessed at. Password-gated like everything else here.
+      if (body.raw) {
+        return json(200, { ok: true, drive: { ...meta, events: events || [], samples: samples || [] } });
+      }
       const raw = downsamplePath(samples, 2000);
       // Snap the trace onto real roads (handles sparse/jumpy recordings that
       // otherwise draw as straight chords). Falls back to the raw trace.
