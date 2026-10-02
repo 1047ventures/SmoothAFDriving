@@ -283,6 +283,15 @@ keep `favicon: 🏠`, and re-stamp the "Reviewed" line. Update it when home-scre
 elements are added, linked, or removed, so it never describes a screen that no
 longer exists.
 
+## ⚠️ Two lockfiles — keep both in sync (operating rule)
+
+Cloudflare Pages detects `bun.lock` and runs `bun install --frozen-lockfile`;
+the iOS GitHub Action uses `npm ci` with `package-lock.json`. **Any change to
+`package.json` must update BOTH** (`npm install <pkg>` then `bun install`), or the
+other host's build fails — silently freezing the web app and `/admin` on old code.
+This happened once (a plugin was added to npm only; every deploy failed for a day).
+After pushing, check the Cloudflare Pages + iOS checks actually went green.
+
 ## Commands
 
 ```bash
