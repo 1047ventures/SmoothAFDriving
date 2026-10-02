@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**335 tasks shipped** as of 2026-10-01.
+**346 tasks shipped** as of 2026-10-02.
 
 
 ## 2026-04
@@ -355,3 +355,14 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T333** · auth: capture Apple first/last name and store it on the account  _( 2026-10-01 )_
 - **T334** · install: tagline + link-preview OG tags  _( 2026-10-01 )_
 - **T335** · feat: 'what's your name, Driver?' post-drive name capture  _( 2026-10-01 )_
+- **T336** · admin: colour routes by score (red→green) and show direction of travel  _( 2026-10-01 )_
+- **T337** · admin: overlay back to red heatmap; smoothness colors only per-drive  _( 2026-10-01 )_
+- **T338** · admin: raise route-path resolution so drives follow the road's curves  _( 2026-10-01 )_
+- **T339** · admin: snap per-drive routes to roads (OSRM) so sparse GPS follows the road  _( 2026-10-01 )_
+- **T340** · feat(Q3): background GPS so drive recording survives backgrounding  _( 2026-10-01 )_
+- **T341** · obd: make saved-adapter auto-reconnect reliable on cold start  _( 2026-10-02 )_
+- **T342** · admin: raw samples diagnostic view for tracing a bad score to the real GPS fixes  _( 2026-10-02 )_
+- **T343** · obd: fix the scan list that ate taps; OBD-only list; keep trying to auto-reconnect  _( 2026-10-02 )_
+- **T344** · fix(deploy): resync bun.lock — Cloudflare was failing every build since 442fc77  _( 2026-10-02 )_
+- **T345** · docs: two-lockfile rule (bun.lock for Cloudflare, package-lock for iOS)  _( 2026-10-02 )_
+- **T346** · scoring: stop counting only real stops; re-fit pedal-force scale (town drives were scored as violent)  _( 2026-10-02 )_
