@@ -7,7 +7,7 @@
  * this panel exists to answer.
  */
 
-import { connect, connectTo, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
+import { connect, connectTo, reconnectSaved, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
 import { state } from '../state.js';
 import { OBD_DEVICE_KEY } from '../constants.js';
 
@@ -352,7 +352,7 @@ async function autoReconnect(){
   setStatus(`Reconnecting to ${label}…`);
   if (btn) btn.disabled = true;
   try {
-    const info = await connectTo(saved.deviceId, saved.name, { onStatus: setStatus });
+    const info = await reconnectSaved(saved.deviceId, saved.name, { onStatus: setStatus });
     rememberDevice(info.deviceId, info.name);
     if (btn) btn.textContent = 'Disconnect';
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);

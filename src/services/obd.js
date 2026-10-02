@@ -407,6 +407,50 @@ export async function connectTo(deviceId, name, { onStatus = () => {} } = {}){
 }
 
 /**
+ * Wait (up to `timeoutMs`) for a specific saved deviceId to appear in a BLE
+ * scan, then resolve true. Resolves false on timeout. Always stops the scan.
+ */
+function scanUntilFound(deviceId, timeoutMs){
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = async (val) => {
+      if (done) return; done = true;
+      try { await BleClient.stopLEScan(); } catch {}
+      resolve(val);
+    };
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    BleClient.requestLEScan({ allowDuplicates: false }, (result) => {
+      if (result.device?.deviceId === deviceId){ clearTimeout(timer); finish(true); }
+    }).catch(() => { clearTimeout(timer); finish(false); });
+  });
+}
+
+/**
+ * Reconnect to a remembered adapter as reliably as we can, with no taps.
+ *
+ * A plain connect-by-saved-id works only while iOS still holds the peripheral;
+ * on a cold start CoreBluetooth often can't connect to a UUID it hasn't seen
+ * this session, so the saved-adapter reconnect silently failed. This tries the
+ * fast direct connect first, and if that misses, briefly scans to re-discover
+ * the exact saved id before connecting. Throws if the adapter never turns up
+ * (powered off / out of range) — the caller leaves the manual button in place.
+ */
+export async function reconnectSaved(deviceId, name, { onStatus = () => {}, scanMs = 6000 } = {}){
+  await BleClient.initialize();
+  // Fast path: still retrievable — just connect (fewer retries, fail fast to the scan).
+  try {
+    await connectWithRetry(deviceId, () => disconnect(), onStatus, 2);
+    return negotiate(deviceId, name, onStatus);
+  } catch { /* fall through to rediscovery */ }
+
+  onStatus('Looking for your adapter…');
+  const found = await scanUntilFound(deviceId, scanMs);
+  if (!found) throw new Error('saved adapter not found');
+  await connectWithRetry(deviceId, () => disconnect(), onStatus);
+  return negotiate(deviceId, name, onStatus);
+}
+
+/**
  * Fallback path: hand off to the OS device picker. Kept for the rare adapter
  * that advertises neither a name nor a known service and so never shows up in
  * the filtered scan — better a wonky list than no way in at all.
