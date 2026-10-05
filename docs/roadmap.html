@@ -314,7 +314,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 4, 2026 · 7:53 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 4, 2026 · 7:58 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -323,7 +323,7 @@
   <!-- NEEDS YOU — first thing on the page -->
   <section class="needs" aria-label="Needs you">
     <div class="needs-head"><h2>Needs you</h2><span class="count">6 open</span></div>
-      <div class="need"><div class="need-top"><span class="pill p-block">Now</span></div><div class="t">Install the new TestFlight build, then drive</div><div class="d">Check: a town drive scores higher &middot; OBD connects on its own &middot; with <b>Always</b> location a screen-locked drive records densely &middot; turning the car off ends the drive ~30&nbsp;s later (newest build). Tell me what you see.</div></div>
+      <div class="need"><div class="need-top"><span class="pill p-block">Now</span></div><div class="t">Install the new TestFlight build, then drive</div><div class="d">Check: a town drive scores higher &middot; OBD connects on its own &middot; with <b>Always</b> location a screen-locked drive records densely &middot; turning the car off pops &ldquo;End this drive?&rdquo; ~30&nbsp;s later &mdash; answer it either way (it learns). Tell me what you see.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-next">Decision</span></div><div class="t">Rescore your saved drives with the new scoring?</div><div class="d">Your 59 becomes ~75. <b>Changes your lifetime score</b> &mdash; yes or no.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-wait">Soon</span></div><div class="t">Rotate the admin password</div><div class="d">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-wait">Soon</span></div><div class="t">Nightly digest email is failing</div><div class="d">3 nights in a row (HTTP 500 from <code>/api/daily-digest</code>). Most likely the Resend key isn&rsquo;t set: Cloudflare &rarr; <code>RESEND_API_KEY</code>. If it is, paste the error from the failed run&rsquo;s <b>Trigger digest email</b> step.</div></div>
@@ -336,7 +336,7 @@
     <div class="lane-head"><span class="lane-dot" style="background:var(--gold)"></span><span class="lane-title">Right now</span><span class="lane-sub"><a href="https://smoothafdriving.pages.dev/admin.html">live &rarr; /admin</a></span></div>
     <ul class="now-lines">
       <li><b>Web + /admin:</b> live. <b>Nightly digest email:</b> failing (see Needs you).</li>
-      <li><b>iPhone:</b> TestFlight has the scoring, OBD and stoplight-label builds; the engine-off auto-end build is compiling.</li>
+      <li><b>iPhone:</b> TestFlight has the scoring, OBD and stoplight builds. The engine-off build that <b>asks first</b> is queued &mdash; skip the one before it (that one ends drives without asking).</li>
       <li><b>Unconfirmed on a real drive:</b> background GPS (Q3) &mdash; item 1 above.</li>
     </ul>
     <div class="statband">
@@ -353,10 +353,10 @@
   <section class="now" aria-label="Status at a glance">
     <div class="lane lane--ship">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">Just shipped</span><span class="lane-sub">newest first</span></div>
+      <div class="lane-item"><span class="tn tn--ship">T349</span>Engine-off now ASKS first, then learns <span class="sub">&ldquo;End this drive?&rdquo; card; your answers tune the wait and eventually stop it asking</span></div>
       <div class="lane-item"><span class="tn tn--ship">T348</span>Drive auto-ends when the engine goes off <span class="sub">dongle connected: link lost or RPM 0 while parked ends it and trims the idle tail. Never ends a moving drive</span></div>
       <div class="lane-item"><span class="tn tn--ship">T347</span>"Why you stopped" in the recap <span class="sub">each stop: at a light / in a light&rsquo;s queue / stop sign / none. Score unchanged</span></div>
       <div class="lane-item"><span class="tn tn--ship">T346</span>Town drives scored fairly <span class="sub">town driving was scored as violent; re-fit. Your 59 &rarr; ~75</span></div>
-      <div class="lane-item"><span class="tn tn--ship">T344</span>Deploys fixed <span class="sub">Cloudflare failed every deploy for a day; web + /admin were frozen</span></div>
     </div>
     <div class="lane lane--prog">
       <div class="lane-head"><span class="lane-dot"></span><span class="lane-title">In progress</span></div>
