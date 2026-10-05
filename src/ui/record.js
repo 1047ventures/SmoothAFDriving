@@ -14,6 +14,8 @@ import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { startLocationWatch, stopLocationWatch } from '../services/sensors/location.js';
+import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
+import { isConnected as isObdConnected } from '../services/obd.js';
 import { showCarPromptIfNeeded } from './modals.js';
 import { runPostDrivePrompts } from './postdrive.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
@@ -396,6 +398,7 @@ export function startRecording(){
   }
 
   state.tickInterval = setInterval(updateLiveUI, 200);
+  startAutoEndWatch();
 
   if ('wakeLock' in navigator){
     navigator.wakeLock.request('screen')
@@ -440,8 +443,47 @@ export function startRecording(){
   window.addEventListener('devicemotion', state.motionHandler);
 }
 
-export function stopRecording(){
+// ── Auto-end when the engine goes off (OBD) ─────────────────────────────────────
+// With a dongle connected, a lost link or RPM 0 while PARKED means the drive is
+// over; without this the recording just keeps going in a parked car. All the
+// judgement (arming, grace periods, never ending mid-drive) lives in
+// services/autoEnd.js; this only feeds it readings once a second and acts on it.
+let autoEndMonitor = null;
+let autoEndTimer   = null;
+
+function startAutoEndWatch(){
+  stopAutoEndWatch();
+  autoEndMonitor = createAutoEndMonitor();
+  autoEndTimer = setInterval(checkAutoEnd, 1000);
+}
+function stopAutoEndWatch(){
+  if (autoEndTimer){ clearInterval(autoEndTimer); autoEndTimer = null; }
+  autoEndMonitor = null;
+}
+function checkAutoEnd(){
+  if (!state.recording || state.simulated || !autoEndMonitor) return;
+  const last = state.samples[state.samples.length - 1];
+  const obd  = state.obd;
+  const end = autoEndMonitor.tick({
+    now: Date.now(),
+    linked: isObdConnected(),
+    rpm:   obd ? obd.rpm : null,
+    obdAt: obd ? obd.at  : null,
+    gpsSpeedMps: last ? last.speed : null,
+    gpsAt:       last ? last.t     : null,
+  });
+  if (!end) return;
+  showToast('Engine off — drive ended');
+  // End the drive where the car actually stopped, not when we noticed.
+  stopRecording({ trimToMs: end.restAt + AUTO_END.TAIL_KEEP_MS });
+}
+
+export function stopRecording(opts){
+  // Called with an {trimToMs} only by the engine-off auto-end; click handlers pass
+  // an Event (or nothing), which has no such field and is ignored.
+  const trimTo = opts && typeof opts.trimToMs === 'number' ? opts.trimToMs : null;
   state.recording = false;   // set immediately so persistActiveDrive can't re-save
+  stopAutoEndWatch();
   clearActiveDrive();
   if (state.gpsWatchActive){
     stopLocationWatch();
@@ -455,6 +497,7 @@ export function stopRecording(){
   if (state.tickInterval){ clearInterval(state.tickInterval); state.tickInterval = null; }
   if (state.wakeLock){ state.wakeLock.release().catch(() => {}); state.wakeLock = null; }
   state.recording = false;
+  if (trimTo != null) trimDriveTail(state, trimTo);   // drop the parked tail before scoring
   finalizeAndReview({
     onReview: renderReview,
     onListUpdate: renderDriveList,
