@@ -124,3 +124,43 @@ describe('trimDriveTail', () => {
     expect(AUTO_END.TAIL_KEEP_MS).toBeGreaterThan(0);
   });
 });
+
+describe('auto-end: the driver said "keep recording"', () => {
+  const parkedNoLink = { secs: 1, linked: false, speed: 0 };
+
+  it('dismiss() silences the rest of that parked spell', () => {
+    const monitor = createAutoEndMonitor();
+    const fired = run([driving(120), { secs: 60, linked: false, speed: 0 }], { monitor });
+    expect(fired.reason).toBe('link-lost');
+    monitor.dismiss();
+    const more = run([{ secs: 600, linked: false, speed: 0 }], { monitor, startAt: fired.at + 1000 });
+    expect(more.ended).toBe(false);
+  });
+
+  it('the next parked spell is judged afresh once the car has moved again', () => {
+    const monitor = createAutoEndMonitor();
+    const t0 = 1_000_000;
+    const fired = run([driving(120), { secs: 60, linked: false, speed: 0 }], { monitor, startAt: t0 });
+    monitor.dismiss();
+    // drives off for a minute (still no link), then parks again
+    const again = run([{ secs: 60, linked: false, speed: 12 }, { secs: 90, linked: false, speed: 0 }], { monitor, startAt: fired.at + 1000 });
+    expect(again.reason).toBe('link-lost');
+  });
+
+  it('reports parked / not parked from fresh GPS', () => {
+    const monitor = createAutoEndMonitor();
+    run([driving(30)], { monitor });
+    expect(monitor.parked).toBe(false);
+    run([{ secs: 5, linked: true, rpm: 800, speed: 0 }], { monitor, startAt: 1_100_000 });
+    expect(monitor.parked).toBe(true);
+  });
+
+  it('honours a tuned (longer) wait', () => {
+    const slow = createAutoEndMonitor({ ...AUTO_END, LINK_LOST_PARKED_MS: 60_000 });
+    const r = run([driving(60), { secs: 50, linked: false, speed: 0 }], { monitor: slow });
+    expect(r.ended).toBe(false);
+    const r2 = run([driving(60), { secs: 90, linked: false, speed: 0 }], { monitor: createAutoEndMonitor({ ...AUTO_END, LINK_LOST_PARKED_MS: 60_000 }) });
+    expect(r2.reason).toBe('link-lost');
+    expect(r2.elapsed).toBeGreaterThanOrEqual(60 + 60);
+  });
+});

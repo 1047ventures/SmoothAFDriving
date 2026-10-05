@@ -35,9 +35,17 @@ export function createAutoEndMonitor(cfg = AUTO_END){
   let linkLostAt = null;
   let stationarySince = null;    // when the car last came to rest (GPS fix time)
   let rpmZeroSince = null;
+  let snoozed = false;           // driver said "keep recording" — quiet until the car moves again
 
   return {
     get armed(){ return armed; },
+    /** Is the car parked right now (a fresh GPS fix says it's stationary)? */
+    get parked(){ return stationarySince != null; },
+    /**
+     * The driver declined to end the drive. Stay quiet for this parked spell; it
+     * re-opens the moment the car moves again, so the NEXT stop is judged afresh.
+     */
+    dismiss(){ snoozed = true; },
 
     /**
      * Feed one observation (call about once a second while recording).
@@ -76,7 +84,9 @@ export function createAutoEndMonitor(cfg = AUTO_END){
         rpmZeroSince = null;
       }
 
-      if (!armed || stationarySince == null) return null;
+      // Driving again ends the snooze, whatever the parked clocks say.
+      if (stationarySince == null) snoozed = false;
+      if (!armed || stationarySince == null || snoozed) return null;
 
       if (linkLostAt != null && (now - Math.max(linkLostAt, stationarySince)) >= cfg.LINK_LOST_PARKED_MS){
         return { reason: 'link-lost', restAt: stationarySince };

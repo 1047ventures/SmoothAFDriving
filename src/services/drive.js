@@ -234,6 +234,8 @@ export function buildDriveFromState(){
       ra: e.ra != null ? +e.ra.toFixed(3) : null,
     })),
     eventCount: events.length,
+    // Set only when the engine-off flow ended it: { reason, answer } — see services/autoEndLearn.js.
+    endedBy: state.endedBy || null,
     simulated: state.simulated,
     settingsSnapshot: { ...CFG },
     destination:    state.destination || null,

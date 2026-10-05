@@ -26,6 +26,7 @@ export const state = {
   screen: 'home',
   recording: false,
   simulated: false,
+  endedBy: null,        // how the drive ended, if the engine-off flow ended it
   samples: [],
   events: [],
   startTime: 0,
@@ -73,6 +74,7 @@ export const state = {
 };
 
 export function resetState(){
+  state.endedBy = null;
   state.samples = [];
   state.events = [];
   state.emaLongAccel = 0;

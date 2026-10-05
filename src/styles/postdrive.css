@@ -59,6 +59,9 @@
 }
 .pdcta-skip:active{color:var(--cream-dim)}
 
+/* "End this drive?" — the quiet countdown under the buttons. */
+.ae-count{margin-top:12px; color:var(--muted); font:600 12.5px/1 var(--sans); letter-spacing:.02em; font-variant-numeric:tabular-nums}
+
 /* Name-prompt fields — first/last, stacked. */
 .pdcta-fields{ width:100%; display:flex; flex-direction:column; gap:10px; margin:4px 0 16px; }
 .pdcta-input{

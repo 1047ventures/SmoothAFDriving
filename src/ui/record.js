@@ -15,6 +15,8 @@ import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { startLocationWatch, stopLocationWatch } from '../services/sensors/location.js';
 import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
+import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/autoEndLearn.js';
+import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
 import { isConnected as isObdConnected } from '../services/obd.js';
 import { showCarPromptIfNeeded } from './modals.js';
 import { runPostDrivePrompts } from './postdrive.js';
@@ -445,21 +447,42 @@ export function startRecording(){
 
 // ── Auto-end when the engine goes off (OBD) ─────────────────────────────────────
 // With a dongle connected, a lost link or RPM 0 while PARKED means the drive is
-// over; without this the recording just keeps going in a parked car. All the
-// judgement (arming, grace periods, never ending mid-drive) lives in
-// services/autoEnd.js; this only feeds it readings once a second and acts on it.
+// probably over. We ASK ("End this drive?") rather than act, and learn from the
+// answer: a wrong call lengthens the wait, a run of right ones shortens it and
+// eventually earns the right to stop asking. The judgement lives in
+// services/autoEnd.js (when) and services/autoEndLearn.js (how it adapts); this
+// feeds the monitor once a second and runs the question.
+const ASK_TIMEOUT_MS = 45_000;       // no answer by then → the driver has walked away → end
 let autoEndMonitor = null;
 let autoEndTimer   = null;
+let asking         = null;           // { reason, since } while the prompt is up
 
 function startAutoEndWatch(){
   stopAutoEndWatch();
-  autoEndMonitor = createAutoEndMonitor();
+  // Waits tuned by this driver's earlier answers.
+  autoEndMonitor = createAutoEndMonitor(tunedConfig(loadLog()));
   autoEndTimer = setInterval(checkAutoEnd, 1000);
 }
 function stopAutoEndWatch(){
   if (autoEndTimer){ clearInterval(autoEndTimer); autoEndTimer = null; }
   autoEndMonitor = null;
+  asking = null;
+  closeAutoEndPrompt();
 }
+
+function finishAutoEnd(end, answer){
+  // Remember how this drive ended, on the drive itself, then end where the car stopped.
+  state.endedBy = { reason: end.reason, answer };
+  stopRecording({ trimToMs: end.restAt + AUTO_END.TAIL_KEEP_MS });
+}
+
+function answerAutoEnd(end, answer){
+  asking = null;
+  recordOutcome({ reason: end.reason, answer, parkedMs: Date.now() - end.restAt });
+  if (answer === 'keep' || answer === 'moved'){ autoEndMonitor?.dismiss(); return; }
+  finishAutoEnd(end, answer);
+}
+
 function checkAutoEnd(){
   if (!state.recording || state.simulated || !autoEndMonitor) return;
   const last = state.samples[state.samples.length - 1];
@@ -472,10 +495,34 @@ function checkAutoEnd(){
     gpsSpeedMps: last ? last.speed : null,
     gpsAt:       last ? last.t     : null,
   });
+
+  if (asking){
+    // The car drove off while we were asking: we were wrong, and the question is moot.
+    if (!autoEndMonitor.parked){
+      const a = asking; asking = null;
+      closeAutoEndPrompt();
+      answerAutoEnd(a, 'moved');
+    }
+    return;
+  }
   if (!end) return;
-  showToast('Engine off — drive ended');
-  // End the drive where the car actually stopped, not when we noticed.
-  stopRecording({ trimToMs: end.restAt + AUTO_END.TAIL_KEEP_MS });
+
+  // A signal that has been right 8 times running no longer needs to ask.
+  if (isTrusted(loadLog(), end.reason)){
+    showToast('Engine off — drive ended');
+    recordOutcome({ reason: end.reason, answer: 'auto', parkedMs: Date.now() - end.restAt });
+    finishAutoEnd(end, 'auto');
+    return;
+  }
+
+  asking = end;
+  showAutoEndPrompt({
+    reason: end.reason,
+    timeoutMs: ASK_TIMEOUT_MS,
+    onEnd:     () => answerAutoEnd(end, 'end'),
+    onKeep:    () => answerAutoEnd(end, 'keep'),
+    onTimeout: () => answerAutoEnd(end, 'timeout'),
+  });
 }
 
 export function stopRecording(opts){
