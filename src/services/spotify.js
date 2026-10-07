@@ -80,30 +80,43 @@ export async function handleRedirect(url){
   } catch { return false; }
 }
 
-async function accessToken(){
+let inflight = null;   // one refresh at a time: concurrent callers share it (rotating refresh tokens)
+async function refreshToken(){
   const t = read(SPOTIFY.KEY_TOKENS);
   if (!t) return null;
-  if (Date.now() < t.expires_at) return t.access_token;
   try {
     const n = await tokenCall({ grant_type: 'refresh_token', refresh_token: t.refresh_token });
     saveTokens(n, t); return n.access_token;
   } catch (e) {
-    if (e.status === 400 || e.status === 401) disconnect();   // revoked: ask to reconnect
+    // Only a refused refresh token means the login is gone; a network blip must not log the driver out.
+    if (e.status === 400 || e.status === 401){
+      const now = read(SPOTIFY.KEY_TOKENS);
+      if (now && now.refresh_token !== t.refresh_token) return now.access_token;   // someone else already rotated it
+      disconnect();
+    }
     return null;
   }
 }
+async function accessToken(force = false){
+  const t = read(SPOTIFY.KEY_TOKENS);
+  if (!t) return null;
+  if (!force && Date.now() < t.expires_at) return t.access_token;
+  inflight = inflight || refreshToken().finally(() => { inflight = null; });
+  return inflight;
+}
 
 /** Authenticated call. Returns { ok, status, data }; never throws. */
-async function api(method, path, { query } = {}){
-  const tok = await accessToken();
+async function api(method, path, { query } = {}, retried = false){
+  const tok = await accessToken(retried);
   if (!tok) return { ok: false, status: 401, data: null };
   const qs = query ? `?${new URLSearchParams(query)}` : '';
   try {
     const res = await fetch(`${SPOTIFY.API}${path}${qs}`, { method, headers: { Authorization: `Bearer ${tok}` } });
-    let data = null;
+    if (res.status === 401 && !retried) return api(method, path, { query }, true);   // stale token: refresh once, retry
+    let data = null, reason = '';
     if (res.status === 200) { try { data = await res.json(); } catch { /* empty body */ } }
-    if (res.status === 401) disconnect();
-    return { ok: res.ok, status: res.status, data };
+    else if (res.status === 403) { try { reason = (await res.json())?.error?.reason || ''; } catch { /* no body */ } }
+    return { ok: res.ok, status: res.status, data, reason };
   } catch { return { ok: false, status: 0, data: null }; }
 }
 
@@ -128,10 +141,12 @@ export async function getPlayback(){
   return p ? { state: 'ok', ...p } : { state: 'idle' };
 }
 
-const mapErr = (r) => r.ok ? 'ok' : r.status === 403 ? 'premium' : r.status === 404 ? 'nodevice' : r.status === 401 ? 'auth' : 'error';
-export const play = async () => mapErr(await api('PUT', '/me/player/play'));
-export const pause = async () => mapErr(await api('PUT', '/me/player/pause'));
-export const next = async () => mapErr(await api('POST', '/me/player/next'));
+const mapErr = (r) => r.ok ? 'ok' : r.status === 403 ? (r.reason === 'PREMIUM_REQUIRED' ? 'premium' : 'redundant') : r.status === 404 ? 'nodevice' : r.status === 401 ? 'auth' : 'error';
+// 403 on play/pause that isn't PREMIUM_REQUIRED means it was already in that state: treat as done.
+const soft = (c) => c === 'redundant' ? 'ok' : c;
+export const play = async () => soft(mapErr(await api('PUT', '/me/player/play')));
+export const pause = async () => soft(mapErr(await api('PUT', '/me/player/pause')));
+export const next = async () => { const c = mapErr(await api('POST', '/me/player/next')); return c === 'redundant' ? 'error' : c; };
 
 const trackUri = (id) => `spotify:track:${id}`;
 export async function isSaved(id){
@@ -143,5 +158,5 @@ export async function setSaved(id, saved){
   const m = saved ? 'PUT' : 'DELETE';
   let r = await api(m, '/me/library', { query: { uris: trackUri(id) } });
   if (r.status === 404) r = await api(m, '/me/tracks', { query: { ids: id } });
-  return mapErr(r);
+  const c = mapErr(r); return c === 'redundant' ? 'error' : c;
 }

@@ -3,6 +3,7 @@ import * as sp from '../services/spotify.js';
 
 const mem = () => { const m = new Map(); return { getItem: k => m.has(k) ? m.get(k) : null, setItem: (k, v) => m.set(k, String(v)), removeItem: k => m.delete(k) }; };
 const res = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
+const tok = () => localStorage.setItem(sp.SPOTIFY.KEY_TOKENS, JSON.stringify({ access_token: 'A', refresh_token: 'R', expires_at: Date.now() + 600000 }));
 
 beforeEach(() => {
   vi.stubGlobal('localStorage', mem());
@@ -47,6 +48,32 @@ describe('spotify auth', () => {
     expect(f.mock.calls[1][1].headers.Authorization).toBe('Bearer new');
     expect(JSON.parse(localStorage.getItem(sp.SPOTIFY.KEY_TOKENS)).refresh_token).toBe('R');
   });
+  it('a 403 that is not Premium is a redundant play/pause, but a failure for next', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(res(403, { error: { reason: 'UNKNOWN' } })));
+    expect(await sp.next()).toBe('error');
+  });
+  it('a 401 refreshes once and retries instead of disconnecting', async () => {
+    const f = vi.fn()
+      .mockResolvedValueOnce(res(401))
+      .mockResolvedValueOnce(res(200, { access_token: 'n', expires_in: 3600 }))
+      .mockResolvedValueOnce(res(204));
+    vi.stubGlobal('fetch', f);
+    expect(await sp.next()).toBe('ok');
+    expect(sp.isConnected()).toBe(true);
+  });
+  it('concurrent calls on an expired token share one refresh', async () => {
+    localStorage.setItem(sp.SPOTIFY.KEY_TOKENS, JSON.stringify({ access_token: 'o', refresh_token: 'R', expires_at: 1 }));
+    const f = vi.fn(async (url) => String(url).includes('/api/token') ? res(200, { access_token: 'n', refresh_token: 'R2', expires_in: 3600 }) : res(204));
+    vi.stubGlobal('fetch', f);
+    await Promise.all([sp.next(), sp.pause(), sp.play()]);
+    expect(f.mock.calls.filter(c => String(c[0]).includes('/api/token')).length).toBe(1);
+  });
+  it('a network error during refresh keeps the login', async () => {
+    localStorage.setItem(sp.SPOTIFY.KEY_TOKENS, JSON.stringify({ access_token: 'o', refresh_token: 'R', expires_at: 1 }));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    await sp.next();
+    expect(sp.isConnected()).toBe(true);
+  });
   it('a revoked refresh token disconnects', async () => {
     localStorage.setItem(sp.SPOTIFY.KEY_TOKENS, JSON.stringify({ access_token: 'old', refresh_token: 'R', expires_at: 1 }));
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(res(400, {})));
@@ -68,8 +95,8 @@ describe('spotify playback', () => {
     expect(sp.shapePlayback({ currently_playing_type: 'ad', is_playing: true })).toMatchObject({ ad: true });
   });
   it('maps control errors to plain codes', async () => {
-    for (const [st, code] of [[204, 'ok'], [403, 'premium'], [404, 'nodevice'], [500, 'error']]){
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(res(st)));
+    for (const [st, code, body] of [[204, 'ok'], [403, 'premium', { error: { reason: 'PREMIUM_REQUIRED' } }], [403, 'ok'], [404, 'nodevice'], [500, 'error']]){
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(res(st, body)));
       localStorage.setItem(sp.SPOTIFY.KEY_TOKENS, JSON.stringify({ access_token: 'A', refresh_token: 'R', expires_at: Date.now() + 600000 }));
       expect(await sp.pause()).toBe(code);
     }

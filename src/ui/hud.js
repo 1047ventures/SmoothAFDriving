@@ -124,7 +124,7 @@ function paintInsight(cur){
   $id('rec-line')?.classList.toggle('has-insight', Boolean(cur));
   lastShownText = text;
   if (!cur){ el.classList.remove('show'); return; }
-  el.textContent = cur.text;
+  el.textContent = ''; const sp = document.createElement('span'); sp.textContent = cur.text; el.appendChild(sp);
   el.className = 'rec-insight ' + (cur.tone || '');
   void el.offsetWidth;
   el.classList.add('show');

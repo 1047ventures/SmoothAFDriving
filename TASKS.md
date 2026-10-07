@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**350 tasks shipped** as of 2026-10-07.
+**352 tasks shipped** as of 2026-10-07.
 
 
 ## 2026-04
@@ -370,3 +370,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T348** · feat: auto-end the drive when the engine goes off (OBD connected)  _( 2026-10-05 )_
 - **T349** · auto-end: ASK 'End this drive?' first, and learn from the answers  _( 2026-10-05 )_
 - **T350** · driving screen makeover: streak, live inputs ribbon, one-line insights, honest stats  _( 2026-10-07 )_
+- **T351** · Spotify: now-playing strip with heart/play-pause/next merged into the insight line; PKCE auth, native deep link (inert until VITE_SPOTIFY_CLIENT_ID set)  _( 2026-10-07 )_
+- **T352** · iOS build: pass VITE_SPOTIFY_CLIENT_ID secret to web build  _( 2026-10-07 )_

@@ -271,8 +271,9 @@
   .rec-line.has-music .mu-text{display:flex;flex-direction:column;min-width:0;gap:2px;transition:opacity .3s ease}
   .mu-text b{font:700 14px/1.15 var(--sans);color:rgba(244,235,217,.96);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mu-text span{font:500 12px/1.15 var(--sans);color:rgba(244,235,217,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rec-line.has-music .rec-insight{position:absolute;inset:0;pointer-events:none;font-size:14px;white-space:nowrap}
-  .rec-line.has-music.has-insight .mu-text{opacity:0}
+  .rec-line.has-music .rec-insight{position:absolute;inset:0;pointer-events:none;font-size:13.5px;line-height:1.15;align-items:center}
+  .rec-line.has-music .rec-insight span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-width:0}
+  .rec-line.has-music.has-insight .mu-text{opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s .3s}
   .mu-btn{width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;color:rgba(244,235,217,.85);-webkit-tap-highlight-color:transparent}
   .mu-btn svg{width:22px;height:22px;fill:currentColor}
   .mu-btn:active{opacity:.55}.mu-btn:disabled{opacity:.3}
