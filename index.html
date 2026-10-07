@@ -188,12 +188,32 @@
       <div class="hero-score">
         <div class="hero-score-lbl">Score</div>
         <div class="hero-num-score" id="live-score">--</div>
+        <div class="hero-score-delta" id="score-delta" aria-label="Score change over the last minute"></div>
       </div>
     </div>
 
     <!-- Fix 1: visible "waiting for GPS fix" state — shown from startRecording()
          until the first real GPS sample lands (see markGpsAcquired in record.js) -->
     <div id="gps-acquiring" class="gps-acquiring hidden">Acquiring GPS…</div>
+
+    <!-- Live insights. Replaces the big radar, which sat dead-centre (doing nothing) whenever you
+         drove well. These track the app's philosophy — fewest inputs, fewest stops, longest clean
+         line — and only the streak + ribbon are always on; the insight line is blank unless there
+         is something worth saying. Drawn by ui/hud.js from services/liveInsights.js. -->
+    <div class="rec-mid" id="rec-mid">
+      <div class="rec-streak" id="rec-streak">
+        <div class="streak-top">
+          <div class="streak-main"><span class="streak-num" id="streak-num">0.0</span><span class="streak-unit">mi clean</span></div>
+          <div class="streak-best" id="streak-best"></div>
+        </div>
+        <div class="streak-bar"><div class="streak-fill" id="streak-fill"></div></div>
+      </div>
+      <div class="rec-ribbon">
+        <div class="ribbon-lbl"><span>Your inputs</span><span class="ribbon-hint" id="ribbon-hint">flat line = smooth</span></div>
+        <canvas id="ribbon" class="ribbon-canvas" aria-hidden="true"></canvas>
+      </div>
+      <div class="rec-insight" id="rec-insight" aria-live="polite"></div>
+    </div>
 
     <!-- G-force radar: big, striking, state-colored -->
     <div class="rec-radar">
@@ -227,20 +247,22 @@
       </div>
     </div>
 
-    <!-- Bottom stats: Time | Miles | Avg Speed | Efficiency -->
+    <!-- Bottom stats: Stops | Miles | Time -->
     <div class="rec-bottom">
       <div class="bot-stat bot-stat--center">
-        <div class="bot-lbl">Time</div>
-        <div class="bot-val bot-val--time" id="live-time">0:00:00</div>
+        <div class="bot-lbl">Stops</div>
+        <div class="bot-val"><span id="live-stops">0</span></div>
+        <div class="bot-sub" id="live-rolled"></div>
       </div>
       <div class="bot-stat bot-stat--center">
         <div class="bot-lbl">Miles</div>
         <div class="bot-val"><span id="live-distance">0.0</span><span class="bot-unit"> mi</span></div>
       </div>
       <div class="bot-stat bot-stat--center">
-        <div class="bot-lbl">Avg Speed</div>
-        <div class="bot-val"><span id="live-avg-speed">0</span><span class="bot-unit"> mph</span></div>
+        <div class="bot-lbl">Time</div>
+        <div class="bot-val bot-val--time" id="live-time">0:00:00</div>
       </div>
+      <span id="live-avg-speed" style="display:none">0</span>
     </div>
 
     <!-- Event flash ticker -->

@@ -190,7 +190,7 @@
   }
 
   /* hero numbers */
-  .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 20px;gap:4px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 22px;gap:4px;transition:top .3s cubic-bezier(.4,0,.2,1)}
   /* Destination drive: the big countdown lives up top, so drop the speed/score
      heroes down to make room for it (only when a target is set). */
   #screen-record.has-target .rec-heroes{top:calc(env(safe-area-inset-top,0) + 150px)}
@@ -200,13 +200,16 @@
   .hero-slash{font-family:var(--serif);font-style:italic;font-weight:200;font-size:clamp(80px,33vw,130px);line-height:1;color:rgba(244,235,217,.10);align-self:center;margin-top:20px;flex-shrink:0}
   .hero-score{display:flex;flex-direction:column;align-items:flex-end;margin-top:44px;flex:1 1 0;min-width:0}
   .hero-score-lbl{font-family:var(--sans);font-size:11px;letter-spacing:.34em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:3px}
+  /* colour is set from the score's value by ui/hud.js */
   .hero-num-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(66px,28vw,110px);line-height:.86;letter-spacing:-.04em;transition:color .25s}
-  #screen-record.smooth  .hero-num-score{color:rgba(125,196,118,.95)}
-  #screen-record.braking .hero-num-score{color:rgba(224,96,80,.95)}
-  #screen-record.accel   .hero-num-score{color:rgba(232,160,58,.95)}
+
+  .hero-score-delta{height:18px;margin-top:8px;font-family:var(--sans);font-size:15px;font-weight:700;letter-spacing:.12em;color:rgba(244,235,217,.55);font-variant-numeric:tabular-nums}
+  .hero-score-delta.up{color:rgba(125,196,118,.95)}
+  .hero-score-delta.down{color:rgba(224,96,80,.95)}
 
   /* g-radar */
-  .rec-radar{position:absolute;left:0;right:0;top:56%;transform:translateY(-50%);z-index:10;display:flex;justify-content:center}
+  /* Replaced by .rec-mid (live insights). Kept in the DOM — flashEvent/updateLiveUI still write to it. */
+  .rec-radar{display:none}
   .radar-wrap{width:min(70vw,268px);height:min(70vw,268px);position:relative;transition:filter .35s}
   #g-radar.state-smooth{filter:drop-shadow(0 0 28px rgba(90,158,82,.45))}
   #g-radar.state-accel {filter:drop-shadow(0 0 28px rgba(232,160,58,.45))}
@@ -234,6 +237,40 @@
   .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 112px);display:flex;justify-content:center;align-items:center;pointer-events:none}
   .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
   .stop-btn:active{background:rgba(244,235,217,.88);transform:scale(.98)}
+
+  /* ── Live insights: clean streak · inputs ribbon · one-line insight ── */
+  .rec-mid{justify-content:center;position:absolute;left:0;right:0;z-index:10;top:calc(env(safe-area-inset-top,0) + 256px);bottom:calc(env(safe-area-inset-bottom,0) + 218px);padding:0 22px;display:flex;flex-direction:column;gap:14px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0) + 330px)}
+  .streak-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .streak-main{display:flex;align-items:baseline;gap:9px;min-width:0}
+  .streak-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:46px;line-height:.9;letter-spacing:-.03em;color:var(--cream);font-variant-numeric:tabular-nums;transition:color .25s}
+  .streak-unit{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,235,217,.72)}
+  .streak-best{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,235,217,.66);white-space:nowrap}
+  .streak-bar{height:4px;margin-top:9px;border-radius:2px;background:rgba(244,235,217,.09);overflow:hidden}
+  .streak-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,rgba(111,182,105,.55),rgba(125,196,118,.95));transition:width .6s ease-out,background .3s}
+  .streak-fill.is-best{background:linear-gradient(90deg,rgba(196,169,98,.7),rgba(222,196,120,1));box-shadow:0 0 10px rgba(196,169,98,.55)}
+  .rec-streak.reset .streak-num{animation:streak-reset .7s ease-out}
+  @keyframes streak-reset{0%{color:rgba(224,96,80,1);transform:scale(1.06)}100%{color:var(--cream);transform:none}}
+  .rec-ribbon{position:relative;flex:1 1 auto;min-height:84px;max-height:240px;display:flex;flex-direction:column}
+  .ribbon-lbl{display:flex;justify-content:space-between;margin-bottom:7px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,235,217,.64)}
+  .ribbon-hint{letter-spacing:.14em;color:rgba(125,196,118,.8)}
+  .ribbon-canvas{display:block;width:100%;flex:1 1 auto;min-height:0;border-radius:14px;border:1px solid rgba(244,235,217,.08);background:linear-gradient(180deg,rgba(244,235,217,.03),rgba(244,235,217,.01))}
+  .rec-insight{min-height:24px;display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:.01em;color:rgba(244,235,217,.96);opacity:0;transform:translateY(5px);transition:opacity .3s ease,transform .3s ease}
+  .rec-insight::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:rgba(244,235,217,.7)}
+  .rec-insight.good::before{background:var(--good);box-shadow:0 0 8px rgba(111,182,105,.7)}
+  .rec-insight.bad::before{background:var(--danger);box-shadow:0 0 8px rgba(224,59,47,.7)}
+  .rec-insight.show{opacity:1;transform:none}
+  @media(max-height:700px){
+    .rec-mid{top:calc(env(safe-area-inset-top,0) + 238px);bottom:calc(env(safe-area-inset-bottom,0) + 204px);gap:9px}
+    .streak-num{font-size:36px}.streak-bar{margin-top:6px}.ribbon-lbl{margin-bottom:4px}
+    /* Small phone AND a destination strip: not enough room for a legible ribbon. Keep the
+       streak + the insight line (most value per pixel) rather than a squeezed sliver. */
+    #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0) + 322px)}
+    #screen-record.has-target .rec-ribbon{display:none}
+  }
+  .bot-stat{position:relative}
+  .bot-sub{position:absolute;top:100%;left:0;right:0;margin-top:5px;text-align:center;height:14px;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--good)}
+  @media(prefers-reduced-motion:reduce){.rec-insight,.streak-fill,.rec-mid{transition:none}.rec-streak.reset .streak-num{animation:none}}
 
   /* ── Calibration ── */
   .calib-overlay{position:absolute;inset:0;z-index:50;background:rgba(6,4,4,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px}
