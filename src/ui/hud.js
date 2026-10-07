@@ -121,6 +121,7 @@ function paintInsight(cur){
   const el = $id('rec-insight'); if (!el) return;
   const text = cur ? cur.text : '';
   if (text === lastShownText) return;
+  $id('rec-line')?.classList.toggle('has-insight', Boolean(cur));
   lastShownText = text;
   if (!cur){ el.classList.remove('show'); return; }
   el.textContent = cur.text;

@@ -212,7 +212,20 @@
         <div class="ribbon-lbl"><span>Your inputs</span><span class="ribbon-hint" id="ribbon-hint">flat line = smooth</span></div>
         <canvas id="ribbon" class="ribbon-canvas" aria-hidden="true"></canvas>
       </div>
-      <div class="rec-insight" id="rec-insight" aria-live="polite"></div>
+      <!-- One line, two jobs: the track that's playing (Spotify, once connected) is the resting
+           state; an insight takes the text over for a few seconds. ♥ / ⏯ / ⏭ stay put. -->
+      <div class="rec-line" id="rec-line">
+        <div class="mu-art" id="mu-art" aria-hidden="true"></div>
+        <div class="rec-linetext">
+          <div class="mu-text"><b id="mu-title"></b><span id="mu-artist"></span></div>
+          <div class="rec-insight" id="rec-insight" aria-live="polite"></div>
+        </div>
+        <div class="mu-ctl">
+          <button id="mu-heart" class="mu-btn mu-heart" type="button" aria-label="Save to Liked Songs" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.2-9.3C1.7 8 3.6 5 6.7 5c1.9 0 3.5 1 5.3 3 1.8-2 3.4-3 5.3-3 3.1 0 5 3 3.9 6.2-1.7 4.7-9.2 9.3-9.2 9.3z"/></svg></button>
+          <button id="mu-pp" class="mu-btn mu-pp" type="button" aria-label="Pause"><svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg><svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+          <button id="mu-next" class="mu-btn" type="button" aria-label="Next track"><svg viewBox="0 0 24 24"><path d="M6 5.5v13l9-6.5zM16.5 5H19v14h-2.5z"/></svg></button>
+        </div>
+      </div>
     </div>
 
     <!-- G-force radar: big, striking, state-colored -->
@@ -304,6 +317,11 @@
         <button id="obd-scan-fallback" class="obd-scan-fallback" type="button">Don’t see it? Open full device list</button>
       </div>
       <div id="obd-readout" class="obd-readout"></div>
+      <!-- Spotify: only shown once a client ID is configured. -->
+      <div id="sp-row" class="obd-row hidden">
+        <button id="sp-connect" class="obd-btn" type="button">Connect Spotify</button>
+        <span id="sp-status" class="obd-status">Not connected</span>
+      </div>
     </div>
 
     <button id="btn-stop" class="stop-btn">End Drive</button>

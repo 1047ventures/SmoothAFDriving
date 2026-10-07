@@ -260,6 +260,26 @@
   .rec-insight.good::before{background:var(--good);box-shadow:0 0 8px rgba(111,182,105,.7)}
   .rec-insight.bad::before{background:var(--danger);box-shadow:0 0 8px rgba(224,59,47,.7)}
   .rec-insight.show{opacity:1;transform:none}
+
+  /* ── One line: now-playing + insight ── */
+  .rec-line{display:flex;align-items:center;gap:10px;min-height:24px}
+  .rec-linetext{position:relative;flex:1;min-width:0;min-height:24px;display:flex;align-items:center}
+  .mu-art,.mu-ctl,.mu-text{display:none}
+  .rec-line.has-music{min-height:44px}
+  .rec-line.has-music .mu-art{display:block;flex:none;width:40px;height:40px;border-radius:8px;background:rgba(244,235,217,.08) center/cover no-repeat}
+  .rec-line.has-music .mu-ctl{display:flex;flex:none;align-items:center}
+  .rec-line.has-music .mu-text{display:flex;flex-direction:column;min-width:0;gap:2px;transition:opacity .3s ease}
+  .mu-text b{font:700 14px/1.15 var(--sans);color:rgba(244,235,217,.96);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mu-text span{font:500 12px/1.15 var(--sans);color:rgba(244,235,217,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rec-line.has-music .rec-insight{position:absolute;inset:0;pointer-events:none;font-size:14px;white-space:nowrap}
+  .rec-line.has-music.has-insight .mu-text{opacity:0}
+  .mu-btn{width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;color:rgba(244,235,217,.85);-webkit-tap-highlight-color:transparent}
+  .mu-btn svg{width:22px;height:22px;fill:currentColor}
+  .mu-btn:active{opacity:.55}.mu-btn:disabled{opacity:.3}
+  .mu-heart svg{fill:none;stroke:currentColor;stroke-width:1.8}
+  .mu-heart.on{color:#1ed760}.mu-heart.on svg{fill:currentColor;stroke:currentColor}
+  .mu-pp .i-play{display:block}.mu-pp .i-pause{display:none}
+  .mu-pp.is-playing .i-play{display:none}.mu-pp.is-playing .i-pause{display:block}
   @media(max-height:700px){
     .rec-mid{top:calc(env(safe-area-inset-top,0) + 238px);bottom:calc(env(safe-area-inset-bottom,0) + 204px);gap:9px}
     .streak-num{font-size:36px}.streak-bar{margin-top:6px}.ribbon-lbl{margin-bottom:4px}

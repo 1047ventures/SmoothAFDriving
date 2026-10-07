@@ -58,3 +58,11 @@ set_string NSBluetoothPeripheralUsageDescription \
 "$PB" -c "Delete :ITSAppUsesNonExemptEncryption" "$PLIST" >/dev/null 2>&1 || true
 "$PB" -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
 echo "[ios-privacy] set ITSAppUsesNonExemptEncryption=false (export compliance)"
+
+# Spotify sign-in returns to the app through a custom URL scheme (appUrlOpen).
+"$PB" -c "Delete :CFBundleURLTypes" "$PLIST" >/dev/null 2>&1 || true
+"$PB" -c "Add :CFBundleURLTypes array" "$PLIST"
+"$PB" -c "Add :CFBundleURLTypes:0 dict" "$PLIST"
+"$PB" -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$PLIST"
+"$PB" -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string com.smoothafdriving.app" "$PLIST"
+echo "[ios-privacy] set CFBundleURLTypes (Spotify return scheme)"

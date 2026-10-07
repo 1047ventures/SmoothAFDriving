@@ -18,6 +18,7 @@ import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoE
 import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/autoEndLearn.js';
 import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
 import { hudStart, hudStop, hudTick } from './hud.js';
+import { musicStart, musicStop } from './music.js';
 import { isConnected as isObdConnected } from '../services/obd.js';
 import { showCarPromptIfNeeded } from './modals.js';
 import { runPostDrivePrompts } from './postdrive.js';
@@ -410,6 +411,7 @@ export function startRecording(){
   startAutoEndWatch();
   state.liveStops = 0; state.liveStopMarkers = [];
   hudStart();
+  musicStart();
 
   if ('wakeLock' in navigator){
     navigator.wakeLock.request('screen')
@@ -541,6 +543,7 @@ export function stopRecording(opts){
   state.recording = false;   // set immediately so persistActiveDrive can't re-save
   stopAutoEndWatch();
   hudStop();                 // persists a new personal-best streak
+  musicStop();
   clearActiveDrive();
   if (state.gpsWatchActive){
     stopLocationWatch();

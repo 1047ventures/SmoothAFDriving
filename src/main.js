@@ -19,6 +19,7 @@ import { refreshIfNeeded, isSignedIn } from './services/auth.js';
 import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
 import { wireObdPanel } from './ui/obd.js';
+import { wireMusic } from './ui/music.js';
 import { showIntroIfNeeded } from './ui/intro.js';
 import { openTrends, wireTrends } from './ui/trends.js';
 
@@ -195,6 +196,7 @@ function boot(){
   // Garage sheet
   wireGarageButtons();
   wireObdPanel();
+  wireMusic();
   wireTrends();
   // The home sparkline is the doorway into the full Trends screen.
   document.querySelector('.home-sparkline')?.addEventListener('click', openTrends);
