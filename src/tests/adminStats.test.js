@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeOverview, computeUserRows, summarizeFlags, computeDailyDigest, downsamplePath } from '../shared/adminStats.mjs';
+import { computeOverview, computeUserRows, summarizeFlags, downsamplePath } from '../shared/adminStats.mjs';
 
 const DAY = 864e5;
 const NOW = 1_700_000_000_000;            // fixed "now" for deterministic windows
@@ -197,32 +197,6 @@ describe('identity merge (one person, many device ids)', () => {
     expect(ov.totalUsers).toBe(1);        // known people
     expect(ov.totalIdentities).toBe(2);   // known + one anonymous device
     expect(ov.totalDevices).toBe(2);
-  });
-});
-
-describe('computeDailyDigest', () => {
-  const tzOffset = 0; // deterministic: local midnight == UTC midnight
-  const NOON = Date.parse('2026-09-30T12:00:00Z');
-  const users = [{ device_id: 'a', name: 'A', email: 'a@x.com', updated_at: '2026-09-29T09:00:00Z' }];
-  const drives = [
-    { device_id: 'a', start_time: Date.parse('2026-09-30T09:00:00Z'), score: 80, distance_meters: 1609.34, event_count: 2, simulated: false }, // today
-    { device_id: 'a', start_time: Date.parse('2026-09-29T09:00:00Z'), score: 60, distance_meters: 1609.34, event_count: 1, simulated: false }, // yesterday
-    { device_id: 'a', start_time: Date.parse('2026-09-30T10:00:00Z'), score: 0, distance_meters: 9999, event_count: 50, simulated: true },     // excluded
-  ];
-  const dg = computeDailyDigest(users, drives, NOON, tzOffset);
-
-  it('separates today from all-time (simulated excluded)', () => {
-    expect(dg.drivesToday).toBe(1);
-    expect(dg.milesToday).toBe(1);
-    expect(dg.avgScoreToday).toBe(80);
-    expect(dg.flagsToday).toBe(2);
-    expect(dg.totalDrives).toBe(2);
-    expect(dg.totalMiles).toBe(2);
-  });
-
-  it('new vs active today keys off first/last seen', () => {
-    expect(dg.newDriversToday).toBe(0); // first drove yesterday
-    expect(dg.activeToday).toBe(1);     // drove again today
   });
 });
 

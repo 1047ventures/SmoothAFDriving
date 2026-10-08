@@ -316,7 +316,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 7, 2026 · 10:15 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 7, 2026 · 10:25 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -324,12 +324,11 @@
 
   <!-- NEEDS YOU — first thing on the page -->
   <section class="needs" aria-label="Needs you">
-    <div class="needs-head"><h2>Needs you</h2><span class="count">7 open</span></div>
+    <div class="needs-head"><h2>Needs you</h2><span class="count">6 open</span></div>
       <div class="need"><div class="need-top"><span class="pill p-block">Now</span><a class="need-go" href="https://testflight.apple.com/" target="_blank" rel="noopener">Open TestFlight &rarr;</a></div><div class="t">Install the new TestFlight build, then drive</div><div class="d">Check: a town drive scores higher &middot; OBD connects on its own &middot; with <b>Always</b> location a screen-locked drive records densely &middot; turning the car off pops &ldquo;End this drive?&rdquo; ~30&nbsp;s later &mdash; answer it either way (it learns) &middot; and the <b>new driving screen</b>: too busy, or still boring? Tell me what you see.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-block">Now</span><a class="need-go" href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Open dashboard &rarr;</a></div><div class="t">Spotify: create a developer app, send me the Client ID</div><div class="d">developer.spotify.com/dashboard &rarr; create app &rarr; add redirect URIs <code>com.smoothafdriving.app://spotify</code> and your web URL with a trailing <code>/</code>. Client ID is public, not a secret. I add it as <code>VITE_SPOTIFY_CLIENT_ID</code> (GitHub secret + Cloudflare). Dev mode = 5 allow-listed users; play/pause/next need Premium. Untested against real Spotify.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-next">Decision</span></div><div class="t">Rescore your saved drives with the new scoring?</div><div class="d">Your 59 becomes ~75. <b>Changes your lifetime score</b> &mdash; yes or no.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-wait">Soon</span><a class="need-go" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank" rel="noopener">Open Cloudflare &rarr;</a></div><div class="t">Rotate the admin password</div><div class="d">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.</div></div>
-      <div class="need"><div class="need-top"><span class="pill p-wait">Soon</span><a class="need-go" href="https://github.com/1047ventures/SmoothAFDriving/actions/workflows/daily-digest.yml" target="_blank" rel="noopener">See failed runs &rarr;</a></div><div class="t">Nightly digest email is failing</div><div class="d">Confirmed from the run log: <code>no_resend_key</code>. The digest computes fine (207 drives, 5 users) but Cloudflare has no <code>RESEND_API_KEY</code> for Production. Add it (resend.com &rarr; API Keys) under Pages &rarr; Settings &rarr; Variables, then Retry deployment. Next 5&nbsp;AM run should go green.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-next">Next drives</span><span class="tn tn--wait">Q2</span></div><div class="t">Mount the phone for a few drives</div><div class="d">Unlocks ride-quality scoring. Mix it up: smooth, a rough road, stop-and-go.</div></div>
       <div class="need"><div class="need-top"><span class="pill p-next">Next drive</span><span class="tn tn--wait">Q1</span></div><div class="t">OBD: do hp and nm show?</div><div class="d">Gear won&rsquo;t &mdash; a 2008 X3 predates that PID. Expected.</div></div>
   </section>
@@ -338,7 +337,7 @@
   <section class="glance" aria-label="Where we are">
     <div class="lane-head"><span class="lane-dot" style="background:var(--gold)"></span><span class="lane-title">Right now</span><span class="lane-sub"><a href="https://smoothafdriving.pages.dev/admin.html">live &rarr; /admin</a></span></div>
     <ul class="now-lines">
-      <li><b>Web + /admin:</b> live. <b>Nightly digest email:</b> failing (see Needs you).</li>
+      <li><b>Web + /admin:</b> live.</li>
       <li><b>iPhone:</b> TestFlight has the scoring, OBD, stoplight and ask-first engine-off builds. The driving-screen + Spotify build (iOS run 101) is on TestFlight; Spotify stays hidden until the Client ID is set.</li>
       <li><b>Unconfirmed on a real drive:</b> background GPS (Q3) &mdash; item 1 above.</li>
     </ul>
@@ -565,7 +564,7 @@
         <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">Live speed stutters &amp; sticks mid-drive</div><div class="d">iOS intermittently returns a null speed mid-drive and the app reused the previous value, so the number froze then snapped — and since cornering-G and event detection are scaled by speed, the score degraded with it. Now <code>deriveSpeed()</code> falls back to distance-moved between fixes, with a deadband so parked jitter reads 0 and a cap so a GPS glitch can't spike it. Feeds the score, not just the display.</div></div></div>
         <div class="row"><span class="pill p-flag">Unfinished</span><div class="body"><div class="t">Leaderboard "Corridors" / "Rivals" tabs</div><div class="d">Permanent empty placeholders — the road-trends fix fills these.</div></div></div>
         <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">Four deploy pipelines → one</div><div class="d">Netlify and Vercel are retired — <b>Cloudflare Pages is the sole host</b>. The <code>/api/*</code> functions, admin dashboard and signup capture all moved to Cloudflare Pages Functions; the Netlify configs/functions/deploy workflow and <code>vercel.json</code> are gone. (If the Netlify/Vercel git integrations are still linked on those platforms, unlink them there to stop the duplicate builds — repo-side there's nothing left for them to build.)</div></div></div>
-        <div class="row"><span class="pill p-flag">Debt</span><div class="body"><div class="t">Deleting a drive is local-only</div><div class="d">Delete removes the drive from the phone and fixes the local overall score, but the copy in Supabase stays — so the <b>operator dashboard and the digest still count deleted drives</b>. Next: have delete also remove the row from the cloud so a cleanup actually cleans the data.</div></div></div>
+        <div class="row"><span class="pill p-flag">Debt</span><div class="body"><div class="t">Deleting a drive is local-only</div><div class="d">Delete removes the drive from the phone and fixes the local overall score, but the copy in Supabase stays — so the <b>operator dashboard still counts deleted drives</b>. Next: have delete also remove the row from the cloud so a cleanup actually cleans the data.</div></div></div>
       </div>
       <div class="card full">
         <div class="row"><span class="pill p-ship">Fixed</span><div class="body"><div class="t">Drives come back down again</div><div class="d">The app only ever pushed, so a reinstall showed an empty history while the data sat safely in the cloud. Restore now works two ways: signed in it pulls everything the account owns across every device, and signed out it still recovers this device&rsquo;s own drives. Your <b>122 drives / 403 mi</b> are claimed to your account.</div></div></div>

@@ -181,55 +181,6 @@ export function summarizeFlags(events) {
   return out;
 }
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
-
-/**
- * The end-of-day digest: all-time totals plus today's deltas, with "today"
- * bounded in the owner's local day via a fixed UTC offset (in hours).
- *
- * Deliberately offset-based arithmetic rather than Intl named time zones: the
- * Cloudflare Workers runtime is unreliable with `Intl.DateTimeFormat`
- * timeZone/dateStyle, and a digest boundary that's an hour off across a DST
- * switch twice a year doesn't matter for daily counts. Aggregate only — counts
- * and sums, never a user row.
- */
-export function computeDailyDigest(users, drives, nowMs, tzOffsetHours = -6) {
-  const real = realDrives(drives);
-  const ov = computeOverview(users, drives, nowMs);
-  const rows = computeUserRows(users, drives);
-
-  const offsetMs = tzOffsetHours * 3600 * 1000;
-  const localNow = nowMs + offsetMs;                        // shift to local wall clock
-  const localMidnight = Math.floor(localNow / 864e5) * 864e5;
-  const dayStart = localMidnight - offsetMs;               // back to the real (UTC) instant
-  const ld = new Date(localMidnight);                      // its UTC Y/M/D are the local date
-
-  const todays = real.filter(d => d.start_time >= dayStart);
-  const milesToday = miles(todays.reduce((s, d) => s + (d.distance_meters || 0), 0));
-  const scoresToday = todays.map(d => d.score).filter(s => s != null);
-
-  return {
-    date: `${DAY_NAMES[ld.getUTCDay()]}, ${MONTH_NAMES[ld.getUTCMonth()]} ${ld.getUTCDate()}, ${ld.getUTCFullYear()}`,
-    tzOffsetHours,
-    // today
-    newDriversToday: rows.filter(r => r.firstSeen != null && r.firstSeen >= dayStart).length,
-    activeToday:     rows.filter(r => r.lastSeen != null && r.lastSeen >= dayStart).length,
-    drivesToday:     todays.length,
-    milesToday,
-    avgScoreToday:   scoresToday.length ? Math.round(scoresToday.reduce((a, b) => a + b, 0) / scoresToday.length) : null,
-    flagsToday:      todays.reduce((s, d) => s + (d.event_count || 0), 0),
-    // all-time
-    totalUsers:      ov.totalUsers,
-    totalDevices:    ov.totalDevices,
-    totalDrives:     ov.totalDrives,
-    totalMiles:      ov.totalMiles,
-    avgScore:        ov.avgScore,
-    activeUsers7d:   ov.activeUsers7d,
-  };
-}
-
 /**
  * Thin a drive's GPS samples to at most `max` [lat, lon] points, for plotting a
  * route overlay without shipping thousands of coordinates. Keeps the first and
