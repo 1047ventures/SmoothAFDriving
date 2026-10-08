@@ -80,7 +80,8 @@ ALL-TIME
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
       console.error('resend send failed:', res.status, detail);
-      return json(502, { ok: false, error: 'send_failed', digest });
+      let why = ''; try { why = JSON.parse(detail)?.message || ''; } catch { /* not JSON */ }
+      return json(502, { ok: false, error: 'send_failed', resend_status: res.status, resend_message: why.slice(0, 300), digest });
     }
   } catch (err) {
     console.error('resend error:', err.message);
