@@ -33,6 +33,14 @@ import { getPendingDestination } from './destination.js';
 // #rec-source label once GPS is live (Fix 1 + Fix 5).
 let motionActive = true;
 
+// iOS gates devicemotion behind DeviceMotionEvent.requestPermission(). Once the
+// user has granted it, the `devicemotion` listener startRecording() attaches
+// fires on its own — re-calling requestPermission() every drive was what popped
+// a permission alert at the start of EVERY drive. We now arm it at most once per
+// app launch (and only when we don't already have a stored grant), so a returning
+// driver never sees the prompt again.
+let motionArmedThisSession = false;
+
 export function requestMotionPermissionIfNeeded(){
   if (typeof DeviceMotionEvent !== 'undefined' &&
       typeof DeviceMotionEvent.requestPermission === 'function'){
@@ -661,10 +669,16 @@ export function wireStartButton(btnId){
     const needsPermission = typeof DeviceMotionEvent !== 'undefined' &&
                             typeof DeviceMotionEvent.requestPermission === 'function';
     if (needsPermission){
-      // Already granted before — call silently (iOS returns cached result)
+      // Already granted on a previous launch — never prompt again. Arm the
+      // devicemotion stream at most ONCE per app launch (some iOS builds need a
+      // single requestPermission() call per session to start firing events), then
+      // every later drive starts silently.
       if (motionPermGranted()){
         motionActive = true;
-        await requestMotionPermissionIfNeeded();
+        if (!motionArmedThisSession){
+          motionArmedThisSession = true;
+          await requestMotionPermissionIfNeeded();
+        }
         startRecording();
         return;
       }
@@ -672,6 +686,7 @@ export function wireStartButton(btnId){
       $('#perm-allow').onclick = async () => {
         $('#perm-modal').classList.add('hidden');
         const granted = await requestMotionPermissionIfNeeded();
+        motionArmedThisSession = true;
         motionActive = !!granted;
         // Fix 5: denial still proceeds (never block recording) but the user
         // should know scoring degrades to GPS-only.
