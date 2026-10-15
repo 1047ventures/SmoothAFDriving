@@ -23,15 +23,15 @@ struct SmoothAFWidgetLiveActivity: Widget {
             // ── Lock Screen ──────────────────────────────────────────────
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
+                    Text("\(context.state.speedMph)").font(.system(size: 34, weight: .bold, design: .serif)).italic().foregroundStyle(cream)
+                    Text("MPH").font(.system(size: 10, weight: .semibold)).kerning(1.5).foregroundStyle(.secondary)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
                     Text("SMOOTH AF").font(.system(size: 10, weight: .bold)).kerning(2).foregroundStyle(.secondary)
                     Text("\(context.state.score)")
                         .font(.system(size: 42, weight: .bold, design: .serif)).italic()
                         .foregroundStyle(scoreColor(context.state.status))
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("\(context.state.speedMph)").font(.system(size: 34, weight: .bold, design: .serif)).italic().foregroundStyle(cream)
-                    Text("MPH").font(.system(size: 10, weight: .semibold)).kerning(1.5).foregroundStyle(.secondary)
                 }
             }
             .padding(.horizontal, 18).padding(.vertical, 14)
@@ -42,21 +42,21 @@ struct SmoothAFWidgetLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 1) {
+                        Text("mph").font(.system(size: 11)).foregroundStyle(.secondary)
+                        Text("\(context.state.speedMph)").font(.system(size: 24, weight: .bold, design: .serif)).italic().foregroundStyle(cream)
+                    }
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    VStack(alignment: .trailing, spacing: 1) {
                         Text("Smooth").font(.system(size: 11)).foregroundStyle(.secondary)
                         Text("\(context.state.score)").font(.system(size: 24, weight: .bold, design: .serif)).italic()
                             .foregroundStyle(scoreColor(context.state.status))
                     }
                 }
-                DynamicIslandExpandedRegion(.trailing) {
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text("mph").font(.system(size: 11)).foregroundStyle(.secondary)
-                        Text("\(context.state.speedMph)").font(.system(size: 24, weight: .bold, design: .serif)).italic().foregroundStyle(cream)
-                    }
-                }
             } compactLeading: {
-                Text("\(context.state.score)").font(.system(size: 15, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
-            } compactTrailing: {
                 Text("\(context.state.speedMph)").font(.system(size: 15, weight: .bold)).foregroundStyle(cream)
+            } compactTrailing: {
+                Text("\(context.state.score)").font(.system(size: 15, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
             } minimal: {
                 Text("\(context.state.score)").font(.system(size: 13, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
             }
