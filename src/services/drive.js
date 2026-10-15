@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, CFG } from '../constants.js';
+import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, CFG, RESCORE_VERSION, RESCORE_DONE_KEY } from '../constants.js';
 import {
   loadDrives,
   saveDrive,
@@ -386,4 +386,46 @@ export async function restoreDrivesForUser(){
   const result = mergeCloudDrives(rows);
   if (result.added > 0) recomputeLifetimeScore();
   return { ...result, fetched: rows.length };
+}
+
+/**
+ * One-time rescore: when the scoring engine changes, re-run analyzeDrive over
+ * every stored drive that still has its GPS samples, so the user's history and
+ * lifetime score reflect the current engine instead of whatever it was scored
+ * under at the time.
+ *
+ * Deliberately conservative:
+ *  - Only drives WITH samples are touched. localStorage sheds samples from the
+ *    oldest drives under quota, and analyzeDrive falls back to a neutral score
+ *    without them — rescoring those would REPLACE a real historical score with a
+ *    guess, so we leave them exactly as they were.
+ *  - Runs once per RESCORE_VERSION (a flag in localStorage), so it's a no-op on
+ *    every launch after the first and costs nothing.
+ *
+ * Returns a summary (or null if already current) — handy for a one-line log.
+ */
+export function rescoreStoredDrives(){
+  let done = 0;
+  try { done = Number(localStorage.getItem(RESCORE_DONE_KEY)) || 0; } catch {}
+  if (done >= RESCORE_VERSION) return null;
+
+  const drives = loadDrives();
+  let rescored = 0, changed = 0, delta = 0;
+  for (const d of drives){
+    if (!d.samples || !d.samples.length) continue;   // can't fairly rescore — leave it
+    const before = d.score;
+    const a = analyzeDrive(d);
+    const next = Math.round(a.score);
+    if (a.dims) d.dims = a.dims;
+    d.score = next;
+    rescored++;
+    if (before != null && next !== before){ changed++; delta += next - before; }
+  }
+
+  saveDrives(drives);
+  recomputeLifetimeScore();
+  try { localStorage.setItem(RESCORE_DONE_KEY, String(RESCORE_VERSION)); } catch {}
+
+  const avgDelta = changed ? +(delta / changed).toFixed(1) : 0;
+  return { rescored, changed, avgDelta };
 }

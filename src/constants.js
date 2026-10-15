@@ -26,6 +26,10 @@ export const PROFILE_SYNCED_KEY = 'smoothaf.profile_synced';
 export const CAR_PROMPTED_KEY   = 'smoothaf.car_prompted';
 export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
+// Bumped when the scoring engine changes enough to warrant rescoring stored
+// drives in place. rescoreStoredDrives() runs once per new value.
+export const RESCORE_VERSION     = 2;
+export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
 export const SHARE_PROMPTED_KEY = 'smoothaf.share_prompted';
