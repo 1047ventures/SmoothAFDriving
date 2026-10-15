@@ -28,36 +28,45 @@ function forgetDevice(){
 }
 
 /**
- * The shippable half of auto-start: when the car's dongle links up while the app
- * is open, offer to start the drive with one tap — so a dongle user doesn't have
- * to remember. (Nudging when the app is *closed* needs iOS background modes +
- * local notifications; that's the native tier, speced separately.)
+ * Auto-start: when the car's dongle links up (silent reconnect, or a manual
+ * connect) while the app is open and no drive is running, just START the drive —
+ * the dongle is only powered when the car is, so a link is a strong "we're
+ * driving" signal and the driver shouldn't have to remember to tap.
  *
- * Unobtrusive by design: a dismissable banner, never a wall, suppressed if a
- * drive is already running and not re-shown within a few minutes.
+ * Safety net instead of a confirm: start first, then show a dismissable "Drive
+ * started — Stop?" banner for a few seconds, so a false start (plugged in but
+ * not actually driving) is one tap to undo. A 4-minute guard stops a flapping
+ * Bluetooth link (drop + reconnect) from restarting a drive the user just ended.
+ * (Starting while the app is *closed* needs iOS background modes + local
+ * notifications — the native tier, speced separately.)
  */
-let lastNudgeAt = 0;
-function nudgeStartDrive(){
+let lastAutoStartAt = 0;
+function autoStartDrive(){
   if (state.recording) return;
   if (document.getElementById('obd-nudge')) return;
   const startBtn = document.getElementById('btn-start');
   if (!startBtn) return;
   const now = Date.now();
-  if (now - lastNudgeAt < 4 * 60 * 1000) return;   // don't re-nag within 4 min
-  lastNudgeAt = now;
+  if (now - lastAutoStartAt < 4 * 60 * 1000) return;   // don't restart after a link flap
+  lastAutoStartAt = now;
+
+  startBtn.click();   // begin the drive immediately
 
   const bar = document.createElement('div');
   bar.id = 'obd-nudge';
   bar.className = 'obd-nudge';
   bar.innerHTML =
-    '<span class="obd-nudge-txt">Car linked &mdash; start your drive?</span>' +
-    '<button class="obd-nudge-go" type="button">Start</button>' +
+    '<span class="obd-nudge-txt">Drive started &mdash; car linked</span>' +
+    '<button class="obd-nudge-go" type="button">Stop</button>' +
     '<button class="obd-nudge-x" type="button" aria-label="Dismiss">&times;</button>';
   document.body.appendChild(bar);
   requestAnimationFrame(() => bar.classList.add('in'));
 
   const dismiss = () => { bar.classList.remove('in'); setTimeout(() => bar.remove(), 260); };
-  bar.querySelector('.obd-nudge-go').addEventListener('click', () => { dismiss(); startBtn.click(); });
+  bar.querySelector('.obd-nudge-go').addEventListener('click', () => {
+    dismiss();
+    document.getElementById('btn-stop')?.click();   // undo the auto-start
+  });
   bar.querySelector('.obd-nudge-x').addEventListener('click', dismiss);
   // Auto-retire so it never lingers into the drive.
   setTimeout(() => { if (document.body.contains(bar)) dismiss(); }, 11000);
@@ -146,6 +155,45 @@ function renderReadout(){
 }
 
 /**
+ * The live OBD strip on the *driving* screen — not the Sensors panel. Only the
+ * handful of channels worth a glance mid-drive, in priority order, and only the
+ * ones this car actually reports (capped so it never clutters). The full
+ * diagnostic readout still lives in the Sensors panel.
+ *
+ * Relevance call: RPM (tach feel), HP (the fun one), coolant (the one live
+ * health gauge that means "pull over"), then boost/torque on cars that offer
+ * them. Everything else — intake/ambient temp, baro, timing, MAF, fuel %,
+ * voltage, load, throttle — is diagnostic, not driving feedback, so it stays out.
+ */
+const LIVE_STRIP = [
+  { key: 'rpm',        label: 'rpm',   unit: '',  dp: 0 },
+  { key: 'horsepower', label: 'hp',    unit: '',  dp: 0 },
+  { key: 'coolant',    label: 'temp',  unit: '°', dp: 0 },
+  { key: 'map',        label: 'boost', unit: '',  dp: 0 },
+  { key: 'torqueNm',   label: 'nm',    unit: '',  dp: 0 },
+];
+const LIVE_STRIP_MAX = 4;
+
+function renderLiveStrip(){
+  const node = el('obd-live');
+  if (!node) return;
+  if (!isConnected()){ node.classList.add('hidden'); node.innerHTML = ''; return; }
+
+  const L = getLatest();
+  const cells = [];
+  for (const m of LIVE_STRIP){
+    const v = L[m.key];
+    if (v == null) continue;
+    const val = m.dp ? v.toFixed(m.dp) : Math.round(v);
+    cells.push(`<span class="obdl-cell"><b>${val}${m.unit}</b><i>${m.label}</i></span>`);
+    if (cells.length >= LIVE_STRIP_MAX) break;
+  }
+  if (!cells.length){ node.classList.add('hidden'); node.innerHTML = ''; return; }
+  node.innerHTML = cells.join('');
+  node.classList.remove('hidden');
+}
+
+/**
  * Push the car's own numbers onto shared state.
  *
  * Kept as a plain assignment rather than routed into scoring yet: the readings
@@ -184,7 +232,7 @@ function startPolling(){
   stopPolling();
   timer = setInterval(async () => {
     if (!isConnected()){ setPill(false); return stopPolling(); }
-    try { await poll(); publish(); renderReadout(); setPill(true); }
+    try { await poll(); publish(); renderReadout(); renderLiveStrip(); setPill(true); }
     catch { /* a dropped frame is not worth interrupting a drive over */ }
   }, POLL_MS);
 }
@@ -312,7 +360,7 @@ async function connectChosen(deviceId, name){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-    nudgeStartDrive();
+    autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
       ? 'That device isn’t an OBD adapter'
@@ -339,7 +387,7 @@ async function useSystemPicker(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-    nudgeStartDrive();
+    autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'no device chosen'
       ? 'No device selected.'
@@ -361,6 +409,7 @@ async function onConnectClick(){
     forgetDevice();
     setStatus('Disconnected');
     renderReadout();
+    renderLiveStrip();
     setPill(false);
     const btn = el('obd-connect');
     if (btn) btn.textContent = 'Connect OBD';
@@ -400,7 +449,7 @@ async function autoReconnect(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-    nudgeStartDrive();
+    autoStartDrive();
   } catch {
     // Don't nag or forget — the dongle may just not be powered yet. Next launch
     // (or a manual tap) tries again.
@@ -420,6 +469,7 @@ export function wireObdPanel(){
   });
   el('obd-scan-fallback')?.addEventListener('click', useSystemPicker);
   renderReadout();
+  renderLiveStrip();
   setPill(isConnected());
   // Try the remembered adapter in the background — the whole point is that the
   // driver doesn't have to think about it. One attempt at launch isn't enough: the

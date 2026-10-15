@@ -233,6 +233,15 @@
   .bot-val--time{font-variant-numeric:tabular-nums}
   .bot-unit{font-family:var(--sans);font-style:normal;font-size:13px;color:rgba(244,235,217,.86)}
 
+  /* Live OBD strip — the few car channels worth a glance mid-drive. Sits in the
+     gap between the Stops|Miles|Time row and the End Drive button; only shown
+     when the dongle is connected (JS toggles .hidden). */
+  .obd-live{position:absolute;left:0;right:0;z-index:11;bottom:calc(env(safe-area-inset-bottom,0) + 74px);display:flex;justify-content:center;flex-wrap:wrap;gap:4px 20px;padding:0 20px;pointer-events:none}
+  .obd-live.hidden{display:none}
+  .obdl-cell{display:inline-flex;align-items:baseline;gap:5px}
+  .obdl-cell b{font-family:var(--serif);font-style:italic;font-weight:700;font-size:19px;color:var(--cream);line-height:1;letter-spacing:-.02em}
+  .obdl-cell i{font-family:var(--sans);font-style:normal;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.6)}
+
   /* event ticker + stop button */
   .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 112px);display:flex;justify-content:center;align-items:center;pointer-events:none}
   .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
