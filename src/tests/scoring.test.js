@@ -96,6 +96,38 @@ describe('smoothness calibration — ordinary town driving is not "violent"', ()
   });
 });
 
+describe('throttle smoothness — the OBD pedal-input half of smoothness', () => {
+  // Same calm longitudinal profile for all three (la/speed identical), so only the
+  // throttle channel differs — isolating what the fusion does.
+  const base = (thrFn) => ({
+    samples: Array.from({ length: 60 }, (_, i) => ({
+      t: i * 1000, lat: 39.7 + i * 0.0001, lon: -104.9,
+      speed: 10, la: 0.1, ra: 0.05, h: 0.3, ...(thrFn(i)),
+    })),
+    events: [], durationMs: 60000, distanceMeters: 1000, topSpeedMps: 15,
+  });
+  const gentle = base(i => ({ thr: 20 + i * 0.5 }));   // ~0.5 %/s — a progressive squeeze
+  const stabby = base(i => ({ thr: i % 2 ? 55 : 10 })); // ~45 %/s — flip-flopping the pedal
+  const noThr  = base(() => ({}));                      // GPS / no-OBD drive
+
+  it('reports smoothThrottle only when the drive carried throttle data', () => {
+    expect(analyzeDrive(gentle).smoothThrottle).toBeGreaterThan(90);
+    expect(analyzeDrive(noThr).smoothThrottle).toBeNull();
+  });
+
+  it('a progressive pedal scores high, stabbing scores low', () => {
+    const g = analyzeDrive(gentle), s = analyzeDrive(stabby);
+    expect(g.smoothThrottle).toBeGreaterThan(90);
+    expect(s.smoothThrottle).toBeLessThan(20);
+    expect(g.dims.smoothness).toBeGreaterThan(s.dims.smoothness);
+  });
+
+  it('stabbing the throttle costs smoothness vs the same drive with no OBD', () => {
+    expect(analyzeDrive(stabby).dims.smoothness)
+      .toBeLessThan(analyzeDrive(noThr).dims.smoothness);
+  });
+});
+
 describe('getDriverPersona', () => {
   it('returns null for fewer than 2 drives', () => {
     expect(getDriverPersona([])).toBeNull();

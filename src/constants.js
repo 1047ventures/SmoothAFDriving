@@ -28,7 +28,7 @@ export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 // Bumped when the scoring engine changes enough to warrant rescoring stored
 // drives in place. rescoreStoredDrives() runs once per new value.
-export const RESCORE_VERSION     = 2;
+export const RESCORE_VERSION     = 3;
 export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
@@ -145,6 +145,13 @@ export const SMOOTH_LA_LO    = 0.30; // p85 |longitudinal accel| (m/s²) scoring
 export const SMOOTH_LA_HI    = 2.5;  // p85 |longitudinal accel| scoring 0
 export const SMOOTH_JERK_LO  = 0.05; // mean |jerk| (m/s³) scoring 100
 export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
+// Throttle smoothness — the driver-input half the phone can't see. From the OBD
+// throttle/pedal channel, p85 of |Δthrottle/dt| in %/s: a progressive squeeze is
+// gentle, stabbing the pedal spikes it. Calibrated to real drives (gentle runs
+// sit at p85 2–5.5 %/s; genuine stabbing runs far higher). Only applies when the
+// drive actually carried throttle data — GPS-only drives are untouched.
+export const SMOOTH_THR_LO   = 2;    // p85 |Δthrottle/dt| (%/s) scoring 100
+export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
 export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
 
 // Speed difficulty multiplier: holding the car smooth at speed is harder than at

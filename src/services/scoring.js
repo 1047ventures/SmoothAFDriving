@@ -14,6 +14,8 @@ import {
   SMOOTH_LA_HI,
   SMOOTH_JERK_LO,
   SMOOTH_JERK_HI,
+  SMOOTH_THR_LO,
+  SMOOTH_THR_HI,
   MOMENTUM_STOP_MAX,
   SPEED_DIFF_LO_MPH,
   SPEED_DIFF_HI_MPH,
@@ -70,11 +72,40 @@ export function analyzeDrive(drive){
     ? clamp(linMap(pct(rrVals, 85), RIDE_RR_LO, RIDE_RR_HI, 100, 0), 0, 100)
     : null;
 
-  // With a ride measurement, composure is a full quarter of smoothness — a rough
-  // ride visibly costs. Without it, the two pedal-based signals carry smoothness.
-  const smoothness = hasRide
-    ? Math.round(0.40 * smoothLong + 0.30 * smoothJerk + 0.30 * rideComposure)
-    : Math.round(0.60 * smoothLong + 0.40 * smoothJerk);
+  // Throttle smoothness — the one input the phone can't see: how you work the
+  // pedal. From the OBD throttle/pedal channel (`thr`), p85 of |Δthrottle/dt| —
+  // a progressive squeeze stays low, stabbing the pedal spikes it. Brake and
+  // steering deliberately aren't here: they're not OBD signals (brake pedal has
+  // no standard PID, steering angle lives on manufacturer CAN), and we already
+  // score their *outcome* — decel and lateral-g — from the phone. Present only
+  // when the drive carried throttle, so GPS-only drives are completely untouched.
+  const thrRates = [];
+  for (let i = 1; i < n; i++){
+    if ((smp[i].speed || 0) <= 2) continue;
+    const a = smp[i-1].thr, b = smp[i].thr;
+    if (a == null || b == null) continue;
+    const dt = Math.max(0.1, (smp[i].t - smp[i-1].t) / 1000);
+    thrRates.push(Math.abs(b - a) / dt);
+  }
+  const thrCount = moving.filter(s => s.thr != null).length;
+  const hasThrottle = thrCount >= Math.max(10, moving.length * 0.3) && thrRates.length > 0;
+  const smoothThrottle = hasThrottle
+    ? clamp(linMap(pct(thrRates.slice().sort((a,b) => a - b), 85), SMOOTH_THR_LO, SMOOTH_THR_HI, 100, 0), 0, 100)
+    : null;
+
+  // Smoothness fuses the signals the drive actually carried. Ride composure (when
+  // the phone was mounted) and throttle (when a dongle was connected) each take a
+  // slice; whatever's absent hands its weight back to the two always-present
+  // pedal signals, so a plain GPS drive scores exactly as it did before.
+  let smoothness;
+  if (hasRide && hasThrottle)
+    smoothness = Math.round(0.34 * smoothLong + 0.26 * smoothJerk + 0.26 * rideComposure + 0.14 * smoothThrottle);
+  else if (hasRide)
+    smoothness = Math.round(0.40 * smoothLong + 0.30 * smoothJerk + 0.30 * rideComposure);
+  else if (hasThrottle)
+    smoothness = Math.round(0.50 * smoothLong + 0.36 * smoothJerk + 0.14 * smoothThrottle);
+  else
+    smoothness = Math.round(0.60 * smoothLong + 0.40 * smoothJerk);
 
   // ── 2. Braking Anticipation — approach quality for each stop ─────────────
   const STOP_ENTRY = 2.2;
@@ -257,6 +288,7 @@ export function analyzeDrive(drive){
     transitionScore,
     speedBonus:      +speedBonus.toFixed(1),
     rideComposure,   // null on GPS-only drives (ride quality unmeasured)
+    smoothThrottle,  // null unless the drive carried OBD throttle data
     // extended
     peakBrakeG: brakeG.peak,  avgBrakeG: brakeG.avg,  peakBrakeEv: brakeG.peakEv,
     peakAccelG: accelG.peak,  avgAccelG: accelG.avg,  peakAccelEv: accelG.peakEv,
