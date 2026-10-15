@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**354 tasks shipped** as of 2026-10-08.
+**357 tasks shipped** as of 2026-10-14.
 
 
 ## 2026-04
@@ -374,3 +374,6 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T352** · iOS build: pass VITE_SPOTIFY_CLIENT_ID secret to web build  _( 2026-10-07 )_
 - **T353** · Spotify review fixes (single-flight refresh, 401 retry, wrap insight, revert on failure, stop cleanup); roadmap T351 + Spotify needs-you  _( 2026-10-07 )_
 - **T354** · daily-digest: return Resend's status + message on send failure so the run log says why  _( 2026-10-08 )_
+- **T355** · Scrap the nightly digest: remove workflow, /api/daily-digest, computeDailyDigest + test; drop its roadmap items  _( 2026-10-08 )_
+- **T356** · Live Activity: score+speed on Lock Screen / Dynamic Island (app side + staged native)  _( 2026-10-14 )_
+- **T357** · Live Activity: add SmoothAFWidget extension target (Dynamic Island) — builds + runs on sim  _( 2026-10-14 )_
