@@ -110,6 +110,8 @@
   .bar .n{font-size:12px;font-variant-numeric:tabular-nums;color:var(--cream);font-weight:600}
   .bar .m{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
   .chart-note{margin:2px 2px 0;font-size:12.5px;color:var(--muted)}
+  .linechart{margin:18px 0 2px}
+  .linechart svg{width:100%;height:auto;display:block;overflow:visible}
   .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
   @media(max-width:560px){.nums{grid-template-columns:repeat(2,1fr)}.nums .cell:last-child{grid-column:1/-1}}
   .nums .cell{background:var(--panel);padding:13px 10px;text-align:center}
@@ -126,7 +128,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 14, 2026 · 9:40 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 12:52 AM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -377,6 +379,28 @@
         <div class="bar"><span class="n">37</span><div class="col" style="height:33%"></div><span class="m">Oct</span></div>
       </div>
       <p class="chart-note">Tasks shipped per month &mdash; the big May/June build-out, then steadier feature work. 357 total.</p>
+      <div class="linechart">
+        <svg viewBox="0 0 320 142" role="img" aria-label="Cumulative tasks over time, climbing to 357: April 5, May 102, June 214, July 232, August 294, September 320, October 357">
+          <defs>
+            <linearGradient id="lcfill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#E85D3A" stop-opacity="0.32"/>
+              <stop offset="1" stop-color="#E85D3A" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="20" y1="120" x2="300" y2="120" stroke="rgba(242,232,213,.12)" stroke-width="1"/>
+          <polygon fill="url(#lcfill)" points="20,118.5 66.7,90 113.3,57.1 160,51.8 206.7,33.5 253.3,25.9 300,15 300,120 20,120"/>
+          <polyline fill="none" stroke="#E85D3A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="20,118.5 66.7,90 113.3,57.1 160,51.8 206.7,33.5 253.3,25.9 300,15"/>
+          <g fill="#F2E8D5" stroke="#0A0908" stroke-width="2">
+            <circle cx="20" cy="118.5" r="3"/><circle cx="66.7" cy="90" r="3"/><circle cx="113.3" cy="57.1" r="3"/><circle cx="160" cy="51.8" r="3"/><circle cx="206.7" cy="33.5" r="3"/><circle cx="253.3" cy="25.9" r="3"/>
+          </g>
+          <circle cx="300" cy="15" r="4" fill="#C4A962" stroke="#0A0908" stroke-width="2"/>
+          <text x="300" y="8" text-anchor="end" font-family="Georgia,serif" font-style="italic" font-size="13" fill="#C4A962">357</text>
+          <g font-family="-apple-system,sans-serif" font-size="9" fill="#7A7060" text-anchor="middle">
+            <text x="20" y="135">Apr</text><text x="66.7" y="135">May</text><text x="113.3" y="135">Jun</text><text x="160" y="135">Jul</text><text x="206.7" y="135">Aug</text><text x="253.3" y="135">Sep</text><text x="300" y="135">Oct</text>
+          </g>
+        </svg>
+      </div>
+      <p class="chart-note">Cumulative total &mdash; the climb to 357 tasks shipped.</p>
       <div class="nums">
         <div class="cell"><span class="v">2</span><span class="k">Returning<br>drivers &#9733;</span></div>
         <div class="cell"><span class="v">5</span><span class="k">Active<br>7 days</span></div>
