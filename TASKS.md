@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**362 tasks shipped** as of 2026-10-15.
+**363 tasks shipped** as of 2026-10-15.
 
 
 ## 2026-04
@@ -382,3 +382,4 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T360** · OBD: auto-start the drive on connect + live PID strip on the driving screen  _( 2026-10-15 )_
 - **T361** · Scoring: one-time rescore of stored drives under the current engine  _( 2026-10-15 )_
 - **T362** · Driving screen: restore Avg MPH stat + add iOS background-location purpose string  _( 2026-10-15 )_
+- **T363** · Scoring (Q5): fuse OBD throttle rate into the smoothness dimension  _( 2026-10-15 )_

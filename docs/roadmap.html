@@ -128,7 +128,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 2:55 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 3:05 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -159,6 +159,10 @@
     <summary><h2>Just shipped</h2><span class="count">newest first</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
+        <summary><span class="tag t-ship tn">T363</span><span class="ent-t">Your throttle foot is now part of the score</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The OBD throttle channel &mdash; how you work the pedal &mdash; now feeds the <b>smoothness</b> score: a progressive squeeze reads smooth, stabbing the pedal costs you. It&rsquo;s the one input the phone can&rsquo;t see. Brake and steering stay out on purpose &mdash; neither is a real OBD signal, and the phone already scores their <i>result</i> (braking g, cornering g) better than the pedal/wheel position would. Only touches drives that had a dongle connected; GPS-only drives are unchanged.</div>
+      </details>
+      <details class="ent">
         <summary><span class="tag t-ship tn">T362</span><span class="ent-t">Avg MPH is back &middot; App Store location fix</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Avg MPH returns to the live stats bar (Stops &middot; Miles &middot; Avg &middot; Time) &mdash; it was quietly dropped in the driving-screen makeover. And the iOS build now carries the background-location purpose string App Store Connect flagged (ITMS-90683), so the next upload is clean.</div>
       </details>
@@ -169,10 +173,6 @@
       <details class="ent">
         <summary><span class="tag t-ship tn">T360</span><span class="ent-t">OBD auto-starts the drive &middot; live gauges on screen</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">When the dongle links up, the drive just <b>starts</b> &mdash; no tapping, with a one-tap undo if it jumps early. And the channels worth a glance (RPM, HP, coolant, boost) now show <b>right on the driving screen</b> whenever OBD&rsquo;s connected; the full diagnostic set still lives in Sensors.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T359</span><span class="ent-t">Spotify is live</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The public PKCE Client ID is wired in, so <b>Connect Spotify</b> now works on web and iOS &mdash; track + &#9825; / play-pause / next on the insight line. Redirect URIs registered; play/pause/next need Premium.</div>
       </details>
       <p class="chart-note" style="margin-top:12px">The full chronological log lives under <a href="#ms">Major milestones</a>.</p>
     </div>
@@ -195,34 +195,30 @@
 
   <!-- ══ UP NEXT ══ -->
   <details class="sec">
-    <summary><h2>Up next</h2><span class="count">7 queued</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Up next</h2><span class="count">6 queued</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent" id="un-q5">
-        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">OBD readings into the score</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Throttle &amp; torque &mdash; the dongle&rsquo;s validated (it auto-connects and its gauges read), so this is clear to start.</div>
-      </details>
       <details class="ent" id="un-q6">
-        <summary><span class="tag t-next tn">Q6</span><span class="ent-t">Car Health: fault codes</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Car Health: fault codes</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Mode-03 read &mdash; the Concierge unlock (<a href="#vis-health">Vision &rarr; Car Health</a>).</div>
       </details>
       <details class="ent" id="un-q7">
-        <summary><span class="tag t-next tn">Q7</span><span class="ent-t">Maps handoff, recording survives</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q6</span><span class="ent-t">Maps handoff, recording survives</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Needs <a href="#ip-q3">Q3</a> confirmed on a real drive.</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-next tn">Q8</span><span class="ent-t">Closed-app auto-start nudge</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q7</span><span class="ent-t">Closed-app auto-start nudge</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">A notification when a drive starts &mdash; needs <a href="#ip-q3">Q3</a>.</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-next tn">Q9</span><span class="ent-t">Goals</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q8</span><span class="ent-t">Goals</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Pick goals that tune how the app coaches you.</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-next tn">Q10</span><span class="ent-t">Home-screen cleanup</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q9</span><span class="ent-t">Home-screen cleanup</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Link Miles &rarr; Trends, delete the dead persona markup. Not urgent.</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-next tn">Q11</span><span class="ent-t">Car-icon redesign</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q10</span><span class="ent-t">Car-icon redesign</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The current set isn&rsquo;t it. Not urgent.</div>
       </details>
     </div>
@@ -285,7 +281,7 @@
       <p class="sec-note">One honest app for your whole drive, keyed to the car you&rsquo;re actually in. The map gets you there, the score makes you want to be smooth, the coach makes you good at it. OBD isn&rsquo;t a feature &mdash; it&rsquo;s the platform underneath.</p>
       <details class="ent" id="vis-health">
         <summary><span class="tag t-next">Unlock</span><span class="ent-t">Car Health &mdash; codes read every drive</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Every drive quietly scans for fault codes (OBD <b>Mode 03</b> &mdash; universal since &rsquo;96). A code pops &rarr; a plain-English alert <i>before</i> the dashboard light &rarr; a DIY video, or a local mobile mechanic. <b>Free:</b> scan + basic alert. <b>Paid:</b> proactive heads-up, a maintenance timeline keyed to your mileage, seasonal tips &mdash; the recurring-revenue line. Built in <a href="#un-q6">Q6</a>.</div>
+        <div class="ent-body">Every drive quietly scans for fault codes (OBD <b>Mode 03</b> &mdash; universal since &rsquo;96). A code pops &rarr; a plain-English alert <i>before</i> the dashboard light &rarr; a DIY video, or a local mobile mechanic. <b>Free:</b> scan + basic alert. <b>Paid:</b> proactive heads-up, a maintenance timeline keyed to your mileage, seasonal tips &mdash; the recurring-revenue line. Built in <a href="#un-q6">Q5</a>.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-next">Phase 2</span><span class="ent-t">Vehicle-aware directions</span><span class="ent-chev">&#9654;</span></summary>
@@ -339,7 +335,7 @@
         <div class="ent-body">Drives group by <b>road corridor</b>, so the same route is one entry &mdash; groundwork for &ldquo;are you getting smoother on your commute.&rdquo;</div>
       </details>
       <details class="ent">
-        <summary><span class="ent-t">The full chronological log</span><span class="when">362 tasks</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="ent-t">The full chronological log</span><span class="when">363 tasks</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Highlights: OBD reads 9 more channels (Sep 28) &middot; scoring rebuilt (Sep 28) &middot; GPS tracks locked down, leaderboard derived server-side (Aug) &middot; the car&rsquo;s numbers recorded into every drive (Aug 19) &middot; honest traffic-aware ETAs (Aug 16) &middot; real accounts + cloud restore (Aug 15) &middot; native iOS shell &amp; running on a real phone (Aug 13) &middot; Destination Drive, the HUD, corridor dedupe, the composite score (earlier). The exhaustive list lives in <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</div>
       </details>
     </div>
@@ -347,20 +343,20 @@
 
   <!-- ══ PROGRESS OVER THE MONTHS ══ -->
   <details class="sec">
-    <summary><h2>Progress over the months</h2><span class="count">362 tasks</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Progress over the months</h2><span class="count">363 tasks</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <div class="chart" role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 42">
+      <div class="chart" role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 43">
         <div class="bar"><span class="n">5</span><div class="col" style="height:5%"></div><span class="m">Apr</span></div>
         <div class="bar"><span class="n">97</span><div class="col" style="height:87%"></div><span class="m">May</span></div>
         <div class="bar"><span class="n">112</span><div class="col peak" style="height:100%"></div><span class="m">Jun</span></div>
         <div class="bar"><span class="n">18</span><div class="col" style="height:16%"></div><span class="m">Jul</span></div>
         <div class="bar"><span class="n">62</span><div class="col" style="height:55%"></div><span class="m">Aug</span></div>
         <div class="bar"><span class="n">26</span><div class="col" style="height:23%"></div><span class="m">Sep</span></div>
-        <div class="bar"><span class="n">42</span><div class="col" style="height:38%"></div><span class="m">Oct</span></div>
+        <div class="bar"><span class="n">43</span><div class="col" style="height:39%"></div><span class="m">Oct</span></div>
       </div>
-      <p class="chart-note">Tasks shipped per month &mdash; the big May/June build-out, then steadier feature work. 362 total.</p>
+      <p class="chart-note">Tasks shipped per month &mdash; the big May/June build-out, then steadier feature work. 363 total.</p>
       <div class="linechart">
-        <svg viewBox="0 0 320 142" role="img" aria-label="Cumulative tasks over time, climbing to 362: April 5, May 102, June 214, July 232, August 294, September 320, October 362">
+        <svg viewBox="0 0 320 142" role="img" aria-label="Cumulative tasks over time, climbing to 363: April 5, May 102, June 214, July 232, August 294, September 320, October 363">
           <defs>
             <linearGradient id="lcfill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stop-color="#E85D3A" stop-opacity="0.32"/>
@@ -374,13 +370,13 @@
             <circle cx="20" cy="118.5" r="3"/><circle cx="66.7" cy="90" r="3"/><circle cx="113.3" cy="57.1" r="3"/><circle cx="160" cy="51.8" r="3"/><circle cx="206.7" cy="33.5" r="3"/><circle cx="253.3" cy="25.9" r="3"/>
           </g>
           <circle cx="300" cy="15" r="4" fill="#C4A962" stroke="#0A0908" stroke-width="2"/>
-          <text x="300" y="8" text-anchor="end" font-family="Georgia,serif" font-style="italic" font-size="13" fill="#C4A962">362</text>
+          <text x="300" y="8" text-anchor="end" font-family="Georgia,serif" font-style="italic" font-size="13" fill="#C4A962">363</text>
           <g font-family="-apple-system,sans-serif" font-size="9" fill="#7A7060" text-anchor="middle">
             <text x="20" y="135">Apr</text><text x="66.7" y="135">May</text><text x="113.3" y="135">Jun</text><text x="160" y="135">Jul</text><text x="206.7" y="135">Aug</text><text x="253.3" y="135">Sep</text><text x="300" y="135">Oct</text>
           </g>
         </svg>
       </div>
-      <p class="chart-note">Cumulative total &mdash; the climb to 362 tasks shipped.</p>
+      <p class="chart-note">Cumulative total &mdash; the climb to 363 tasks shipped.</p>
       <div class="nums">
         <div class="cell"><span class="v">2</span><span class="k">Returning<br>drivers &#9733;</span></div>
         <div class="cell"><span class="v">5</span><span class="k">Active<br>7 days</span></div>
