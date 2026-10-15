@@ -9,7 +9,9 @@
  * Everything network-facing takes `fetch` from globalThis so tests can mock it.
  */
 export const SPOTIFY = {
-  CLIENT_ID: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SPOTIFY_CLIENT_ID) || '',
+  // Public PKCE client ID — safe to ship (no secret). The env var still overrides
+  // it (e.g. to point a preview build at a different Spotify app).
+  CLIENT_ID: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SPOTIFY_CLIENT_ID) || 'bb5f0ea7e1974f21b489878949e1da47',
   NATIVE_REDIRECT: 'com.smoothafdriving.app://spotify',
   SCOPES: 'user-read-playback-state user-modify-playback-state user-library-read user-library-modify',
   AUTH_URL: 'https://accounts.spotify.com/authorize',
