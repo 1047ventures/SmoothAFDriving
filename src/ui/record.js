@@ -19,6 +19,7 @@ import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/auto
 import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
 import { hudStart, hudStop, hudTick } from './hud.js';
 import { musicStart, musicStop } from './music.js';
+import { startDriveActivity, updateDriveActivity, endDriveActivity } from '../services/liveActivity.js';
 import { isConnected as isObdConnected } from '../services/obd.js';
 import { showCarPromptIfNeeded } from './modals.js';
 import { runPostDrivePrompts } from './postdrive.js';
@@ -280,6 +281,10 @@ export function updateLiveUI(){
     if (scoreEl) scoreEl.textContent = state.liveScore;
   }
 
+  // Push the live score + speed to the Lock Screen / Dynamic Island (throttled
+  // inside the service; no-op off native iOS).
+  updateDriveActivity({ score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) });
+
   // Arc gauge: fill dashoffset from score, color + glow from driving state
   const arcProgress = document.getElementById('arc-progress');
   const arcSvg      = document.getElementById('arc-svg');
@@ -412,6 +417,7 @@ export function startRecording(){
   state.liveStops = 0; state.liveStopMarkers = [];
   hudStart();
   musicStart();
+  startDriveActivity({ score: state.liveScore || 100, speedMph: 0 }); // Lock Screen / Dynamic Island (iOS 16.1+ native only)
 
   if ('wakeLock' in navigator){
     navigator.wakeLock.request('screen')
@@ -544,6 +550,7 @@ export function stopRecording(opts){
   stopAutoEndWatch();
   hudStop();                 // persists a new personal-best streak
   musicStop();
+  endDriveActivity({ score: state.liveScore });
   clearActiveDrive();
   if (state.gpsWatchActive){
     stopLocationWatch();
