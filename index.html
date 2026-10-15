@@ -260,7 +260,7 @@
       </div>
     </div>
 
-    <!-- Bottom stats: Stops | Miles | Time -->
+    <!-- Bottom stats: Stops | Miles | Avg | Time -->
     <div class="rec-bottom">
       <div class="bot-stat bot-stat--center">
         <div class="bot-lbl">Stops</div>
@@ -272,10 +272,13 @@
         <div class="bot-val"><span id="live-distance">0.0</span><span class="bot-unit"> mi</span></div>
       </div>
       <div class="bot-stat bot-stat--center">
+        <div class="bot-lbl">Avg</div>
+        <div class="bot-val"><span id="live-avg-speed">0</span><span class="bot-unit"> mph</span></div>
+      </div>
+      <div class="bot-stat bot-stat--center">
         <div class="bot-lbl">Time</div>
         <div class="bot-val bot-val--time" id="live-time">0:00:00</div>
       </div>
-      <span id="live-avg-speed" style="display:none">0</span>
     </div>
 
     <!-- Live OBD strip: the few car channels worth a glance while driving.
