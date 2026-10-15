@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**357 tasks shipped** as of 2026-10-14.
+**362 tasks shipped** as of 2026-10-15.
 
 
 ## 2026-04
@@ -377,3 +377,8 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T355** · Scrap the nightly digest: remove workflow, /api/daily-digest, computeDailyDigest + test; drop its roadmap items  _( 2026-10-08 )_
 - **T356** · Live Activity: score+speed on Lock Screen / Dynamic Island (app side + staged native)  _( 2026-10-14 )_
 - **T357** · Live Activity: add SmoothAFWidget extension target (Dynamic Island) — builds + runs on sim  _( 2026-10-14 )_
+- **T358** · Live Activity: swap to Speed-left / Score-right across island (compact + expanded) and Lock Screen  _( 2026-10-15 )_
+- **T359** · Spotify: ship the public PKCE client ID as the default (env var still overrides)  _( 2026-10-15 )_
+- **T360** · OBD: auto-start the drive on connect + live PID strip on the driving screen  _( 2026-10-15 )_
+- **T361** · Scoring: one-time rescore of stored drives under the current engine  _( 2026-10-15 )_
+- **T362** · Driving screen: restore Avg MPH stat + add iOS background-location purpose string  _( 2026-10-15 )_
