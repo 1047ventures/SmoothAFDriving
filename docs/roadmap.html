@@ -17,8 +17,9 @@
   <details class="sec">; every entry under it is a collapsed <details class="ent">.
   The page opens to just the header + the section list. Links appear only where
   they help — external (TestFlight, dashboards) or internal (#ip-q4, #need-testflight).
-  Sections, in order: Needs You · Just Shipped · In Progress · Up Next · Key Files
-  · Mission · Vision · Major Milestones · Progress over the months · Bugs · Tech Debt.
+  Sections, in order: Needs You · Just Shipped · In Progress · The Plan Ahead
+  (four tracks, with the old Vision folded in) · Key Files · Mission · Major
+  Milestones · Progress over the months · Bugs · Tech Debt.
 -->
 <title>Smooth AF — Build Log & Roadmap</title>
 <style>
@@ -128,7 +129,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:26 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:45 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -184,7 +185,7 @@
     <div class="sec-body">
       <details class="ent" id="ip-q3">
         <summary><span class="tag t-prog tn">Q3</span><span class="ent-t">Background GPS</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Shipped; waiting on your real-drive check (<a href="#need-testflight">Needs you &rarr; TestFlight</a>). Fixes the sparse-GPS drives, and it&rsquo;s the keystone for <a href="#un-q7">the Maps handoff</a> and the Dynamic Island staying live.</div>
+        <div class="ent-body">Shipped; waiting on your real-drive check (<a href="#need-testflight">Needs you &rarr; TestFlight</a>). Fixes the sparse-GPS drives, and it&rsquo;s the keystone for the whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> and the Dynamic Island staying live.</div>
       </details>
       <details class="ent" id="ip-q4">
         <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours</span><span class="ent-chev">&#9654;</span></summary>
@@ -193,33 +194,35 @@
     </div>
   </details>
 
-  <!-- ══ UP NEXT ══ -->
+  <!-- ══ THE PLAN AHEAD ══ -->
   <details class="sec">
-    <summary><h2>Up next</h2><span class="count">6 queued</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>The plan ahead</h2><span class="count">4 tracks + polish</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent" id="un-q6">
-        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Car Health: fault codes</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Mode-03 read &mdash; the Concierge unlock (<a href="#vis-health">Vision &rarr; Car Health</a>).</div>
+      <p class="sec-note">One honest app for your whole drive, keyed to the car you&rsquo;re actually in &mdash; <b>Your Car&rsquo;s Concierge</b>. The map gets you there, the score makes you want to be smooth, the coach makes you good at it; OBD is the platform underneath, not a feature. The old &ldquo;Up next&rdquo; queue and the &ldquo;Vision&rdquo; list were the same four efforts at two distances &mdash; here they&rsquo;re one plan. Each track names its <b>next build</b> (with its Q-number) and where it leads.</p>
+
+      <details class="ent" id="trk-health">
+        <summary><span class="tag t-next">Track 1</span><span class="ent-t">Car Health &mdash; the Concierge engine &amp; the money line</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body"><b>Next build &middot; <span class="tn">Q5</span>:</b> read fault codes on every drive &mdash; OBD <b>Mode 03</b>, universal since &rsquo;96 &mdash; and raise a plain-English alert <i>before</i> the dashboard light.<br><b>Where it leads:</b> <b>free</b> = scan + basic alert; <b>paid</b> = proactive heads-up, a maintenance timeline keyed to your mileage, seasonal tips, and a tap through to a DIY video or a local mobile mechanic. This is the recurring-revenue line &mdash; and the reason OBD is the platform, not just a gauge.</div>
       </details>
-      <details class="ent" id="un-q7">
-        <summary><span class="tag t-next tn">Q6</span><span class="ent-t">Maps handoff, recording survives</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Needs <a href="#ip-q3">Q3</a> confirmed on a real drive.</div>
+
+      <details class="ent" id="trk-always">
+        <summary><span class="tag t-next">Track 2</span><span class="ent-t">The drive records itself &mdash; never babysit it</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Three builds, all riding on <a href="#ip-q3">Q3 background GPS</a> proving out on a real drive:<br>&bull; <b><span class="tn">Q6</span> Maps handoff</b> &mdash; recording survives when you switch to Apple/Google Maps.<br>&bull; <b><span class="tn">Q7</span> Closed-app auto-start</b> &mdash; a drive starts, and notifies you, without opening the app.<br>&bull; <b><span class="tn">Q8</span> Dongle wake</b> &mdash; the OBD powers up, the app wakes in the background (CoreBluetooth) and recording begins on its own. <i>The real version of the auto-start you asked for.</i><br><b>Goal:</b> you drive, it captures &mdash; app open, behind Maps, or never launched.</div>
       </details>
-      <details class="ent">
-        <summary><span class="tag t-next tn">Q7</span><span class="ent-t">Closed-app auto-start nudge</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">A notification when a drive starts &mdash; needs <a href="#ip-q3">Q3</a>.</div>
+
+      <details class="ent" id="trk-map">
+        <summary><span class="tag t-idea">Track 3</span><span class="ent-t">Be the drive layer &mdash; the map, keyed to your car</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The longer horizon, unlocked once the app owns the drive (Track&nbsp;2):<br>&bull; <b>Vehicle-aware directions</b> &mdash; no interstate shortcut when you&rsquo;re in an RV. Road-type avoidance works on Mapbox today; true RV-grade (bridge heights, weight limits) needs a specialized API.<br>&bull; <b>Popular &amp; scenic routes nearby</b> &mdash; a reason to open the app when you&rsquo;re <i>not</i> just commuting.<br>&bull; <b>Contextual services</b> &mdash; gas, EV chargers, parking, surfaced only when they help (low tank, nearing your stop) then out of the way. EV chargers are a free API, parking has partner APIs, gas pricing is the paid one.</div>
       </details>
-      <details class="ent">
-        <summary><span class="tag t-next tn">Q8</span><span class="ent-t">Goals</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Pick goals that tune how the app coaches you.</div>
+
+      <details class="ent" id="trk-motiv">
+        <summary><span class="tag t-prog">Track 4</span><span class="ent-t">Make smooth worth chasing</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">&bull; <b>Rewards + Scoreboard</b> <i>(in flight)</i> &mdash; smoothness that earns something, and standings that are real: server-derived, simulated drives excluded.<br>&bull; <b><span class="tn">Q9</span> Goals</b> &mdash; pick goals that tune how the app coaches you (the hook into the <a href="#ms">modes</a> idea &mdash; first-timer to pro).</div>
       </details>
-      <details class="ent">
-        <summary><span class="tag t-next tn">Q9</span><span class="ent-t">Home-screen cleanup</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Link Miles &rarr; Trends, delete the dead persona markup. Not urgent.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-next tn">Q10</span><span class="ent-t">Car-icon redesign</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The current set isn&rsquo;t it. Not urgent.</div>
+
+      <details class="ent" id="trk-polish">
+        <summary><span class="tag t-wait">Polish</span><span class="ent-t">Debt &mdash; worth doing, not urgent</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">&bull; <b><span class="tn">Q10</span> Home-screen cleanup</b> &mdash; link Miles &rarr; Trends, delete the dead persona markup.<br>&bull; <b><span class="tn">Q11</span> Car-icon redesign</b> &mdash; the current set isn&rsquo;t it.</div>
       </details>
     </div>
   </details>
@@ -270,34 +273,6 @@
       <details class="ent">
         <summary><span class="ent-t">Smooth AF driving coaches</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The app coaches you free every drive &mdash; tips, trends, drills. When a pattern won&rsquo;t budge, a <b>real coach</b> reading telemetry no instructor ever had (the Driving Fingerprint, harsh-moment map markers, the g-arc through each corner) sends drills tuned to <i>your</i> patterns. Async review &rarr; live ride-along &rarr; structured programs. <b>Teens + parents are the wedge</b>; it&rsquo;s a coaching marketplace.</div>
-      </details>
-    </div>
-  </details>
-
-  <!-- ══ VISION ══ -->
-  <details class="sec">
-    <summary><h2>Vision</h2><span class="count">Your Car&rsquo;s Concierge</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
-    <div class="sec-body">
-      <p class="sec-note">One honest app for your whole drive, keyed to the car you&rsquo;re actually in. The map gets you there, the score makes you want to be smooth, the coach makes you good at it. OBD isn&rsquo;t a feature &mdash; it&rsquo;s the platform underneath.</p>
-      <details class="ent" id="vis-health">
-        <summary><span class="tag t-next">Unlock</span><span class="ent-t">Car Health &mdash; codes read every drive</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Every drive quietly scans for fault codes (OBD <b>Mode 03</b> &mdash; universal since &rsquo;96). A code pops &rarr; a plain-English alert <i>before</i> the dashboard light &rarr; a DIY video, or a local mobile mechanic. <b>Free:</b> scan + basic alert. <b>Paid:</b> proactive heads-up, a maintenance timeline keyed to your mileage, seasonal tips &mdash; the recurring-revenue line. Built in <a href="#un-q6">Q5</a>.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-next">Phase 2</span><span class="ent-t">Vehicle-aware directions</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Routing that respects the vehicle &mdash; <b>no interstate shortcut when you&rsquo;re in an RV.</b> Road-type avoidance is doable on Mapbox now; true RV-grade (bridge heights, weight limits) needs a specialized API.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-prog">In flight</span><span class="ent-t">Rewards + Scoreboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Smoothness that earns something, and standings that are real (server-derived, simulated drives excluded).</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-idea">Feasible</span><span class="ent-t">Popular &amp; scenic routes nearby</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Discover good drives around you &mdash; a reason to open the app when you&rsquo;re <i>not</i> just commuting.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-idea">Contextual</span><span class="ent-t">Gas &middot; EV chargers &middot; parking &mdash; only when useful</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Surface a service only when it helps (low tank, EV low on charge, nearing your stop), then get out of the way. EV chargers are a free open API; parking has partner APIs; gas pricing is the paid one.</div>
       </details>
     </div>
   </details>
