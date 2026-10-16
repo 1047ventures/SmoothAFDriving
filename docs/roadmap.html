@@ -137,7 +137,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:50 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:55 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -150,12 +150,9 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">1 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent" id="need-testflight">
-        <summary><span class="tag t-block">Now</span><span class="ent-t">Install the new TestFlight build, then drive</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Lots to feel out in this one: OBD <b>auto-starts the drive</b> when it links up (one-tap undo if it jumps the gun) &middot; its gauges &mdash; RPM, HP, coolant, boost &mdash; now sit <b>right on the driving screen</b> &middot; <b>Avg MPH is back</b> in the stats bar &middot; your <b>rescored</b> drives should read right &middot; <b>no more motion prompt</b> at the start of a drive &middot; a town drive scores higher &middot; <b>Always</b> location keeps a screen-locked drive recording densely &middot; car off still pops &ldquo;End this drive?&rdquo; ~30&nbsp;s later. Tell me what feels busy, wrong, or boring.<br><a class="ent-go" href="https://testflight.apple.com/" target="_blank" rel="noopener">Open TestFlight &#8599;</a></div>
-      </details>
+      <p class="sec-note">Owner-only actions that actually block something &mdash; a credential, a spend, a config, a real decision. <b>Driving and testing isn&rsquo;t here</b>: that&rsquo;s the job, not a task. What&rsquo;s new to feel out in the current build lives under <a href="#ms">Just shipped</a>; the things you hand back from a drive become tasks in <a href="#upnext">Up next</a>.</p>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.<br><a class="ent-go" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank" rel="noopener">Open Cloudflare &#8599;</a></div>
@@ -164,17 +161,17 @@
   </details>
 
   <!-- ══ UP NEXT ══ -->
-  <details class="sec" open>
-    <summary><h2>Up next</h2><span class="count">now moving</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+  <details class="sec" id="upnext" open>
+    <summary><h2>Up next</h2><span class="count">things to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The immediate focus &mdash; two items are in flight, and the first clear build to pick up is finishing <a href="#trk-motiv">Track&nbsp;4</a> (its foundation is already built and it carries most of the <a href="#trk-motiv">tech debt</a>, so it&rsquo;s cheaper than it looks). The whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> unlocks the moment Q3 below is confirmed on a real drive.</p>
-      <details class="ent" id="ip-q3">
-        <summary><span class="tag t-prog tn">Q3</span><span class="ent-t">Background GPS &mdash; awaiting your real-drive check</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Shipped; waiting on the real-drive check (<a href="#need-testflight">Needs you &rarr; TestFlight</a>). Fixes the sparse-GPS drives, and it&rsquo;s the keystone for the whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> and the Dynamic Island staying live.</div>
-      </details>
+      <p class="sec-note">The things <b>I</b> build next &mdash; not things waiting on you to drive. The clearest pick-up is finishing <a href="#trk-motiv">Track&nbsp;4</a>: its foundation is already shipped and it carries most of the <a href="#techdebt-note">tech debt</a>, so it&rsquo;s cheaper than it looks. The whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> is also unblocked now that background GPS is in.</p>
       <details class="ent" id="ip-q4">
-        <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; unblocked, ready to build</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; ready to build</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s rewards and standings fair, and it&rsquo;s the first KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-next">pick up</span><span class="ent-t">Finish Track 4 &mdash; rewards + scoreboard</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Half-wired already: the leaderboard foundation is shipped, and three of five <a href="#techdebt-note">tech-debt items</a> (cloud delete, the empty Corridors/Rivals tabs, the dead Rewards button) are the rest of it. Finishing it turns pillar&nbsp;1&rsquo;s engagement into something you chase &mdash; see <a href="#trk-motiv">Track&nbsp;4</a>.</div>
       </details>
     </div>
   </details>
@@ -183,7 +180,7 @@
   <details class="sec">
     <summary><h2>In the queue</h2><span class="count">3 tracks + polish</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The buildable work behind <a href="#ip-q3">Up next</a> &mdash; grouped by theme (its Track), each naming the concrete next build with its Q-number. The far-horizon end of each theme lives under <a href="#vision">Long-term vision</a>.</p>
+      <p class="sec-note">The buildable work behind <a href="#upnext">Up next</a> &mdash; grouped by theme (its Track), each naming the concrete next build with its Q-number. The far-horizon end of each theme lives under <a href="#vision">Long-term vision</a>.</p>
 
       <details class="ent" id="trk-health">
         <summary><span class="tag t-next">Track 1</span><span class="ent-t">Car Health &mdash; the Concierge engine &amp; the money line</span><span class="ent-chev">&#9654;</span></summary>
@@ -192,7 +189,7 @@
 
       <details class="ent" id="trk-always">
         <summary><span class="tag t-next">Track 2</span><span class="ent-t">The drive records itself &mdash; never babysit it</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Three builds, all riding on <a href="#ip-q3">Q3 background GPS</a> proving out on a real drive:<br>&bull; <b><span class="tn">Q6</span> Maps handoff</b> &mdash; recording survives when you switch to Apple/Google Maps.<br>&bull; <b><span class="tn">Q7</span> Closed-app auto-start</b> &mdash; a drive starts, and notifies you, without opening the app.<br>&bull; <b><span class="tn">Q8</span> Dongle wake</b> &mdash; the OBD powers up, the app wakes in the background (CoreBluetooth) and recording begins on its own. <i>The real version of the auto-start you asked for.</i><br><b>Goal:</b> you drive, it captures &mdash; app open, behind Maps, or never launched.</div>
+        <div class="ent-body">Three builds, all on top of <a href="#ip-q3">background GPS</a> (shipped):<br>&bull; <b><span class="tn">Q6</span> Maps handoff</b> &mdash; recording survives when you switch to Apple/Google Maps.<br>&bull; <b><span class="tn">Q7</span> Closed-app auto-start</b> &mdash; a drive starts, and notifies you, without opening the app.<br>&bull; <b><span class="tn">Q8</span> Dongle wake</b> &mdash; the OBD powers up, the app wakes in the background (CoreBluetooth) and recording begins on its own. <i>The real version of the auto-start you asked for.</i><br><b>Goal:</b> you drive, it captures &mdash; app open, behind Maps, or never launched.</div>
       </details>
 
       <details class="ent" id="trk-motiv">
@@ -232,7 +229,7 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note"><b>Just shipped</b>, newest first &mdash; then the story so far. The exhaustive log is <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</p>
+      <p class="sec-note"><b>Just shipped</b>, newest first &mdash; this is also <b>what&rsquo;s new to feel out</b> in the current TestFlight build, grouped as a changelog, not a to-do. Then the story so far. The exhaustive log is <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</p>
       <details class="ent">
         <summary><span class="tag t-ship tn">T365</span><span class="ent-t">No more motion prompt &mdash; zero, ever</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">That &ldquo;allow motion&rdquo; alert at the start of every drive is <b>gone for good</b>. It came from the web motion API, which iOS re-asks every session. The app now reads motion through <b>native Core Motion</b>, which needs no permission and no prompt at all. Native plugin verified building on the simulator; lands on the next TestFlight build.</div>
@@ -248,6 +245,10 @@
       <details class="ent">
         <summary><span class="tag t-ship tn">T360</span><span class="ent-t">OBD auto-starts the drive &middot; live gauges on screen</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The dongle links up and the drive just starts (one-tap undo), with RPM / HP / coolant / boost on the driving screen. The first piece of <a href="#trk-always">Track&nbsp;2</a> already in your hands.</div>
+      </details>
+      <details class="ent" id="ip-q3">
+        <summary><span class="tag t-ship tn">Q3</span><span class="ent-t">Background GPS &mdash; denser tracks, locked-screen drives</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">With Always location, a screen-locked drive keeps recording densely instead of going sparse. Fixes the thin-GPS drives and is the keystone the whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> and the live Dynamic Island build on. Shipped &mdash; you&rsquo;ll feel it on the next drive.</div>
       </details>
       <details class="ent">
         <summary><span class="ent-t">It became a real native app you can ship</span><span class="ent-chev">&#9654;</span></summary>
