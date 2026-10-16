@@ -5,6 +5,30 @@ import {
 } from '../constants.js';
 import { authHeaders, currentUser } from './auth.js';
 
+/**
+ * Remove a drive's cloud row so the server-derived leaderboard and the operator
+ * dashboard stop counting a drive the user deleted on the phone. Keyed on this
+ * device's id + the drive's start_time via the delete_device_drive RPC. Fails
+ * soft: offline, or before the RPC migration is applied, it just returns false
+ * and the local delete still stands (the cloud row is reconciled next time).
+ * Returns true only if the server confirmed a row was removed.
+ */
+export async function deleteCloudDrive(startTime){
+  if (startTime == null) return false;
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/delete_device_drive`, {
+      method:  'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ p_device_id: getDeviceId(), p_start_time: startTime }),
+    });
+    if (!res.ok) return false;
+    const n = await res.json().catch(() => 0);
+    return Number(n) > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function pushDriveToSupabase(drive){
   if (!drive || !drive.startTime) return;
   const driveId = String(drive.startTime); // stable local ID

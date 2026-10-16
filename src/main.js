@@ -8,7 +8,7 @@ import { renderCorridorsList } from './ui/corridor.js';
 import { showScreen } from './ui/router.js';
 import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record.js';
 import { renderRewards } from './ui/rewards.js';
-import { openLeaderboard, openSignupModal, switchLeaderboardTab } from './ui/leaderboard.js';
+import { openLeaderboard, openSignupModal } from './ui/leaderboard.js';
 import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap, reviewDrive, reviewAnalysis } from './ui/review.js';
 import { shareCurrentDrive } from './ui/share.js';
 import { wireDestination } from './ui/destination.js';
@@ -166,12 +166,6 @@ function boot(){
   document.getElementById('btn-lb-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
-  document.getElementById('btn-join-rivals')?.addEventListener('click', () => openSignupModal(() => openLeaderboard('rivals')));
-
-  // Leaderboard tabs — functional switching
-  document.querySelectorAll('.lb-tab').forEach(tab => {
-    tab.addEventListener('click', () => switchLeaderboardTab(tab.dataset.tab));
-  });
 
   // Rewards
   document.getElementById('btn-rewards')?.addEventListener('click', () => { renderRewards(); showScreen('rewards'); });

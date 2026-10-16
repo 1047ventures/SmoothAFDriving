@@ -27,11 +27,9 @@ export async function openLeaderboard(tab = 'overall'){
   if (scoreVal)    scoreVal.textContent    = myName ? Math.round(myScore) : '--';
   if (setNameBtn)  setNameBtn.textContent  = myName ? 'Edit name' : 'Set name';
 
-  // Show/hide join CTAs
+  // Show/hide the join CTA
   const joinCta = document.getElementById('lb-join-cta');
   if (joinCta) joinCta.style.display = myName ? 'none' : 'block';
-  const rivalsCta = document.getElementById('lb-rivals-join-cta');
-  if (rivalsCta) rivalsCta.style.display = myName ? 'none' : 'block';
 
   // Fetch live rankings, fall back to ghost rows
   const list = document.getElementById('lb-list');

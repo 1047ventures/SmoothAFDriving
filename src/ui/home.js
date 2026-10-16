@@ -6,6 +6,7 @@ import {
   deleteDrive,
 } from '../services/storage.js';
 import { getDriverPersona, analyzeDrive } from '../services/scoring.js';
+import { deleteCloudDrive } from '../services/supabase.js';
 import { metersToMiles, fmtDuration } from '../utils/math.js';
 import { scoreColor, dimColor } from '../utils/color.js';
 import { DIM_DISPLAY } from '../constants.js';
@@ -245,7 +246,10 @@ ${restoreBoxHtml()}
     btn.addEventListener('click', e => {
       e.stopPropagation();
       if (btn.dataset.confirm === '1'){
-        deleteDrive(Number(btn.dataset.idx), { onUpdate: () => { renderDriveList(); renderHomeStats(); } });
+        const idx = Number(btn.dataset.idx);
+        const startTime = loadDrives()[idx]?.startTime;   // grab before the local delete drops it
+        deleteDrive(idx, { onUpdate: () => { renderDriveList(); renderHomeStats(); } });
+        if (startTime != null) deleteCloudDrive(startTime); // reconcile the cloud copy too (fail-soft)
       } else {
         btn.dataset.confirm = '1';
         btn.textContent = 'Delete?';
