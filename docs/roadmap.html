@@ -13,13 +13,15 @@
     3. favicon: 🏎️  (keep it stable — the user finds the tab by its icon)
     4. ALWAYS re-stamp the "Updated" line in the header.
 
-  STRUCTURE (Oct 2026 redesign): a nested accordion. Every section is a collapsed
+  STRUCTURE (Oct 2026): a nested accordion. Every section is a collapsed
   <details class="sec">; every entry under it is a collapsed <details class="ent">.
-  The page opens to just the header + the section list. Links appear only where
-  they help — external (TestFlight, dashboards) or internal (#ip-q4, #need-testflight).
-  Sections, in order: Needs You · Just Shipped · In Progress · The Plan Ahead
-  (four tracks, with the old Vision folded in) · Key Files · Mission · Major
-  Milestones · Progress over the months · Bugs · Tech Debt.
+  The page opens to just the header + the section list. Sections are ordered by
+  TIME HORIZON, then measurement, then history:
+    Needs You · Up Next · In the Queue · Long-Term Vision · Major Milestones
+    · Progress · Bugs · Tech Debt · Mission (KPIs + the tasks that move each) ·
+    Key Files (reference appendix).
+  Forward work carries a theme tag (Track 1–4); the Mission section links each
+  pillar to the tasks that advance it.
 -->
 <title>Smooth AF — Build Log & Roadmap</title>
 <style>
@@ -103,6 +105,10 @@
   /* key-file entry */
   .kf-what{color:var(--muted)}
 
+  /* Mission KPIs — small labelled blocks inside a mission pillar */
+  .mlabel{display:block;margin-top:11px;margin-bottom:2px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .kpi-v{font-family:var(--serif);font-style:italic;color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+
   /* ── Progress chart ─────────────────────────────────────────────────────── */
   .chart{display:flex;align-items:flex-end;gap:10px;height:170px;padding:14px 4px 0;margin:4px 0 6px}
   .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end;min-width:0}
@@ -129,7 +135,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:58 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:43 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -146,7 +152,7 @@
     <div class="sec-body">
       <details class="ent" id="need-testflight">
         <summary><span class="tag t-block">Now</span><span class="ent-t">Install the new TestFlight build, then drive</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Lots to feel out in this one: OBD <b>auto-starts the drive</b> when it links up (one-tap undo if it jumps the gun) &middot; its gauges &mdash; RPM, HP, coolant, boost &mdash; now sit <b>right on the driving screen</b> &middot; <b>Avg MPH is back</b> in the stats bar &middot; your <b>rescored</b> drives should read right &middot; a town drive scores higher &middot; <b>Always</b> location keeps a screen-locked drive recording densely &middot; car off still pops &ldquo;End this drive?&rdquo; ~30&nbsp;s later. Tell me what feels busy, wrong, or boring.<br><a class="ent-go" href="https://testflight.apple.com/" target="_blank" rel="noopener">Open TestFlight &#8599;</a></div>
+        <div class="ent-body">Lots to feel out in this one: OBD <b>auto-starts the drive</b> when it links up (one-tap undo if it jumps the gun) &middot; its gauges &mdash; RPM, HP, coolant, boost &mdash; now sit <b>right on the driving screen</b> &middot; <b>Avg MPH is back</b> in the stats bar &middot; your <b>rescored</b> drives should read right &middot; <b>no more motion prompt</b> at the start of a drive &middot; a town drive scores higher &middot; <b>Always</b> location keeps a screen-locked drive recording densely &middot; car off still pops &ldquo;End this drive?&rdquo; ~30&nbsp;s later. Tell me what feels busy, wrong, or boring.<br><a class="ent-go" href="https://testflight.apple.com/" target="_blank" rel="noopener">Open TestFlight &#8599;</a></div>
       </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
@@ -155,54 +161,31 @@
     </div>
   </details>
 
-  <!-- ══ JUST SHIPPED ══ -->
-  <details class="sec">
-    <summary><h2>Just shipped</h2><span class="count">newest first</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+  <!-- ══ UP NEXT ══ -->
+  <details class="sec" open>
+    <summary><h2>Up next</h2><span class="count">now moving</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T365</span><span class="ent-t">No more motion prompt &mdash; zero, ever</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">That &ldquo;allow motion&rdquo; alert at the start of every drive is <b>gone for good</b>. It came from the web motion API, which iOS re-asks every session. The app now reads motion through <b>native Core Motion</b>, which needs no permission and no prompt at all &mdash; so you tap start and you&rsquo;re driving. Native plugin verified building on the simulator; lands on the next TestFlight build.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T363</span><span class="ent-t">Your throttle foot is now part of the score</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The OBD throttle channel &mdash; how you work the pedal &mdash; now feeds the <b>smoothness</b> score: a progressive squeeze reads smooth, stabbing the pedal costs you. It&rsquo;s the one input the phone can&rsquo;t see. Brake and steering stay out on purpose &mdash; neither is a real OBD signal, and the phone already scores their <i>result</i> (braking g, cornering g) better than the pedal/wheel position would. Only touches drives that had a dongle connected; GPS-only drives are unchanged.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T362</span><span class="ent-t">Avg MPH is back &middot; App Store location fix</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Avg MPH returns to the live stats bar (Stops &middot; Miles &middot; Avg &middot; Time) &mdash; it was quietly dropped in the driving-screen makeover. And the iOS build now carries the background-location purpose string App Store Connect flagged (ITMS-90683), so the next upload is clean.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T361</span><span class="ent-t">Your saved drives, rescored</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Every stored drive that still has its GPS was re-scored under the current engine &mdash; median 90&rarr;93, and the drives the old engine over-punished climb the most (one 59&rarr;88). Runs once on your device; your lifetime score updates with it. Drives whose GPS was long since trimmed are left as they were rather than guessed.</div>
-      </details>
-      <p class="chart-note" style="margin-top:12px">The full chronological log lives under <a href="#ms">Major milestones</a>.</p>
-    </div>
-  </details>
-
-  <!-- ══ IN PROGRESS ══ -->
-  <details class="sec">
-    <summary><h2>In progress</h2><span class="count">2 moving</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
-    <div class="sec-body">
+      <p class="sec-note">The immediate focus &mdash; two items are in flight, and the first clear build to pick up is finishing <a href="#trk-motiv">Track&nbsp;4</a> (its foundation is already built and it carries most of the <a href="#trk-motiv">tech debt</a>, so it&rsquo;s cheaper than it looks). The whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> unlocks the moment Q3 below is confirmed on a real drive.</p>
       <details class="ent" id="ip-q3">
-        <summary><span class="tag t-prog tn">Q3</span><span class="ent-t">Background GPS</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Shipped; waiting on your real-drive check (<a href="#need-testflight">Needs you &rarr; TestFlight</a>). Fixes the sparse-GPS drives, and it&rsquo;s the keystone for the whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> and the Dynamic Island staying live.</div>
+        <summary><span class="tag t-prog tn">Q3</span><span class="ent-t">Background GPS &mdash; awaiting your real-drive check</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Shipped; waiting on the real-drive check (<a href="#need-testflight">Needs you &rarr; TestFlight</a>). Fixes the sparse-GPS drives, and it&rsquo;s the keystone for the whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> and the Dynamic Island staying live.</div>
       </details>
       <details class="ent" id="ip-q4">
-        <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s rewards and standings fair in the first place.</div>
+        <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; unblocked, ready to build</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s rewards and standings fair, and it&rsquo;s the first KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
       </details>
     </div>
   </details>
 
-  <!-- ══ THE PLAN AHEAD ══ -->
+  <!-- ══ IN THE QUEUE ══ -->
   <details class="sec">
-    <summary><h2>The plan ahead</h2><span class="count">4 tracks + polish</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>In the queue</h2><span class="count">3 tracks + polish</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">One honest app for your whole drive, keyed to the car you&rsquo;re actually in &mdash; <b>Your Car&rsquo;s Concierge</b>. The map gets you there, the score makes you want to be smooth, the coach makes you good at it; OBD is the platform underneath, not a feature. The old &ldquo;Up next&rdquo; queue and the &ldquo;Vision&rdquo; list were the same four efforts at two distances &mdash; here they&rsquo;re one plan. Each track names its <b>next build</b> (with its Q-number) and where it leads.</p>
+      <p class="sec-note">The buildable work behind <a href="#ip-q3">Up next</a> &mdash; grouped by theme (its Track), each naming the concrete next build with its Q-number. The far-horizon end of each theme lives under <a href="#vision">Long-term vision</a>.</p>
 
       <details class="ent" id="trk-health">
         <summary><span class="tag t-next">Track 1</span><span class="ent-t">Car Health &mdash; the Concierge engine &amp; the money line</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body"><b>Next build &middot; <span class="tn">Q5</span>:</b> read fault codes on every drive &mdash; OBD <b>Mode 03</b>, universal since &rsquo;96 &mdash; and raise a plain-English alert <i>before</i> the dashboard light.<br><b>Where it leads:</b> <b>free</b> = scan + basic alert; <b>paid</b> = proactive heads-up, a maintenance timeline keyed to your mileage, seasonal tips, and a tap through to a DIY video or a local mobile mechanic. This is the recurring-revenue line &mdash; and the reason OBD is the platform, not just a gauge.</div>
+        <div class="ent-body"><b>Next build &middot; <span class="tn">Q5</span>:</b> read fault codes on every drive &mdash; OBD <b>Mode 03</b>, universal since &rsquo;96 &mdash; and raise a plain-English alert <i>before</i> the dashboard light. The <b>paid</b> concierge tiers on top of it are the <a href="#vision">long-term vision</a> and the recurring-revenue line.</div>
       </details>
 
       <details class="ent" id="trk-always">
@@ -210,14 +193,9 @@
         <div class="ent-body">Three builds, all riding on <a href="#ip-q3">Q3 background GPS</a> proving out on a real drive:<br>&bull; <b><span class="tn">Q6</span> Maps handoff</b> &mdash; recording survives when you switch to Apple/Google Maps.<br>&bull; <b><span class="tn">Q7</span> Closed-app auto-start</b> &mdash; a drive starts, and notifies you, without opening the app.<br>&bull; <b><span class="tn">Q8</span> Dongle wake</b> &mdash; the OBD powers up, the app wakes in the background (CoreBluetooth) and recording begins on its own. <i>The real version of the auto-start you asked for.</i><br><b>Goal:</b> you drive, it captures &mdash; app open, behind Maps, or never launched.</div>
       </details>
 
-      <details class="ent" id="trk-map">
-        <summary><span class="tag t-idea">Track 3</span><span class="ent-t">Be the drive layer &mdash; the map, keyed to your car</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The longer horizon, unlocked once the app owns the drive (Track&nbsp;2):<br>&bull; <b>Vehicle-aware directions</b> &mdash; no interstate shortcut when you&rsquo;re in an RV. Road-type avoidance works on Mapbox today; true RV-grade (bridge heights, weight limits) needs a specialized API.<br>&bull; <b>Popular &amp; scenic routes nearby</b> &mdash; a reason to open the app when you&rsquo;re <i>not</i> just commuting.<br>&bull; <b>Contextual services</b> &mdash; gas, EV chargers, parking, surfaced only when they help (low tank, nearing your stop) then out of the way. EV chargers are a free API, parking has partner APIs, gas pricing is the paid one.</div>
-      </details>
-
       <details class="ent" id="trk-motiv">
         <summary><span class="tag t-prog">Track 4</span><span class="ent-t">Make smooth worth chasing</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">&bull; <b>Rewards + Scoreboard</b> <i>(in flight)</i> &mdash; smoothness that earns something, and standings that are real: server-derived, simulated drives excluded.<br>&bull; <b><span class="tn">Q9</span> Goals</b> &mdash; pick goals that tune how the app coaches you (the hook into the <a href="#ms">modes</a> idea &mdash; first-timer to pro).</div>
+        <div class="ent-body">&bull; <b>Rewards + Scoreboard</b> <i>(in flight)</i> &mdash; smoothness that earns something, and standings that are real: server-derived, simulated drives excluded.<br>&bull; <b><span class="tn">Q9</span> Goals</b> &mdash; pick goals that tune how the app coaches you (the hook into the <a href="#mission-modes">modes</a> idea &mdash; first-timer to pro).<br><i>Half-wired already: its leaderboard foundation is a shipped <a href="#bugs-note">bug fix</a>, and three of five <a href="#techdebt-note">tech-debt items</a> are the rest of it &mdash; finishing this is cheap.</i></div>
       </details>
 
       <details class="ent" id="trk-polish">
@@ -227,52 +205,23 @@
     </div>
   </details>
 
-  <!-- ══ KEY FILES ══ -->
-  <details class="sec">
-    <summary><h2>Key files</h2><span class="count">6 documents</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+  <!-- ══ LONG-TERM VISION ══ -->
+  <details class="sec" id="vision">
+    <summary><h2>Long-term vision</h2><span class="count">Your Car&rsquo;s Concierge</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent">
-        <summary><span class="ent-t">&#127937; The Driving Fingerprint</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">Every OBD + phone channel and how it becomes a profile &mdash; reading a corner, pedal vs the g-arc.<br><a class="ent-go" href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Open &#8599;</a></div>
-      </details>
-      <details class="ent">
-        <summary><span class="ent-t">&#129517; Customer Journey</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">Discovery to retention, mapped on the real app &mdash; the friction worth cutting.<br><a class="ent-go" href="https://claude.ai/code/artifact/e1f6ae31-c0af-4f09-ae41-2b97fdd9590d" target="_blank" rel="noopener">Open &#8599;</a></div>
-      </details>
-      <details class="ent">
-        <summary><span class="ent-t">&#127968; Home Screen Audit</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">Every home-screen element sorted by verdict &mdash; link, cut, or decide.<br><a class="ent-go" href="https://claude.ai/code/artifact/5b0f3541-951e-49af-bbb7-05e0fdc3fb85" target="_blank" rel="noopener">Open &#8599;</a></div>
-      </details>
-      <details class="ent">
-        <summary><span class="ent-t">ACCOUNTS.md</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">Auth setup, and the manual fallbacks if the script path fails.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/ACCOUNTS.md" target="_blank" rel="noopener">Open &#8599;</a></div>
-      </details>
-      <details class="ent">
-        <summary><span class="ent-t">NATIVE.md</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">The iOS and TestFlight runbook.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/NATIVE.md" target="_blank" rel="noopener">Open &#8599;</a></div>
-      </details>
-      <details class="ent">
-        <summary><span class="ent-t">CLAUDE.md</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">Architecture and the standing rules this project is built under.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/CLAUDE.md" target="_blank" rel="noopener">Open &#8599;</a></div>
-      </details>
-    </div>
-  </details>
+      <p class="sec-note">Where the queue leads &mdash; <b>one honest app for your whole drive, keyed to the car you&rsquo;re actually in</b>. The map gets you there, the score makes you want to be smooth, the coach makes you good at it; OBD is the platform underneath, not a feature. These are the far ends of the four tracks, and the money.</p>
 
-  <!-- ══ MISSION ══ -->
-  <details class="sec">
-    <summary><h2>Mission</h2><span class="count">make better drivers</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
-    <div class="sec-body">
       <details class="ent">
-        <summary><span class="ent-t">Make people genuinely better, smoother drivers</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">US roads suck because driving is treated as a skill you got at 16 and never revisit. We want to be part of changing that &mdash; <b>efficient, systems-thinking drivers who read the whole road.</b> The score makes you <i>want</i> to be smooth; the app teaches you how. Improvement, not the number, is the product.</div>
+        <summary><span class="tag t-next">from Track 1</span><span class="ent-t">Car Health, paid &mdash; the recurring-revenue line</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">On top of the free fault-code scan (<a href="#trk-health">Q5</a>): <b>free</b> = scan + basic alert; <b>paid</b> = proactive heads-up before the light, a maintenance timeline keyed to your mileage, seasonal tips, and a tap through to a DIY video or a local mobile mechanic. This is why OBD is the platform, not just a gauge.</div>
+      </details>
+      <details class="ent" id="trk-map">
+        <summary><span class="tag t-idea">Track 3</span><span class="ent-t">Be the drive layer &mdash; the map, keyed to your car</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Unlocked once the app reliably owns the drive (<a href="#trk-always">Track&nbsp;2</a>):<br>&bull; <b>Vehicle-aware directions</b> &mdash; no interstate shortcut when you&rsquo;re in an RV. Road-type avoidance works on Mapbox today; true RV-grade (bridge heights, weight limits) needs a specialized API.<br>&bull; <b>Popular &amp; scenic routes nearby</b> &mdash; a reason to open the app when you&rsquo;re <i>not</i> just commuting.<br>&bull; <b>Contextual services</b> &mdash; gas, EV chargers, parking, surfaced only when they help (low tank, nearing your stop) then out of the way. EV chargers are a free API, parking has partner APIs, gas pricing is the paid one.</div>
       </details>
       <details class="ent">
-        <summary><span class="ent-t">Modes &mdash; one app, never-driven to pro</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">It&rsquo;s an <b>education app</b> as much as a tracker. Same engine, different voice: <b>First Timer</b> (pedals, signals, mirror &amp; seat setup, CarPlay, first turns &mdash; with gentle &ldquo;check your mirrors / scan who&rsquo;s around / think in systems&rdquo; nudges), <b>Teen</b> (parent-linked, logs practice hours), <b>Smooth Operator</b> (the everyday loop), <b>Pro</b> (all the data, Max-G pings, leaderboards, prizes), <b>Road-tripper/RV</b>. Modes <i>subtract</i> &mdash; a pro never sees &ldquo;check your mirrors,&rdquo; a first-timer never sees &ldquo;Max G.&rdquo;</div>
-      </details>
-      <details class="ent">
-        <summary><span class="ent-t">Smooth AF driving coaches</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The app coaches you free every drive &mdash; tips, trends, drills. When a pattern won&rsquo;t budge, a <b>real coach</b> reading telemetry no instructor ever had (the Driving Fingerprint, harsh-moment map markers, the g-arc through each corner) sends drills tuned to <i>your</i> patterns. Async review &rarr; live ride-along &rarr; structured programs. <b>Teens + parents are the wedge</b>; it&rsquo;s a coaching marketplace.</div>
+        <summary><span class="tag t-idea">from Mission</span><span class="ent-t">The coaching marketplace</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The far end of <a href="#mission-coach">Mission &rarr; coaches</a>: async review &rarr; live ride-along &rarr; structured programs, with teens + parents as the wedge. A real coach reading telemetry no instructor ever had &mdash; the <a href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Driving Fingerprint</a>, harsh-moment markers, the g-arc through each corner.</div>
       </details>
     </div>
   </details>
@@ -281,6 +230,23 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <p class="sec-note"><b>Just shipped</b>, newest first &mdash; then the story so far. The exhaustive log is <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</p>
+      <details class="ent">
+        <summary><span class="tag t-ship tn">T365</span><span class="ent-t">No more motion prompt &mdash; zero, ever</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">That &ldquo;allow motion&rdquo; alert at the start of every drive is <b>gone for good</b>. It came from the web motion API, which iOS re-asks every session. The app now reads motion through <b>native Core Motion</b>, which needs no permission and no prompt at all. Native plugin verified building on the simulator; lands on the next TestFlight build.</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-ship tn">T363</span><span class="ent-t">Your throttle foot is now part of the score</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The OBD throttle channel &mdash; how you work the pedal &mdash; now feeds the <b>smoothness</b> score: a progressive squeeze reads smooth, stabbing the pedal costs you. Brake and steering stay out on purpose &mdash; neither is a real OBD signal, and the phone already scores their result (braking g, cornering g). GPS-only drives are unchanged.</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-ship tn">T362</span><span class="ent-t">Avg MPH is back &middot; App Store location fix</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Avg MPH returns to the live stats bar (Stops &middot; Miles &middot; Avg &middot; Time), and the iOS build now carries the background-location purpose string App Store Connect flagged (ITMS-90683).</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-ship tn">T360</span><span class="ent-t">OBD auto-starts the drive &middot; live gauges on screen</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The dongle links up and the drive just starts (one-tap undo), with RPM / HP / coolant / boost on the driving screen. The first piece of <a href="#trk-always">Track&nbsp;2</a> already in your hands.</div>
+      </details>
       <details class="ent">
         <summary><span class="ent-t">It became a real native app you can ship</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Smooth AF runs as a native iOS app via TestFlight. The part that matters: a <b><code>git push</code> builds, signs and delivers a new build by itself</b> &mdash; no Xcode, no manual Archive. Cloud signing needed Admin (not App Manager), and a forced-newest Xcode for the iOS 26 SDK.</div>
@@ -307,7 +273,7 @@
       </details>
       <details class="ent">
         <summary><span class="ent-t">The same road, compared against itself</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Drives group by <b>road corridor</b>, so the same route is one entry &mdash; groundwork for &ldquo;are you getting smoother on your commute.&rdquo;</div>
+        <div class="ent-body">Drives group by <b>road corridor</b>, so the same route is one entry &mdash; groundwork for &ldquo;are you getting smoother on your commute,&rdquo; a KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
       </details>
       <details class="ent">
         <summary><span class="ent-t">The full chronological log</span><span class="when">365 tasks</span><span class="ent-chev">&#9654;</span></summary>
@@ -367,7 +333,7 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">All fixed &mdash; and these are the foundations the tracks now stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">Track&nbsp;4</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Track&nbsp;1</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ip-q4">Road&rsquo;s-fault</a>.</p>
+      <p class="sec-note" id="bugs-note">All fixed &mdash; and these are the foundations the tracks now stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">Track&nbsp;4</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Track&nbsp;1</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ip-q4">Road&rsquo;s-fault</a>.</p>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Live speed stutters &amp; sticks mid-drive</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">iOS intermittently returns a null speed and the app reused the previous value, so the number froze then snapped &mdash; and since cornering-G and event detection scale by speed, the score degraded with it. Now <code>deriveSpeed()</code> falls back to distance-moved between fixes, with a deadband and a cap. Feeds the score, not just the display.</div>
@@ -378,7 +344,7 @@
       </details>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Leaderboard wrote to a table that never existed</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Every score upload 404&rsquo;d into a silent catch for months. Standing is now <b>derived on the server</b> from recorded drives. The five invented competitors are gone.</div>
+        <div class="ent-body">Every score upload 404&rsquo;d into a silent catch for months. Standing is now <b>derived on the server</b> from recorded drives. The five invented competitors are gone. This is <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s foundation, already laid.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Four deploy pipelines &rarr; one</span><span class="ent-chev">&#9654;</span></summary>
@@ -395,7 +361,7 @@
   <details class="sec">
     <summary><h2>Tech debt</h2><span class="count">5 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">Not its own track &mdash; each item is a drag on one of the four, and <b>three of the five land on <a href="#trk-motiv">Track&nbsp;4</a></b> (the scoreboard). Pay each down as its track lights up: you can&rsquo;t ship honest rewards on miscounted drives, empty tabs and a dead button. Two items sit outside the tracks &mdash; pure security/front-door hygiene.</p>
+      <p class="sec-note" id="techdebt-note">Not its own track &mdash; each item is a drag on one of the four, and <b>three of the five land on <a href="#trk-motiv">Track&nbsp;4</a></b> (the scoreboard). Pay each down as its track lights up: you can&rsquo;t ship honest rewards on miscounted drives, empty tabs and a dead button. Two items sit outside the tracks &mdash; pure security/front-door hygiene.</p>
       <details class="ent">
         <summary><span class="tag t-flag">Debt</span><span class="ent-t">Deleting a drive is local-only</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Delete removes the drive from the phone and fixes the local score, but the Supabase copy stays &mdash; so the <b>operator dashboard still counts deleted drives</b>. Next: delete the cloud row too. <b>&rarr; <a href="#trk-motiv">Track&nbsp;4</a>:</b> standings and stats built on drive data aren&rsquo;t honest while deleted drives still count.</div>
@@ -414,7 +380,84 @@
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Polish</span><span class="ent-t">UX-audit leftovers</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The dead <b>&ldquo;Explore Rewards&rdquo;</b> button belongs to <a href="#trk-motiv">Track&nbsp;4</a> &mdash; it promises what that track delivers. The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#ms">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Track&nbsp;1</a> / <a href="#trk-map">Track&nbsp;3</a>).</div>
+        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The dead <b>&ldquo;Explore Rewards&rdquo;</b> button belongs to <a href="#trk-motiv">Track&nbsp;4</a> &mdash; it promises what that track delivers. The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#mission-modes">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Track&nbsp;1</a> / <a href="#trk-map">Track&nbsp;3</a>).</div>
+      </details>
+    </div>
+  </details>
+
+  <!-- ══ MISSION ══ -->
+  <details class="sec">
+    <summary><h2>Mission</h2><span class="count">measured &middot; 3 pillars</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <div class="sec-body">
+      <p class="sec-note">The why, made measurable. Each pillar carries the <b>KPIs</b> we judge it by and the <b>tasks that move them</b> &mdash; most of those metrics aren&rsquo;t instrumented yet, so the list doubles as what to start measuring.</p>
+
+      <details class="ent" id="mission-better">
+        <summary><span class="ent-t">Make people genuinely better, smoother drivers</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">US roads suck because driving is treated as a skill you got at 16 and never revisit. We want to be part of changing that &mdash; <b>efficient, systems-thinking drivers who read the whole road.</b> The score makes you <i>want</i> to be smooth; the app teaches you how. Improvement, not the number, is the product.
+          <span class="mlabel">KPIs</span>
+          &bull; <b>Improvement rate</b> &mdash; % of returning drivers whose rolling-avg score climbs over time <i>(metric to build)</i><br>
+          &bull; <b>Harsh events / mile</b> &mdash; trending down across a driver&rsquo;s own history<br>
+          &bull; <b>Same-corridor delta</b> &mdash; smoother on your commute than a month ago
+          <span class="mlabel">Baseline today (live /admin)</span>
+          &bull; <span class="kpi-v">86</span> avg score &middot; <span class="kpi-v">2</span> returning drivers &middot; <span class="kpi-v">195</span> drives scored
+          <span class="mlabel">Tasks that move it</span>
+          &bull; <a href="#ip-q4">Q4 honest scoring</a> (a fair score is the prerequisite) &middot; corridor comparison (<a href="#ms">shipped</a>) &middot; <a href="#trk-motiv">Track&nbsp;4</a> rewards (the pull to improve) &middot; the coach, below
+        </div>
+      </details>
+
+      <details class="ent" id="mission-modes">
+        <summary><span class="ent-t">Modes &mdash; one app, never-driven to pro</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">It&rsquo;s an <b>education app</b> as much as a tracker. Same engine, different voice: <b>First Timer</b> (pedals, signals, mirror &amp; seat setup, CarPlay, first turns &mdash; with gentle &ldquo;check your mirrors / scan who&rsquo;s around / think in systems&rdquo; nudges), <b>Teen</b> (parent-linked, logs practice hours), <b>Smooth Operator</b> (the everyday loop), <b>Pro</b> (all the data, Max-G pings, leaderboards, prizes), <b>Road-tripper/RV</b>. Modes <i>subtract</i> &mdash; a pro never sees &ldquo;check your mirrors,&rdquo; a first-timer never sees &ldquo;Max G.&rdquo;
+          <span class="mlabel">KPIs</span>
+          &bull; <b>Modes shipped</b> &mdash; <span class="kpi-v">0</span> of 5 today (one-size app)<br>
+          &bull; <b>Teen + parent signups</b> &mdash; the wedge<br>
+          &bull; <b>First-timer walkthrough completion</b>
+          <span class="mlabel">Tasks that move it</span>
+          &bull; <a href="#trk-motiv">Q9 Goals</a> (the first per-driver tuning) &middot; first-run onboarding (specced, not built &mdash; see <a href="#techdebt-note">Tech debt</a>) &middot; the modes build itself (not yet queued)
+        </div>
+      </details>
+
+      <details class="ent" id="mission-coach">
+        <summary><span class="ent-t">Smooth AF driving coaches</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The app coaches you free every drive &mdash; tips, trends, drills. When a pattern won&rsquo;t budge, a <b>real coach</b> reading telemetry no instructor ever had (the Driving Fingerprint, harsh-moment map markers, the g-arc through each corner) sends drills tuned to <i>your</i> patterns. Async review &rarr; live ride-along &rarr; structured programs. <b>Teens + parents are the wedge</b>; it&rsquo;s a <a href="#vision">coaching marketplace</a>.
+          <span class="mlabel">KPIs</span>
+          &bull; <b>Coached drivers / sessions</b> &mdash; <span class="kpi-v">0</span> today<br>
+          &bull; <b>Retention</b> &mdash; coached vs uncoached<br>
+          &bull; <b>Marketplace GMV</b> &mdash; the far-horizon number
+          <span class="mlabel">Tasks that move it</span>
+          &bull; the <a href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Driving Fingerprint</a> (the telemetry edge) &middot; harsh-moment markers (<a href="#ms">shipped</a>) &middot; async-review tooling (unbuilt)
+        </div>
+      </details>
+    </div>
+  </details>
+
+  <!-- ══ KEY FILES (reference appendix) ══ -->
+  <details class="sec">
+    <summary><h2>Key files</h2><span class="count">reference</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <div class="sec-body">
+      <details class="ent">
+        <summary><span class="ent-t">&#127937; The Driving Fingerprint</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">Every OBD + phone channel and how it becomes a profile &mdash; reading a corner, pedal vs the g-arc. The telemetry edge under <a href="#mission-coach">Mission &rarr; coaches</a>.<br><a class="ent-go" href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Open &#8599;</a></div>
+      </details>
+      <details class="ent">
+        <summary><span class="ent-t">&#129517; Customer Journey</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">Discovery to retention, mapped on the real app &mdash; the friction worth cutting.<br><a class="ent-go" href="https://claude.ai/code/artifact/e1f6ae31-c0af-4f09-ae41-2b97fdd9590d" target="_blank" rel="noopener">Open &#8599;</a></div>
+      </details>
+      <details class="ent">
+        <summary><span class="ent-t">&#127968; Home Screen Audit</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">Every home-screen element sorted by verdict &mdash; link, cut, or decide.<br><a class="ent-go" href="https://claude.ai/code/artifact/5b0f3541-951e-49af-bbb7-05e0fdc3fb85" target="_blank" rel="noopener">Open &#8599;</a></div>
+      </details>
+      <details class="ent">
+        <summary><span class="ent-t">ACCOUNTS.md</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">Auth setup, and the manual fallbacks if the script path fails.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/ACCOUNTS.md" target="_blank" rel="noopener">Open &#8599;</a></div>
+      </details>
+      <details class="ent">
+        <summary><span class="ent-t">NATIVE.md</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">The iOS and TestFlight runbook.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/NATIVE.md" target="_blank" rel="noopener">Open &#8599;</a></div>
+      </details>
+      <details class="ent">
+        <summary><span class="ent-t">CLAUDE.md</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">Architecture and the standing rules this project is built under.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/blob/main/CLAUDE.md" target="_blank" rel="noopener">Open &#8599;</a></div>
       </details>
     </div>
   </details>
