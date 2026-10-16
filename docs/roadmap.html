@@ -137,7 +137,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 7:02 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 7:28 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -150,9 +150,13 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">1 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <p class="sec-note">Owner-only actions that actually block something &mdash; a credential, a spend, a config, a real decision. <b>Driving and testing isn&rsquo;t here</b>: that&rsquo;s the job, not a task. What&rsquo;s new to feel out in the current build lives under <a href="#ms">Just shipped</a>; the things you hand back from a drive become tasks in <a href="#upnext">Up next</a>.</p>
+      <details class="ent" id="need-migration">
+        <summary><span class="tag t-wait">Soon</span><span class="ent-t">Apply the cloud-delete migration to Supabase</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The client now asks the server to delete a drive&rsquo;s cloud row when you delete it on the phone, so the leaderboard and <code>/admin</code> stop counting thrown-away drives &mdash; but it needs the <code>delete_device_drive</code> function applied to the live DB (in <code>supabase/migrations/20261015190000_delete_device_drive.sql</code>). Until then the delete just fails soft. Run it in the Supabase SQL editor, same as the dev-pull RPCs.<br><a class="ent-go" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Open Supabase &#8599;</a></div>
+      </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.<br><a class="ent-go" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank" rel="noopener">Open Cloudflare &#8599;</a></div>
@@ -164,14 +168,14 @@
   <details class="sec" id="upnext" open>
     <summary><h2>Up next</h2><span class="count">things to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The things <b>I</b> build next &mdash; not things waiting on you to drive. The clearest pick-up is finishing <a href="#trk-motiv">rewards &amp; leaderboard</a>: its foundation is already shipped and it carries most of the <a href="#techdebt-note">tech debt</a>, so it&rsquo;s cheaper than it looks. The whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> is also unblocked now that background GPS is in.</p>
-      <details class="ent" id="ip-q4">
-        <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; ready to build</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">rewards &amp; leaderboard</a>&rsquo;s rewards and standings fair, and it&rsquo;s the first KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
+      <p class="sec-note">The things <b>I</b> build next. Q4 (road&rsquo;s-fault scoring) and the honest-standings cleanup just shipped &mdash; see <a href="#ms">Just shipped</a>. Next: the first new feature in the queue, plus one loose end from the leaderboard work.</p>
+      <details class="ent">
+        <summary><span class="tag t-next">loose end</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The leaderboard is derived on the server from your uploaded drives &mdash; but those rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you actually see. Pairs with applying the cloud-delete migration (<a href="#need-migration">Needs you</a>).</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-next">pick up</span><span class="ent-t">Finish rewards &amp; leaderboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Half-wired already: the leaderboard foundation is shipped, and three of five <a href="#techdebt-note">tech-debt items</a> (cloud delete, the empty Corridors/Rivals tabs, the dead Rewards button) are the rest of it. Finishing it turns everyday driving into something you actually want to chase.</div>
+        <summary><span class="tag t-next">next feature</span><span class="ent-t">Start Car Health &mdash; read fault codes <span class="tn">(Q5)</span></span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The clear next build (full detail in <a href="#trk-health">the queue</a>): quietly read the car&rsquo;s trouble codes every drive and flag them in plain English, before the dashboard light. The start of the paid Concierge line.</div>
       </details>
     </div>
   </details>
@@ -194,7 +198,7 @@
 
       <details class="ent" id="trk-motiv">
         <summary><span class="tag t-next tn">Q9</span><span class="ent-t">Rewards &amp; leaderboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Make being smooth actually pay off &mdash; points and rewards, plus real standings (no made-up rivals). And goals you pick that change how it coaches you <span class="tn">(Q9)</span>. Most of the plumbing is already in from earlier work, so this is a cheap one to finish.</div>
+        <div class="ent-body"><b>Standings are real now</b> &mdash; the fake Corridors/Rivals tabs are gone and deleted drives get reconciled (<a href="#ms">just shipped</a>). What&rsquo;s left: <b>redeemable rewards</b> (the voucher/discount side &mdash; a product &amp; partnership step, not just code), and <b>goals</b> you pick that tune how it coaches you <span class="tn">(Q9)</span>.</div>
       </details>
 
       <details class="ent" id="trk-polish">
@@ -231,6 +235,14 @@
     <div class="sec-body">
       <p class="sec-note"><b>Just shipped</b>, newest first &mdash; this is also <b>what&rsquo;s new to feel out</b> in the current TestFlight build, grouped as a changelog, not a to-do. Then the story so far. The exhaustive log is <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</p>
       <details class="ent">
+        <summary><span class="tag t-ship tn">T367</span><span class="ent-t">Leaderboard is real now &mdash; fiction cut</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The Corridors and Rivals tabs were empty placeholders with ghost rows and &ldquo;unlock with GPS&rdquo; teasers &mdash; gone. The leaderboard is just the one real, server-derived board. And deleting a drive now also removes its cloud row, so the standings stop counting drives you threw away (needs the <a href="#need-migration">migration</a> applied).</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-ship tn">T366</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; forced stops don&rsquo;t cost you</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">A stop you were forced into &mdash; a red light, its queue, a stop sign &mdash; now barely dents your momentum score (you can&rsquo;t will a red light green), while a stop with no signal nearby still counts. Uses the OSM signal data the recap already had. Verified on your drives: momentum 84&rarr;95 on light-heavy routes, +1&ndash;3 on the score; a drive with 6 unforced stops gets proportionally less.</div>
+      </details>
+      <details class="ent">
         <summary><span class="tag t-ship tn">T365</span><span class="ent-t">No more motion prompt &mdash; zero, ever</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">That &ldquo;allow motion&rdquo; alert at the start of every drive is <b>gone for good</b>. It came from the web motion API, which iOS re-asks every session. The app now reads motion through <b>native Core Motion</b>, which needs no permission and no prompt at all. Native plugin verified building on the simulator; lands on the next TestFlight build.</div>
       </details>
@@ -241,10 +253,6 @@
       <details class="ent">
         <summary><span class="tag t-ship tn">T362</span><span class="ent-t">Avg MPH is back &middot; App Store location fix</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Avg MPH returns to the live stats bar (Stops &middot; Miles &middot; Avg &middot; Time), and the iOS build now carries the background-location purpose string App Store Connect flagged (ITMS-90683).</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T360</span><span class="ent-t">OBD auto-starts the drive &middot; live gauges on screen</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The dongle links up and the drive just starts (one-tap undo), with RPM / HP / coolant / boost on the driving screen. The first piece of <a href="#trk-always">hands-free recording</a> already in your hands.</div>
       </details>
       <details class="ent" id="ip-q3">
         <summary><span class="tag t-ship tn">Q3</span><span class="ent-t">Background GPS &mdash; denser tracks, locked-screen drives</span><span class="ent-chev">&#9654;</span></summary>
@@ -279,7 +287,7 @@
         <div class="ent-body">Drives group by <b>road corridor</b>, so the same route is one entry &mdash; groundwork for &ldquo;are you getting smoother on your commute,&rdquo; a KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
       </details>
       <details class="ent">
-        <summary><span class="ent-t">The full chronological log</span><span class="when">365 tasks</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="ent-t">The full chronological log</span><span class="when">367 tasks</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Highlights: OBD reads 9 more channels (Sep 28) &middot; scoring rebuilt (Sep 28) &middot; GPS tracks locked down, leaderboard derived server-side (Aug) &middot; the car&rsquo;s numbers recorded into every drive (Aug 19) &middot; honest traffic-aware ETAs (Aug 16) &middot; real accounts + cloud restore (Aug 15) &middot; native iOS shell &amp; running on a real phone (Aug 13) &middot; Destination Drive, the HUD, corridor dedupe, the composite score (earlier). The exhaustive list lives in <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</div>
       </details>
     </div>
@@ -287,20 +295,20 @@
 
   <!-- ══ PROGRESS OVER THE MONTHS ══ -->
   <details class="sec">
-    <summary><h2>Progress over the months</h2><span class="count">365 tasks</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Progress over the months</h2><span class="count">367 tasks</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <div class="chart" role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 45">
+      <div class="chart" role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 47">
         <div class="bar"><span class="n">5</span><div class="col" style="height:5%"></div><span class="m">Apr</span></div>
         <div class="bar"><span class="n">97</span><div class="col" style="height:87%"></div><span class="m">May</span></div>
         <div class="bar"><span class="n">112</span><div class="col peak" style="height:100%"></div><span class="m">Jun</span></div>
         <div class="bar"><span class="n">18</span><div class="col" style="height:16%"></div><span class="m">Jul</span></div>
         <div class="bar"><span class="n">62</span><div class="col" style="height:55%"></div><span class="m">Aug</span></div>
         <div class="bar"><span class="n">26</span><div class="col" style="height:23%"></div><span class="m">Sep</span></div>
-        <div class="bar"><span class="n">45</span><div class="col" style="height:40%"></div><span class="m">Oct</span></div>
+        <div class="bar"><span class="n">47</span><div class="col" style="height:42%"></div><span class="m">Oct</span></div>
       </div>
-      <p class="chart-note">Tasks shipped per month &mdash; the big May/June build-out, then steadier feature work. 365 total.</p>
+      <p class="chart-note">Tasks shipped per month &mdash; the big May/June build-out, then steadier feature work. 367 total.</p>
       <div class="linechart">
-        <svg viewBox="0 0 320 142" role="img" aria-label="Cumulative tasks over time, climbing to 365: April 5, May 102, June 214, July 232, August 294, September 320, October 365">
+        <svg viewBox="0 0 320 142" role="img" aria-label="Cumulative tasks over time, climbing to 367: April 5, May 102, June 214, July 232, August 294, September 320, October 367">
           <defs>
             <linearGradient id="lcfill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stop-color="#E85D3A" stop-opacity="0.32"/>
@@ -314,13 +322,13 @@
             <circle cx="20" cy="118.5" r="3"/><circle cx="66.7" cy="90" r="3"/><circle cx="113.3" cy="57.1" r="3"/><circle cx="160" cy="51.8" r="3"/><circle cx="206.7" cy="33.5" r="3"/><circle cx="253.3" cy="25.9" r="3"/>
           </g>
           <circle cx="300" cy="15" r="4" fill="#C4A962" stroke="#0A0908" stroke-width="2"/>
-          <text x="300" y="8" text-anchor="end" font-family="Georgia,serif" font-style="italic" font-size="13" fill="#C4A962">365</text>
+          <text x="300" y="8" text-anchor="end" font-family="Georgia,serif" font-style="italic" font-size="13" fill="#C4A962">367</text>
           <g font-family="-apple-system,sans-serif" font-size="9" fill="#7A7060" text-anchor="middle">
             <text x="20" y="135">Apr</text><text x="66.7" y="135">May</text><text x="113.3" y="135">Jun</text><text x="160" y="135">Jul</text><text x="206.7" y="135">Aug</text><text x="253.3" y="135">Sep</text><text x="300" y="135">Oct</text>
           </g>
         </svg>
       </div>
-      <p class="chart-note">Cumulative total &mdash; the climb to 365 tasks shipped.</p>
+      <p class="chart-note">Cumulative total &mdash; the climb to 367 tasks shipped.</p>
       <div class="nums">
         <div class="cell"><span class="v">2</span><span class="k">Returning<br>drivers &#9733;</span></div>
         <div class="cell"><span class="v">5</span><span class="k">Active<br>7 days</span></div>
@@ -336,7 +344,7 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note" id="bugs-note">All fixed &mdash; and these are the foundations the queued features stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">rewards &amp; leaderboard</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Car Health</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ip-q4">Road&rsquo;s-fault</a>.</p>
+      <p class="sec-note" id="bugs-note">All fixed &mdash; and these are the foundations the queued features stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">rewards &amp; leaderboard</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Car Health</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ms">Road&rsquo;s-fault</a> (shipped).</p>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Live speed stutters &amp; sticks mid-drive</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">iOS intermittently returns a null speed and the app reused the previous value, so the number froze then snapped &mdash; and since cornering-G and event detection scale by speed, the score degraded with it. Now <code>deriveSpeed()</code> falls back to distance-moved between fixes, with a deadband and a cap. Feeds the score, not just the display.</div>
@@ -362,24 +370,20 @@
 
   <!-- ══ TECH DEBT ══ -->
   <details class="sec">
-    <summary><h2>Tech debt</h2><span class="count">5 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Tech debt</h2><span class="count">4 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note" id="techdebt-note">Each of these drags on one of the features above &mdash; and <b>three of the five are really part of <a href="#trk-motiv">rewards &amp; leaderboard</a></b>: you can&rsquo;t ship honest rewards on miscounted drives, empty tabs and a dead button. The other two are just security / front-door hygiene, not tied to any feature.</p>
+      <p class="sec-note" id="techdebt-note">Each of these drags on a feature above. The leaderboard&rsquo;s fake tabs are now cut and cloud-delete is wired (just pending the <a href="#need-migration">migration</a>). What&rsquo;s left: a dead button tied to <a href="#trk-motiv">rewards &amp; leaderboard</a>, plus security / front-door hygiene that isn&rsquo;t tied to any feature.</p>
       <details class="ent">
-        <summary><span class="tag t-flag">Debt</span><span class="ent-t">Deleting a drive is local-only</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Delete removes the drive from the phone and fixes the local score, but the Supabase copy stays &mdash; so the <b>operator dashboard still counts deleted drives</b>. Next: delete the cloud row too. <b>&rarr; <a href="#trk-motiv">rewards &amp; leaderboard</a>:</b> standings and stats built on drive data aren&rsquo;t honest while deleted drives still count.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-flag">Unfinished</span><span class="ent-t">Leaderboard &ldquo;Corridors&rdquo; / &ldquo;Rivals&rdquo; tabs</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Permanent empty placeholders &mdash; the road-trends fix fills these. <b>&rarr; <a href="#trk-motiv">rewards &amp; leaderboard</a>:</b> this <i>is</i> the scoreboard, unfinished &mdash; finish or cut.</div>
+        <summary><span class="tag t-flag">Debt</span><span class="ent-t">Cloud-delete needs its migration applied</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Deleting a drive used to leave the Supabase row, so <code>/admin</code> and the leaderboard kept counting it. The client now calls a <code>delete_device_drive</code> RPC to remove the cloud row &mdash; but that function has to be <a href="#need-migration">applied to the live DB</a> first; until then it fails soft. Once applied, this closes.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Security</span><span class="ent-t">Rotate the remove.bg API key</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>. <b><b>&rarr; Outside the tracks:</b>rarr; Not a build task:</b> security hygiene, same bucket as rotating the admin password.</div>
+        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>. <b>&rarr; Not a build task:</b> security hygiene, same bucket as rotating the admin password.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Confusing</span><span class="ent-t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. <b><b>&rarr; Outside the tracks:</b>rarr; Not a build task:</b> the front door / acquisition, not a build track.</div>
+        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. <b>&rarr; Not a build task:</b> the front door / acquisition, not a build track.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Polish</span><span class="ent-t">UX-audit leftovers</span><span class="ent-chev">&#9654;</span></summary>
@@ -404,7 +408,7 @@
           <span class="mlabel">Baseline today (live /admin)</span>
           &bull; <span class="kpi-v">86</span> avg score &middot; <span class="kpi-v">2</span> returning drivers &middot; <span class="kpi-v">195</span> drives scored
           <span class="mlabel">Tasks that move it</span>
-          &bull; <a href="#ip-q4">Q4 honest scoring</a> (a fair score is the prerequisite) &middot; corridor comparison (<a href="#ms">shipped</a>) &middot; <a href="#trk-motiv">rewards &amp; leaderboard</a> rewards (the pull to improve) &middot; the coach, below
+          &bull; <a href="#ms">honest scoring</a> (shipped &mdash; a fair score is the prerequisite) &middot; corridor comparison (<a href="#ms">shipped</a>) &middot; <a href="#trk-motiv">rewards &amp; leaderboard</a> rewards (the pull to improve) &middot; the coach, below
         </div>
       </details>
 

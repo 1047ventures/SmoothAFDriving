@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**365 tasks shipped** as of 2026-10-15.
+**367 tasks shipped** as of 2026-10-15.
 
 
 ## 2026-04
@@ -385,3 +385,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T363** · Scoring (Q5): fuse OBD throttle rate into the smoothness dimension  _( 2026-10-15 )_
 - **T364** · iOS: stop re-prompting motion permission on every drive  _( 2026-10-15 )_
 - **T365** · iOS: read motion via native Core Motion — zero permission prompts, ever  _( 2026-10-15 )_
+- **T366** · Q4: road's fault vs yours — forced stops don't cost you momentum  _( 2026-10-15 )_
+- **T367** · Rewards & leaderboard: real standings only — cut fiction, reconcile deletes  _( 2026-10-15 )_
