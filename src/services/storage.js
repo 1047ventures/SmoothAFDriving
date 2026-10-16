@@ -122,6 +122,21 @@ export function saveDrive(drive){
   saveDrives(all);
 }
 
+/**
+ * Replace a stored drive in place (matched by startTime) with an updated copy —
+ * e.g. after its score is recomputed from newly-fetched stop causes. No-op if the
+ * drive isn't in the list. Returns true if it replaced something.
+ */
+export function updateStoredDrive(drive){
+  if (!drive || drive.startTime == null) return false;
+  const all = loadDrives();
+  const i = all.findIndex(d => d.startTime === drive.startTime);
+  if (i < 0) return false;
+  all[i] = drive;
+  saveDrives(all);
+  return true;
+}
+
 export function toggleFavoriteDrive(idx, callbacks = {}){
   const all = loadDrives();
   if (!all[idx]) return;

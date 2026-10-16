@@ -17,6 +17,7 @@ import {
   SMOOTH_THR_LO,
   SMOOTH_THR_HI,
   MOMENTUM_STOP_MAX,
+  MOMENTUM_SIGNAL_WEIGHT,
   SPEED_DIFF_LO_MPH,
   SPEED_DIFF_HI_MPH,
   SPEED_BONUS_MAX,
@@ -179,8 +180,26 @@ export function analyzeDrive(drive){
     }
   }
   // Any stop still pending, or stationary at the very end, was an arrival — not counted.
+
+  // Road's-fault vs yours: when the drive carries classified causes (drive.stopCauses,
+  // parallel to stopMarkers, set once the OSM signal lookup has run), a stop forced
+  // by a light / its queue / a stop sign counts only MOMENTUM_SIGNAL_WEIGHT toward
+  // momentum — you can't will a red light green. "Other" stops (no signal nearby)
+  // count fully. Without causes (live gauge, offline, GPS-only, old drives whose
+  // samples were shed) every stop counts fully, exactly as before. fullStops stays
+  // the real count for the recap; only momentum uses the weighted total.
+  const causes = drive.stopCauses;
+  let momentumStops = fullStops;
+  if (Array.isArray(causes) && causes.length === stopMarkers.length && stopMarkers.length){
+    momentumStops = causes.reduce((sum, c) => {
+      const forced = c && (c.kind === 'light' || c.kind === 'queue' || c.kind === 'sign');
+      return sum + (forced ? MOMENTUM_SIGNAL_WEIGHT : 1);
+    }, 0);
+  }
+  // stopsPerMile stays the honest count for the recap; momentum scores the weighted one.
   const stopsPerMile = distanceMi > 0 ? fullStops / distanceMi : 0;
-  const momentum = Math.round(clamp(linMap(stopsPerMile, 0, MOMENTUM_STOP_MAX, 100, 0), 0, 100));
+  const momentumStopsPerMile = distanceMi > 0 ? momentumStops / distanceMi : 0;
+  const momentum = Math.round(clamp(linMap(momentumStopsPerMile, 0, MOMENTUM_STOP_MAX, 100, 0), 0, 100));
 
   // ── Composite + speed difficulty multiplier ──────────────────────────────
   const dims = { smoothness, braking, momentum };

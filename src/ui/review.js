@@ -4,7 +4,7 @@ import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, mome
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
-import { loadDrives, loadDriverName } from '../services/storage.js';
+import { loadDrives, loadDriverName, updateStoredDrive, recomputeLifetimeScore } from '../services/storage.js';
 import { baseTiles } from '../utils/maptiles.js';
 import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
 import { showToast } from '../utils/toast.js';
@@ -22,7 +22,13 @@ export let reviewAnalysis = null;
  * Say WHY each stop happened — at a light, in the queue for one, at a stop sign,
  * or nothing on the map nearby — using OpenStreetMap's signal positions. Runs
  * after the recap has painted and fails soft: offline or blocked just means no
- * labels. Informational only; it does not change the score.
+ * labels.
+ *
+ * Q4 "road's fault vs yours": the causes also feed the score — a stop you were
+ * forced into (a light, its queue, a stop sign) is heavily discounted in momentum
+ * (you can't will a red light green), while a stop with no signal nearby still
+ * counts. We persist the causes and, if the credit moved the score, repaint the
+ * recap once from the adjusted analysis.
  */
 let _causeToken = 0;
 async function annotateStopCauses(drive, analysis){
@@ -34,6 +40,22 @@ async function annotateStopCauses(drive, analysis){
   const features = await fetchStopFeatures(drive.startTime, markers);
   if (token !== _causeToken || features == null) return;          // a newer recap opened, or no data
   const causes = classifyStops(markers, drive.samples, features);
+
+  // ── Feed the causes into the score (only when they're newly learned) ────────
+  const kinds = causes.map(c => ({ kind: c.kind }));
+  if (JSON.stringify(kinds) !== JSON.stringify(drive.stopCauses || null)){
+    const before = Math.round(drive.score ?? analysis.score ?? 0);
+    drive.stopCauses = kinds;
+    const a = analyzeDrive(drive);              // now cause-aware: forced stops discounted
+    drive.score = Math.round(a.score);
+    drive.dims  = a.dims;
+    updateStoredDrive(drive);                   // make it stick…
+    recomputeLifetimeScore();                   // …and follow through to the home/lifetime number
+    if (drive.score !== before){
+      renderReview(drive);                      // repaint with the credited score; the re-run
+      return;                                   // finds causes already set, so it settles here
+    }
+  }
 
   // Per-stop wording on the map markers.
   causes.forEach((k, i) => {

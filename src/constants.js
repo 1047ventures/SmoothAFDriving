@@ -153,6 +153,14 @@ export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
 export const SMOOTH_THR_LO   = 2;    // p85 |Δthrottle/dt| (%/s) scoring 100
 export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
 export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
+// Road's-fault vs yours: a stop forced by a red light, its queue, or a stop sign
+// is far less avoidable than one with no signal nearby (a jam you didn't read, a
+// rolling situation you mishandled). When a drive carries classified stop causes
+// (drive.stopCauses, from signals.js), a forced stop counts this fraction toward
+// momentum instead of a full stop. Not zero — stacking lots of stops still means
+// a less-flowing drive — but heavily discounted. GPS-only / unclassified drives
+// count every stop fully, exactly as before.
+export const MOMENTUM_SIGNAL_WEIGHT = 0.25;
 
 // Speed difficulty multiplier: holding the car smooth at speed is harder than at
 // a crawl, so a smooth fast drive earns a bonus the same smoothness at low speed

@@ -74,6 +74,45 @@ describe('full-stop counting — only stops BETWEEN stretches of real driving', 
   });
 });
 
+describe('Q4 — forced stops (lights/signs) are discounted in momentum', () => {
+  const build = (segs) => {
+    const samples = []; let t = 0;
+    for (const [speed, secs] of segs) for (let i = 0; i < secs; i++, t++)
+      samples.push({ t: t * 1000, speed, lat: 39.7, lon: -104.9, la: 0, ra: 0, h: 0 });
+    return { samples, events: [], durationMs: t * 1000, distanceMeters: 4000, topSpeedMps: 15 };
+  };
+  // Drive, stop, drive, stop, drive, stop, drive — three real full stops.
+  const threeStops = () => build([[12,20],[0,8],[12,20],[0,8],[12,20],[0,8],[12,20]]);
+
+  it('a light/queue/sign stop costs far less momentum than an avoidable one', () => {
+    const d = threeStops();
+    const raw = analyzeDrive(d);
+    expect(raw.fullStops).toBe(3);
+    const n = raw.stopMarkers.length;
+
+    const forced = analyzeDrive({ ...d, stopCauses: Array.from({ length: n }, () => ({ kind: 'light' })) });
+    expect(forced.dims.momentum).toBeGreaterThan(raw.dims.momentum);
+
+    // Stops with no signal nearby are still fully your momentum to manage.
+    const avoidable = analyzeDrive({ ...d, stopCauses: Array.from({ length: n }, () => ({ kind: 'other' })) });
+    expect(avoidable.dims.momentum).toBe(raw.dims.momentum);
+  });
+
+  it('only momentum is credited — fullStops (the recap count) is unchanged', () => {
+    const d = threeStops();
+    const n = analyzeDrive(d).stopMarkers.length;
+    const forced = analyzeDrive({ ...d, stopCauses: Array.from({ length: n }, () => ({ kind: 'light' })) });
+    expect(forced.fullStops).toBe(3);
+  });
+
+  it('a mismatched or absent causes list falls back to counting every stop', () => {
+    const d = threeStops();
+    const raw = analyzeDrive(d).dims.momentum;
+    expect(analyzeDrive({ ...d, stopCauses: [{ kind: 'light' }] }).dims.momentum).toBe(raw); // wrong length → ignored
+    expect(analyzeDrive({ ...d, stopCauses: null }).dims.momentum).toBe(raw);
+  });
+});
+
 describe('smoothness calibration — ordinary town driving is not "violent"', () => {
   // A gentle town drive: lots of speed changes at ~0.9 m/s², low jerk. With the old
   // 0.15→1.2 scale this scored smoothness ~30 on the pedal half; it must read as smooth.
