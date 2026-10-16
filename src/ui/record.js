@@ -13,6 +13,7 @@ import { analyzeDrive, computePitStopMs } from '../services/scoring.js';
 import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
+import { nativeMotionAvailable, startNativeMotion, stopNativeMotion } from '../services/sensors/nativeMotion.js';
 import { startLocationWatch, stopLocationWatch } from '../services/sensors/location.js';
 import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
 import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/autoEndLearn.js';
@@ -467,7 +468,15 @@ export function startRecording(){
   setCalibUI('calibrating');
 
   state.motionHandler = createMotionHandler({ flashEvent });
-  window.addEventListener('devicemotion', state.motionHandler);
+  // Prefer native Core Motion on iOS (zero permission prompts); fall back to the
+  // web devicemotion stream everywhere else, or if the native plugin is missing.
+  if (nativeMotionAvailable()){
+    startNativeMotion(state.motionHandler).then(ok => {
+      if (!ok) window.addEventListener('devicemotion', state.motionHandler);
+    });
+  } else {
+    window.addEventListener('devicemotion', state.motionHandler);
+  }
 }
 
 // ── Auto-end when the engine goes off (OBD) ─────────────────────────────────────
@@ -565,6 +574,8 @@ export function stopRecording(opts){
     state.gpsWatchActive = false;
   }
   if (state.motionHandler){
+    // Covers both paths: native stream (iOS) and the web devicemotion listener.
+    if (nativeMotionAvailable()) stopNativeMotion();
     window.removeEventListener('devicemotion', state.motionHandler);
     state.motionHandler = null;
   }
@@ -666,6 +677,14 @@ export function wireStartButton(btnId){
   const btn = $(btnId);
   if (!btn) return;
   btn.addEventListener('click', async () => {
+    // Native iOS reads motion through Core Motion (no permission, no prompt), so
+    // skip the web DeviceMotionEvent gate entirely — startRecording() starts the
+    // native stream. This is what makes it zero prompts, ever.
+    if (nativeMotionAvailable()){
+      motionActive = true;
+      startRecording();
+      return;
+    }
     const needsPermission = typeof DeviceMotionEvent !== 'undefined' &&
                             typeof DeviceMotionEvent.requestPermission === 'function';
     if (needsPermission){
