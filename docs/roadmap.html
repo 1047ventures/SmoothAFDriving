@@ -20,8 +20,8 @@
     Needs You · Up Next · In the Queue · Long-Term Vision · Major Milestones
     · Progress · Bugs · Tech Debt · Mission (KPIs + the tasks that move each) ·
     Key Files (reference appendix).
-  Forward work carries a theme tag (Track 1–4); the Mission section links each
-  pillar to the tasks that advance it.
+  Forward work is named in plain feature terms (no "Track N" labels); the Mission
+  section links each part to the tasks that advance it.
 -->
 <title>Smooth AF — Build Log & Roadmap</title>
 <style>
@@ -137,7 +137,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:55 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 7:02 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -164,42 +164,42 @@
   <details class="sec" id="upnext" open>
     <summary><h2>Up next</h2><span class="count">things to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The things <b>I</b> build next &mdash; not things waiting on you to drive. The clearest pick-up is finishing <a href="#trk-motiv">Track&nbsp;4</a>: its foundation is already shipped and it carries most of the <a href="#techdebt-note">tech debt</a>, so it&rsquo;s cheaper than it looks. The whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> is also unblocked now that background GPS is in.</p>
+      <p class="sec-note">The things <b>I</b> build next &mdash; not things waiting on you to drive. The clearest pick-up is finishing <a href="#trk-motiv">rewards &amp; leaderboard</a>: its foundation is already shipped and it carries most of the <a href="#techdebt-note">tech debt</a>, so it&rsquo;s cheaper than it looks. The whole <a href="#trk-always">&ldquo;records itself&rdquo; track</a> is also unblocked now that background GPS is in.</p>
       <details class="ent" id="ip-q4">
         <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; ready to build</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s rewards and standings fair, and it&rsquo;s the first KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
+        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">rewards &amp; leaderboard</a>&rsquo;s rewards and standings fair, and it&rsquo;s the first KPI under <a href="#mission-better">Mission &rarr; better drivers</a>.</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-next">pick up</span><span class="ent-t">Finish Track 4 &mdash; rewards + scoreboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Half-wired already: the leaderboard foundation is shipped, and three of five <a href="#techdebt-note">tech-debt items</a> (cloud delete, the empty Corridors/Rivals tabs, the dead Rewards button) are the rest of it. Finishing it turns pillar&nbsp;1&rsquo;s engagement into something you chase &mdash; see <a href="#trk-motiv">Track&nbsp;4</a>.</div>
+        <summary><span class="tag t-next">pick up</span><span class="ent-t">Finish rewards &amp; leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Half-wired already: the leaderboard foundation is shipped, and three of five <a href="#techdebt-note">tech-debt items</a> (cloud delete, the empty Corridors/Rivals tabs, the dead Rewards button) are the rest of it. Finishing it turns everyday driving into something you actually want to chase.</div>
       </details>
     </div>
   </details>
 
   <!-- ══ IN THE QUEUE ══ -->
   <details class="sec">
-    <summary><h2>In the queue</h2><span class="count">3 tracks + polish</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>In the queue</h2><span class="count">what&rsquo;s next to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The buildable work behind <a href="#upnext">Up next</a> &mdash; grouped by theme (its Track), each naming the concrete next build with its Q-number. The far-horizon end of each theme lives under <a href="#vision">Long-term vision</a>.</p>
+      <p class="sec-note">The features lined up after <a href="#upnext">Up next</a>. Each has a Q-number just so we can point at one. The bigger, further-out versions live under <a href="#vision">Long-term vision</a>.</p>
 
       <details class="ent" id="trk-health">
-        <summary><span class="tag t-next">Track 1</span><span class="ent-t">Car Health &mdash; the Concierge engine &amp; the money line</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body"><b>Next build &middot; <span class="tn">Q5</span>:</b> read fault codes on every drive &mdash; OBD <b>Mode 03</b>, universal since &rsquo;96 &mdash; and raise a plain-English alert <i>before</i> the dashboard light. The <b>paid</b> concierge tiers on top of it are the <a href="#vision">long-term vision</a> and the recurring-revenue line.</div>
+        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Car Health &mdash; read the car&rsquo;s fault codes</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Every drive, quietly check the car for trouble codes (works on any car since &rsquo;96) and tell you in plain English what&rsquo;s wrong &mdash; <i>before</i> the dashboard light comes on. The paid, proactive version is the big <a href="#vision">long-term</a> money-maker.</div>
       </details>
 
       <details class="ent" id="trk-always">
-        <summary><span class="tag t-next">Track 2</span><span class="ent-t">The drive records itself &mdash; never babysit it</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Three builds, all on top of <a href="#ip-q3">background GPS</a> (shipped):<br>&bull; <b><span class="tn">Q6</span> Maps handoff</b> &mdash; recording survives when you switch to Apple/Google Maps.<br>&bull; <b><span class="tn">Q7</span> Closed-app auto-start</b> &mdash; a drive starts, and notifies you, without opening the app.<br>&bull; <b><span class="tn">Q8</span> Dongle wake</b> &mdash; the OBD powers up, the app wakes in the background (CoreBluetooth) and recording begins on its own. <i>The real version of the auto-start you asked for.</i><br><b>Goal:</b> you drive, it captures &mdash; app open, behind Maps, or never launched.</div>
+        <summary><span class="tag t-next tn">Q6&ndash;8</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q6)</span><br>&bull; a drive starts without you opening the app <span class="tn">(Q7)</span><br>&bull; a drive starts the moment the dongle powers up <span class="tn">(Q8)</span></div>
       </details>
 
       <details class="ent" id="trk-motiv">
-        <summary><span class="tag t-prog">Track 4</span><span class="ent-t">Make smooth worth chasing</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">&bull; <b>Rewards + Scoreboard</b> <i>(in flight)</i> &mdash; smoothness that earns something, and standings that are real: server-derived, simulated drives excluded.<br>&bull; <b><span class="tn">Q9</span> Goals</b> &mdash; pick goals that tune how the app coaches you (the hook into the <a href="#mission-modes">modes</a> idea &mdash; first-timer to pro).<br><i>Half-wired already: its leaderboard foundation is a shipped <a href="#bugs-note">bug fix</a>, and three of five <a href="#techdebt-note">tech-debt items</a> are the rest of it &mdash; finishing this is cheap.</i></div>
+        <summary><span class="tag t-next tn">Q9</span><span class="ent-t">Rewards &amp; leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Make being smooth actually pay off &mdash; points and rewards, plus real standings (no made-up rivals). And goals you pick that change how it coaches you <span class="tn">(Q9)</span>. Most of the plumbing is already in from earlier work, so this is a cheap one to finish.</div>
       </details>
 
       <details class="ent" id="trk-polish">
-        <summary><span class="tag t-wait">Polish</span><span class="ent-t">Debt &mdash; worth doing, not urgent</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">&bull; <b><span class="tn">Q10</span> Home-screen cleanup</b> &mdash; link Miles &rarr; Trends, delete the dead persona markup.<br>&bull; <b><span class="tn">Q11</span> Car-icon redesign</b> &mdash; the current set isn&rsquo;t it.</div>
+        <summary><span class="tag t-wait tn">Q10&ndash;11</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q10)</span> and a better set of car icons <span class="tn">(Q11)</span>.</div>
       </details>
     </div>
   </details>
@@ -208,19 +208,19 @@
   <details class="sec" id="vision">
     <summary><h2>Long-term vision</h2><span class="count">Your Car&rsquo;s Concierge</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">Where the queue leads &mdash; <b>one honest app for your whole drive, keyed to the car you&rsquo;re actually in</b>. The map gets you there, the score makes you want to be smooth, the coach makes you good at it; OBD is the platform underneath, not a feature. These are the far ends of the four tracks, and the money.</p>
+      <p class="sec-note">The big picture: <b>one honest app for your whole drive, built around the car you actually have.</b> The map gets you there, the score makes you want to drive smooth, the coach makes you good at it.</p>
 
       <details class="ent">
-        <summary><span class="tag t-next">from Track 1</span><span class="ent-t">Car Health, paid &mdash; the recurring-revenue line</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">On top of the free fault-code scan (<a href="#trk-health">Q5</a>): <b>free</b> = scan + basic alert; <b>paid</b> = proactive heads-up before the light, a maintenance timeline keyed to your mileage, seasonal tips, and a tap through to a DIY video or a local mobile mechanic. This is why OBD is the platform, not just a gauge.</div>
+        <summary><span class="tag t-idea">paid</span><span class="ent-t">Car Health, the subscription</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Built on the free code-scan (<a href="#trk-health">Q5</a>): a proactive heads-up <i>before</i> the warning light, a maintenance schedule for your mileage, and a tap through to a how-to video or a local mobile mechanic. This is the recurring-revenue line.</div>
       </details>
       <details class="ent" id="trk-map">
-        <summary><span class="tag t-idea">Track 3</span><span class="ent-t">Be the drive layer &mdash; the map, keyed to your car</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Unlocked once the app reliably owns the drive (<a href="#trk-always">Track&nbsp;2</a>):<br>&bull; <b>Vehicle-aware directions</b> &mdash; no interstate shortcut when you&rsquo;re in an RV. Road-type avoidance works on Mapbox today; true RV-grade (bridge heights, weight limits) needs a specialized API.<br>&bull; <b>Popular &amp; scenic routes nearby</b> &mdash; a reason to open the app when you&rsquo;re <i>not</i> just commuting.<br>&bull; <b>Contextual services</b> &mdash; gas, EV chargers, parking, surfaced only when they help (low tank, nearing your stop) then out of the way. EV chargers are a free API, parking has partner APIs, gas pricing is the paid one.</div>
+        <summary><span class="tag t-idea">later</span><span class="ent-t">Be your map, not just your score</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Directions that know your vehicle (no interstate shortcut when you&rsquo;re towing an RV), scenic drives nearby, and gas / EV charging / parking shown only when you actually need them. Comes after the app reliably records the whole drive on its own.</div>
       </details>
       <details class="ent">
-        <summary><span class="tag t-idea">from Mission</span><span class="ent-t">The coaching marketplace</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The far end of <a href="#mission-coach">Mission &rarr; coaches</a>: async review &rarr; live ride-along &rarr; structured programs, with teens + parents as the wedge. A real coach reading telemetry no instructor ever had &mdash; the <a href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Driving Fingerprint</a>, harsh-moment markers, the g-arc through each corner.</div>
+        <summary><span class="tag t-idea">later</span><span class="ent-t">Real coaching</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">When a habit won&rsquo;t budge, a real coach reading data no instructor ever had sends drills tuned to you &mdash; async review, then live ride-alongs, then full programs. Teens and their parents first. (<a href="#mission-coach">Mission &rarr; coaches</a>.)</div>
       </details>
     </div>
   </details>
@@ -244,7 +244,7 @@
       </details>
       <details class="ent">
         <summary><span class="tag t-ship tn">T360</span><span class="ent-t">OBD auto-starts the drive &middot; live gauges on screen</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The dongle links up and the drive just starts (one-tap undo), with RPM / HP / coolant / boost on the driving screen. The first piece of <a href="#trk-always">Track&nbsp;2</a> already in your hands.</div>
+        <div class="ent-body">The dongle links up and the drive just starts (one-tap undo), with RPM / HP / coolant / boost on the driving screen. The first piece of <a href="#trk-always">hands-free recording</a> already in your hands.</div>
       </details>
       <details class="ent" id="ip-q3">
         <summary><span class="tag t-ship tn">Q3</span><span class="ent-t">Background GPS &mdash; denser tracks, locked-screen drives</span><span class="ent-chev">&#9654;</span></summary>
@@ -336,7 +336,7 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note" id="bugs-note">All fixed &mdash; and these are the foundations the tracks now stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">Track&nbsp;4</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Track&nbsp;1</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ip-q4">Road&rsquo;s-fault</a>.</p>
+      <p class="sec-note" id="bugs-note">All fixed &mdash; and these are the foundations the queued features stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">rewards &amp; leaderboard</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Car Health</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ip-q4">Road&rsquo;s-fault</a>.</p>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Live speed stutters &amp; sticks mid-drive</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">iOS intermittently returns a null speed and the app reused the previous value, so the number froze then snapped &mdash; and since cornering-G and event detection scale by speed, the score degraded with it. Now <code>deriveSpeed()</code> falls back to distance-moved between fixes, with a deadband and a cap. Feeds the score, not just the display.</div>
@@ -347,7 +347,7 @@
       </details>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Leaderboard wrote to a table that never existed</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Every score upload 404&rsquo;d into a silent catch for months. Standing is now <b>derived on the server</b> from recorded drives. The five invented competitors are gone. This is <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s foundation, already laid.</div>
+        <div class="ent-body">Every score upload 404&rsquo;d into a silent catch for months. Standing is now <b>derived on the server</b> from recorded drives. The five invented competitors are gone. This is <a href="#trk-motiv">rewards &amp; leaderboard</a>&rsquo;s foundation, already laid.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Four deploy pipelines &rarr; one</span><span class="ent-chev">&#9654;</span></summary>
@@ -364,35 +364,35 @@
   <details class="sec">
     <summary><h2>Tech debt</h2><span class="count">5 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note" id="techdebt-note">Not its own track &mdash; each item is a drag on one of the four, and <b>three of the five land on <a href="#trk-motiv">Track&nbsp;4</a></b> (the scoreboard). Pay each down as its track lights up: you can&rsquo;t ship honest rewards on miscounted drives, empty tabs and a dead button. Two items sit outside the tracks &mdash; pure security/front-door hygiene.</p>
+      <p class="sec-note" id="techdebt-note">Each of these drags on one of the features above &mdash; and <b>three of the five are really part of <a href="#trk-motiv">rewards &amp; leaderboard</a></b>: you can&rsquo;t ship honest rewards on miscounted drives, empty tabs and a dead button. The other two are just security / front-door hygiene, not tied to any feature.</p>
       <details class="ent">
         <summary><span class="tag t-flag">Debt</span><span class="ent-t">Deleting a drive is local-only</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Delete removes the drive from the phone and fixes the local score, but the Supabase copy stays &mdash; so the <b>operator dashboard still counts deleted drives</b>. Next: delete the cloud row too. <b>&rarr; <a href="#trk-motiv">Track&nbsp;4</a>:</b> standings and stats built on drive data aren&rsquo;t honest while deleted drives still count.</div>
+        <div class="ent-body">Delete removes the drive from the phone and fixes the local score, but the Supabase copy stays &mdash; so the <b>operator dashboard still counts deleted drives</b>. Next: delete the cloud row too. <b>&rarr; <a href="#trk-motiv">rewards &amp; leaderboard</a>:</b> standings and stats built on drive data aren&rsquo;t honest while deleted drives still count.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Unfinished</span><span class="ent-t">Leaderboard &ldquo;Corridors&rdquo; / &ldquo;Rivals&rdquo; tabs</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Permanent empty placeholders &mdash; the road-trends fix fills these. <b>&rarr; <a href="#trk-motiv">Track&nbsp;4</a>:</b> this <i>is</i> the scoreboard, unfinished &mdash; finish or cut.</div>
+        <div class="ent-body">Permanent empty placeholders &mdash; the road-trends fix fills these. <b>&rarr; <a href="#trk-motiv">rewards &amp; leaderboard</a>:</b> this <i>is</i> the scoreboard, unfinished &mdash; finish or cut.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Security</span><span class="ent-t">Rotate the remove.bg API key</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>. <b>&rarr; Outside the tracks:</b> security hygiene, same bucket as rotating the admin password.</div>
+        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>. <b><b>&rarr; Outside the tracks:</b>rarr; Not a build task:</b> security hygiene, same bucket as rotating the admin password.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Confusing</span><span class="ent-t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. <b>&rarr; Outside the tracks:</b> the front door / acquisition, not a build track.</div>
+        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. <b><b>&rarr; Outside the tracks:</b>rarr; Not a build task:</b> the front door / acquisition, not a build track.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Polish</span><span class="ent-t">UX-audit leftovers</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The dead <b>&ldquo;Explore Rewards&rdquo;</b> button belongs to <a href="#trk-motiv">Track&nbsp;4</a> &mdash; it promises what that track delivers. The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#mission-modes">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Track&nbsp;1</a> / <a href="#trk-map">Track&nbsp;3</a>).</div>
+        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The dead <b>&ldquo;Explore Rewards&rdquo;</b> button belongs to <a href="#trk-motiv">rewards &amp; leaderboard</a> &mdash; it promises what that track delivers. The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#mission-modes">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Car Health</a> / <a href="#trk-map">the map features</a>).</div>
       </details>
     </div>
   </details>
 
   <!-- ══ MISSION ══ -->
   <details class="sec">
-    <summary><h2>Mission</h2><span class="count">measured &middot; 3 pillars</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Mission</h2><span class="count">measured &middot; 3 parts</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The why, made measurable. Each pillar carries the <b>KPIs</b> we judge it by and the <b>tasks that move them</b> &mdash; most of those metrics aren&rsquo;t instrumented yet, so the list doubles as what to start measuring.</p>
+      <p class="sec-note">The why, made measurable. Each part carries the <b>KPIs</b> we judge it by and the <b>tasks that move them</b> &mdash; most of those metrics aren&rsquo;t instrumented yet, so the list doubles as what to start measuring.</p>
 
       <details class="ent" id="mission-better">
         <summary><span class="ent-t">Make people genuinely better, smoother drivers</span><span class="ent-chev">&#9654;</span></summary>
@@ -404,7 +404,7 @@
           <span class="mlabel">Baseline today (live /admin)</span>
           &bull; <span class="kpi-v">86</span> avg score &middot; <span class="kpi-v">2</span> returning drivers &middot; <span class="kpi-v">195</span> drives scored
           <span class="mlabel">Tasks that move it</span>
-          &bull; <a href="#ip-q4">Q4 honest scoring</a> (a fair score is the prerequisite) &middot; corridor comparison (<a href="#ms">shipped</a>) &middot; <a href="#trk-motiv">Track&nbsp;4</a> rewards (the pull to improve) &middot; the coach, below
+          &bull; <a href="#ip-q4">Q4 honest scoring</a> (a fair score is the prerequisite) &middot; corridor comparison (<a href="#ms">shipped</a>) &middot; <a href="#trk-motiv">rewards &amp; leaderboard</a> rewards (the pull to improve) &middot; the coach, below
         </div>
       </details>
 
