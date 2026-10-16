@@ -129,7 +129,7 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:45 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 6:58 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -189,7 +189,7 @@
       </details>
       <details class="ent" id="ip-q4">
         <summary><span class="tag t-prog tn">Q4</span><span class="ent-t">Road&rsquo;s fault vs yours</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked.</div>
+        <div class="ent-body">Don&rsquo;t penalize roughness or stops you can&rsquo;t help &mdash; stoplight labels are the first piece. The mounted-phone drives are in, so this is unblocked. It&rsquo;s <b>core-engine accuracy</b>, which sits under the whole plan: an honest score is what makes <a href="#trk-motiv">Track&nbsp;4</a>&rsquo;s rewards and standings fair in the first place.</div>
       </details>
     </div>
   </details>
@@ -367,6 +367,7 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <p class="sec-note">All fixed &mdash; and these are the foundations the tracks now stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">Track&nbsp;4</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Track&nbsp;1</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ip-q4">Road&rsquo;s-fault</a>.</p>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Live speed stutters &amp; sticks mid-drive</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">iOS intermittently returns a null speed and the app reused the previous value, so the number froze then snapped &mdash; and since cornering-G and event detection scale by speed, the score degraded with it. Now <code>deriveSpeed()</code> falls back to distance-moved between fixes, with a deadband and a cap. Feeds the score, not just the display.</div>
@@ -394,25 +395,26 @@
   <details class="sec">
     <summary><h2>Tech debt</h2><span class="count">5 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <p class="sec-note">Not its own track &mdash; each item is a drag on one of the four, and <b>three of the five land on <a href="#trk-motiv">Track&nbsp;4</a></b> (the scoreboard). Pay each down as its track lights up: you can&rsquo;t ship honest rewards on miscounted drives, empty tabs and a dead button. Two items sit outside the tracks &mdash; pure security/front-door hygiene.</p>
       <details class="ent">
         <summary><span class="tag t-flag">Debt</span><span class="ent-t">Deleting a drive is local-only</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Delete removes the drive from the phone and fixes the local score, but the Supabase copy stays &mdash; so the <b>operator dashboard still counts deleted drives</b>. Next: delete the cloud row too.</div>
+        <div class="ent-body">Delete removes the drive from the phone and fixes the local score, but the Supabase copy stays &mdash; so the <b>operator dashboard still counts deleted drives</b>. Next: delete the cloud row too. <b>&rarr; <a href="#trk-motiv">Track&nbsp;4</a>:</b> standings and stats built on drive data aren&rsquo;t honest while deleted drives still count.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Unfinished</span><span class="ent-t">Leaderboard &ldquo;Corridors&rdquo; / &ldquo;Rivals&rdquo; tabs</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Permanent empty placeholders &mdash; the road-trends fix fills these.</div>
+        <div class="ent-body">Permanent empty placeholders &mdash; the road-trends fix fills these. <b>&rarr; <a href="#trk-motiv">Track&nbsp;4</a>:</b> this <i>is</i> the scoreboard, unfinished &mdash; finish or cut.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Security</span><span class="ent-t">Rotate the remove.bg API key</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>.</div>
+        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>. <b>&rarr; Outside the tracks:</b> security hygiene, same bucket as rotating the admin password.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Confusing</span><span class="ent-t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. Not blocking anything.</div>
+        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. <b>&rarr; Outside the tracks:</b> the front door / acquisition, not a build track.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Polish</span><span class="ent-t">UX-audit leftovers</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Modal focus management, the dead &ldquo;Explore Rewards&rdquo; button, a couple of missing empty states. Plus two specced-not-built items: first-run onboarding and vehicle fingerprinting.</div>
+        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The dead <b>&ldquo;Explore Rewards&rdquo;</b> button belongs to <a href="#trk-motiv">Track&nbsp;4</a> &mdash; it promises what that track delivers. The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#ms">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Track&nbsp;1</a> / <a href="#trk-map">Track&nbsp;3</a>).</div>
       </details>
     </div>
   </details>
