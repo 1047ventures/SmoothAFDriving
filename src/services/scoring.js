@@ -5,7 +5,7 @@ import {
   ETA_BUFFER,
   PACE_PENALTY,
   CLOCK_MAX_SWING,
-  CLOCK_BEAT_FULL,
+  CLOCK_BEAT_FULL, POINTS_SMOOTH_GATE,
   CLOCK_LATE_FULL,
   SCORE_MAX,
   PIT_SPEED_MPS,
@@ -680,14 +680,15 @@ export function destinationTier(effectiveness, efficiency){
   return GRID[effBand][timeBand];
 }
 
-// Signed clock modifier in points. Positive (beat the ETA) is smoothness-gated so
-// only smooth drivers approach the max and can break 100; negative (late) applies
+// Signed clock modifier in points. Positive (beat the ETA) needs efficiency at the
+// smoothness gate and scales with it, so only smooth drivers can break 100; negative (late) applies
 // only when allowPenalty (which ships with the live traffic-aware ETA).
 export function clockModifier(rawEtaSec, actualSec, efficiency, allowPenalty = false, buffer = ETA_BUFFER){
   if (!(rawEtaSec > 0) || !(actualSec > 0)) return 0;
   const target = rawEtaSec * buffer;
   const margin = (target - actualSec) / target; // >0 beat it, <0 late
   if (margin >= 0){
+    if (efficiency < POINTS_SMOOTH_GATE) return 0;   // rough-but-fast earns nothing
     const pace = Math.min(1, margin / CLOCK_BEAT_FULL);
     return CLOCK_MAX_SWING * pace * (clamp(efficiency, 0, 100) / 100);
   }

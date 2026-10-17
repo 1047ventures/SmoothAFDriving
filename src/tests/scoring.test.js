@@ -396,8 +396,10 @@ describe('clockModifier', () => {
     expect(clockModifier(600, 576, 95)).toBeCloseTo(14.25, 2);
     // efficiency 100 → full 15
     expect(clockModifier(600, 576, 100)).toBeCloseTo(15, 2);
-    // rough driver (eff 60) beating the clock earns little → 15*1*0.6 = 9
-    expect(clockModifier(600, 576, 60)).toBeCloseTo(9, 2);
+    // rough driver (eff 60, below the gate) beating the clock earns nothing
+    expect(clockModifier(600, 576, 60)).toBe(0);
+    // right at the gate (80) → 15*1*0.8 = 12
+    expect(clockModifier(600, 576, 80)).toBeCloseTo(12, 2);
     // beat by 10% (actual 648) → pace 0.5 → 15*0.5*0.95 = 7.125
     expect(clockModifier(600, 648, 95)).toBeCloseTo(7.125, 2);
   });
@@ -425,7 +427,7 @@ describe('compositeScore', () => {
     expect(compositeScore(100, 600, 576, { arrived: true })).toBe(115); // caps at SCORE_MAX
   });
   it('reckless-but-fast cannot break 100', () => {
-    expect(compositeScore(60, 600, 576, { arrived: true })).toBe(69); // 60 + 9
+    expect(compositeScore(60, 600, 576, { arrived: true })).toBe(60); // below the smoothness gate → no clock bonus
   });
   it('applies the penalty only when allowPenalty', () => {
     expect(compositeScore(95, 600, 864, { arrived: true })).toBe(95);                    // late, no penalty

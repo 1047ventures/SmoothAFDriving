@@ -1,6 +1,8 @@
 import { APP_VERSION, INSTALL_URL } from './constants.js';
 import { migrateLifetimeScore, getDeviceId } from './services/storage.js';
 import { checkRecoveredDrive, rescoreStoredDrives } from './services/drive.js';
+import { stampMissingPoints } from './services/points.js';
+import { loadDrives, saveDrives } from './services/storage.js';
 import { syncPendingDrives } from './services/supabase.js';
 import { renderDriveList } from './ui/home.js';
 import { renderCarDisplay, renderRecAvatar, saveRecPhoto, showGarageSheet, hideGarageSheet, processCarPhoto, wireGarageButtons } from './ui/garage.js';
@@ -73,6 +75,7 @@ function boot(){
   // Rescore stored drives under the current engine BEFORE the lifetime migration,
   // so lifetime averages the new scores. One-time (gated by RESCORE_VERSION).
   safeInit('rescoreStoredDrives',  () => { const r = rescoreStoredDrives(); if (r) console.log(`[rescore] ${r.rescored} drives, ${r.changed} changed, avg ${r.avgDelta > 0 ? '+' : ''}${r.avgDelta}`); });
+  safeInit('stampMissingPoints',   () => { const all = loadDrives(); if (stampMissingPoints(all)) saveDrives(all); });
   safeInit('migrateLifetimeScore', () => migrateLifetimeScore());
   safeInit('checkRecoveredDrive',  () => checkRecoveredDrive({ onListUpdate: renderDriveList }));
   safeInit('renderDriveList',      () => renderDriveList());

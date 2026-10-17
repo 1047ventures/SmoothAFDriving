@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 216</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 9:00 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 10:01 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -166,27 +166,34 @@
 
   <!-- ══ UP NEXT ══ -->
   <details class="sec" id="upnext" open>
-    <summary><h2>Up next</h2><span class="count">things to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Up next</h2><span class="count">in this order</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent">
-        <summary><span class="tag t-next">loose end</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The leaderboard is derived on the server from your uploaded drives &mdash; but those rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you actually see.</div>
+      <details class="ent" id="trk-points">
+        <summary><span class="tag t-prog tn">Q1</span><span class="ent-t">Points for every smooth mile &amp; honest rewards</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">10 points per smooth mile (road near a harsh moment doesn&rsquo;t count). Beating the ETA stacks a bonus of up to +50% &mdash; <b>only if you stayed smooth</b>; rough-but-fast earns nothing, and no longer lifts the score either. Rewards screen shows points, smooth miles and smooth-mile badges instead of vouchers that didn&rsquo;t exist.</div>
       </details>
-      <details class="ent">
-        <summary><span class="tag t-next">next feature</span><span class="ent-t">Start Car Health &mdash; read fault codes <span class="tn">(Q5)</span></span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The clear next build (full detail in <a href="#trk-health">the queue</a>): quietly read the car&rsquo;s trouble codes every drive and flag them in plain English, before the dashboard light. The start of the paid Concierge line.</div>
+      <details class="ent" id="trk-better">
+        <summary><span class="tag t-next tn">Q2</span><span class="ent-t">&ldquo;Are you getting better?&rdquo;</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The North Star, made visible: one card after each drive and on Home &mdash; &ldquo;braking 18% smoother than 30 days ago&rdquo;, &ldquo;beat your usual on Main St 4 times running&rdquo;. Built on the trends + same-road data already collected.</div>
+      </details>
+      <details class="ent" id="trk-coach">
+        <summary><span class="tag t-next tn">Q3</span><span class="ent-t">Coaching that remembers</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Tips that notice patterns (&ldquo;third drive in a row braking late &mdash; try this&rdquo;), pick a focus, and back off once you&rsquo;ve fixed it. Needs Q2&rsquo;s baselines, so it comes after.</div>
+      </details>
+      <details class="ent" id="trk-health">
+        <summary><span class="tag t-next tn">Q4</span><span class="ent-t">Car Health &mdash; read the car&rsquo;s fault codes</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Every drive, quietly check the car for trouble codes (any car since &rsquo;96) and say in plain English what&rsquo;s wrong &mdash; <i>before</i> the dashboard light. Last of the four: only dongle drivers benefit today, and it&rsquo;s the start of the paid Concierge line.</div>
       </details>
     </div>
   </details>
 
   <!-- ══ IN THE QUEUE ══ -->
   <details class="sec">
-    <summary><h2>In the queue</h2><span class="count">what&rsquo;s next to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>In the queue</h2><span class="count">after that</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-
-      <details class="ent" id="trk-health">
-        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Car Health &mdash; read the car&rsquo;s fault codes</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Every drive, quietly check the car for trouble codes (works on any car since &rsquo;96) and tell you in plain English what&rsquo;s wrong &mdash; <i>before</i> the dashboard light comes on. The paid, proactive version is the big <a href="#vision">long-term</a> money-maker.</div>
+      <details class="ent">
+        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Uploaded drive rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you see.</div>
       </details>
 
       <details class="ent" id="trk-always">
@@ -195,8 +202,8 @@
       </details>
 
       <details class="ent" id="trk-motiv">
-        <summary><span class="tag t-next tn">Q9</span><span class="ent-t">Rewards &amp; leaderboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body"><b>Standings are real now</b> &mdash; the fake Corridors/Rivals tabs are gone and deleted drives get reconciled (<a href="#ms">just shipped</a>). What&rsquo;s left: <b>redeemable rewards</b> (the voucher/discount side &mdash; a product &amp; partnership step, not just code), and <b>goals</b> you pick that tune how it coaches you <span class="tn">(Q9)</span>.</div>
+        <summary><span class="tag t-wait tn">Q9</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Turning points into gas, car care or coaching &mdash; a partnership step, not just code. Waits until points (Q1) have run for a while.</div>
       </details>
 
       <details class="ent" id="trk-polish">
@@ -213,7 +220,7 @@
 
       <details class="ent">
         <summary><span class="tag t-idea">paid</span><span class="ent-t">Car Health, the subscription</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Built on the free code-scan (<a href="#trk-health">Q5</a>): a proactive heads-up <i>before</i> the warning light, a maintenance schedule for your mileage, and a tap through to a how-to video or a local mobile mechanic. This is the recurring-revenue line.</div>
+        <div class="ent-body">Built on the free code-scan (<a href="#trk-health">Q4</a>): a proactive heads-up <i>before</i> the warning light, a maintenance schedule for your mileage, and a tap through to a how-to video or a local mobile mechanic. This is the recurring-revenue line.</div>
       </details>
       <details class="ent" id="trk-map">
         <summary><span class="tag t-idea">later</span><span class="ent-t">Be your map, not just your score</span><span class="ent-chev">&#9654;</span></summary>
@@ -363,8 +370,12 @@
 
   <!-- ══ TECH DEBT ══ -->
   <details class="sec" id="techdebt">
-    <summary><h2>Tech debt</h2><span class="count">4 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Tech debt</h2><span class="count">5 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent">
+        <summary><span class="tag t-flag">Small</span><span class="ent-t">Points don&rsquo;t follow you to a new phone yet</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Drives restored from the cloud come back without their GPS track or smoothness, so points are estimated from the score and the on-time bonus is lost. Fix: store each drive&rsquo;s points in the cloud row and read them back on restore (needs one small database column).</div>
+      </details>
       <details class="ent">
         <summary><span class="tag t-flag">Optional</span><span class="ent-t"><code>SUPABASE_DB_URL</code> secret &mdash; stops the failure emails</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The secret holds the password alone, so the auto-migrate job fails on every push that touches the database. Harmless &mdash; changes get applied by hand in the SQL editor instead. Fixing it (Session pooler connection string) just makes them apply themselves and stops the emails.</div>
@@ -379,7 +390,7 @@
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Polish</span><span class="ent-t">UX-audit leftovers</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The dead <b>&ldquo;Explore Rewards&rdquo;</b> button belongs to <a href="#trk-motiv">rewards &amp; leaderboard</a> &mdash; it promises what that track delivers. The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#mission-modes">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Car Health</a> / <a href="#trk-map">the map features</a>).</div>
+        <div class="ent-body">Modal focus management and a couple of missing empty states (polish). The two specced-not-built items map up: <b>first-run onboarding</b> &rarr; the <a href="#mission-modes">modes</a> idea (first-timer), and <b>vehicle fingerprinting</b> &rarr; keyed-to-your-car (<a href="#trk-health">Car Health</a> / <a href="#trk-map">the map features</a>).</div>
       </details>
     </div>
   </details>

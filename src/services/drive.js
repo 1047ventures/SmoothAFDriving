@@ -32,6 +32,7 @@ function arrivedAtDestination(drive){
   return d <= ARRIVAL_RADIUS_M;
 }
 import { detectCorridors } from './corridors.js';
+import { drivePoints } from './points.js';
 import { syncProfile } from './profile.js';
 
 // Map one in-memory sample to its compact stored shape (short keys, rounded).
@@ -305,6 +306,7 @@ export function finalizeAndReview(callbacks = {}){
     : null;
   drive.score = compositeScore(analysis.score, drive.targetEtaSec, moveSec,
     { arrived: drive.arrived, allowPenalty: penalize, buffer: drive.etaBuffer });
+  drive.points = drivePoints(drive);
   saveDrive(drive);
   pushDriveToSupabase(drive);
   // Non-blocking — corridor detection runs after review renders

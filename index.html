@@ -716,27 +716,27 @@
 
     <!-- Wallet hero -->
     <div class="rw-wallet">
-      <div class="rw-wallet-label">Your Points</div>
+      <div class="rw-wallet-label">10 points per smooth mile</div>
       <div class="rw-wallet-stats">
         <div class="rw-wallet-col">
-          <div class="rw-wallet-num" id="rw-earned">0</div>
-          <div class="rw-wallet-col-label">Earned</div>
+          <div class="rw-wallet-num rw-balance" id="rw-points">0</div>
+          <div class="rw-wallet-col-label">Points</div>
         </div>
         <div class="rw-wallet-col">
-          <div class="rw-wallet-num rw-spent" id="rw-spent">0</div>
-          <div class="rw-wallet-col-label">Spent</div>
+          <div class="rw-wallet-num" id="rw-smooth-mi">0</div>
+          <div class="rw-wallet-col-label">Smooth mi</div>
         </div>
         <div class="rw-wallet-col">
-          <div class="rw-wallet-num rw-balance" id="rw-balance">0</div>
-          <div class="rw-wallet-col-label">Balance</div>
+          <div class="rw-wallet-num rw-spent" id="rw-smooth-pct">0%</div>
+          <div class="rw-wallet-col-label">Smooth rate</div>
         </div>
       </div>
     </div>
 
-    <!-- Next reward progress -->
+    <!-- Next milestone progress -->
     <div class="rw-closest">
-      <div class="rw-closest-label" id="rw-closest-label">Drive more to earn rewards</div>
-      <div class="rw-closest-reward" id="rw-closest-reward">Keep driving smoothly</div>
+      <div class="rw-closest-label" id="rw-closest-label">Drive smoothly to bank points</div>
+      <div class="rw-closest-reward" id="rw-closest-reward">Smooth Starter</div>
       <div class="rw-progress-track">
         <div class="rw-progress-fill" id="rw-progress-fill" style="width:0%"></div>
       </div>
@@ -744,17 +744,14 @@
 
     <!-- Scrollable body -->
     <div class="rw-body">
-      <div class="rw-section-label">Recent Activity</div>
+      <div class="rw-section-label">Recent Drives</div>
       <div class="rw-activity-list" id="rw-activity-list"></div>
-
-      <div class="rw-section-label">Drive History</div>
-      <div id="rw-history-list"></div>
-
-      <button class="rw-cta" id="btn-rw-explore">
-        <div class="rw-cta-main">Explore Rewards Universe &#8594;</div>
-        <div class="rw-cta-sub">Gas &middot; Insurance &middot; Coaching &middot; Merch</div>
-      </button>
     </div>
+
+    <button class="rw-cta" id="btn-rw-explore">
+      <div class="rw-cta-main">Invite a driver &#8594;</div>
+      <div class="rw-cta-sub">Redeemable rewards are on the way</div>
+    </button>
 
   </section>
 

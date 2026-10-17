@@ -226,6 +226,15 @@ export const CLOCK_BEAT_FULL = 0.20; // beating the (buffered) ETA by 20% = full
 export const CLOCK_LATE_FULL = 0.20; // 20% over the (buffered) ETA = full -penalty
 export const SCORE_MAX        = 100 + CLOCK_MAX_SWING; // drives can break 100 (rare)
 
+// ── Smooth AF points ───────────────────────────────────────────────────────────
+// Base: points per smooth mile. Bonus: beating the ETA multiplies the base, but
+// only for drives at/above the smoothness gate — rough-but-fast earns nothing.
+// The same gate stops the clock from lifting a rough drive's score.
+export const POINTS_PER_SMOOTH_MILE = 10;
+export const POINTS_EVENT_WINDOW_MS = 8000;  // road within ±8s of a harsh event isn't "smooth"
+export const POINTS_SMOOTH_GATE     = 80;    // efficiency needed to earn any clock reward
+export const POINTS_PACE_BONUS_MAX  = 0.5;   // beating the ETA fully = +50% on the base
+
 // ── Live ETA + pit-stop detection ──────────────────────────────────────────────
 export const LIVE_ETA_REFRESH_MS = 60000;  // re-fetch the traffic-aware ETA at most this often
 export const PIT_SPEED_MPS       = 0.7;     // below this the car is "stationary"
