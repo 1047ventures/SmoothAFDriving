@@ -412,7 +412,9 @@ export function startRecording(){
   renderRecAvatar();
 
   // ── Phase 0: detect if already moving (skip stability wait if so) ────────
-  getCurrentPositionOnce({ timeout: 2000, maximumAge: 2000 }).then(p => {
+  // requestPermissions:false — the drive watcher below owns the permission ask;
+  // two simultaneous asks can make iOS drop the 'Always' one.
+  getCurrentPositionOnce({ timeout: 2000, maximumAge: 2000, requestPermissions: false }).then(p => {
     const spd = p.coords.speed;
     if (spd != null && !Number.isNaN(spd) && spd > 2.2){
       setCalibUI('moving');

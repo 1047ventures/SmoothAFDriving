@@ -116,7 +116,7 @@ export async function stopLocationWatch() {
  * Resolves a GeolocationPosition-shaped object; rejects `{ code, message }`
  * (code 1 = denied, 3 = timeout), mirroring the web API.
  */
-export function getCurrentPositionOnce({ timeout = 8000, maximumAge = 60000, enableHighAccuracy = true } = {}) {
+export function getCurrentPositionOnce({ timeout = 8000, maximumAge = 60000, enableHighAccuracy = true, requestPermissions = true } = {}) {
   if (!Capacitor.isNativePlatform()) {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) return reject({ code: 2, message: 'No geolocation' });
@@ -135,7 +135,7 @@ export function getCurrentPositionOnce({ timeout = 8000, maximumAge = 60000, ena
     };
     const timer = setTimeout(() => finish(reject, { code: 3, message: 'Location timed out' }), timeout);
     const idReady = BackgroundGeolocation.addWatcher(
-      { requestPermissions: true, stale: maximumAge > 0, distanceFilter: 0 },
+      { requestPermissions, stale: maximumAge > 0, distanceFilter: 0 },
       (location, error) => {
         if (error) return finish(reject, { code: error.code === 'NOT_AUTHORIZED' ? 1 : 2, message: error.message || String(error) });
         if (!location) return;
