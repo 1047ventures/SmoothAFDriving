@@ -14,7 +14,7 @@ import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
 import { nativeMotionAvailable, startNativeMotion, stopNativeMotion } from '../services/sensors/nativeMotion.js';
-import { startLocationWatch, stopLocationWatch } from '../services/sensors/location.js';
+import { startLocationWatch, stopLocationWatch, getCurrentPositionOnce } from '../services/sensors/location.js';
 import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
 import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/autoEndLearn.js';
 import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
@@ -412,14 +412,12 @@ export function startRecording(){
   renderRecAvatar();
 
   // ── Phase 0: detect if already moving (skip stability wait if so) ────────
-  if (navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(p => {
-      const spd = p.coords.speed;
-      if (spd != null && !Number.isNaN(spd) && spd > 2.2){
-        setCalibUI('moving');
-      }
-    }, ()=>{}, { enableHighAccuracy:true, timeout:2000, maximumAge:2000 });
-  }
+  getCurrentPositionOnce({ timeout: 2000, maximumAge: 2000 }).then(p => {
+    const spd = p.coords.speed;
+    if (spd != null && !Number.isNaN(spd) && spd > 2.2){
+      setCalibUI('moving');
+    }
+  }).catch(() => {});
 
   state.tickInterval = setInterval(updateLiveUI, 200);
   startAutoEndWatch();

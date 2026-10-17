@@ -8,6 +8,7 @@ import { geocode, fetchRoute, reverseGeocode } from '../services/routing.js';
 import { etaBuffer } from '../services/routing.js';
 import { baseTiles } from '../utils/maptiles.js';
 import { showToast } from '../utils/toast.js';
+import { getCurrentPositionOnce } from '../services/sensors/location.js';
 
 let picked = null; // { label, lat, lng } | null
 let route  = null; // { distanceM, durationSec, geometry } | null
@@ -87,11 +88,7 @@ function applyPicked(newPicked){
   route  = null;
   renderChip();
 
-  if (!navigator.geolocation){
-    showToast('Couldn\'t get your location — recording without an ETA target.', 'error');
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
+  getCurrentPositionOnce({ timeout: 8000, maximumAge: 30000 }).then(
     pos => {
       const from = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       fetchRoute(from, newPicked)
@@ -111,7 +108,6 @@ function applyPicked(newPicked){
         });
     },
     () => { showToast('Couldn\'t get your location — recording without an ETA target.', 'error'); },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
   );
 }
 
@@ -136,13 +132,9 @@ function openMapPicker(){
   // The container was display:none until now; Leaflet needs a resize + a locate.
   setTimeout(() => {
     map.invalidateSize();
-    if (navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(
-        pos => map.setView([pos.coords.latitude, pos.coords.longitude], 15),
-        () => {},
-        { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
-      );
-    }
+    getCurrentPositionOnce({ timeout: 6000, maximumAge: 60000 })
+      .then(pos => map.setView([pos.coords.latitude, pos.coords.longitude], 15))
+      .catch(() => {});
   }, 80);
 }
 

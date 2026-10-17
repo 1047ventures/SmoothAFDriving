@@ -12,6 +12,7 @@
 
 import { INTRO_SEEN_KEY } from '../constants.js';
 import { requestMotionPermissionIfNeeded } from './record.js';
+import { getCurrentPositionOnce } from '../services/sensors/location.js';
 
 const SLIDES = [
   {
@@ -116,7 +117,7 @@ async function finish({ prime = true } = {}){
   if (prime){
     try { await requestMotionPermissionIfNeeded(); } catch { /* denial is fine */ }
     try {
-      navigator.geolocation?.getCurrentPosition(() => {}, () => {}, { timeout: 8000, maximumAge: 60000 });
+      getCurrentPositionOnce({ timeout: 8000, maximumAge: 60000 }).catch(() => {});
     } catch { /* no geolocation — the drive will report it */ }
   }
 

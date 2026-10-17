@@ -102,3 +102,47 @@ export async function stopLocationWatch() {
     _webWatchId = null;
   }
 }
+
+/**
+ * One location fix, the native way on iOS/Android.
+ *
+ * `navigator.geolocation` inside the app's web view makes iOS show Safari's
+ * per-site prompt ("“localhost” would like to use your current location") —
+ * every session, even though the app itself already holds location permission.
+ * So every one-shot read goes through the same native plugin as the drive
+ * watch: a short foreground-only watcher (no backgroundMessage) that resolves
+ * on the first fix and removes itself. Web builds keep getCurrentPosition.
+ *
+ * Resolves a GeolocationPosition-shaped object; rejects `{ code, message }`
+ * (code 1 = denied, 3 = timeout), mirroring the web API.
+ */
+export function getCurrentPositionOnce({ timeout = 8000, maximumAge = 60000, enableHighAccuracy = true } = {}) {
+  if (!Capacitor.isNativePlatform()) {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject({ code: 2, message: 'No geolocation' });
+      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout, maximumAge, enableHighAccuracy });
+    });
+  }
+  return new Promise((resolve, reject) => {
+    let id = null, done = false;
+    const finish = (fn, val) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      const remove = () => BackgroundGeolocation.removeWatcher({ id }).catch(() => {});
+      if (id != null) remove(); else idReady.then(remove);
+      fn(val);
+    };
+    const timer = setTimeout(() => finish(reject, { code: 3, message: 'Location timed out' }), timeout);
+    const idReady = BackgroundGeolocation.addWatcher(
+      { requestPermissions: true, stale: maximumAge > 0, distanceFilter: 0 },
+      (location, error) => {
+        if (error) return finish(reject, { code: error.code === 'NOT_AUTHORIZED' ? 1 : 2, message: error.message || String(error) });
+        if (!location) return;
+        // A cached fix older than maximumAge isn't good enough — wait for a fresh one.
+        if (location.time != null && Date.now() - location.time > maximumAge) return;
+        finish(resolve, nativeToPos(location));
+      },
+    ).then(w => { id = w; return w; }).catch(e => { finish(reject, { code: 2, message: e?.message || 'Location failed' }); });
+  });
+}
