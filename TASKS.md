@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**373 tasks shipped** as of 2026-10-16.
+**375 tasks shipped** as of 2026-10-16.
 
 
 ## 2026-04
@@ -393,3 +393,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T371** · Points per smooth mile + honest rewards screen (Q1)  _( 2026-10-16 )_
 - **T372** · Q1: 'Are you getting better?' — improvement verdict on Home + recap  _( 2026-10-16 )_
 - **T373** · Q1 review fixes: honest comparisons + clearer improvement line  _( 2026-10-16 )_
+- **T374** · Car Health: read trouble codes on connect, explain them in plain English  _( 2026-10-16 )_
+- **T375** · Car Health review fixes: never a false all-clear, no phantom codes  _( 2026-10-16 )_
