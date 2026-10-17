@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 216</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 8:32 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 8:41 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -157,10 +157,9 @@
   <details class="sec sec--alert" open>
     <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">Owner-only actions that actually block something &mdash; a credential, a spend, a config, a real decision. <b>Driving and testing isn&rsquo;t here</b>: that&rsquo;s the job, not a task. What&rsquo;s new to feel out in the current build lives under <a href="#ms">Just shipped</a>; the things you hand back from a drive become tasks in <a href="#upnext">Up next</a>.</p>
       <details class="ent" id="need-migration">
-        <summary><span class="tag t-block">Now</span><span class="ent-t">Fix the <code>SUPABASE_DB_URL</code> GitHub secret</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">This is the GitHub failure email. The <b>DB Migrate</b> workflow applies new database migrations automatically, but it stopped because the secret holds something that isn&rsquo;t a full connection string. Supabase &rarr; Project Settings &rarr; Database &rarr; Connection string &rarr; <b>Session pooler (URI)</b>, with your DB password filled in (it starts <code>postgresql://</code>). Paste that into GitHub &rarr; repo Settings &rarr; Secrets &rarr; <code>SUPABASE_DB_URL</code>, then re-run the failed job. That applies the pending cloud-delete migration, so deleting a drive also clears it from the leaderboard and <code>/admin</code>. Nothing else is broken; the app builds fine.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">Open GitHub secrets &#8599;</a></div>
+        <summary><span class="tag t-wait">Soon</span><span class="ent-t">Fix the <code>SUPABASE_DB_URL</code> secret (the failure emails)</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">It holds the database password on its own instead of the full connection string, so the auto-migrate workflow has failed on every run since August. Replace it with Supabase &rarr; Settings &rarr; Database &rarr; <b>Session pooler URI</b> (starts <code>postgresql://</code>, password filled in), then re-run the failed job. Or skip it and paste <code>supabase/migrations/20261015190000_delete_device_drive.sql</code> into the SQL editor like before.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">Open GitHub secrets &#8599;</a></div>
       </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
@@ -173,7 +172,6 @@
   <details class="sec" id="upnext" open>
     <summary><h2>Up next</h2><span class="count">things to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The things <b>I</b> build next. Q4 (road&rsquo;s-fault scoring) and the honest-standings cleanup just shipped &mdash; see <a href="#ms">Just shipped</a>. Next: the first new feature in the queue, plus one loose end from the leaderboard work.</p>
       <details class="ent">
         <summary><span class="tag t-next">loose end</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The leaderboard is derived on the server from your uploaded drives &mdash; but those rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you actually see. Pairs with applying the cloud-delete migration (<a href="#need-migration">Needs you</a>).</div>
@@ -189,7 +187,6 @@
   <details class="sec">
     <summary><h2>In the queue</h2><span class="count">what&rsquo;s next to build</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The features lined up after <a href="#upnext">Up next</a>. Each has a Q-number just so we can point at one. The bigger, further-out versions live under <a href="#vision">Long-term vision</a>.</p>
 
       <details class="ent" id="trk-health">
         <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Car Health &mdash; read the car&rsquo;s fault codes</span><span class="ent-chev">&#9654;</span></summary>
@@ -217,7 +214,6 @@
   <details class="sec" id="vision">
     <summary><h2>Long-term vision</h2><span class="count">Your Car&rsquo;s Concierge</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The big picture: <b>one honest app for your whole drive, built around the car you actually have.</b> The map gets you there, the score makes you want to drive smooth, the coach makes you good at it.</p>
 
       <details class="ent">
         <summary><span class="tag t-idea">paid</span><span class="ent-t">Car Health, the subscription</span><span class="ent-chev">&#9654;</span></summary>
@@ -238,7 +234,6 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note"><b>Just shipped</b>, newest first &mdash; this is also <b>what&rsquo;s new to feel out</b> in the current TestFlight build, grouped as a changelog, not a to-do. Then the story so far. The exhaustive log is <a href="https://github.com/1047ventures/SmoothAFDriving/blob/main/TASKS.md" target="_blank" rel="noopener">TASKS.md</a>.</p>
       <details class="ent">
         <summary><span class="tag t-ship tn">T367</span><span class="ent-t">Leaderboard is real now &mdash; fiction cut</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The Corridors and Rivals tabs were empty placeholders with ghost rows and &ldquo;unlock with GPS&rdquo; teasers &mdash; gone. The leaderboard is just the one real, server-derived board. And deleting a drive now also removes its cloud row, so the standings stop counting drives you threw away (needs the <a href="#need-migration">migration</a> applied).</div>
@@ -311,7 +306,6 @@
         <div class="bar"><span class="n">26</span><div class="col" style="height:23%"></div><span class="m">Sep</span></div>
         <div class="bar"><span class="n">47</span><div class="col" style="height:42%"></div><span class="m">Oct</span></div>
       </div>
-      <p class="chart-note">Tasks shipped per month &mdash; the big May/June build-out, then steadier feature work. 367 total.</p>
       <div class="linechart">
         <svg viewBox="0 0 320 142" role="img" aria-label="Cumulative tasks over time, climbing to 367: April 5, May 102, June 214, July 232, August 294, September 320, October 367">
           <defs>
@@ -333,7 +327,6 @@
           </g>
         </svg>
       </div>
-      <p class="chart-note">Cumulative total &mdash; the climb to 367 tasks shipped.</p>
       <div class="nums">
         <div class="cell"><span class="v">2</span><span class="k">Returning<br>drivers &#9733;</span></div>
         <div class="cell"><span class="v">5</span><span class="k">Active<br>7 days</span></div>
@@ -349,7 +342,6 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note" id="bugs-note">All fixed &mdash; and these are the foundations the queued features stand on. Two matter most: the <b>server-derived leaderboard</b> made honest standings possible at all (<a href="#trk-motiv">rewards &amp; leaderboard</a>), and <b>locking down the GPS tracks</b> is the privacy floor under any health/location data (<a href="#trk-health">Car Health</a>). The live-speed fix is core-engine accuracy, same family as <a href="#ms">Road&rsquo;s-fault</a> (shipped).</p>
       <details class="ent">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Live speed stutters &amp; sticks mid-drive</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">iOS intermittently returns a null speed and the app reused the previous value, so the number froze then snapped &mdash; and since cornering-G and event detection scale by speed, the score degraded with it. Now <code>deriveSpeed()</code> falls back to distance-moved between fixes, with a deadband and a cap. Feeds the score, not just the display.</div>
@@ -374,21 +366,20 @@
   </details>
 
   <!-- ══ TECH DEBT ══ -->
-  <details class="sec">
+  <details class="sec" id="techdebt">
     <summary><h2>Tech debt</h2><span class="count">4 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note" id="techdebt-note">Each of these drags on a feature above. The leaderboard&rsquo;s fake tabs are now cut and cloud-delete is wired (just pending the <a href="#need-migration">migration</a>). What&rsquo;s left: a dead button tied to <a href="#trk-motiv">rewards &amp; leaderboard</a>, plus security / front-door hygiene that isn&rsquo;t tied to any feature.</p>
       <details class="ent">
         <summary><span class="tag t-flag">Debt</span><span class="ent-t">Cloud-delete needs its migration applied</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Deleting a drive used to leave the Supabase row, so <code>/admin</code> and the leaderboard kept counting it. The client now calls a <code>delete_device_drive</code> RPC to remove the cloud row &mdash; but that function has to be <a href="#need-migration">applied to the live DB</a> first; until then it fails soft. Once applied, this closes.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Security</span><span class="ent-t">Rotate the remove.bg API key</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>. <b>&rarr; Not a build task:</b> security hygiene, same bucket as rotating the admin password.</div>
+        <div class="ent-body">A key was hardcoded and shipped in every client bundle. The fallback is removed and the app prompts for your own key, but <b>the old one should be treated as compromised and revoked at remove.bg</b>.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Confusing</span><span class="ent-t"><code>smoothafdriving.com/tracker</code> serves a dead old tracker</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link. <b>&rarr; Not a build task:</b> the front door / acquisition, not a build track.</div>
+        <div class="ent-body">The Lovable marketing site (DNS at IONOS) still hosts a stale tracker at <code>/tracker</code> &mdash; what made the app look broken. Decision: the domain stays brand/marketing; this page should become a &ldquo;Download the app&rdquo; link.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Polish</span><span class="ent-t">UX-audit leftovers</span><span class="ent-chev">&#9654;</span></summary>
@@ -401,7 +392,6 @@
   <details class="sec">
     <summary><h2>Mission</h2><span class="count">measured &middot; 3 parts</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <p class="sec-note">The why, made measurable. Each part carries the <b>KPIs</b> we judge it by and the <b>tasks that move them</b> &mdash; most of those metrics aren&rsquo;t instrumented yet, so the list doubles as what to start measuring.</p>
 
       <details class="ent" id="mission-better">
         <summary><span class="ent-t">Make people genuinely better, smoother drivers</span><span class="ent-chev">&#9654;</span></summary>
@@ -425,7 +415,7 @@
           &bull; <b>Teen + parent signups</b> &mdash; the wedge<br>
           &bull; <b>First-timer walkthrough completion</b>
           <span class="mlabel">Tasks that move it</span>
-          &bull; <a href="#trk-motiv">Q9 Goals</a> (the first per-driver tuning) &middot; first-run onboarding (specced, not built &mdash; see <a href="#techdebt-note">Tech debt</a>) &middot; the modes build itself (not yet queued)
+          &bull; <a href="#trk-motiv">Q9 Goals</a> (the first per-driver tuning) &middot; first-run onboarding (specced, not built &mdash; see <a href="#techdebt">Tech debt</a>) &middot; the modes build itself (not yet queued)
         </div>
       </details>
 
