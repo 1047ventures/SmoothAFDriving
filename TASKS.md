@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**371 tasks shipped** as of 2026-10-16.
+**373 tasks shipped** as of 2026-10-16.
 
 
 ## 2026-04
@@ -391,3 +391,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T369** · CLAUDE.md: rule — when the owner must act, find the lowest-effort path  _( 2026-10-16 )_
 - **T370** · Drive screen: evenly space everything between the inputs graph and End Drive  _( 2026-10-16 )_
 - **T371** · Points per smooth mile + honest rewards screen (Q1)  _( 2026-10-16 )_
+- **T372** · Q1: 'Are you getting better?' — improvement verdict on Home + recap  _( 2026-10-16 )_
+- **T373** · Q1 review fixes: honest comparisons + clearer improvement line  _( 2026-10-16 )_
