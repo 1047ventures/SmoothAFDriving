@@ -1,4 +1,4 @@
-import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY } from '../constants.js';
+import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY, CAR_PROMPTED_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 import { pushProfile } from '../services/profile.js';
 import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
@@ -213,6 +213,41 @@ export function addVehicleFromPrompt(make, model, year) {
     registration:{state:'',expiryDate:''}, active:true,
   });
   saveGarage(vehicles);
+}
+
+// ── Cars identified by the dongle (VIN) ─────────────────────────────────────────
+export function findVehicleByVin(vin){
+  return vin ? loadGarage().find(v => (v.vin || '').toUpperCase() === vin) || null : null;
+}
+
+export function activateVehicle(id){ setActiveVehicle(id); }
+
+/** Add a dongle-identified car as a new active vehicle. Returns its id. */
+export function addVehicleFromCar(c){
+  const vehicles = loadGarage();
+  vehicles.forEach(v => { v.active = false; });
+  const id = generateId();
+  vehicles.push({
+    id, type: c.type || '', make: c.make || '', model: c.model || '', year: c.year || '',
+    trim: c.trim || '', color:'', licensePlate:'', vin: c.vin || '',
+    insurance:{provider:'',policyNumber:'',expiryDate:'',agentPhone:''},
+    registration:{state:'',expiryDate:''}, active:true,
+  });
+  saveGarage(vehicles);
+  try { localStorage.setItem(CAR_PROMPTED_KEY, '1'); } catch {}
+  return id;
+}
+
+/** Attach a VIN to an existing vehicle, filling only the fields left blank. */
+export function linkCarToVehicle(id, c){
+  const vehicles = loadGarage();
+  const v = vehicles.find(x => x.id === id);
+  if (!v) return null;
+  v.vin = c.vin;
+  for (const k of ['make', 'model', 'year', 'trim', 'type']) if (!v[k] && c[k]) v[k] = c[k];
+  vehicles.forEach(x => { x.active = x.id === id; });
+  saveGarage(vehicles);
+  return id;
 }
 
 function migrateFromOldVehicleKey(){

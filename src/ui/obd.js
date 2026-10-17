@@ -7,9 +7,10 @@
  * this panel exists to answer.
  */
 
-import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes } from '../services/obd.js';
+import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes, readVin } from '../services/obd.js';
 import { buildReport, saveHealthReport } from '../services/carHealth.js';
-import { getActiveVehicle } from './garage.js';
+import { getActiveVehicle, findVehicleByVin, activateVehicle } from './garage.js';
+import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendingCar } from '../services/carIdentity.js';
 import { state } from '../state.js';
 import { OBD_DEVICE_KEY } from '../constants.js';
 
@@ -43,19 +44,50 @@ function forgetDevice(){
  * notifications — the native tier, speced separately.)
  */
 /**
- * Car Health: read the trouble codes once per connection, file the report under
- * the active vehicle, and let Home / the Garage redraw. Silent on purpose — a
- * code is never announced mid-drive; it waits on Home for after you park.
- * A read the car didn't answer leaves the previous report in place.
+ * Who is this car? Read the VIN once per connection. A car already in the
+ * Garage becomes the active vehicle silently (so a two-car household gets the
+ * right one every time). A new car is decoded and parked as "pending" — the
+ * driver confirms it on Home after the drive, never mid-drive.
+ * Returns the key Car Health should file under.
  */
-async function checkCarHealth(){
+async function identifyCar(){
+  const vin = parseVinResponse(await readVin());
+  if (!vin) return getActiveVehicle()?.id;
+  const known = findVehicleByVin(vin);
+  if (known){
+    if (!known.active){ activateVehicle(known.id); window.dispatchEvent(new CustomEvent('smoothaf:carhealth')); }
+    return known.id;
+  }
+  if (!isDismissedVin(vin) && loadPendingCar()?.vin !== vin){
+    savePendingCar(await decodeVin(vin));
+    window.dispatchEvent(new CustomEvent('smoothaf:carpending'));
+  }
+  // An unconfirmed car's health is filed under its VIN, then moved onto the
+  // vehicle once the driver says yes — never onto someone else's car.
+  return isDismissedVin(vin) ? null : `vin:${vin}`;
+}
+
+/**
+ * Car Health: read the trouble codes, file the report under the identified
+ * car, and let Home / the Garage redraw. Silent on purpose — a code is never
+ * announced mid-drive; it waits on Home for after you park. A read the car
+ * didn't answer leaves the previous report in place.
+ */
+async function checkCarHealth(key){
   try {
     const raw = await readTroubleCodes();
     const report = raw && buildReport(raw);
-    if (!report) return;
-    saveHealthReport(getActiveVehicle()?.id, report);
+    if (!report || key === null) return;
+    saveHealthReport(key, report);
     window.dispatchEvent(new CustomEvent('smoothaf:carhealth'));
   } catch {}
+}
+
+/** Everything that runs once when the dongle links up, in order. */
+async function onCarLinked(){
+  let key;
+  try { key = await identifyCar(); } catch { key = getActiveVehicle()?.id; }
+  await checkCarHealth(key);
 }
 
 let lastAutoStartAt = 0;
@@ -384,7 +416,7 @@ async function connectChosen(deviceId, name){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-    checkCarHealth();
+    onCarLinked();
     autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
@@ -412,7 +444,7 @@ async function useSystemPicker(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-    checkCarHealth();
+    onCarLinked();
     autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'no device chosen'
@@ -475,7 +507,7 @@ async function autoReconnect(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
-    checkCarHealth();
+    onCarLinked();
     autoStartDrive();
   } catch {
     // Don't nag or forget — the dongle may just not be powered yet. Next launch

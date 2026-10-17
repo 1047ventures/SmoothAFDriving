@@ -1,6 +1,7 @@
 import { CAR_PROMPTED_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 import { addVehicleFromPrompt } from './garage.js';
+import { loadPendingCar } from '../services/carIdentity.js';
 
 // ── Car prompt modal ───────────────────────────────────────────────────────────
 
@@ -25,6 +26,7 @@ function injectCarPromptModal() {
 
 export function showCarPromptIfNeeded() {
   if (localStorage.getItem(CAR_PROMPTED_KEY)) return;
+  if (loadPendingCar()) return;   // the dongle already knows the car — ask that instead
   if (loadDrives().length < 2) return;
   if (document.getElementById('car-prompt-modal')) return;
 

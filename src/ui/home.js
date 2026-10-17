@@ -17,6 +17,7 @@ import { getActiveVehicle } from './garage.js';
 import { improvementVerdict } from '../services/improvement.js';
 import { openTrends } from './trends.js';
 import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
+import { showPendingCarPrompt } from './carPrompt.js';
 
 export function renderHomeStats(){
   const all   = loadDrives().filter(d => d.score != null);
@@ -58,6 +59,9 @@ export function renderHomeStats(){
       card.setAttribute('aria-label', 'My Garage');
     }
   }
+
+  // A car the dongle identified mid-drive gets confirmed here, once parked.
+  setTimeout(showPendingCarPrompt, 0);
 
   // Welcome name
   const welcomeEl = document.getElementById('home-welcome-name');

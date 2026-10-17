@@ -496,6 +496,12 @@ export async function disconnect(){
   if (id) { try { await BleClient.disconnect(id); } catch {} }
 }
 
+/** Ask the car for its VIN (Mode 09 PID 02). Raw reply; parsed in carIdentity.js. */
+export async function readVin(){
+  if (!state.deviceId) return null;
+  return send('0902', 6000);
+}
+
 /**
  * Read the car's trouble codes: check-engine status (0101), stored codes (03)
  * and pending codes (07). Returns the raw replies for services/carHealth.js to

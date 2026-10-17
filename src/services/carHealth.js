@@ -193,3 +193,12 @@ export function saveHealthReport(vehicleId, report){
   all[vehicleId || '_'] = report;
   try { localStorage.setItem(CAR_HEALTH_KEY, JSON.stringify(all)); } catch {}
 }
+
+/** Move a report filed under one key (e.g. an unconfirmed car's VIN) to another. */
+export function moveHealthReport(fromKey, toKey){
+  const all = loadHealthReports();
+  if (!all[fromKey]) return;
+  all[toKey] = all[fromKey];
+  delete all[fromKey];
+  try { localStorage.setItem(CAR_HEALTH_KEY, JSON.stringify(all)); } catch {}
+}

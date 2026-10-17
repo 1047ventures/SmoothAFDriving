@@ -21,6 +21,7 @@ import { refreshIfNeeded, isSignedIn } from './services/auth.js';
 import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
 import { wireObdPanel } from './ui/obd.js';
+import { showPendingCarPrompt } from './ui/carPrompt.js';
 import { wireMusic } from './ui/music.js';
 import { showIntroIfNeeded } from './ui/intro.js';
 import { openTrends, wireTrends } from './ui/trends.js';
@@ -172,6 +173,8 @@ function boot(){
 
   // Car Health: a fresh trouble-code read redraws the Garage card on Home.
   window.addEventListener('smoothaf:carhealth', () => renderDriveList());
+  // A car identified by VIN waits for the driver's yes/no on Home (never mid-drive).
+  window.addEventListener('smoothaf:carpending', () => showPendingCarPrompt());
 
   // Rewards
   document.getElementById('btn-rewards')?.addEventListener('click', () => { renderRewards(); showScreen('rewards'); });
