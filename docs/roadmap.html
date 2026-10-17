@@ -12,6 +12,9 @@
        Omitting `url` publishes a SEPARATE artifact and orphans this link.
     3. favicon: 🏎️  (keep it stable — the user finds the tab by its icon)
     4. ALWAYS re-stamp the "Updated" line in the header.
+    5. Keep "Phone should be on" current: the latest SUCCESSFUL "iOS → TestFlight"
+       run's number + 100 (see ios-testflight.yml). `gh run list --workflow
+       "iOS → TestFlight" --status success --limit 1`.
 
   STRUCTURE (Oct 2026): a nested accordion. Every section is a collapsed
   <details class="sec">; every entry under it is a collapsed <details class="ent">.
@@ -137,7 +140,9 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Updated</span> <b>Oct 15, 2026 · 7:28 PM MDT</b>
+      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 216</b>
+      <span class="sep">·</span>
+      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 8:32 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -154,8 +159,8 @@
     <div class="sec-body">
       <p class="sec-note">Owner-only actions that actually block something &mdash; a credential, a spend, a config, a real decision. <b>Driving and testing isn&rsquo;t here</b>: that&rsquo;s the job, not a task. What&rsquo;s new to feel out in the current build lives under <a href="#ms">Just shipped</a>; the things you hand back from a drive become tasks in <a href="#upnext">Up next</a>.</p>
       <details class="ent" id="need-migration">
-        <summary><span class="tag t-wait">Soon</span><span class="ent-t">Apply the cloud-delete migration to Supabase</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The client now asks the server to delete a drive&rsquo;s cloud row when you delete it on the phone, so the leaderboard and <code>/admin</code> stop counting thrown-away drives &mdash; but it needs the <code>delete_device_drive</code> function applied to the live DB (in <code>supabase/migrations/20261015190000_delete_device_drive.sql</code>). Until then the delete just fails soft. Run it in the Supabase SQL editor, same as the dev-pull RPCs.<br><a class="ent-go" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Open Supabase &#8599;</a></div>
+        <summary><span class="tag t-block">Now</span><span class="ent-t">Fix the <code>SUPABASE_DB_URL</code> GitHub secret</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">This is the GitHub failure email. The <b>DB Migrate</b> workflow applies new database migrations automatically, but it stopped because the secret holds something that isn&rsquo;t a full connection string. Supabase &rarr; Project Settings &rarr; Database &rarr; Connection string &rarr; <b>Session pooler (URI)</b>, with your DB password filled in (it starts <code>postgresql://</code>). Paste that into GitHub &rarr; repo Settings &rarr; Secrets &rarr; <code>SUPABASE_DB_URL</code>, then re-run the failed job. That applies the pending cloud-delete migration, so deleting a drive also clears it from the leaderboard and <code>/admin</code>. Nothing else is broken; the app builds fine.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">Open GitHub secrets &#8599;</a></div>
       </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
