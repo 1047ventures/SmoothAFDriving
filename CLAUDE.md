@@ -22,6 +22,16 @@ from a phone, and expects you to carry the detail.
     "worth a look", or FYI items under it. A red alert with nothing behind it
     reads as manufactured urgency and erodes trust. Non-blocking suggestions go
     in ✅ DONE or a plain closing line, not under the alarm.
+- **When the owner has to do something, find the path with the least owner
+  effort — not the "proper" one.** Before handing over a multi-step chore, ask
+  what the smallest thing they could do is, and do everything else yourself.
+  Example: a broken GitHub secret blocked an auto-migrate job; instead of walking
+  them through Supabase's connection-string screens, the fix was one SQL block
+  pasted into the SQL editor (or handed to Supabase's AI) — the infra fix became
+  optional. Prefer: one paste / one click / one command they run, with the exact
+  text ready to copy. Never make them hunt through a dashboard you can't see; if
+  a UI step is unavoidable and unclear, ask for a screenshot instead of guessing.
+  Then verify the result yourself.
 - **Verify against the running system, then say so plainly.** See the rule
   below. When something failed, report it with the evidence; don't smooth it
   over.
