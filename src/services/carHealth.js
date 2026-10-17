@@ -202,3 +202,10 @@ export function moveHealthReport(fromKey, toKey){
   delete all[fromKey];
   try { localStorage.setItem(CAR_HEALTH_KEY, JSON.stringify(all)); } catch {}
 }
+
+export function deleteHealthReport(key){
+  const all = loadHealthReports();
+  if (!(key in all)) return;
+  delete all[key];
+  try { localStorage.setItem(CAR_HEALTH_KEY, JSON.stringify(all)); } catch {}
+}

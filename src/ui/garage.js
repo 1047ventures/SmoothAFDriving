@@ -233,8 +233,9 @@ export function addVehicleFromCar(c){
     insurance:{provider:'',policyNumber:'',expiryDate:'',agentPhone:''},
     registration:{state:'',expiryDate:''}, active:true,
   });
-  saveGarage(vehicles);
+  // Before saveGarage, so the profile push it triggers already says "prompted".
   try { localStorage.setItem(CAR_PROMPTED_KEY, '1'); } catch {}
+  saveGarage(vehicles);
   return id;
 }
 

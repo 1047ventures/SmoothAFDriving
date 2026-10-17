@@ -25,7 +25,10 @@
   .signup-input:focus{border-color:rgba(232,93,58,.5);box-shadow:0 0 0 3px rgba(232,93,58,.08)}
   .signup-submit{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;padding:14px;border-radius:12px;margin-bottom:10px}
   .signup-cancel{appearance:none;border:0;background:transparent;color:var(--cream-dim);font-size:14px;width:100%;padding:8px;cursor:pointer}
-  .car-id-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;line-height:1.2;margin:6px 0 4px;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .car-id-name{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;line-height:1.2;margin:6px 0 4px;hyphens:none;text-wrap:balance;background:linear-gradient(135deg,#E8501A,#C49A28);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .car-id-trim{font-family:var(--sans);font-size:12px;letter-spacing:.06em;color:var(--cream-dim);margin-bottom:6px}
+  .car-id-sub{margin-top:8px}
+  .car-id-vin{display:block;margin-top:2px;font-family:ui-monospace,Menlo,monospace;font-size:12px;opacity:.6;white-space:nowrap}
   .car-id-link{appearance:none;cursor:pointer;width:100%;background:transparent;border:1px solid rgba(244,235,217,.22);color:var(--cream);font-family:var(--sans);font-size:15px;padding:12px;border-radius:12px;margin-bottom:6px}
 
   /* ── Destination sheet (reuses .garage-sheet/.gs-bar chrome) ── */

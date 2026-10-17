@@ -59,8 +59,11 @@ async function identifyCar(){
     return known.id;
   }
   if (!isDismissedVin(vin) && loadPendingCar()?.vin !== vin){
-    savePendingCar(await decodeVin(vin));
-    window.dispatchEvent(new CustomEvent('smoothaf:carpending'));
+    // Decode in the background — the trouble-code read shouldn't wait on the network.
+    decodeVin(vin).then(car => {
+      savePendingCar(car);
+      window.dispatchEvent(new CustomEvent('smoothaf:carpending'));
+    });
   }
   // An unconfirmed car's health is filed under its VIN, then moved onto the
   // vehicle once the driver says yes — never onto someone else's car.
@@ -100,6 +103,7 @@ function autoStartDrive(){
   if (now - lastAutoStartAt < 4 * 60 * 1000) return;   // don't restart after a link flap
   lastAutoStartAt = now;
 
+  document.getElementById('car-id-modal')?.remove();   // never leave a prompt over a live drive
   startBtn.click();   // begin the drive immediately
 
   const bar = document.createElement('div');

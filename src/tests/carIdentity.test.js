@@ -24,6 +24,35 @@ describe('parseVinResponse', () => {
   });
 });
 
+describe('parseVinResponse — several computers answering', () => {
+  const h = '490201' + asciiHex(VIN);
+  const block = ['014', '0:' + h.slice(0, 12), '1:' + h.slice(12, 26), '2:' + h.slice(26, 40)];
+  const legacyLines = () => {
+    const data = '000000' + asciiHex(VIN);
+    return [0, 1, 2, 3, 4].map(k => '4902' + String(k + 1).padStart(2, '0') + data.slice(k * 8, k * 8 + 8));
+  };
+  it('accepts two complete CAN answers that agree', () => {
+    expect(parseVinResponse([...block, ...block].join('\r') + '\r>')).toBe(VIN);
+  });
+  it('rejects interleaved CAN frames rather than stitching a wrong VIN', () => {
+    const [, f0, f1, f2] = block;
+    expect(parseVinResponse(['014', f0, f0, f1, f1, f2, f2].join('\r') + '\r>')).toBeNull();
+  });
+  it('separates interleaved legacy answers by sequence', () => {
+    const L = legacyLines();
+    const inter = L.flatMap(l => [l, l]);   // A1 B1 A2 B2 ...
+    expect(parseVinResponse(inter.join('\r') + '\r>')).toBe(VIN);
+  });
+  it('rejects answers that disagree', () => {
+    const other = '490201' + asciiHex('1G1ZD5ST4JF123456');
+    const b2 = ['014', '0:' + other.slice(0, 12), '1:' + other.slice(12, 26), '2:' + other.slice(26, 40)];
+    expect(parseVinResponse([...block, ...b2].join('\r') + '\r>')).toBeNull();
+  });
+  it('rejects a North-American VIN with a bad check digit', () => {
+    expect(parseVinResponse('490201' + asciiHex('1HGCM82623A004352') + '\r>')).toBeNull();
+  });
+});
+
 describe('offline decode', () => {
   const now = new Date('2026-10-16');
   it('reads the model year across cycles', () => {

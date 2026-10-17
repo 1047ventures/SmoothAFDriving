@@ -21,9 +21,13 @@ const VIN_CHARS = /^[A-HJ-NPR-Z0-9]{17}$/;   // 17 chars, never I, O or Q
  *  - CAN ISO-TP block: "014", "0:490201314734", "1:4A433534343452", "2:..."
  *  - Legacy: five lines "490201000000 31", "490202 47314A43", ... — a sequence
  *    byte then 4 data bytes each, the first padded with zeros.
- * Either way the data bytes are ASCII; padding is 0x00. Returns null unless
- * exactly a well-formed 17-character VIN comes out — a garbled VIN must never
- * be matched against (or saved into) the garage.
+ * The data bytes are ASCII; padding is 0x00 (sometimes 0x01 / spaces).
+ *
+ * More than one computer may answer (engine AND transmission). With headers
+ * off their frames can interleave, so each answer is decoded on its own, every
+ * answer must agree, and a North-American VIN must pass its check digit.
+ * Anything doubtful returns null — a wrong VIN would mis-file a car, which is
+ * far worse than not recognising it.
  */
 export function parseVinResponse(raw){
   if (raw == null) return null;
@@ -34,40 +38,57 @@ export function parseVinResponse(raw){
   const lines = text.replace(/>/g, '').split(/[\r\n]+/).map(l => l.replace(/\s+/g, '')).filter(Boolean)
     .filter(l => !/SEARCHING/.test(l));
 
-  let hex = '';
-  const multi = lines.filter(l => /^[0-9A-F]:[0-9A-F]+$/.test(l));
-  if (multi.length){
-    // CAN: frames in order; the block starts 49 02 01 then the 17 bytes.
-    const block = multi.map(l => l.slice(2)).join('');
-    const at = block.indexOf('490201');
-    if (at !== 0) return null;
-    hex = block.slice(6);
+  const answers = [];   // hex payload per answering computer, after "490201"
+  if (lines.some(l => /^[0-9A-F]:[0-9A-F]+$/.test(l))){
+    // CAN: each answer starts at a "0:" frame (or a byte-count header).
+    let cur = null;
+    const close = () => { if (cur != null) answers.push(cur); cur = null; };
+    for (const l of lines){
+      if (/^[0-9A-F]{3}$/.test(l)){ close(); continue; }
+      const m = l.match(/^([0-9A-F]):([0-9A-F]+)$/);
+      if (!m) continue;
+      if (m[1] === '0'){ close(); cur = m[2]; } else if (cur != null) cur += m[2];
+    }
+    close();
+    for (let i = 0; i < answers.length; i++){
+      answers[i] = answers[i].startsWith('490201') ? answers[i].slice(6) : null;
+    }
   } else {
-    // Legacy: each line 49 02 <seq> <4 bytes>, ordered by seq.
-    const parts = lines
-      .filter(l => /^4902[0-9A-F]{10}$/.test(l))
-      .map(l => ({ seq: parseInt(l.slice(4, 6), 16), data: l.slice(6) }))
-      .sort((a, b) => a.seq - b.seq);
-    if (!parts.length){
-      // CAN single-frame can't hold a VIN, but some adapters return the whole
-      // payload on one line: 490201 + 34 hex chars.
-      const one = lines.find(l => /^490201[0-9A-F]{34,}$/.test(l));
-      if (!one) return null;
-      hex = one.slice(6);
+    const legacy = lines.filter(l => /^4902[0-9A-F]{10}$/.test(l));
+    if (legacy.length){
+      // Legacy: the k-th time a sequence number appears, it belongs to the
+      // k-th computer — which separates interleaved answers too.
+      const groups = [];
+      const seen = {};
+      for (const l of legacy){
+        const seq = parseInt(l.slice(4, 6), 16);
+        const k = seen[seq] = (seen[seq] ?? -1) + 1;
+        (groups[k] = groups[k] || []).push({ seq, data: l.slice(6) });
+      }
+      for (const g of groups) answers.push(g.sort((x, y) => x.seq - y.seq).map(p => p.data).join(''));
     } else {
-      hex = parts.map(p => p.data).join('');
+      // Some adapters return the whole payload on one line.
+      for (const l of lines) if (/^490201[0-9A-F]{34,}$/.test(l)) answers.push(l.slice(6));
     }
   }
 
-  let out = '';
-  for (let i = 0; i + 1 < hex.length; i += 2){
-    const b = parseInt(hex.slice(i, i + 2), 16);
-    if (b === 0) continue;                           // padding
-    out += String.fromCharCode(b);
-  }
-  out = out.trim();
-  if (out.length > 17) out = out.slice(-17);         // leading junk before the VIN
-  return VIN_CHARS.test(out) ? out : null;
+  const vins = answers.map(hex => {
+    if (hex == null) return null;
+    let out = '';
+    for (let i = 0; i + 1 < hex.length; i += 2){
+      const b = parseInt(hex.slice(i, i + 2), 16);
+      if (out === '' && (b === 0x00 || b === 0x01 || b === 0x20)) continue;   // leading padding / count
+      out += String.fromCharCode(b);
+    }
+    out = out.replace(/[\x00\x20]+$/, '');
+    return VIN_CHARS.test(out) ? out : null;
+  });
+  if (!vins.length || vins.some(v => v == null)) return null;
+  if (vins.some(v => v !== vins[0])) return null;
+  const vin = vins[0];
+  // North-American VINs (1-5) always carry a check digit; elsewhere it's optional.
+  if (/^[1-5]/.test(vin) && !checkDigitOk(vin)) return null;
+  return vin;
 }
 
 // ── Offline decode ───────────────────────────────────────────────────────────
