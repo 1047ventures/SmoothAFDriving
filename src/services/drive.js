@@ -17,7 +17,7 @@ import {
 } from './supabase.js';
 import { isSignedIn } from './auth.js';
 import { haversine, metersToMiles, mpsToMph } from '../utils/math.js';
-import { ARRIVAL_RADIUS_M, MIN_DRIVE_METERS } from '../constants.js';
+import { ARRIVAL_RADIUS_M, MIN_DRIVE_METERS, ETA_BUFFER_TRAFFIC } from '../constants.js';
 
 // Did the drive actually end at the destination? Effectiveness must NOT be
 // awarded otherwise — ending short (e.g. a gas stop halfway) would look like
@@ -419,9 +419,15 @@ export function rescoreStoredDrives(){
     const a = analyzeDrive(d);
     const next = Math.round(a.score);
     if (a.dims) d.dims = a.dims;
-    d.score = next;
+    // Efficiency is the smoothness-only figure; the headline score re-applies
+    // the ETA clock for destination drives so a rescore doesn't strip it.
+    d.efficiency = next;
+    d.score = compositeScore(next, d.targetEtaSec, d.movingSec, {
+      arrived: d.arrived, buffer: d.etaBuffer,
+      allowPenalty: d.etaBuffer === ETA_BUFFER_TRAFFIC,
+    });
     rescored++;
-    if (before != null && next !== before){ changed++; delta += next - before; }
+    if (before != null && d.score !== before){ changed++; delta += d.score - before; }
   }
 
   saveDrives(drives);

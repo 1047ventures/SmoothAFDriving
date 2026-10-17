@@ -1,6 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
 import { improvementVerdict } from '../services/improvement.js';
+import { openTrends } from './trends.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
@@ -110,9 +111,15 @@ export function renderReview(drive){
     if (progEl){
       const all = loadDrives().filter(d => d.score != null);
       const v = all[0]?.startTime === drive.startTime ? improvementVerdict(all) : null;
-      progEl.innerHTML = v && (v.status === 'improving' || v.status === 'slipping')
-        ? `<em>${escapeHtml(v.headline)}</em> across ${escapeHtml(v.detail)}.`
+      const show = v && (v.status === 'improving' || v.status === 'slipping');
+      const slip = show && v.status === 'slipping';
+      // "over your last N drives" frames it as a trend, so it can't read as a
+      // verdict on this one drive when the narrative above just called it clean.
+      progEl.innerHTML = show
+        ? `<em>${escapeHtml(v.headline)}</em> — ${escapeHtml(v.detail)}.${slip && v.tip ? ' ' + escapeHtml(v.tip) : ''}`
         : '';
+      progEl.className = 'rv-progress' + (slip ? ' rv-progress--slip' : '') + (show && v.trend ? ' rv-progress--tap' : '');
+      progEl.onclick = show && v.trend ? () => openTrends(v.trend) : null;
     }
     // Numbers pulled out of the prose into a compact facts row.
     const factsEl = document.getElementById('rv-facts');

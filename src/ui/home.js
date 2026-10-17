@@ -55,19 +55,26 @@ export function renderHomeStats(){
   const sentenceEl = document.getElementById('home-score-sentence');
   if (sentenceEl){
     const v = all.length ? improvementVerdict(all) : null;
-    sentenceEl.onclick = null;
-    sentenceEl.classList.remove('home-score-sentence--tap');
+    sentenceEl.onclick = sentenceEl.onkeydown = null;
+    sentenceEl.removeAttribute('role'); sentenceEl.removeAttribute('tabindex');
+    sentenceEl.classList.remove('home-score-sentence--tap', 'home-score-sentence--slip', 'home-score-sentence--win');
     if (!all.length){
       sentenceEl.innerHTML = 'First lap unscored. Tap <em>Start Drive</em> — it scores itself.';
     } else if (v.status === 'improving' || v.status === 'slipping'){
-      const tail = v.status === 'slipping' && v.tip ? ` ${v.tip}` : '';
-      sentenceEl.innerHTML = `<em>${v.headline}</em> — ${v.detail}.${tail}`;
+      const slip = v.status === 'slipping';
+      const tip = slip && v.tip ? ` <span class="tip">${v.tip}</span>` : '';
+      sentenceEl.innerHTML = `<em>${v.headline}</em> — ${v.detail}.${tip}`;
+      sentenceEl.classList.add(slip ? 'home-score-sentence--slip' : 'home-score-sentence--win');
       if (v.trend){
+        const go = () => openTrends(v.trend);
         sentenceEl.classList.add('home-score-sentence--tap');
-        sentenceEl.onclick = () => openTrends(v.trend);
+        sentenceEl.setAttribute('role', 'button');
+        sentenceEl.setAttribute('tabindex', '0');
+        sentenceEl.onclick = go;
+        sentenceEl.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
       }
     } else if (v.status === 'not-enough'){
-      sentenceEl.textContent = v.headline;
+      sentenceEl.innerHTML = `<em>${v.headline}</em> ${v.detail}`;
     } else if (p){
       sentenceEl.innerHTML = `<em>${p.title}</em> — ${p.sub}`;
     } else {

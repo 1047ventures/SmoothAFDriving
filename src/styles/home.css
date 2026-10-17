@@ -193,8 +193,15 @@
   .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:6px}
   .home-score-sentence{font-family:var(--sans);font-size:14px;color:rgba(242,232,213,.85);line-height:1.65}
   .home-score-sentence em{color:#E8501A;font-style:normal;font-weight:600}
+  .home-score-sentence--win em{color:#6FB669}
+  .home-score-sentence--slip em{color:#E0A33A}
   .home-score-sentence--tap{cursor:pointer}
-  .home-score-sentence--tap::after{content:' ›';color:rgba(242,232,213,.5)}
+  .home-score-sentence--tap::after{content:' ›';color:#E8501A;font-weight:600}
+  @media (max-height:700px){
+    .home-score-sentence .tip{display:none}
+    .home-score-sentence{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .home-welcome-block{padding:12px 24px 6px}
+  }
 
   /* ── Corridors section ── */
   .home-routes{margin:20px 24px 0;border-left:3px solid rgba(242,232,213,.15);background:rgba(242,232,213,.03);padding:10px 14px;flex-shrink:0}

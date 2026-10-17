@@ -28,7 +28,7 @@ export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 // Bumped when the scoring engine changes enough to warrant rescoring stored
 // drives in place. rescoreStoredDrives() runs once per new value.
-export const RESCORE_VERSION     = 3;
+export const RESCORE_VERSION     = 4;
 export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';

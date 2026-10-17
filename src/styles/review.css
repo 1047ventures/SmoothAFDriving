@@ -183,7 +183,10 @@
   .rv-narrative{margin:0;padding:0;font-family:var(--serif);font-size:15.5px;line-height:1.45;color:rgba(244,235,217,.95);flex-shrink:0}
   .rv-narrative:empty{display:none}
   .rv-progress{margin:6px 0 0;padding:0;font-family:var(--sans);font-size:12.5px;line-height:1.45;color:rgba(244,235,217,.75);flex-shrink:0}
-  .rv-progress em{font-style:normal;font-weight:600;color:#E8501A}
+  .rv-progress em{font-style:normal;font-weight:600;color:#6FB669}
+  .rv-progress--slip em{color:#E0A33A}
+  .rv-progress--tap{cursor:pointer}
+  .rv-progress--tap::after{content:' ›';color:#E8501A;font-weight:600}
   .rv-progress:empty{display:none}
 
   /* Numbers extracted from the story — compact fact chips */
