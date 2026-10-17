@@ -32,6 +32,22 @@ from a phone, and expects you to carry the detail.
   text ready to copy. Never make them hunt through a dashboard you can't see; if
   a UI step is unavoidable and unclear, ask for a screenshot instead of guessing.
   Then verify the result yourself.
+- **Don't burn tokens on ceremony.** Pushing is cheap; what's expensive is repeated
+  verification loops, polling, re-reading big files, and republishing the roadmap
+  for every small step. So:
+  - **Batch per task, not per step.** Commit locally as you go; push once when a
+    task is finished (or when the other session needs it). One roadmap update +
+    publish per finished task, not per edit.
+  - **Targeted tests only.** Run the test files that cover what changed, with a
+    hard time cap. Vitest is very slow on this Mac (repo is in iCloud-synced
+    Documents) — never wait on a full-suite run; CI-equivalent safety comes from
+    `npm run build` + the targeted files. Skip tests entirely for CSS/markup-only
+    changes and verify visually instead.
+  - **Measure before screenshotting.** Get positions/gaps via one JS call; take one
+    screenshot at the end as proof, not one per tweak.
+  - **Don't poll.** Use a single bounded wait; if something hangs, kill it and move
+    on rather than re-checking it.
+  - **Short replies.** Lead with the answer; skip recaps of what was already said.
 - **Verify against the running system, then say so plainly.** See the rule
   below. When something failed, report it with the evidence; don't smooth it
   over.

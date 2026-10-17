@@ -43,6 +43,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    // Agent worktrees under .claude/ hold full copies of the repo — without this every
+    // run executes every test twice and can hang.
+    exclude: ['**/node_modules/**', '**/dist/**', '.claude/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

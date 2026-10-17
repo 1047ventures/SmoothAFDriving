@@ -212,6 +212,11 @@
         <div class="ribbon-lbl"><span>Your inputs</span><span class="ribbon-hint" id="ribbon-hint">flat line = smooth</span></div>
         <canvas id="ribbon" class="ribbon-canvas" aria-hidden="true"></canvas>
       </div>
+    </div>
+
+    <!-- Everything between the inputs graph and End Drive lives in one column that spaces
+         itself evenly; rows with nothing to show (no insight yet, no OBD) collapse. -->
+    <div class="rec-lower" id="rec-lower">
       <!-- One line, two jobs: the track that's playing (Spotify, once connected) is the resting
            state; an insight takes the text over for a few seconds. ♥ / ⏯ / ⏭ stay put. -->
       <div class="rec-line" id="rec-line">
@@ -226,6 +231,30 @@
           <button id="mu-next" class="mu-btn" type="button" aria-label="Next track"><svg viewBox="0 0 24 24"><path d="M6 5.5v13l9-6.5zM16.5 5H19v14h-2.5z"/></svg></button>
         </div>
       </div>
+      <button id="debug-handle" class="debug-handle" type="button" aria-label="Toggle sensor data">⌃&nbsp;Sensors</button>
+      <!-- Bottom stats: Stops | Miles | Avg | Time -->
+      <div class="rec-bottom">
+        <div class="bot-stat bot-stat--center">
+          <div class="bot-lbl">Stops</div>
+          <div class="bot-val"><span id="live-stops">0</span></div>
+          <div class="bot-sub" id="live-rolled"></div>
+        </div>
+        <div class="bot-stat bot-stat--center">
+          <div class="bot-lbl">Miles</div>
+          <div class="bot-val"><span id="live-distance">0.0</span><span class="bot-unit"> mi</span></div>
+        </div>
+        <div class="bot-stat bot-stat--center">
+          <div class="bot-lbl">Avg</div>
+          <div class="bot-val"><span id="live-avg-speed">0</span><span class="bot-unit"> mph</span></div>
+        </div>
+        <div class="bot-stat bot-stat--center">
+          <div class="bot-lbl">Time</div>
+          <div class="bot-val bot-val--time" id="live-time">0:00:00</div>
+        </div>
+      </div>
+      <!-- Live OBD strip: the few car channels worth a glance while driving.
+           Hidden until the dongle is connected; populated by renderLiveStrip(). -->
+      <div id="obd-live" class="obd-live hidden" aria-hidden="true"></div>
     </div>
 
     <!-- G-force radar: big, striking, state-colored -->
@@ -260,30 +289,7 @@
       </div>
     </div>
 
-    <!-- Bottom stats: Stops | Miles | Avg | Time -->
-    <div class="rec-bottom">
-      <div class="bot-stat bot-stat--center">
-        <div class="bot-lbl">Stops</div>
-        <div class="bot-val"><span id="live-stops">0</span></div>
-        <div class="bot-sub" id="live-rolled"></div>
-      </div>
-      <div class="bot-stat bot-stat--center">
-        <div class="bot-lbl">Miles</div>
-        <div class="bot-val"><span id="live-distance">0.0</span><span class="bot-unit"> mi</span></div>
-      </div>
-      <div class="bot-stat bot-stat--center">
-        <div class="bot-lbl">Avg</div>
-        <div class="bot-val"><span id="live-avg-speed">0</span><span class="bot-unit"> mph</span></div>
-      </div>
-      <div class="bot-stat bot-stat--center">
-        <div class="bot-lbl">Time</div>
-        <div class="bot-val bot-val--time" id="live-time">0:00:00</div>
-      </div>
-    </div>
 
-    <!-- Live OBD strip: the few car channels worth a glance while driving.
-         Hidden until the dongle is connected; populated by renderLiveStrip(). -->
-    <div id="obd-live" class="obd-live hidden" aria-hidden="true"></div>
 
     <!-- Event flash ticker -->
 
@@ -306,7 +312,6 @@
     </div>
 
     <!-- Debug sensor chart panel -->
-    <button id="debug-handle" class="debug-handle" type="button" aria-label="Toggle sensor data">⌃&nbsp;Sensors</button>
     <div id="debug-panel" class="debug-panel">
       <div id="debug-legend" class="debug-legend"></div>
       <canvas id="debug-canvas" class="debug-canvas"></canvas>

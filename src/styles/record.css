@@ -224,7 +224,9 @@
   .g-radar-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(244,235,217,.95);top:50%;left:50%;transform:translate(-50%,-50%);transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s;box-shadow:0 0 12px rgba(244,235,217,.65);z-index:15}
 
   /* bottom stats */
-  .rec-bottom{position:absolute;bottom:calc(env(safe-area-inset-bottom,0) + 100px);left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:flex-end;padding:0 24px}
+  .rec-bottom{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:flex-end;padding:0 24px}
+  /* "rolled N" hangs under Stops — reserve its room only when it has something to say */
+  .rec-bottom:has(.bot-sub:not(:empty)){padding-bottom:18px}
   .bot-stat{display:flex;flex-direction:column;flex:1}
   .bot-stat--center{align-items:center}
   .bot-stat--right{align-items:flex-end}
@@ -236,7 +238,7 @@
   /* Live OBD strip — the few car channels worth a glance mid-drive. Sits in the
      gap between the Stops|Miles|Time row and the End Drive button; only shown
      when the dongle is connected (JS toggles .hidden). */
-  .obd-live{position:absolute;left:0;right:0;z-index:11;bottom:calc(env(safe-area-inset-bottom,0) + 74px);display:flex;justify-content:center;flex-wrap:wrap;gap:4px 20px;padding:0 20px;pointer-events:none}
+  .obd-live{position:relative;z-index:11;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 20px;padding:0 20px;pointer-events:none}
   .obd-live.hidden{display:none}
   .obdl-cell{display:inline-flex;align-items:baseline;gap:5px}
   .obdl-cell b{font-family:var(--serif);font-style:italic;font-weight:700;font-size:19px;color:var(--cream);line-height:1;letter-spacing:-.02em}
@@ -248,7 +250,12 @@
   .stop-btn:active{background:rgba(244,235,217,.88);transform:scale(.98)}
 
   /* ── Live insights: clean streak · inputs ribbon · one-line insight ── */
-  .rec-mid{justify-content:center;position:absolute;left:0;right:0;z-index:10;top:calc(env(safe-area-inset-top,0) + 256px);bottom:calc(env(safe-area-inset-bottom,0) + 218px);padding:0 22px;display:flex;flex-direction:column;gap:14px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  .rec-mid{justify-content:center;position:absolute;left:0;right:0;z-index:10;top:calc(env(safe-area-inset-top,0) + 256px);bottom:calc(env(safe-area-inset-bottom,0) + 256px);padding:0 22px;display:flex;flex-direction:column;gap:14px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  /* Everything between the inputs graph and End Drive: one column, evenly spaced. It spans
+     from the graph block's bottom (256px) down to End Drive's top (8 + 62 = 70px). Rows with
+     nothing to show collapse, so the spacing stays even whatever is on screen. */
+  .rec-lower{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 70px);height:186px;display:flex;flex-direction:column;justify-content:space-evenly;pointer-events:none}
+  .rec-lower > *{pointer-events:auto}
   #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0) + 330px)}
   .streak-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
   .streak-main{display:flex;align-items:baseline;gap:9px;min-width:0}
@@ -271,7 +278,8 @@
   .rec-insight.show{opacity:1;transform:none}
 
   /* ── One line: now-playing + insight ── */
-  .rec-line{display:flex;align-items:center;gap:10px;min-height:24px}
+  .rec-line{position:relative;z-index:10;display:flex;align-items:center;gap:10px;min-height:24px;padding:0 22px}
+  .rec-line:not(.has-music):not(.has-insight){display:none}
   .rec-linetext{position:relative;flex:1;min-width:0;min-height:24px;display:flex;align-items:center}
   .mu-art,.mu-ctl,.mu-text{display:none}
   .rec-line.has-music{min-height:44px}
@@ -291,7 +299,8 @@
   .mu-pp .i-play{display:block}.mu-pp .i-pause{display:none}
   .mu-pp.is-playing .i-play{display:none}.mu-pp.is-playing .i-pause{display:block}
   @media(max-height:700px){
-    .rec-mid{top:calc(env(safe-area-inset-top,0) + 238px);bottom:calc(env(safe-area-inset-bottom,0) + 204px);gap:9px}
+    .rec-mid{top:calc(env(safe-area-inset-top,0) + 238px);bottom:calc(env(safe-area-inset-bottom,0) + 237px);gap:9px}
+    .rec-lower{height:167px}
     .streak-num{font-size:36px}.streak-bar{margin-top:6px}.ribbon-lbl{margin-bottom:4px}
     /* Small phone AND a destination strip: not enough room for a legible ribbon. Keep the
        streak + the insight line (most value per pixel) rather than a squeezed sliver. */
@@ -314,8 +323,7 @@
   /* Intentional labeled pill (not a bare floating line), lifted clear of the
      full-width End Drive button so tapping it can't misfire the stop. */
   .debug-handle{
-    position:absolute;left:50%;transform:translateX(-50%);
-    bottom:calc(env(safe-area-inset-bottom,0) + 176px);
+    position:relative;align-self:center;
     display:flex;align-items:center;gap:6px;
     appearance:none;border:1px solid rgba(244,235,217,.22);
     background:rgba(244,235,217,.08);color:rgba(244,235,217,.82);
@@ -327,7 +335,7 @@
   .debug-handle:active{background:rgba(244,235,217,.18);border-color:rgba(244,235,217,.4)}
   /* When the sensor panel (height:45%) is open, the handle rides up to sit on its
      top lip — matching the panel's .28s slide — so it reads as the panel's grab bar. */
-  .debug-handle.open{bottom:calc(45% + 6px)}
+  .debug-handle.open{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(45% + 6px)}
   .debug-panel{
     position:absolute;left:0;right:0;bottom:0;
     height:45%;
