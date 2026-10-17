@@ -14,6 +14,8 @@ import { renderReview } from './review.js';
 import { restoreDrivesFromCloud } from '../services/drive.js';
 import { displayName } from '../services/auth.js';
 import { getActiveVehicle } from './garage.js';
+import { improvementVerdict } from '../services/improvement.js';
+import { openTrends } from './trends.js';
 
 export function renderHomeStats(){
   const all   = loadDrives().filter(d => d.score != null);
@@ -48,11 +50,24 @@ export function renderHomeStats(){
     welcomeEl.textContent = name ? `Back at it, ${name}` : 'Hey, Driver';
   }
 
-  // Persona sentence — score number shown above, just describe the archetype here
+  // The sentence under your name answers "am I getting better?" whenever the
+  // history can say so honestly; otherwise it falls back to the persona.
   const sentenceEl = document.getElementById('home-score-sentence');
   if (sentenceEl){
+    const v = all.length ? improvementVerdict(all) : null;
+    sentenceEl.onclick = null;
+    sentenceEl.classList.remove('home-score-sentence--tap');
     if (!all.length){
       sentenceEl.innerHTML = 'First lap unscored. Tap <em>Start Drive</em> — it scores itself.';
+    } else if (v.status === 'improving' || v.status === 'slipping'){
+      const tail = v.status === 'slipping' && v.tip ? ` ${v.tip}` : '';
+      sentenceEl.innerHTML = `<em>${v.headline}</em> — ${v.detail}.${tail}`;
+      if (v.trend){
+        sentenceEl.classList.add('home-score-sentence--tap');
+        sentenceEl.onclick = () => openTrends(v.trend);
+      }
+    } else if (v.status === 'not-enough'){
+      sentenceEl.textContent = v.headline;
     } else if (p){
       sentenceEl.innerHTML = `<em>${p.title}</em> — ${p.sub}`;
     } else {

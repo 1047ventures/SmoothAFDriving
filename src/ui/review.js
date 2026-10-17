@@ -1,5 +1,6 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
+import { improvementVerdict } from '../services/improvement.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
@@ -101,6 +102,17 @@ export function renderReview(drive){
         similarRouteCount: similar.length,
       };
       narrEl.textContent = driveNarrative(drive, analysis, loadDriverName(), ctx).join(' ');
+    }
+    // Where you're heading — only on your newest drive, where "your last 5"
+    // includes the one you're looking at. On an old drive it would be about
+    // drives that hadn't happened yet.
+    const progEl = document.getElementById('rv-progress');
+    if (progEl){
+      const all = loadDrives().filter(d => d.score != null);
+      const v = all[0]?.startTime === drive.startTime ? improvementVerdict(all) : null;
+      progEl.innerHTML = v && (v.status === 'improving' || v.status === 'slipping')
+        ? `<em>${escapeHtml(v.headline)}</em> across ${escapeHtml(v.detail)}.`
+        : '';
     }
     // Numbers pulled out of the prose into a compact facts row.
     const factsEl = document.getElementById('rv-facts');

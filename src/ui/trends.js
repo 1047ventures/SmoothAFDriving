@@ -97,7 +97,8 @@ export function renderTrends(){
   renderChart(drives);
 }
 
-export function openTrends(){
+export function openTrends(metric){
+  if (metric && METRICS[metric]) active = metric;
   renderTrends();
   showScreen('trends');
 }

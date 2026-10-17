@@ -193,6 +193,8 @@
   .home-welcome-name{font-family:var(--sans);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:6px}
   .home-score-sentence{font-family:var(--sans);font-size:14px;color:rgba(242,232,213,.85);line-height:1.65}
   .home-score-sentence em{color:#E8501A;font-style:normal;font-weight:600}
+  .home-score-sentence--tap{cursor:pointer}
+  .home-score-sentence--tap::after{content:' ›';color:rgba(242,232,213,.5)}
 
   /* ── Corridors section ── */
   .home-routes{margin:20px 24px 0;border-left:3px solid rgba(242,232,213,.15);background:rgba(242,232,213,.03);padding:10px 14px;flex-shrink:0}
