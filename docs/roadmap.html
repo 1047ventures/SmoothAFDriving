@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 216</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 8:41 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 16, 2026 · 9:00 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -155,12 +155,8 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">1 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent" id="need-migration">
-        <summary><span class="tag t-wait">Soon</span><span class="ent-t">Fix the <code>SUPABASE_DB_URL</code> secret (the failure emails)</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">It holds the database password on its own instead of the full connection string, so the auto-migrate workflow has failed on every run since August. Replace it with Supabase &rarr; Settings &rarr; Database &rarr; <b>Session pooler URI</b> (starts <code>postgresql://</code>, password filled in), then re-run the failed job. Or skip it and paste <code>supabase/migrations/20261015190000_delete_device_drive.sql</code> into the SQL editor like before.<br><a class="ent-go" href="https://github.com/1047ventures/SmoothAFDriving/settings/secrets/actions" target="_blank" rel="noopener">Open GitHub secrets &#8599;</a></div>
-      </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.<br><a class="ent-go" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank" rel="noopener">Open Cloudflare &#8599;</a></div>
@@ -174,7 +170,7 @@
     <div class="sec-body">
       <details class="ent">
         <summary><span class="tag t-next">loose end</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The leaderboard is derived on the server from your uploaded drives &mdash; but those rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you actually see. Pairs with applying the cloud-delete migration (<a href="#need-migration">Needs you</a>).</div>
+        <div class="ent-body">The leaderboard is derived on the server from your uploaded drives &mdash; but those rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you actually see.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-next">next feature</span><span class="ent-t">Start Car Health &mdash; read fault codes <span class="tn">(Q5)</span></span><span class="ent-chev">&#9654;</span></summary>
@@ -236,7 +232,7 @@
     <div class="sec-body">
       <details class="ent">
         <summary><span class="tag t-ship tn">T367</span><span class="ent-t">Leaderboard is real now &mdash; fiction cut</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">The Corridors and Rivals tabs were empty placeholders with ghost rows and &ldquo;unlock with GPS&rdquo; teasers &mdash; gone. The leaderboard is just the one real, server-derived board. And deleting a drive now also removes its cloud row, so the standings stop counting drives you threw away (needs the <a href="#need-migration">migration</a> applied).</div>
+        <div class="ent-body">The Corridors and Rivals tabs were empty placeholders with ghost rows and &ldquo;unlock with GPS&rdquo; teasers &mdash; gone. The leaderboard is just the one real, server-derived board. And deleting a drive now also removes its cloud row, so the standings stop counting drives you threw away.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-ship tn">T366</span><span class="ent-t">Road&rsquo;s fault vs yours &mdash; forced stops don&rsquo;t cost you</span><span class="ent-chev">&#9654;</span></summary>
@@ -370,8 +366,8 @@
     <summary><h2>Tech debt</h2><span class="count">4 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
-        <summary><span class="tag t-flag">Debt</span><span class="ent-t">Cloud-delete needs its migration applied</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Deleting a drive used to leave the Supabase row, so <code>/admin</code> and the leaderboard kept counting it. The client now calls a <code>delete_device_drive</code> RPC to remove the cloud row &mdash; but that function has to be <a href="#need-migration">applied to the live DB</a> first; until then it fails soft. Once applied, this closes.</div>
+        <summary><span class="tag t-flag">Optional</span><span class="ent-t"><code>SUPABASE_DB_URL</code> secret &mdash; stops the failure emails</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The secret holds the password alone, so the auto-migrate job fails on every push that touches the database. Harmless &mdash; changes get applied by hand in the SQL editor instead. Fixing it (Session pooler connection string) just makes them apply themselves and stops the emails.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Security</span><span class="ent-t">Rotate the remove.bg API key</span><span class="ent-chev">&#9654;</span></summary>
