@@ -11,7 +11,7 @@
     background:linear-gradient(180deg,rgba(4,2,2,.92) 0%,rgba(4,2,2,.12) 24%,rgba(4,2,2,0) 44%,rgba(4,2,2,0) 54%,rgba(4,2,2,.92) 100%);
   }
   /* Top strip */
-  .rec-top-strip{position:absolute;top:0;left:0;right:0;z-index:5;padding-top:env(safe-area-inset-top,0)}
+  .rec-top-strip{position:absolute;top:0;left:0;right:0;z-index:5;padding-top:env(safe-area-inset-top,0px)}
   .rec-stats-row{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 22px 6px}
   .rec-sub-row{display:flex;justify-content:space-between;align-items:center;padding:0 22px 10px}
   .rec-corner{display:flex;flex-direction:column}
@@ -55,7 +55,7 @@
   .rec-bottom-row{
     position:absolute;left:0;right:0;z-index:4;
     display:flex;justify-content:space-between;align-items:flex-end;
-    padding:0 22px;bottom:calc(env(safe-area-inset-bottom,0) + 96px);
+    padding:0 22px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);
   }
   .rec-bottom-stat{display:flex;flex-direction:column;border-left:2px solid rgba(244,235,217,.18);padding-left:10px}
   .rec-bottom-stat--right{align-items:flex-end;border-left:none;border-right:2px solid rgba(244,235,217,.18);padding-left:0;padding-right:10px}
@@ -86,7 +86,7 @@
   .smooth-ring-wrap,.smooth-ring{display:none}
 
   /* Event flashes */
-  .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 92px);display:flex;justify-content:center;align-items:center;pointer-events:none}
+  .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);display:flex;justify-content:center;align-items:center;pointer-events:none}
   .event-flash{padding:6px 14px;border-radius:999px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;background:rgba(224,59,47,.14);color:var(--danger);border:1px solid rgba(224,59,47,.35);animation:flash-in .25s ease,flash-out .6s ease 1.8s forwards}
   .event-flash.warn{background:rgba(232,160,58,.14);color:var(--warn);border-color:rgba(232,160,58,.35)}
   .event-flash.turn-warn{background:rgba(196,169,98,.14);color:var(--gold);border-color:rgba(196,169,98,.35)}
@@ -96,7 +96,7 @@
   @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
   /* Stop button */
-  .stop-btn{position:absolute;z-index:5;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0) + 16px);appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:16px;border-radius:16px;box-shadow:0 8px 28px rgba(244,235,217,.12);transition:transform .1s ease}
+  .stop-btn{position:absolute;z-index:5;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:16px;border-radius:16px;box-shadow:0 8px 28px rgba(244,235,217,.12);transition:transform .1s ease}
   .stop-btn:active{transform:scale(.985)}
 
   /* Burst effects */
@@ -159,7 +159,7 @@
   .rec-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(6,4,4,.85) 0%,rgba(6,4,4,.12) 28%,rgba(6,4,4,.05) 50%,rgba(6,4,4,.18) 72%,rgba(6,4,4,.92) 100%)}
 
   /* top bar */
-  .rec-topbar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0) + 18px) 28px 0}
+  .rec-topbar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 18px) 28px 0}
   .rec-indicator{position:static;display:flex;align-items:center;gap:7px}
   .rec-dot{width:8px;height:8px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 8px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
@@ -169,7 +169,7 @@
 
   /* destination drive: live pace strip */
   /* Big, translucent, glanceable countdown — floats over the drive, taps pass through */
-  .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0) + 64px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
+  .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 64px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
   .pace-strip.hidden{display:none}
   .pace-target{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5)}
   .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.62);font-weight:600}
@@ -182,7 +182,7 @@
   /* Fix 1: "Acquiring GPS…" — subtle pill sitting just under the Score hero
      number, cleared by markGpsAcquired() once the first GPS sample lands */
   .gps-acquiring{
-    position:absolute;top:calc(env(safe-area-inset-top,0) + 76px + 92px);right:20px;z-index:11;
+    position:absolute;top:calc(env(safe-area-inset-top,0px) + 76px + 92px);right:20px;z-index:11;
     padding:4px 11px;border-radius:999px;
     background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.14);
     font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
@@ -190,10 +190,10 @@
   }
 
   /* hero numbers */
-  .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 22px;gap:4px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  .rec-heroes{position:absolute;top:calc(env(safe-area-inset-top,0px) + 76px);left:0;right:0;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:0 22px;gap:4px;transition:top .3s cubic-bezier(.4,0,.2,1)}
   /* Destination drive: the big countdown lives up top, so drop the speed/score
      heroes down to make room for it (only when a target is set). */
-  #screen-record.has-target .rec-heroes{top:calc(env(safe-area-inset-top,0) + 150px)}
+  #screen-record.has-target .rec-heroes{top:calc(env(safe-area-inset-top,0px) + 150px)}
   .hero-speed{display:flex;flex-direction:column;flex:1 1 0;min-width:0}
   .hero-num-speed{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(88px,36vw,144px);line-height:.86;letter-spacing:-.05em;color:var(--cream)}
   .hero-speed-unit{font-family:var(--sans);font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,235,217,.86);margin-top:7px;align-self:flex-end}
@@ -245,18 +245,18 @@
   .obdl-cell i{font-family:var(--sans);font-style:normal;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.6)}
 
   /* event ticker + stop button */
-  .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 112px);display:flex;justify-content:center;align-items:center;pointer-events:none}
-  .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+  .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 112px);display:flex;justify-content:center;align-items:center;pointer-events:none}
+  .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
   .stop-btn:active{background:rgba(244,235,217,.88);transform:scale(.98)}
 
   /* ── Live insights: clean streak · inputs ribbon · one-line insight ── */
-  .rec-mid{justify-content:center;position:absolute;left:0;right:0;z-index:10;top:calc(env(safe-area-inset-top,0) + 256px);bottom:calc(env(safe-area-inset-bottom,0) + 256px);padding:0 22px;display:flex;flex-direction:column;gap:14px;transition:top .3s cubic-bezier(.4,0,.2,1)}
+  .rec-mid{justify-content:center;position:absolute;left:0;right:0;z-index:10;top:calc(env(safe-area-inset-top,0px) + 256px);bottom:calc(env(safe-area-inset-bottom,0px) + 256px);padding:0 22px;display:flex;flex-direction:column;gap:14px;transition:top .3s cubic-bezier(.4,0,.2,1)}
   /* Everything between the inputs graph and End Drive: one column, evenly spaced. It spans
      from the graph block's bottom (256px) down to End Drive's top (8 + 62 = 70px). Rows with
      nothing to show collapse, so the spacing stays even whatever is on screen. */
-  .rec-lower{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0) + 70px);height:186px;display:flex;flex-direction:column;justify-content:space-evenly;pointer-events:none}
+  .rec-lower{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);height:186px;display:flex;flex-direction:column;justify-content:space-evenly;pointer-events:none}
   .rec-lower > *{pointer-events:auto}
-  #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0) + 330px)}
+  #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0px) + 330px)}
   .streak-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
   .streak-main{display:flex;align-items:baseline;gap:9px;min-width:0}
   .streak-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:46px;line-height:.9;letter-spacing:-.03em;color:var(--cream);font-variant-numeric:tabular-nums;transition:color .25s}
@@ -299,12 +299,12 @@
   .mu-pp .i-play{display:block}.mu-pp .i-pause{display:none}
   .mu-pp.is-playing .i-play{display:none}.mu-pp.is-playing .i-pause{display:block}
   @media(max-height:700px){
-    .rec-mid{top:calc(env(safe-area-inset-top,0) + 238px);bottom:calc(env(safe-area-inset-bottom,0) + 237px);gap:9px}
+    .rec-mid{top:calc(env(safe-area-inset-top,0px) + 238px);bottom:calc(env(safe-area-inset-bottom,0px) + 237px);gap:9px}
     .rec-lower{height:167px}
     .streak-num{font-size:36px}.streak-bar{margin-top:6px}.ribbon-lbl{margin-bottom:4px}
     /* Small phone AND a destination strip: not enough room for a legible ribbon. Keep the
        streak + the insight line (most value per pixel) rather than a squeezed sliver. */
-    #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0) + 322px)}
+    #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0px) + 322px)}
     #screen-record.has-target .rec-ribbon{display:none}
   }
   .bot-stat{position:relative}
@@ -347,7 +347,7 @@
     -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
     border-top:1px solid rgba(244,235,217,.1);
     display:flex;flex-direction:column;
-    padding:10px 12px calc(env(safe-area-inset-bottom,0)+8px);
+    padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 8px);
     transform:translateY(100%);
     transition:transform .28s cubic-bezier(.4,0,.2,1);
     z-index:38;
@@ -450,7 +450,7 @@
 /* Auto-start nudge — the banner that offers to begin a drive the moment the
    dongle links up while the app is open. Bottom-anchored, out of the way. */
 .obd-nudge{
-  position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0) + 18px);
+  position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 18px);
   transform:translate(-50%, 140%); z-index:110;
   display:flex; align-items:center; gap:10px;
   max-width:calc(100vw - 28px);

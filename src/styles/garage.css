@@ -14,7 +14,7 @@
   }
   .gs-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;color:var(--cream);line-height:1;flex:1}
   .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
-  #garage-list-view{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0)+24px)}
+  #garage-list-view{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0px) + 24px)}
   .gs-empty{font-family:var(--serif);font-style:italic;color:var(--cream-dim);font-size:14px;padding:28px 0 8px;text-align:center}
   .gs-card{
     border:1px solid rgba(244,235,217,.1);border-radius:18px;
@@ -35,6 +35,24 @@
   .gs-card-detail{font-size:11px;color:var(--cream-dim);letter-spacing:.04em;margin-bottom:0}
   .gs-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,235,217,.07)}
   .gs-card-stats{display:flex;gap:18px}
+  /* Car Health — last trouble-code read for the active vehicle */
+  .gs-health{border:1px solid rgba(244,235,217,.12);border-radius:14px;padding:14px 16px;margin:4px 0 14px;background:rgba(244,235,217,.03)}
+  .gs-health--attention{border-color:rgba(224,80,58,.55);background:rgba(224,80,58,.06)}
+  .gs-health--watch{border-color:rgba(224,163,58,.45);background:rgba(224,163,58,.05)}
+  .gs-hc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .gs-hc-dot{width:7px;height:7px;border-radius:50%;background:#6FB669;flex-shrink:0}
+  .gs-health--watch .gs-hc-dot{background:#E0A33A}
+  .gs-health--attention .gs-hc-dot{background:#E0503A}
+  .gs-hc-headline{font-family:var(--serif);font-style:italic;font-weight:700;font-size:18px;color:var(--cream);flex:1;min-width:0}
+  .gs-hc-when{font-family:var(--sans);font-size:10px;letter-spacing:.06em;color:rgba(244,235,217,.6)}
+  .gs-hc-code{margin-top:12px;padding-top:12px;border-top:1px solid rgba(244,235,217,.08)}
+  .gs-hc-code-top{display:flex;align-items:baseline;gap:8px}
+  .gs-hc-id{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;padding:2px 6px;border-radius:5px;background:rgba(244,235,217,.08);color:var(--cream);flex-shrink:0}
+  .gs-hc-urgent .gs-hc-id{background:rgba(224,80,58,.2);color:#FF8A72}
+  .gs-hc-soon .gs-hc-id{background:rgba(224,163,58,.18);color:#E8B25A}
+  .gs-hc-title{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--cream);line-height:1.3}
+  .gs-hc-what{font-family:var(--sans);font-size:12.5px;line-height:1.5;color:rgba(244,235,217,.75);margin-top:6px}
+  .gs-hc-what b{color:#E8B25A;font-weight:600}
   .gs-stat{display:flex;flex-direction:column;gap:2px}
   .gs-stat-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:20px;color:var(--cream);line-height:1;letter-spacing:-.02em}
   .gs-stat-lbl{font-family:var(--sans);font-size:7px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,235,217,.86)}
@@ -44,7 +62,7 @@
   .gs-add-btn{appearance:none;border:1px solid rgba(244,235,217,.18);background:transparent;cursor:pointer;width:100%;padding:16px;border-radius:16px;color:var(--cream-dim);font-size:14px;letter-spacing:.08em;transition:background .15s;margin-top:4px}
   .gs-add-btn:active{background:rgba(244,235,217,.06)}
   #garage-form-view{display:flex;flex-direction:column;flex:1;min-height:0}
-  .gs-form-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px calc(env(safe-area-inset-bottom,0)+32px)}
+  .gs-form-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 32px)}
   .gs-section-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream-dim);margin:16px 0 8px}
   .gs-section-label:first-child{margin-top:4px}
   .gs-input{
@@ -91,7 +109,7 @@
     position:fixed;inset:0;z-index:970;background:#0A0808;
     display:flex;flex-direction:column;
     animation:bdp-in .25s ease-out;
-    padding-top:env(safe-area-inset-top,0);
+    padding-top:env(safe-area-inset-top,0px);
   }
   .ip-search-row{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-shrink:0}
   .ip-query-input{
@@ -107,7 +125,7 @@
   }
   .ip-results{
     flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:6px 12px calc(env(safe-area-inset-bottom,0) + 80px);
+    padding:6px 12px calc(env(safe-area-inset-bottom,0px) + 80px);
     display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start;
   }
   .ip-hint{grid-column:1/-1;padding:40px 0;text-align:center;font-size:13px;color:var(--cream-dim);font-family:var(--sans)}
@@ -123,7 +141,7 @@
   .ip-upload-row{
     position:absolute;left:0;right:0;bottom:0;
     background:linear-gradient(transparent,#0A0808 44%);
-    padding:24px 16px calc(env(safe-area-inset-bottom,0) + 18px);
+    padding:24px 16px calc(env(safe-area-inset-bottom,0px) + 18px);
     display:flex;justify-content:center;pointer-events:none;
   }
   .ip-upload-label{

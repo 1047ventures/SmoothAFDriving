@@ -7,7 +7,9 @@
  * this panel exists to answer.
  */
 
-import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps } from '../services/obd.js';
+import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes } from '../services/obd.js';
+import { buildReport, saveHealthReport } from '../services/carHealth.js';
+import { getActiveVehicle } from './garage.js';
 import { state } from '../state.js';
 import { OBD_DEVICE_KEY } from '../constants.js';
 
@@ -40,6 +42,22 @@ function forgetDevice(){
  * (Starting while the app is *closed* needs iOS background modes + local
  * notifications — the native tier, speced separately.)
  */
+/**
+ * Car Health: read the trouble codes once per connection, file the report under
+ * the active vehicle, and let Home / the Garage redraw. Silent on purpose — a
+ * code is never announced mid-drive; it waits on Home for after you park.
+ * A read the car didn't answer leaves the previous report in place.
+ */
+async function checkCarHealth(){
+  try {
+    const raw = await readTroubleCodes();
+    const report = raw && buildReport(raw);
+    if (!report) return;
+    saveHealthReport(getActiveVehicle()?.id, report);
+    window.dispatchEvent(new CustomEvent('smoothaf:carhealth'));
+  } catch {}
+}
+
 let lastAutoStartAt = 0;
 function autoStartDrive(){
   if (state.recording) return;
@@ -360,6 +378,7 @@ async function connectChosen(deviceId, name){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
+    checkCarHealth();
     autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
@@ -387,6 +406,7 @@ async function useSystemPicker(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
+    checkCarHealth();
     autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'no device chosen'
@@ -449,6 +469,7 @@ async function autoReconnect(){
     setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
     setPill(true);
     startPolling();
+    checkCarHealth();
     autoStartDrive();
   } catch {
     // Don't nag or forget — the dongle may just not be powered yet. Next launch

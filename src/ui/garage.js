@@ -1,6 +1,7 @@
 import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 import { pushProfile } from '../services/profile.js';
+import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
@@ -263,12 +264,49 @@ function showGarageView(view){
   document.getElementById('garage-form-view')?.classList.toggle('hidden', view !== 'form');
 }
 
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+function fmtChecked(ts){
+  const d = new Date(ts), now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay
+    ? `today, ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+    : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Car Health for the active vehicle — the last trouble-code read from the
+ * dongle. Nothing until a read has happened, so a car without a dongle never
+ * sees an empty "health" box it can't fill.
+ */
+function healthBlock(v){
+  const r = loadHealthReport(v?.id);
+  if (!r) return '';
+  const codes = r.codes.map(c => `
+      <div class="gs-hc-code gs-hc-${c.severity}${c.pending ? ' gs-hc-pending' : ''}">
+        <div class="gs-hc-code-top">
+          <span class="gs-hc-id">${esc(c.code)}</span>
+          <span class="gs-hc-title">${esc(c.title)}</span>
+        </div>
+        <div class="gs-hc-what">${c.pending ? '<b>Early warning</b> — no dashboard light yet. ' : ''}${esc(c.what)}</div>
+      </div>`).join('');
+  return `
+    <section class="gs-health gs-health--${r.status}" aria-label="Car health">
+      <div class="gs-hc-head">
+        <span class="gs-hc-dot"></span>
+        <span class="gs-hc-headline">${esc(reportHeadline(r))}</span>
+        <span class="gs-hc-when">Checked ${esc(fmtChecked(r.checkedAt))}</span>
+      </div>
+      ${r.status === 'clear' ? '<div class="gs-hc-what">The engine computer has nothing stored or pending.</div>' : codes}
+    </section>`;
+}
+
 function renderGarageList(){
   const container = document.getElementById('garage-list');
   if (!container) return;
   const vehicles = loadGarage();
   if (vehicles.length === 0){
-    container.innerHTML = '<div class="gs-empty">No vehicles yet. Add one below.</div>';
+    container.innerHTML = healthBlock(null) + '<div class="gs-empty">No vehicles yet. Add one below.</div>';
     return;
   }
 
@@ -278,7 +316,7 @@ function renderGarageList(){
   const avgScore = scored.length ? Math.round(scored.reduce((s,d) => s+d.score, 0) / scored.length) : '--';
   const bestScore = scored.length ? Math.max(...scored.map(d => d.score)) : '--';
 
-  container.innerHTML = vehicles.map(v => {
+  container.innerHTML = healthBlock(vehicles.find(v => v.active)) + vehicles.map(v => {
     const vt = VEHICLE_TYPES.find(t => t.id === v.type) || { label:'Vehicle' };
     const makeModel = [v.make, v.model].filter(Boolean).join(' ') || vt.label;
     const detail = [v.color, v.licensePlate].filter(Boolean).join(' · ');

@@ -2,7 +2,7 @@
    The home sparkline, opened up: pick a metric, see its shape and whether it's
    getting better. Same dark, serif-numeral identity as the rest of the app. */
 
-#screen-trends{padding:calc(env(safe-area-inset-top,0) + 10px) 18px calc(env(safe-area-inset-bottom,0) + 24px)}
+#screen-trends{padding:calc(env(safe-area-inset-top,0px) + 10px) 18px calc(env(safe-area-inset-bottom,0px) + 24px)}
 
 .trends-topbar{display:flex; align-items:center; gap:12px; margin-bottom:18px}
 .trends-back-btn{

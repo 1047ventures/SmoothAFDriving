@@ -17,10 +17,10 @@
 
   /* ============ LEADERBOARD ============ */
   #screen-leaderboard{background:linear-gradient(180deg,#140808 0%,#0a0808 100%);overflow:hidden}
-  .lb-topbar{display:flex;align-items:center;gap:14px;flex-shrink:0;padding:calc(env(safe-area-inset-top,0) + 14px) 20px 0}
+  .lb-topbar{display:flex;align-items:center;gap:14px;flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 0}
   .lb-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:32px;color:var(--cream);flex:1}
   .lb-tagline{font-size:11px;letter-spacing:.3em;color:var(--cream-dim);text-transform:uppercase;padding:4px 20px 14px}
-  .lb-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0)+24px)}
+  .lb-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0px) + 24px)}
   .lb-my-card{background:linear-gradient(135deg,rgba(232,93,58,.12),rgba(232,93,58,.04));border:1px solid rgba(232,93,58,.28);border-radius:16px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
   .lb-my-rank{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;color:var(--tang);min-width:42px}
   .lb-my-info{flex:1;min-width:0}

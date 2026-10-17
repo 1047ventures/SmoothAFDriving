@@ -4,7 +4,7 @@
   overflow-y: auto;
   background: var(--bg);
   min-height: 100dvh;
-  padding: calc(env(safe-area-inset-top,0) + 64px) 20px calc(env(safe-area-inset-bottom,0) + 32px);
+  padding: calc(env(safe-area-inset-top,0px) + 64px) 20px calc(env(safe-area-inset-bottom,0px) + 32px);
 }
 .cor-list-body { display: flex; flex-direction: column; gap: 8px; }
 .cor-card {
@@ -41,7 +41,7 @@
   overflow-y: auto;
   background: var(--bg);
   min-height: 100dvh;
-  padding: calc(env(safe-area-inset-top,0) + 64px) 20px calc(env(safe-area-inset-bottom,0) + 32px);
+  padding: calc(env(safe-area-inset-top,0px) + 64px) 20px calc(env(safe-area-inset-bottom,0px) + 32px);
 }
 
 .corridor-topbar {

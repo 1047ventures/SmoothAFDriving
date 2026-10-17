@@ -497,6 +497,21 @@ export async function disconnect(){
 }
 
 /**
+ * Read the car's trouble codes: check-engine status (0101), stored codes (03)
+ * and pending codes (07). Returns the raw replies for services/carHealth.js to
+ * parse — kept raw here so the parsing stays pure and testable. Mode 03/07 can
+ * take a moment on older protocols (several ECUs, multi-frame), hence the
+ * longer timeout. Serialised through send(), so it interleaves safely with poll().
+ */
+export async function readTroubleCodes(){
+  if (!state.deviceId) return null;
+  const milRaw     = await send('0101');
+  const storedRaw  = await send('03', 8000);
+  const pendingRaw = await send('07', 8000);
+  return { milRaw, storedRaw, pendingRaw };
+}
+
+/**
  * Poll the PIDs the car actually implements.
  *
  * Deliberately sequential and modest: an ELM327 manages roughly 10-20 queries a

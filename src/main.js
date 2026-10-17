@@ -170,6 +170,9 @@ function boot(){
   document.getElementById('btn-set-driver-name')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
   document.getElementById('btn-join-lb')?.addEventListener('click', () => openSignupModal(() => openLeaderboard()));
 
+  // Car Health: a fresh trouble-code read redraws the Garage card on Home.
+  window.addEventListener('smoothaf:carhealth', () => renderDriveList());
+
   // Rewards
   document.getElementById('btn-rewards')?.addEventListener('click', () => { renderRewards(); showScreen('rewards'); });
   document.getElementById('btn-rw-back')?.addEventListener('click', () => { showScreen('home'); renderDriveList(); });

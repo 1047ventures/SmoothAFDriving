@@ -16,6 +16,7 @@ import { displayName } from '../services/auth.js';
 import { getActiveVehicle } from './garage.js';
 import { improvementVerdict } from '../services/improvement.js';
 import { openTrends } from './trends.js';
+import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
 
 export function renderHomeStats(){
   const all   = loadDrives().filter(d => d.score != null);
@@ -39,6 +40,23 @@ export function renderHomeStats(){
   if (vehicleNameEl){
     const v = getActiveVehicle();
     vehicleNameEl.textContent = v ? (v.model || v.make || 'My Car') : 'Add Vehicle';
+  }
+
+  // Car Health on the Garage card: the dot and label carry the last
+  // trouble-code read for this car. No read yet → the plain "Garage" label.
+  const card = document.getElementById('btn-vehicle-type');
+  if (card){
+    const r = loadHealthReport(getActiveVehicle()?.id);
+    const lbl = card.querySelector('.hgc-label');
+    card.classList.remove('hgc--clear', 'hgc--watch', 'hgc--attention');
+    if (r){
+      card.classList.add(`hgc--${r.status}`);
+      if (lbl) lbl.textContent = { clear: 'Car OK', watch: 'Heads-up', attention: 'Check car' }[r.status];
+      card.setAttribute('aria-label', `My Garage — ${reportHeadline(r)}`);
+    } else {
+      if (lbl) lbl.textContent = 'Garage';
+      card.setAttribute('aria-label', 'My Garage');
+    }
   }
 
   // Welcome name
