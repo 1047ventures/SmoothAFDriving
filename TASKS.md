@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**377 tasks shipped** as of 2026-10-16.
+**379 tasks shipped** as of 2026-10-17.
 
 
 ## 2026-04
@@ -397,3 +397,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T375** · Car Health review fixes: never a false all-clear, no phantom codes  _( 2026-10-16 )_
 - **T376** · Identify the car from its VIN and offer to add it to the Garage  _( 2026-10-16 )_
 - **T377** · VIN review fixes: never a wrong VIN; prompt polish  _( 2026-10-16 )_
+- **T378** · Kill the 'localhost would like to use your location' prompt on iOS  _( 2026-10-17 )_
+- **T379** · Drive-start location read leaves the permission ask to the drive watcher  _( 2026-10-17 )_
