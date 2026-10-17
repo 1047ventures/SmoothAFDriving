@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**367 tasks shipped** as of 2026-10-15.
+**371 tasks shipped** as of 2026-10-16.
 
 
 ## 2026-04
@@ -387,3 +387,7 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T365** · iOS: read motion via native Core Motion — zero permission prompts, ever  _( 2026-10-15 )_
 - **T366** · Q4: road's fault vs yours — forced stops don't cost you momentum  _( 2026-10-15 )_
 - **T367** · Rewards & leaderboard: real standings only — cut fiction, reconcile deletes  _( 2026-10-15 )_
+- **T368** · Work in progress  _( 2026-10-17 )_
+- **T369** · CLAUDE.md: rule — when the owner must act, find the lowest-effort path  _( 2026-10-16 )_
+- **T370** · Drive screen: evenly space everything between the inputs graph and End Drive  _( 2026-10-16 )_
+- **T371** · Points per smooth mile + honest rewards screen (Q1)  _( 2026-10-16 )_
