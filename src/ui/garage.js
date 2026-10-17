@@ -266,14 +266,6 @@ function showGarageView(view){
 
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
-function fmtChecked(ts){
-  const d = new Date(ts), now = new Date();
-  const sameDay = d.toDateString() === now.toDateString();
-  return sameDay
-    ? `today, ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
-    : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-}
-
 /**
  * Car Health for the active vehicle — the last trouble-code read from the
  * dongle. Nothing until a read has happened, so a car without a dongle never
@@ -282,22 +274,31 @@ function fmtChecked(ts){
 function healthBlock(v){
   const r = loadHealthReport(v?.id);
   if (!r) return '';
+  const carName = v ? ([v.make, v.model].filter(Boolean).join(' ') || 'your car') : 'your car';
+  // Explanations collapse so a long list never pushes the car itself off a
+  // small screen; anything urgent opens by default.
   const codes = r.codes.map(c => `
-      <div class="gs-hc-code gs-hc-${c.severity}${c.pending ? ' gs-hc-pending' : ''}">
-        <div class="gs-hc-code-top">
+      <details class="gs-hc-code gs-hc-${c.severity}${c.pending ? ' gs-hc-pending' : ''}"${c.severity === 'urgent' && !c.pending ? ' open' : ''}>
+        <summary class="gs-hc-code-top">
           <span class="gs-hc-id">${esc(c.code)}</span>
           <span class="gs-hc-title">${esc(c.title)}</span>
-        </div>
+        </summary>
         <div class="gs-hc-what">${c.pending ? '<b>Early warning</b> — no dashboard light yet. ' : ''}${esc(c.what)}</div>
-      </div>`).join('');
+      </details>`).join('');
+  const t = new Date(r.checkedAt);
+  const when = t.toDateString() === new Date().toDateString()
+    ? t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    : t.toLocaleDateString([], { month: 'short', day: 'numeric' });
   return `
+    <div class="gs-section-label">Car health · ${esc(carName)}</div>
     <section class="gs-health gs-health--${r.status}" aria-label="Car health">
       <div class="gs-hc-head">
         <span class="gs-hc-dot"></span>
         <span class="gs-hc-headline">${esc(reportHeadline(r))}</span>
-        <span class="gs-hc-when">Checked ${esc(fmtChecked(r.checkedAt))}</span>
+        <span class="gs-hc-when">Checked ${esc(when)}</span>
       </div>
-      ${r.status === 'clear' ? '<div class="gs-hc-what">The engine computer has nothing stored or pending.</div>' : codes}
+      ${r.milOn ? '<div class="gs-hc-what gs-hc-mil"><b>Check-engine light is on.</b></div>' : ''}
+      ${r.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : codes}
     </section>`;
 }
 

@@ -248,10 +248,16 @@ function publish(){
 
 function startPolling(){
   stopPolling();
+  // One poll in flight at a time: a slow command (the trouble-code read can
+  // take seconds) would otherwise let ticks pile up behind it in the queue.
+  let busy = false;
   timer = setInterval(async () => {
     if (!isConnected()){ setPill(false); return stopPolling(); }
+    if (busy) return;
+    busy = true;
     try { await poll(); publish(); renderReadout(); renderLiveStrip(); setPill(true); }
     catch { /* a dropped frame is not worth interrupting a drive over */ }
+    finally { busy = false; }
   }, POLL_MS);
 }
 

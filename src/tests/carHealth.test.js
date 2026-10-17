@@ -62,18 +62,18 @@ describe('parseMilStatus', () => {
 
 describe('buildReport', () => {
   it('is clear when the car answered with nothing', () => {
-    const r = buildReport({ milRaw: '410100076504', storedRaw: '4300', pendingRaw: '4700' }, 1);
+    const r = buildReport({ milRaw: '410100076504\r>', storedRaw: '4300\r>', pendingRaw: '4700\r>' }, 1);
     expect(r.status).toBe('clear');
     expect(reportHeadline(r)).toBe('No trouble codes');
   });
   it('sorts urgent first and keeps pending separate', () => {
-    const r = buildReport({ milRaw: '410182', storedRaw: '43020420 0301', pendingRaw: '47020442 0420' });
+    const r = buildReport({ milRaw: '410182\r>', storedRaw: '43020420 0301\r>', pendingRaw: '47020442 0420\r>' });
     expect(r.codes.map(c => [c.code, c.pending])).toEqual([['P0301', false], ['P0420', false], ['P0442', true]]);
     expect(r.status).toBe('attention');
     expect(reportHeadline(r)).toBe('2 codes · 1 early warning');
   });
   it('pending-only is a watch, not an alarm', () => {
-    const r = buildReport({ milRaw: '410100', storedRaw: '4300', pendingRaw: '47010171' });
+    const r = buildReport({ milRaw: '410100\r>', storedRaw: '4300\r>', pendingRaw: '47010171\r>' });
     expect(r.status).toBe('watch');
     expect(reportHeadline(r)).toBe('1 early warning');
   });
@@ -85,6 +85,8 @@ describe('buildReport', () => {
 describe('explainCode', () => {
   it('uses the table when known', () => {
     expect(explainCode('P0457').severity).toBe('watch');
+    expect(explainCode('P0522').severity).toBe('soon');
+    expect(explainCode('P0524').severity).toBe('urgent');
     expect(explainCode('P0301').severity).toBe('urgent');
   });
   it('falls back honestly for unknown and maker codes', () => {
@@ -92,5 +94,31 @@ describe('explainCode', () => {
     expect(e.known).toBe(false);
     expect(e.what).toMatch(/manufacturer-specific/);
     expect(explainCode('U0100').title).toMatch(/Network/);
+  });
+});
+
+describe('honesty under failure (review findings)', () => {
+  it('a timed-out or dropped read is unknown, never clear', () => {
+    expect(parseDtcResponse('')).toBeNull();
+    expect(parseDtcResponse('4300')).toBeNull();           // no prompt = partial
+    expect(buildReport({ milRaw: '', storedRaw: '', pendingRaw: '' })).toBeNull();
+    expect(buildReport({ milRaw: '410100\r>', storedRaw: '', pendingRaw: '4700\r>' })).toBeNull();
+  });
+  it('reads the light from every ECU that answers', () => {
+    expect(parseMilStatus('410100076504\r410183076504\r>')).toEqual({ milOn: true, count: 3 });
+  });
+  it('keeps both ECUs when two multi-frame blocks arrive', () => {
+    const raw = '00B\r0:43040133023401\r1:710300AAAAAAAA\r00B\r0:43040420010000\r1:000000AAAAAAAA\r>';
+    expect(parseDtcResponse(raw)).toEqual(['P0133', 'P0234', 'P0171', 'P0300', 'P0420', 'P0100']);
+  });
+  it('drops error-tagged and misshapen lines instead of inventing codes', () => {
+    expect(parseDtcResponse('43013300000000<DATAERROR\r>')).toEqual([]);
+    expect(parseDtcResponse('4301330234\r>')).toEqual([]);   // 5 bytes: fits neither shape
+    expect(parseDtcResponse('1:340171\r>')).toEqual([]);     // orphan continuation frame
+  });
+  it('stored codes the car would not list are never called clear', () => {
+    const r = buildReport({ milRaw: '410102\r>', storedRaw: '4300\r>', pendingRaw: '4700\r>' });
+    expect(r.status).toBe('watch');
+    expect(reportHeadline(r)).toBe('2 codes stored');
   });
 });

@@ -28,6 +28,7 @@
   .leaflet-popup-content{margin:10px 14px;font-size:12px;line-height:1.5}
   .leaflet-popup-close-button{color:var(--cream-dim)!important}
   .leaflet-control-zoom a{background:var(--ink)!important;color:var(--cream)!important;border:1px solid rgba(244,235,217,.12)!important}
+  .leaflet-top.leaflet-left{top:calc(env(safe-area-inset-top,0px) + 56px)}  /* clear the ✕ back button */
   .leaflet-control-attribution{background:rgba(10,10,10,.72)!important;color:var(--cream-dim)!important}
   .leaflet-control-container{z-index:500!important}
   /* Belt and braces: Leaflet's own defaults for these are 1000. Harmless with
