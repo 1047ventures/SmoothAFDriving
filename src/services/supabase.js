@@ -81,28 +81,28 @@ export async function pushDriveToSupabase(drive){
     let body = payload;
     let res = await postDrive(body);
 
-    // A database that predates 20261017120000 has no device_secret_hash column.
-    if (!res.ok && await mentionsColumn(res, /device_secret_hash/)){
-      const { device_secret_hash, ...rest } = body;
-      body = rest;
-      res = await postDrive(body);
-    }
     // A migration may not have reached this database yet, in which case
-    // PostgREST rejects the unknown column (PGRST204 / 400). The drive is still
-    // valid without the optional columns, and this function swallows failures —
-    // so without these retries a driver would silently stop syncing. Strip the
-    // offending optional columns and resend. Two independent migrations can lag:
+    // PostgREST rejects the unknown column (PGRST204 / 400) — one column per
+    // response. The drive is still valid without the optional columns, and this
+    // function swallows failures, so without these retries a driver would
+    // silently stop syncing. Strip whichever optional group the error names and
+    // resend, until none is named. Groups that can lag:
+    //   • device_secret_hash (20261017120000),
     //   • dims/efficiency/obd (the drive-detail columns), and
-    //   • user_id (the accounts migration).
-    if (!res.ok && await mentionsColumn(res, /dims|efficiency|obd/)){
-      const { dims, efficiency, obd, ...rest } = body;
-      body = rest;
-      res = await postDrive(body);
-    }
-    if (!res.ok && uid && await mentionsColumn(res, /user_id/)){
-      // Send as an anonymous row; signing in later claims it via claimDeviceDrives().
-      const { user_id, ...rest } = body;
-      body = rest;
+    //   • user_id (the accounts migration) — sent as an anonymous row instead;
+    //     signing in later claims it via claimDeviceDrives().
+    const optional = [
+      [/device_secret_hash/,   ['device_secret_hash']],
+      [/dims|efficiency|obd/,  ['dims', 'efficiency', 'obd']],
+      [/user_id/,              ['user_id']],
+    ];
+    for (let tries = 0; !res.ok && tries < optional.length; tries++){
+      let group = null;
+      for (const g of optional){
+        if (g[1].some(k => k in body) && await mentionsColumn(res, g[0])) { group = g; break; }
+      }
+      if (!group) break;
+      body = Object.fromEntries(Object.entries(body).filter(([k]) => !group[1].includes(k)));
       res = await postDrive(body);
     }
 
@@ -219,7 +219,9 @@ export async function fetchCloudDrives(deviceId){
     const res = await fetch(`${SB_URL}/rest/v1/rpc/get_device_drives`, {
       method:  'POST',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ p_device_id: deviceId }),
+      // The secret only matches drives this install recorded; drives from a
+      // pasted foreign id come back only if they predate the secret (legacy).
+      body:    JSON.stringify({ p_device_id: deviceId, p_device_secret: getDeviceSecret() }),
     });
     if (!res.ok) return null;
     const rows = await res.json();
@@ -276,7 +278,7 @@ export async function claimDeviceDrives(){
     const res = await fetch(`${SB_URL}/rest/v1/rpc/claim_drives`, {
       method:  'POST',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ p_device_id: getDeviceId() }),
+      body:    JSON.stringify({ p_device_id: getDeviceId(), p_device_secret: getDeviceSecret() }),
     });
     if (!res.ok) return null;
     // The function returns a bare integer.

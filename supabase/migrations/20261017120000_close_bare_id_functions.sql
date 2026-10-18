@@ -22,9 +22,15 @@
 --     and uploads only its SHA-256 (device_secret_hash). anon has no select on
 --     drives, so the hash isn't readable either.
 --
--- Drives uploaded before this migration have no hash. A signed-out user can't
--- delete those from the cloud until they sign in (claiming makes them theirs);
--- the local delete still works and is all they see.
+--   * Claim + anonymous restore → claim_drives / get_device_drives take the same
+--     secret. Without this, delete_my_drive would still be a bare-ID path: sign
+--     up, claim a device's unclaimed drives by its id, then delete (or read) them
+--     as "yours". Rows that carry a hash now need the matching secret.
+--
+-- Legacy rows (uploaded before this migration, no hash) can't be proved either
+-- way. They stay claimable/restorable by device id as before — that remaining
+-- gap is closed only by ageing out or claiming those rows — and a signed-out
+-- user can't cloud-delete them until they sign in. New rows are protected.
 --
 -- Paste-and-run: this whole file can be pasted into the Supabase SQL editor.
 
@@ -88,6 +94,75 @@ grant execute on function public.delete_my_drive(bigint, text, text) to anon, au
 
 comment on function public.delete_my_drive is
   'Delete one of the caller''s drives: by auth.uid() when signed in, or by device id + per-device secret (matched against device_secret_hash).';
+
+-- ── 4 · Claim + anonymous restore: hashed rows need the secret ───────────────
+
+-- Same matching rule as delete: a row with a hash belongs to whoever holds the
+-- secret; a legacy row (no hash) keeps the old device-id behaviour.
+create or replace function public.device_secret_ok(p_hash text, p_secret text)
+returns boolean
+language sql
+immutable
+set search_path = public
+as $$
+  select p_hash is null
+      or (length(coalesce(p_secret, '')) >= 32
+          and p_hash = encode(sha256(convert_to(p_secret, 'UTF8')), 'hex'));
+$$;
+
+revoke all on function public.device_secret_ok(text, text) from public;
+
+drop function if exists public.claim_drives(text);
+
+create or replace function public.claim_drives(p_device_id text, p_device_secret text default null)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  claimed integer;
+begin
+  if auth.uid() is null then
+    raise exception 'must be signed in to claim drives';
+  end if;
+  if p_device_id is null or length(trim(p_device_id)) = 0 then
+    raise exception 'device_id is required';
+  end if;
+
+  update public.drives
+     set user_id = auth.uid()
+   where user_id is null
+     and device_id = p_device_id
+     and public.device_secret_ok(device_secret_hash, p_device_secret);
+
+  get diagnostics claimed = row_count;
+  return claimed;
+end;
+$$;
+
+revoke all on function public.claim_drives(text, text) from public;
+grant execute on function public.claim_drives(text, text) to authenticated;
+
+drop function if exists public.get_device_drives(text);
+
+create or replace function public.get_device_drives(p_device_id text, p_device_secret text default null)
+returns setof public.drives
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select *
+    from public.drives
+   where device_id = p_device_id
+     and user_id is null
+     and public.device_secret_ok(device_secret_hash, p_device_secret)
+   order by start_time desc;
+$$;
+
+revoke all on function public.get_device_drives(text, text) from public;
+grant execute on function public.get_device_drives(text, text) to anon, authenticated;
 
 -- Make PostgREST see the new column/function and forget the dropped ones now,
 -- rather than on its next schema reload.
