@@ -1,0 +1,328 @@
+<!--
+  Smooth AF — Wireframes (user onboarding + designer handbook).
+  Every screen, element by element: what it is, where it goes, how it's used,
+  and audit flags (bloat, dead ends, missing links). Built from index.html +
+  src/ui/* + the running app, Oct 2026. Publish with BOTH file_path
+  docs/wireframes.html and its artifact url (see CLAUDE.md).
+-->
+<title>Smooth AF Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,700&display=swap">
+<style>
+  /* Layout: app branding (dark, cream, Playfair italic, tracked labels). Each
+     screen = phone wireframe (left, sticky on wide screens) + callout table
+     (right). Audit flags are colour chips. Single dark theme, like the app. */
+  :root{
+    --bg:#0A0A0A; --bg2:#141111; --bg3:#1C1817; --wire:#2A2422; --wire2:#3A3230;
+    --cream:#F2E8D5; --cream-dim:#C9BFAC; --muted:#8E8478;
+    --line:rgba(242,232,213,.10); --line2:rgba(242,232,213,.18);
+    --tang:#E8501A; --gold:#C49A28; --good:#6FB669; --warn:#E0A33A; --bad:#E0503A; --sky:#78AECB; --violet:#A98BD6;
+    --grad:linear-gradient(135deg,#E8501A 0%,#C49A28 100%);
+    --serif:"Playfair Display",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding-inline:clamp(16px,4vw,36px);padding-block:0 110px}
+  a{color:var(--tang);text-underline-offset:3px}
+  a:focus-visible{outline:2px solid var(--tang);outline-offset:3px;border-radius:4px}
+  b{font-weight:600}
+  code{font-family:var(--mono);font-size:.85em;color:var(--cream-dim)}
+  p{margin:0 0 12px}
+  ul,ol{margin:0;padding-left:18px} li{margin-bottom:5px}
+  .lbl{font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--cream-dim)}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--tang)}
+  .dim{color:var(--cream-dim)} .col{max-width:70ch}
+
+  header{padding-block:56px 10px;border-bottom:1px solid var(--line)}
+  .brand{font-size:11px;letter-spacing:.38em;text-transform:uppercase;color:var(--cream-dim);margin:0 0 16px}
+  h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,74px);line-height:1.02;letter-spacing:-.02em;margin:0 0 14px}
+  .intro{color:var(--cream-dim);max-width:66ch;font-size:16.5px}
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin:20px 0 18px;padding:0;list-style:none}
+  .toc li{margin:0}
+  .toc a{display:inline-block;font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line2);color:var(--cream-dim);text-decoration:none}
+  .toc a:hover{border-color:var(--tang);color:var(--cream)}
+
+  section{padding-top:64px;scroll-margin-top:10px}
+  h2{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(28px,4.6vw,40px);line-height:1.1;margin:8px 0 14px}
+  h3{font-size:16px;font-weight:600;margin:0 0 6px}
+
+  /* Flags */
+  .flag{display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;vertical-align:1px;margin-right:4px}
+  .f-dead{background:rgba(224,80,58,.18);color:#FF8A72}
+  .f-missing{background:rgba(232,80,26,.16);color:var(--tang)}
+  .f-bloat{background:rgba(224,163,58,.16);color:var(--warn)}
+  .f-stale{background:rgba(169,139,214,.18);color:var(--violet)}
+  .f-incons{background:rgba(120,174,203,.16);color:var(--sky)}
+  .f-hidden{background:rgba(142,132,120,.22);color:var(--cream-dim)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px;font-size:13px;color:var(--cream-dim)}
+
+  /* Audit table */
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--bg2)}
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  th,td{text-align:left;vertical-align:top;padding:11px 14px;border-bottom:1px solid var(--line);font-size:14px}
+  th{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  tr:last-child td{border-bottom:0}
+  td{color:var(--cream-dim)}
+  td.sev{font-family:var(--mono);font-size:12px;white-space:nowrap}
+  .s-high{color:#FF8A72} .s-med{color:var(--warn)} .s-low{color:var(--muted)}
+  td a{white-space:nowrap}
+
+  /* Journey */
+  .journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px;counter-reset:j}
+  @media(max-width:900px){.journey{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:520px){.journey{grid-template-columns:1fr}}
+  .step{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 15px;min-width:0;counter-increment:j}
+  .step::before{content:counter(j);font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;line-height:1;display:block;margin-bottom:6px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .step h3{font-size:15px}
+  .step p{color:var(--cream-dim);font-size:13.5px;margin:0}
+
+  /* Map */
+  .mapwrap{overflow-x:auto;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .mermaid{margin:0;min-width:760px}
+
+  /* Screen block */
+  .screen{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start;margin-top:22px;padding-top:28px;border-top:1px solid var(--line);scroll-margin-top:10px}
+  @media(max-width:860px){.screen{grid-template-columns:1fr}}
+  .screen > *{min-width:0}
+  .phone-col{position:sticky;top:12px}
+  @media(max-width:860px){.phone-col{position:static}}
+  .phone{width:280px;max-width:100%;margin:0 auto;border:2px solid var(--wire2);border-radius:34px;padding:12px 10px 14px;background:#060606}
+  .phone .notch{width:84px;height:18px;border-radius:12px;background:var(--wire);margin:0 auto 10px}
+  .stack{display:flex;flex-direction:column;gap:6px}
+  .blk{position:relative;border:1px dashed var(--wire2);border-radius:8px;background:var(--wire);color:var(--cream-dim);font-size:10.5px;letter-spacing:.06em;padding:6px 8px 6px 28px;min-height:26px;display:flex;align-items:center}
+  .blk.solid{background:#E8501A;color:#160B06;border-style:solid;border-color:#E8501A;font-weight:700;justify-content:center;padding-left:28px;letter-spacing:.2em;text-transform:uppercase}
+  .blk.ghost{background:transparent}
+  .blk.row{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:4px;padding:4px 4px 4px 28px}
+  .blk.row span{border:1px dashed var(--wire2);border-radius:5px;padding:5px 4px;text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .blk.flagged{border-color:#FF8A72;border-style:solid}
+  .pin{position:absolute;left:5px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;background:var(--grad);color:#120A05;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:0}
+  .scr-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:8px}
+  .scr-head h3{font-family:var(--serif);font-style:italic;font-weight:700;font-size:26px;margin:0}
+  .scr-head .how{font-size:13px;color:var(--muted)}
+  .purpose{color:var(--cream-dim);margin:0 0 12px}
+  .callouts td:first-child{width:34px}
+  .callouts .n{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--grad);color:#120A05;font-size:10.5px;font-weight:800;align-items:center;justify-content:center}
+  .callouts td.el{color:var(--cream);font-weight:600;min-width:120px}
+  .callouts td.go{font-family:var(--mono);font-size:12px;color:var(--gold);min-width:110px}
+  .callouts table{min-width:600px}
+  .note{margin-top:10px;font-size:13.5px;color:var(--cream-dim);border-left:2px solid var(--line2);padding-left:12px}
+
+  footer{margin-top:80px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="brand">Smooth AF · Wireframes · Oct 17, 2026</p>
+    <h1>Every screen, <span class="grad">every tap</span></h1>
+    <p class="intro">The whole app, screen by screen: what every element is, where every tap goes, and how we expect people to use it. Start here if you're designing for Smooth AF. Along the way we flag the bloat, the dead ends and the missing links, all rolled up in the audit below.</p>
+    <ul class="toc" aria-label="Contents">
+      <li><a href="#audit">Audit</a></li><li><a href="#journey">First-run journey</a></li><li><a href="#map">Navigation map</a></li>
+      <li><a href="#s-splash">Ad splash</a></li><li><a href="#s-intro">Intro</a></li><li><a href="#s-home">Home</a></li><li><a href="#s-drive">Drive</a></li>
+      <li><a href="#s-recap">Recap</a></li><li><a href="#s-breakdown">Score breakdown</a></li><li><a href="#s-prompts">Prompts</a></li><li><a href="#s-lifetime">Lifetime</a></li>
+      <li><a href="#s-trends">Trends</a></li><li><a href="#s-routes">Routes</a></li><li><a href="#s-rewards">Rewards</a></li><li><a href="#s-board">Leaderboard</a></li>
+      <li><a href="#s-garage">Garage</a></li><li><a href="#s-dest">Destination</a></li><li><a href="#s-account">Account</a></li>
+    </ul>
+    <div class="legend" aria-label="Flag legend">
+      <span><span class="flag f-dead">Dead end</span>looks tappable, goes nowhere</span>
+      <span><span class="flag f-missing">Missing link</span>a path people need that doesn't exist</span>
+      <span><span class="flag f-bloat">Bloat</span>costs attention, earns little</span>
+      <span><span class="flag f-hidden">Hidden</span>built but never shown</span>
+      <span><span class="flag f-stale">Stale</span>no longer true</span>
+      <span><span class="flag f-incons">Inconsistent</span>same job, different pattern</span>
+    </div>
+  </header>
+
+  <!-- AUDIT -->
+  <section id="audit">
+    <span class="lbl">The audit</span>
+    <h2>What we found</h2>
+    <p class="col dim">Ranked by how much it hurts a driver. Each links to the screen where it lives.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Sev</th><th>Flag</th><th>Finding</th><th>Fix</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td class="sev s-high">High</td><td><span class="flag f-hidden">Hidden</span></td><td>Coaching cards ("Late braking", "Excellent momentum") are computed after every drive and never shown. Their container is hidden and the score breakdown doesn't include them.</td><td>Give the recap one coaching card under the narrative. This is the next roadmap item (coaching that remembers) anyway.</td><td><a href="#s-recap">Recap</a></td></tr>
+          <tr><td class="sev s-high">High</td><td><span class="flag f-missing">Missing link</span></td><td>The only way to connect an OBD reader is inside the "Sensors" debug drawer on the drive screen. Garage and Car Health, where people look for it, have no connect button.</td><td>Add "Connect reader" to the Garage's Car Health block; keep auto-reconnect as is.</td><td><a href="#s-drive">Drive</a>, <a href="#s-garage">Garage</a></td></tr>
+          <tr><td class="sev s-high">High</td><td><span class="flag f-dead">Dead end</span></td><td>Drive rows in a route's history and in Rewards' recent drives look like list rows but can't be tapped to open the drive.</td><td>Make every drive row open its recap, same as Home's list.</td><td><a href="#s-routes">Routes</a>, <a href="#s-rewards">Rewards</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-stale">Stale</span></td><td>Ad splash says "7 dimensions scored" (it's 3 since September). "Score my first drive" just closes it, and "Skip intro" lands on the intro.</td><td>Fix the stat. Make the button say what it does, or send people into the intro.</td><td><a href="#s-splash">Ad splash</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-incons">Inconsistent</span></td><td>Post-drive prompts can stack: from drive 2, "What are you driving?" can open on top of the name prompt.</td><td>One queue for every post-drive prompt; at most one per drive.</td><td><a href="#s-prompts">Prompts</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-incons">Inconsistent</span></td><td>Three different rules decide "improving": Trends, the Home verdict and Route detail can disagree about the same driver.</td><td>One rule (the Home verdict's), shared everywhere.</td><td><a href="#s-trends">Trends</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-incons">Inconsistent</span></td><td>Two car prompts: "What are you driving?" (typed, after 2 drives) and "Is this your car?" (from the reader's VIN).</td><td>Keep the VIN prompt. Turn the typed one into a quiet "Add your car" link in the Garage empty state.</td><td><a href="#s-prompts">Prompts</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-incons">Inconsistent</span></td><td>Two identities: a leaderboard "driver name" (name modal) and a signed-in account. "Set name" and "Join leaderboard" open the same modal.</td><td>One identity. Take the name at sign-in; drop the duplicate button.</td><td><a href="#s-board">Leaderboard</a>, <a href="#s-account">Account</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-incons">Inconsistent</span></td><td>Back controls differ: × on Recap and Leaderboard, ‹ on Routes, Trends and Rewards. Swipe-from-edge works on all of them.</td><td>‹ for screens, × for sheets and overlays.</td><td><a href="#map">Map</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-bloat">Bloat</span></td><td>The score breakdown sheet shows ~20 stats, many as "—" (Above limit, Shifts, Coasting, Consistency).</td><td>Show only stats with data. Cut what no driver acts on.</td><td><a href="#s-breakdown">Breakdown</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-bloat">Bloat</span></td><td>The lifetime sheet repeats Home's stats, and its average (all drives) silently differs from the lifetime score on Home (last 10).</td><td>Fold its one new thing (dimension averages) into Trends; remove the sheet.</td><td><a href="#s-lifetime">Lifetime</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-missing">Missing link</span></td><td>The drive list only opens by tapping the "Drives" number on Home. Nothing says it's tappable.</td><td>A visible "All drives ›" link, or the list under the stats by default.</td><td><a href="#s-home">Home</a></td></tr>
+          <tr><td class="sev s-med">Med</td><td><span class="flag f-bloat">Bloat</span></td><td>The vehicle form asks for insurance (4 fields) and registration (2 fields). Nothing in the app uses them yet.</td><td>Hide until the Concierge uses them.</td><td><a href="#s-garage">Garage</a></td></tr>
+          <tr><td class="sev s-low">Low</td><td><span class="flag f-stale">Stale</span></td><td>"This route" in the score breakdown (and the recap's hidden route history) means drives of similar length, not the same road.</td><td>Use Routes (same road) data.</td><td><a href="#s-breakdown">Breakdown</a></td></tr>
+          <tr><td class="sev s-low">Low</td><td><span class="flag f-bloat">Bloat</span></td><td>Developer tools in the user's UI: the recap's ↓ JSON export, and tapping the version number to copy a device ID.</td><td>Move behind a debug gesture or a dev build flag.</td><td><a href="#s-recap">Recap</a>, <a href="#s-home">Home</a></td></tr>
+          <tr><td class="sev s-low">Low</td><td><span class="flag f-hidden">Hidden</span></td><td>Dead markup and code: five hidden "compat" elements on Home, a hidden block of eight recap widgets still filled on every render, and map event-filter code with no buttons left to trigger it.</td><td>Delete once the coaching card has a real home.</td><td><a href="#s-home">Home</a>, <a href="#s-recap">Recap</a></td></tr>
+          <tr><td class="sev s-low">Low</td><td><span class="flag f-incons">Inconsistent</span></td><td>Naming: the button says "Routes", the screen says "My Routes", the empty state says "corridors".</td><td>"Routes" everywhere.</td><td><a href="#s-routes">Routes</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section id="journey">
+    <span class="lbl">User onboarding</span>
+    <h2>A driver's first run</h2>
+    <p class="col dim">The path a brand-new driver takes from install to their third drive. Every step links to its wireframe below.</p>
+    <div class="journey">
+      <div class="step"><h3>Ad splash <span class="flag f-stale">Stale</span></h3><p>Only for first visits that arrive from an ad link (<code>utm_source</code>). Either button closes it and reveals the intro.</p></div>
+      <div class="step"><h3>Intro, 4 slides</h3><p>"Every drive, scored" → edge glow → "Mount &amp; drive" → privacy line. The last button asks for motion and location so the first drive starts clean.</p></div>
+      <div class="step"><h3>Home, empty</h3><p>Score "--", "First lap unscored. Tap Start Drive". Restore-from-cloud offer in the empty drive list.</p></div>
+      <div class="step"><h3>First drive</h3><p>Tap Start Drive. In iPhone Safari, a motion-permission card first; in the iOS app, nothing. Mount the phone and go.</p></div>
+      <div class="step"><h3>End Drive → recap</h3><p>Score, story of the drive, facts, harsh-moment map. Drives under 0.3 mi are discarded.</p></div>
+      <div class="step"><h3>One post-drive ask</h3><p>Signed out and first drive: "share &amp; save" (share card + sign in). Otherwise, if we don't have a name, a name prompt. From drive 2 the "What are you driving?" card can stack on top of it.</p></div>
+      <div class="step"><h3>Home learns</h3><p>Improvement line says "N more drives and we'll show if you're getting smoother" until there are 6 comparable drives.</p></div>
+      <div class="step"><h3>Plug in a reader</h3><p>Car joins the Garage via VIN ("Is this your car?" on Home after the drive) and Car Health appears.</p></div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section id="map">
+    <span class="lbl">Navigation map</span>
+    <h2>Where every tap goes</h2>
+    <p class="col dim">Screens are boxes, sheets and overlays are rounded. Dotted lines are automatic (no tap). Swipe right from the left edge goes back from any screen except Home and Drive.</p>
+    <div class="mapwrap">
+<pre class="mermaid">
+%%{init: {'theme':'dark','themeVariables':{'background':'#141111','primaryColor':'#1C1817','primaryTextColor':'#F2E8D5','primaryBorderColor':'#E8501A','lineColor':'#8E8478','fontSize':'13px'}}}%%
+flowchart LR
+  SPL([Ad splash]) --> INTRO
+  INTRO([Intro x4]) --> HOME
+  HOME[Home] -->|Start Drive| DRIVE[Drive]
+  HOME -->|Set destination| DEST([Destination sheet])
+  DEST -->|Find on map| DMAP([Map picker])
+  HOME -->|Lifetime score| LIFE([Lifetime sheet])
+  HOME -->|Garage card| GAR([Garage sheet])
+  GAR -->|Add / Edit| FORM([Vehicle form])
+  FORM -->|Add vehicle icon| ICON([Icon picker])
+  HOME -->|Sign in| AUTH([Account sheet])
+  HOME -->|Improvement line / Trends| TR[Trends]
+  HOME -->|Drives number, then row / Best| RECAP[Recap]
+  HOME -->|Routes| RL[My Routes]
+  RL -->|route card| RD[Route detail]
+  HOME -->|Rewards| RW[Rewards]
+  HOME -->|Board| LB[Leaderboard]
+  LB -->|Set name / Join| NAME([Name modal])
+  DRIVE -->|Sensors| SENS([Sensors drawer: OBD, Spotify])
+  DRIVE -->|End Drive| RECAP
+  DRIVE -.->|dongle links| BAN([Drive started banner])
+  DRIVE -.->|engine off| PARK([Parked prompt])
+  RECAP -->|score| BRK([Score breakdown])
+  RECAP -->|progress line| TR
+  RECAP -->|Share| SHARE([Share card / handles])
+  RECAP -->|New Drive| DRIVE
+  RECAP -.->|first drive, signed out| SAVE([Share and save])
+  RECAP -.->|after 2 drives| CARQ([What are you driving?])
+  HOME -.->|new VIN seen| CARID([Is this your car?])
+</pre>
+    </div>
+  </section>
+
+  <!-- SCREENS -->
+  <section id="screens">
+    <span class="lbl">Screen by screen</span>
+    <h2>The wireframes</h2>
+    <p class="col dim">Numbers on each wireframe match the callout table beside it. Positions are schematic, top to bottom as they appear on a phone.</p>
+    <div id="screen-list"></div>
+  </section>
+
+  <footer><span>Smooth AF · drive like you mean it</span><span>Built from the live code · Oct 2026</span></footer>
+</div>
+
+<script>
+// Each screen: blocks drawn top-to-bottom in the phone (pin numbers match rows).
+// block: [pin, label, opts] — opts: {solid, ghost, row:[...], h, flag}
+// rows:  [pin, element, what it is, tap → goes to, notes (may include flags)]
+const F = {
+  dead:'<span class="flag f-dead">Dead end</span>', missing:'<span class="flag f-missing">Missing link</span>',
+  bloat:'<span class="flag f-bloat">Bloat</span>', hidden:'<span class="flag f-hidden">Hidden</span>',
+  stale:'<span class="flag f-stale">Stale</span>', incons:'<span class="flag f-incons">Inconsistent</span>'
+};
+const SCREENS = [
+ { id:'s-splash', name:'Ad splash', how:'first visit from an ad link only', purpose:'Landing card for people arriving from a paid ad. Shown once.',
+   blocks:[[1,'FREE APP eyebrow'],[2,'"What\'s your Smooth AF driving score?"',{h:60}],[3,'Sub copy'],[4,'',{row:['7 dimensions','…','…'],flag:1}],[5,'iOS install hint (Safari only)'],[6,'Score my first drive →',{solid:1}],[7,'Skip intro',{ghost:1}]],
+   rows:[[1,'Eyebrow','"FREE APP" label','—',''],[2,'Headline','The hook question','—',''],[3,'Sub copy','Real-time scoring pitch','—','"Free forever" is a promise; check it against the paid-tier plan.'],[4,'Stats row','Three quick stats','—',F.stale+'Says "7 dimensions scored". The score uses 3.'],[5,'Install hint','"Add to Home Screen" help on iPhone Safari','—','Hidden when already installed.'],[6,'Main button','Closes the splash','Intro',F.stale+'Says "Score my first drive" but only closes the card; the intro is waiting underneath.'],[7,'Skip intro','Closes the splash','Intro',F.stale+'Doesn\'t skip the intro: it lands on it. Same action as the main button.']] },
+
+ { id:'s-intro', name:'Intro', how:'4 slides, first launch', purpose:'Teaches the one idea (every drive is scored), shows the edge glow, and gets motion + location permission before the first drive.',
+   blocks:[[1,'Skip',{ghost:1}],[2,'Slide art: 94 /100',{h:110}],[3,'Headline + sub'],[4,'Progress dots',{ghost:1}],[5,'Next / final CTA',{solid:1}]],
+   rows:[[1,'Skip','Ends the intro','Home','Skip doesn\'t ask for motion and location, so those prompts land when the first drive starts instead.'],[2,'Slide art','Big score, glowing edges, mount icon, lock','—','Slides: "Every drive, scored." · "See every move." · "Mount & drive." · "Ready when you are."'],[3,'Copy','One line each','—','Last slide carries the privacy line: data stays on your phone unless you share it.'],[4,'Dots','Slide position','—',''],[5,'Next','Advances; last one finishes','Home','Last button asks for motion, then takes one location fix so the iOS prompt appears now, not mid-drive.']] },
+
+ { id:'s-home', name:'Home', how:'app root', purpose:'Answer two questions at a glance: how am I doing, and am I getting better. Then get out of the way so people tap Start Drive.',
+   blocks:[[1,'SMOOTH AF  v·build',{}],[2,'Sign in',{}],[3,'Lifetime score  84',{h:58}],[4,'Garage card · Check car',{}],[5,'HEY, DRIVER'],[6,'Improvement line ›'],[7,'',{row:['Drives','Miles','Best']}],[8,'Driving Trends sparkline',{h:40}],[9,'Drive list (collapsed)',{ghost:1,flag:1}],[10,'',{row:['Routes','Rewards','Board']}],[11,'Set destination'],[12,'Start Drive →',{solid:1}]],
+   rows:[[1,'Brand + version','App name and build','tap version: copies device ID',F.bloat+'Hidden developer feature in the main UI.'],[2,'Account','"Sign in", or your account when signed in','Account sheet',''],[3,'Lifetime score','Average of your last 10 drives','Lifetime sheet',F.bloat+'The sheet repeats stats already on Home.'],[4,'Garage card','Active car name + Car Health dot: Car OK / Heads-up / Check car','Garage sheet','"Add Vehicle" when the garage is empty.'],[5,'Greeting','"Back at it, <name>" or "Hey, Driver"','—',''],[6,'Improvement line','Green win or amber slip from the last 5 vs the 10 before; falls back to persona text','Trends (that metric)','Short phones hide the tip and cap at 2 lines.'],[7,'Stats','Drives · Miles · Best','Drives: toggles list · Best: recap of best drive',F.missing+'Nothing shows that "Drives" opens the list.'],[8,'Driving Trends','Sparkline of recent scores','Trends',''],[9,'Drive list','Every drive: tap row, favorite, delete (also deletes the cloud copy); a cloud-restore box sits under the list','row: Recap',''],[10,'Nav row','Routes · Rewards · Board','My Routes · Rewards · Leaderboard',F.incons+'Button "Routes", screen "My Routes", empty state "corridors".'],[11,'Set destination','Pick where you\'re going for an ETA game','Destination sheet','Becomes a chip with × once set.'],[12,'Start Drive','Starts recording','Drive','In iPhone Safari: a motion-permission card first. Also hidden compat markup (5 elements) sits on this screen. '+F.hidden]] },
+
+ { id:'s-drive', name:'Drive', how:'while recording', purpose:'Glanceable only. Read it in peripheral vision: the edges glow with what the car is doing, the numbers confirm it, and one message at a time explains it.',
+   blocks:[[1,'● GPS + MOTION'],[2,'Pace strip (destination only)',{ghost:1}],[3,'',{row:['0 mph','/','Score 42'],h:64}],[4,'Clean streak · mi clean · best'],[5,'Your inputs ribbon',{h:36}],[6,'Insight or Now Playing + ♥ ⏯ ⏭'],[7,'⌃ Sensors',{flag:1}],[8,'End Drive',{solid:1}]],
+   rows:[[1,'Source','Which sensors are feeding the score','—','Shows "Acquiring GPS…" until the first fix.'],[2,'Pace strip','Target arrival and how far ahead/behind','—','Only with a destination set.'],[3,'Heroes','Speed and live score','—','Screen edges glow green / amber / red (top = brake, bottom = accel, sides = turns).'],[4,'Clean streak','Miles since your last harsh input vs your best','—',''],[5,'Inputs ribbon','Last 90 s of pedal inputs; flat line = smooth','—',''],[6,'Line','One live insight at a time, or the current Spotify track with like / play-pause / next','—','Spotify controls only when connected.'],[7,'Sensors','Debug drawer: live sensor chart, Connect OBD + adapter list, Connect Spotify','opens drawer',F.missing+'The only place to connect an OBD reader. Most people will never open a drawer called "Sensors".'],[8,'End Drive','Stops recording','Recap','Auto-end can also ask "Looks like you\'ve parked" when the reader drops.']] },
+
+ { id:'s-recap', name:'Recap', how:'after End Drive, or any drive row', purpose:'Tell the story of one drive on one screen with no scrolling: what happened, where, and what it means for you.',
+   blocks:[[1,'×   map · legend   ⤢',{h:120}],[2,'85  date · persona tag',{h:46}],[3,'Narrative (2 lines)'],[4,'Progress line ›'],[5,'',{row:['mi','time','avg'],}],[6,'Hardest moment / best stretch'],[7,'',{row:['↓','Share','New Drive →']}],[8,'Hidden compat block',{ghost:1,flag:1}]],
+   rows:[[1,'Map','Route coloured by coast / brake / accel / turn; × closes; ⤢ enlarges the map. Brake markers open a brake-profile panel; other markers show a popup','× Home · ⤢ full map · marker: detail','× closes the full map first if open. '+F.incons+'× here, ‹ on other screens. '+F.hidden+'Map event-filter code remains but nothing on screen triggers it.'],[2,'Score','The drive\'s score, date, persona tag ("Slow & Steady")','tap: Score breakdown','"Tap score for full analysis ›" hint below.'],[3,'Narrative','Two-line story of the drive','—',''],[4,'Progress line','Improvement verdict, newest drive only','Trends',''],[5,'Facts','Distance, time, avg, top, stops','—',''],[6,'Moments','Hardest moment, best stretch, momentum chart','—','Shown only when the drive has them. Not tappable, though the hardest moment begs to jump to its spot on the map.'],[7,'Actions','↓ export JSON · Share · New Drive','download · Share card · Drive',F.bloat+'↓ is a developer tool. New Drive starts recording immediately.'],[8,'Compat block','Destination result, coaching card, "drives on this route", force timeline, event chips, road quality, a "home" link','—',F.hidden+'Coaching cards are built every drive and never shown. '+F.stale+'"This route" means similar trip length, not the same road.']] },
+
+ { id:'s-breakdown', name:'Score breakdown', how:'sheet over the recap', purpose:'The full numbers behind one score for drivers who want them.',
+   blocks:[[1,'Persona + one-line description'],[2,'Peak forces: brake · corner · accel'],[3,'Drive scores: 3 dimensions',{h:46}],[4,'Speed & flow',{flag:1}],[5,'Smoothness stats',{flag:1}],[6,'Drive context',{flag:1}],[7,'×',{ghost:1}]],
+   rows:[[1,'Persona','Style label and description','—',''],[2,'Peak forces','Hardest brake, corner and launch in g, each with a map › link','map ›: closes sheet, flies map there',''],[3,'Dimension scores','Smoothness, braking anticipation, momentum','—','The three numbers behind the score; the most useful block.'],[4,'Speed & flow','Top, average, consistency, above limit','Top speed: flies map there',F.bloat+'Often "—".'],[5,'Smoothness stats','Clean streak, coasting, events/mi, hard-brake entry','—',F.bloat+'Often "—".'],[6,'Context','Drive grade, shifts, full stops, transitions','—',F.bloat+'Shifts and grade rarely mean anything to a driver. '+F.stale+'"First drive on this route" / "Best" compares drives of similar length, not the same road.'],[7,'Close','Back to recap','Recap','']] },
+
+ { id:'s-prompts', name:'Prompts & banners', how:'appear on their own', purpose:'Every interruption the app can make, and when. Nothing that needs a decision appears while the car is moving, except the two one-tap road prompts.',
+   blocks:[[1,'Share & save card'],[2,'Name prompt'],[3,'What are you driving?',{flag:1}],[4,'Is this your car?'],[5,'Drive started — Stop'],[6,'Looks like you\'ve parked'],[7,'Motion permission (web)'],[8,'Share handles card']],
+   rows:[[1,'Share & save','Share your first drive, then sign in so it\'s kept','Share sheet · Account sheet','Signed-out drivers, first scored drive, once.'],[2,'Name prompt','"Your name" for the leaderboard','Saves name','Only if no name yet and the share card didn\'t show. '+F.incons+'Can stack with "What are you driving?".'],[3,'What are you driving?','Typed make / model / year','Adds a garage car','After 2 drives, once. '+F.incons+'Duplicates the VIN prompt below.'],[4,'Is this your car?','Car decoded from the reader\'s VIN: Add to Garage / It\'s my <car> / Not my car','Garage','Home only, after the drive. Tap outside to snooze until next launch.'],[5,'Drive started','Banner when the reader links and a drive auto-starts','Stop ends it','Disappears on its own after a few seconds.'],[6,'Parked','"Looks like you\'ve parked, end this drive?" when the reader drops or the engine stops','End / Keep','No answer in 45 s ends the drive. Each answer trains auto-end.'],[7,'Motion permission','Explains motion access before the browser asks','Allow / Skip','Only in iPhone Safari (the web app), until motion is granted. The iOS app uses native motion with no prompt.'],[8,'Share handles','Optional Instagram / X / Threads handles for the share card','Save & Share / Share without handle','']] },
+
+ { id:'s-lifetime', name:'Lifetime sheet', how:'tap the lifetime score', purpose:'Career stats across all drives.',
+   blocks:[[1,'Lifetime Profile  ×'],[2,'',{row:['Drives','Avg','Best','Miles'],flag:1}],[3,'Dimension averages',{h:60}]],
+   rows:[[1,'Header','Title and close','× Home',''],[2,'Your stats','Drives, average of all drives, best, total miles','—',F.bloat+F.incons+'Mostly repeats Home, and its average (all drives) differs from the lifetime score on Home (last 10), with no label saying so.'],[3,'Dimension averages','Smoothness / braking / momentum across all drives','—','The only new information here. Better placed in Trends.']] },
+
+ { id:'s-trends', name:'Trends', how:'Home sparkline, improvement line, recap progress line', purpose:'See one metric over your last 30 drives and whether it\'s improving.',
+   blocks:[[1,'‹ Driving Trends · last N drives'],[2,'',{row:['Score','Miles','Brakes','…']}],[3,'Chart',{h:110}],[4,'',{row:['Avg','Best','Latest']}],[5,'↗ Improving']],
+   rows:[[1,'Top bar','Back and window size','‹ Home',''],[2,'Metric chips','Score, Miles, Hard braking, Hard acceleration, Sharp turns, Full stops','switch metric','Opens on the metric you tapped from Home or the recap.'],[3,'Chart','The metric across recent drives','—','Fewer than 2 drives: empty state instead of a lone dot.'],[4,'Summary','Average, best, latest','—',''],[5,'Trend','Improving / Steady / Slipping (recent half vs older half, 5% noise floor)','—',F.incons+'Three different "improving" rules: Trends (halves, 5%), Home verdict (last 5 vs 10 before, 20% / 3 pts), Route detail (halves, ±5 points).']] },
+
+ { id:'s-routes', name:'Routes', how:'Home → Routes', purpose:'Drives grouped by the road they were on, so you can see if you\'re getting smoother on your commute.',
+   blocks:[[1,'‹ My Routes'],[2,'Route card',{}],[3,'Route card',{}],[4,'Route detail: drives · avg · best'],[5,'Score trend',{h:40}],[6,'Drive history rows',{flag:1}]],
+   rows:[[1,'Top bar','Back','‹ Home',F.incons+'"My Routes" vs "Routes".'],[2,'Route card','One road: name, city, drives, average','Route detail','Empty state: "No routes yet… we\'ll detect your corridors." ("corridors" is internal jargon)'],[3,'Route card','Another road','Route detail',''],[4,'Detail stats','Drives, average and best on this road','—','Detail back ‹ returns to the list.'],[5,'Score trend','Sparkline of scores on this road','—',''],[6,'Drive history','Each drive on this road: score, date, distance','—',F.dead+'Rows can\'t be tapped to open the drive.']] },
+
+ { id:'s-rewards', name:'Rewards', how:'Home → Rewards', purpose:'Points, smooth miles and the next badge.',
+   blocks:[[1,'‹ Rewards'],[2,'',{row:['Points','Smooth mi','Smooth rate'],h:50}],[3,'Next badge + progress'],[4,'Recent drives rows',{flag:1,h:46}],[5,'Invite a driver →',{solid:1}]],
+   rows:[[1,'Top bar','Back','‹ Home',''],[2,'Wallet','10 points per smooth mile; smooth share of all miles','—',''],[3,'Next badge','Smooth-mile milestone (10 → 1,000) with progress bar','—',''],[4,'Recent drives','Last 8 drives: smooth miles and points earned','—',F.dead+'Rows can\'t be tapped.'],[5,'Invite','Opens the share sheet with the install link','Share sheet','"Redeemable rewards are on the way."']] },
+
+ { id:'s-board', name:'Leaderboard', how:'Home → Board', purpose:'Where you stand against other drivers, built on the server from real drives.',
+   blocks:[[1,'×  Leaderboard'],[2,'Who\'s the Smoothest Operator?'],[3,'#rank · You · score · Set name',{h:46}],[4,'Top drivers list',{h:80}],[5,'Join leaderboard →',{flag:1}]],
+   rows:[[1,'Top bar','Back','× Home',F.incons+'× instead of ‹.'],[2,'Tagline','—','—',''],[3,'Your card','Your rank and score; Set name','Name modal',''],[4,'Top drivers','Server-built ranking','—',''],[5,'Join CTA','Shown when you have no name','Name modal',F.incons+'Same modal as Set name. The name is separate from your account.']] },
+
+ { id:'s-garage', name:'Garage', how:'Home → Garage card', purpose:'Your cars and their health. The reader adds cars by VIN; you can also add them by hand.',
+   blocks:[[1,'My Garage  ×'],[2,'Car health · <car>',{h:58}],[3,'Vehicle card (active)',{h:56}],[4,'+ Add vehicle'],[5,'Form: type grid · icon',{h:40}],[6,'Make · model · year · color · plate · VIN'],[7,'Insurance ×4 · Registration ×2',{flag:1}],[8,'Save vehicle',{solid:1}]],
+   rows:[[1,'Header','Title and close','× Home',''],[2,'Car health','Last trouble-code read: headline, check-engine light, each code with an urgency colour; tap a code for its explanation','expand code','Only after a reader has connected. '+F.missing+'No "Connect reader" here.'],[3,'Vehicle card','Car silhouette or icon, name, stats on the active car','tap: make active · Edit: form',''],[4,'Add vehicle','Opens the form','Vehicle form',''],[5,'Type + icon','Body type grid; "Add vehicle icon" opens the icon picker (only when editing an existing car)','Icon picker',''],[6,'Details','Basic car fields','—','VIN fills itself when the reader identifies the car.'],[7,'Insurance + registration','Provider, policy, expiry, agent; state, expiry','—',F.bloat+'Nothing uses these yet.'],[8,'Save / Delete','Saves; Delete appears when editing','Garage list','']] },
+
+ { id:'s-dest', name:'Destination', how:'Home → Set destination', purpose:'Set where you\'re going so the drive gets an ETA to beat.',
+   blocks:[[1,'Set destination  ×'],[2,'Search address or place…  [Search]'],[3,'Results',{h:56}],[4,'📍 Find on map'],[5,'Map picker',{h:80}],[6,'Set destination here',{solid:1}]],
+   rows:[[1,'Header','Title and close','× Home',''],[2,'Search','Address or place search (Mapbox, or OSM fallback)','results',''],[3,'Results','Tap one to set it','Home (chip set)','Fetches a traffic-aware route for the ETA.'],[4,'Find on map','Drop a pin instead','Map picker',''],[5,'Map','Centres on your location','—',''],[6,'Confirm','Sets the pin as the destination','Home (chip set)','']] },
+
+ { id:'s-account', name:'Account', how:'Home → Sign in', purpose:'Sign in so drives follow you to any phone.',
+   blocks:[[1,'×  Save your drives'],[2,'Sign in with Apple',{solid:1}],[3,'Email → Email me a code'],[4,'Code → Verify & sign in'],[5,'Signed in: avatar · email'],[6,'Sync my drives · Sign out']],
+   rows:[[1,'Header','"Save your drives" pitch and close','× back',''],[2,'Apple','Native Sign in with Apple (iOS)','signed in',''],[3,'Email','Sends a one-time code','code step',''],[4,'Code','Verify; Resend code; Different email','signed in',''],[5,'Signed-in view','Who you are','—',''],[6,'Actions','Pull drives from the cloud; sign out','—',F.incons+'Your leaderboard name is set separately.']] },
+];
+
+function blockHtml([pin,label,o={}]){
+  const cls=['blk']; if(o.solid)cls.push('solid'); if(o.ghost)cls.push('ghost'); if(o.flag)cls.push('flagged'); if(o.row)cls.push('row');
+  const style=(o.h?`min-height:${o.h}px;`:'')+(o.row?`--n:${o.row.length};`:'');
+  const inner=o.row?o.row.map(t=>`<span>${t}</span>`).join(''):label;
+  return `<div class="${cls.join(' ')}" style="${style}"><span class="pin">${pin}</span>${inner}</div>`;
+}
+document.getElementById('screen-list').innerHTML = SCREENS.map(s=>`
+  <div class="screen" id="${s.id}">
+    <div class="phone-col"><div class="phone" role="img" aria-label="Wireframe of the ${s.name} screen"><div class="notch"></div><div class="stack">${s.blocks.map(blockHtml).join('')}</div></div></div>
+    <div>
+      <div class="scr-head"><h3>${s.name}</h3><span class="how">${s.how}</span></div>
+      <p class="purpose">${s.purpose}</p>
+      <div class="scroll callouts"><table>
+        <thead><tr><th>#</th><th>Element</th><th>What it is</th><th>Tap → goes to</th><th>Notes</th></tr></thead>
+        <tbody>${s.rows.map(r=>`<tr><td><span class="n">${r[0]}</span></td><td class="el">${r[1]}</td><td>${r[2]}</td><td class="go">${r[3]}</td><td>${r[4]}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+  </div>`).join('');
+</script>

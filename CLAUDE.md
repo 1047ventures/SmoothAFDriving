@@ -324,6 +324,21 @@ Publish with **both** `file_path` and that `url`. Its numbers quote the live
 code (src/constants.js, points.js, improvement.js) — when a scoring constant
 changes, update the rubric section in the same commit.
 
+## Wireframes artifact
+
+`docs/wireframes.html` is the designer handbook: every screen as a wireframe
+with numbered callouts (what each element is, where each tap goes), the
+first-run journey, a navigation map, and an audit of bloat / dead ends /
+missing links.
+
+```
+https://claude.ai/artifact/U1wfQmHGQ9D912xE1gVXJR
+```
+
+Publish with **both** `file_path` and that `url`. When a screen, link or prompt
+changes, update its entry (the SCREENS array in the page script) and re-check
+the audit table in the same commit.
+
 ## ⚠️ Two lockfiles — keep both in sync (operating rule)
 
 Cloudflare Pages detects `bun.lock` and runs `bun install --frozen-lockfile`;
