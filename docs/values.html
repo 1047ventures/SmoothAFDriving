@@ -2,7 +2,8 @@
   Smooth AF — Values & Vision (the onboarding doc).
   PUBLISHED ARTIFACT: https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm
   Publish with BOTH file_path: docs/values.html and that url.
-  Voice: plain "what you need to know". Facts only, no pitch lines.
+  Voice: Smooth AF brand voice (confident, a little irreverent, fun) on a plain
+  "what you need to know" structure. No corporate mentor-speak or pitch lines.
   Numbers quote live code: src/constants.js, points.js, improvement.js.
   Look: the app's own branding (src/styles/variables.css) — one dark world.
 -->
@@ -143,34 +144,34 @@
   <header>
     <p class="brand">Smooth AF · Values &amp; Vision · Updated Oct 17, 2026</p>
     <h1>What you need <span class="grad">to know</span></h1>
-    <p class="intro">Smooth AF in one page: what it is, how decisions get made, how the scoring works, where the product stands, and notes for each role.</p>
+    <p class="intro">Everything about Smooth AF on one page: what it is, how we make calls, how we grade your driving, what's shipped, and a cheat sheet for whatever seat you're in. Read it once, then go drive like you mean it.</p>
     <ul class="toc" aria-label="Contents">
       <li><a href="#product">The product</a></li>
-      <li><a href="#decide">How we decide</a></li>
-      <li><a href="#principles">Principles</a></li>
-      <li><a href="#scoring">How scoring works</a></li>
+      <li><a href="#decide">How we make calls</a></li>
+      <li><a href="#principles">House rules</a></li>
+      <li><a href="#scoring">How we grade you</a></li>
       <li><a href="#fingerprint">Driving fingerprint</a></li>
-      <li><a href="#status">Shipped, next, later</a></li>
+      <li><a href="#status">What's in the garage</a></li>
       <li><a href="#history">History</a></li>
       <li><a href="#for-drivers">Drivers</a></li>
       <li><a href="#for-cto">CTO</a></li>
       <li><a href="#for-cpo">CPO</a></li>
       <li><a href="#for-cmo">CMO</a></li>
       <li><a href="#for-investors">Investors</a></li>
-      <li><a href="#gaps">Known gaps</a></li>
+      <li><a href="#gaps">Not nailed yet</a></li>
     </ul>
   </header>
 
   <!-- PRODUCT -->
   <section id="product">
     <span class="lbl">The product</span>
-    <h2>What Smooth AF is</h2>
+    <h2>So what is Smooth AF?</h2>
     <div class="facts">
-      <div class="k">What it does</div><div class="v">Scores how smoothly you drive and coaches you to drive better. It uses the phone's motion sensors and GPS, plus the car's own computer when an OBD-II plug-in reader is connected.</div>
-      <div class="k">Mission</div><div class="v">Make people better drivers: efficient, smooth, reading the road ahead instead of reacting to it.</div>
-      <div class="k">North Star</div><div class="v">Improvement over time. The score, points and leaderboard keep people driving with the app; getting measurably better is the goal.</div>
+      <div class="k">What it does</div><div class="v">Grades how smoothly you drive and coaches you to get better. It uses the phone's motion sensors and GPS, plus the car's own computer when an OBD-II plug-in reader is connected.</div>
+      <div class="k">Mission</div><div class="v">Make people better drivers. Smooth, efficient, reading the road three cars ahead instead of stomping the brakes when it surprises them.</div>
+      <div class="k">North Star</div><div class="v">Getting measurably better over time. The score, points and leaderboard are the bait. Improvement is the catch.</div>
       <div class="k">Platforms</div><div class="v">Native iOS app via TestFlight, and a web app. No Android app.</div>
-      <div class="k">Stage</div><div class="v">Invite-only. At least three drivers besides the founder. No revenue.</div>
+      <div class="k">Stage</div><div class="v">Invite-only. At least three drivers besides the founder. No revenue, and we won't pretend otherwise.</div>
       <div class="k">Team</div><div class="v">One founder, building with AI engineering sessions. 379 tasks shipped since April 30, 2026.</div>
     </div>
   </section>
@@ -178,32 +179,32 @@
   <!-- DECIDE -->
   <section id="decide">
     <span class="lbl">How we decide</span>
-    <h2>Priority order</h2>
-    <p class="col dim">When two goals conflict, the higher one wins.</p>
+    <h2>How we make calls</h2>
+    <p class="col dim">When two good ideas fight, the higher one wins. Every time.</p>
     <div class="order">
-      <div class="ord"><span class="n grad">1st</span><h3>Make a better driver</h3><p>Features that change how someone drives ship before features that are only interesting.</p></div>
-      <div class="ord"><span class="n grad">2nd</span><h3>Tell the truth</h3><p>The app shows a blank rather than a guess, and "couldn't read it" rather than a false all-clear.</p></div>
-      <div class="ord"><span class="n grad">3rd</span><h3>Safety third</h3><p>Safety is the result of smooth driving, not the pitch. We don't market as a safety or insurance product. While the car moves, the app shows only glanceable feedback; decisions wait until you park.</p></div>
+      <div class="ord"><span class="n grad">1st</span><h3>Make a better driver</h3><p>If it changes how someone drives, it ships first. If it's just cool, it waits its turn.</p></div>
+      <div class="ord"><span class="n grad">2nd</span><h3>Tell the truth</h3><p>A blank beats a guess. "Couldn't read it" beats a fake all-clear. We don't fudge numbers to look good.</p></div>
+      <div class="ord"><span class="n grad">3rd</span><h3>Safety third</h3><p>Yes, third. Smooth drivers are safe drivers, so safety is the result, not the sales pitch. No fear-mongering, no insurance vibes. While you're moving, the app stays glanceable; anything that needs a decision waits till you park.</p></div>
     </div>
-    <p class="col dim" style="margin-top:14px">Test for any feature: does this make someone a better driver?</p>
+    <p class="col dim" style="margin-top:14px">The gut check for every feature: does this make someone a better driver? If not, it gets in line.</p>
   </section>
 
   <!-- PRINCIPLES -->
   <section id="principles">
     <span class="lbl">Principles</span>
-    <h2>Principles and where they show up</h2>
+    <h2>The house rules</h2>
     <div class="scroll">
       <table>
-        <thead><tr><th>Principle</th><th>Rule</th><th>In the product</th></tr></thead>
+        <thead><tr><th>Rule</th><th>In plain English</th><th>Where you'll see it</th></tr></thead>
         <tbody>
-          <tr><td class="nm">Smooth before fast</td><td>Speed alone earns nothing extra.</td><td>The ETA bonus applies only when the drive scored 80+ before the clock. The speed bonus (up to +5) scales with how smooth the drive was.</td></tr>
-          <tr><td class="nm">The road's fault isn't yours</td><td>Don't penalize what the driver can't control.</td><td>Once the recap has looked up nearby signals, stops at lights, queues and stop signs count 0.25. Parked stretches over 3 minutes pause the ETA clock.</td></tr>
-          <tr><td class="nm">Miles, not minutes</td><td>Points measure distance driven well.</td><td>10 points per smooth mile. Road within 8 seconds of a harsh moment doesn't count. Badges at 10, 50, 100, 250, 500 and 1,000 smooth miles.</td></tr>
-          <tr><td class="nm">A blank beats a guess</td><td>Claim only what the data supports.</td><td>Drives without ride-quality data cap at 95. Improvement compares only drives scored the same way. A timed-out trouble-code read keeps the last report. A VIN read that disagrees with itself is discarded.</td></tr>
-          <tr><td class="nm">Eyes on the road</td><td>Nothing competes with the road.</td><td>Live feedback is edge color (green, amber, red) and at most one short message at a time. Trouble codes and "Is this your car?" wait for Home. The two on-road prompts ("Drive started, stop?" and "Looks like you've parked") are one tap and dismiss themselves.</td></tr>
-          <tr><td class="nm">Subtract before you add</td><td>Default answer to "add this to the screen?" is no.</td><td>The improvement line replaced a line on Home. Placeholder leaderboard tabs were cut. Planned driver modes will only remove things.</td></tr>
-          <tr><td class="nm">Your drives are yours</td><td>Driving data belongs to the driver.</td><td>Drives are stored on the phone first; cloud rows are owner-only. The leaderboard is built on the server from saved drives. The VIN goes only to NHTSA's public decoder. Deleting a drive deletes its cloud copy.</td></tr>
-          <tr><td class="nm">Verify on the real thing</td><td>Check behavior, not just code.</td><td>Every change gets an adversarial reviewer; screen changes are rendered at phone size. Pedal and stop thresholds are fitted to real drives. Untested features are labeled untested.</td></tr>
+          <tr><td class="nm">Smooth before fast</td><td>Fast is easy. Calm at speed is the skill.</td><td>The ETA bonus applies only when the drive scored 80+ before the clock. The speed bonus (up to +5) scales with how smooth the drive was.</td></tr>
+          <tr><td class="nm">The road's fault isn't yours</td><td>You can't will a red light green.</td><td>Once the recap has looked up nearby signals, stops at lights, queues and stop signs count 0.25. Parked stretches over 3 minutes pause the ETA clock.</td></tr>
+          <tr><td class="nm">Miles, not minutes</td><td>A clean hour beats a clean minute.</td><td>10 points per smooth mile. Road within 8 seconds of a harsh moment doesn't count. Badges at 10, 50, 100, 250, 500 and 1,000 smooth miles.</td></tr>
+          <tr><td class="nm">A blank beats a guess</td><td>If we can't measure it, we don't make it up.</td><td>Drives without ride-quality data cap at 95. Improvement compares only drives scored the same way. A timed-out trouble-code read keeps the last report. A VIN read that disagrees with itself is discarded.</td></tr>
+          <tr><td class="nm">Eyes on the road</td><td>The road always wins.</td><td>Live feedback is edge color (green, amber, red) and at most one short message at a time. Trouble codes and "Is this your car?" wait for Home. The two on-road prompts ("Drive started, stop?" and "Looks like you've parked") are one tap and dismiss themselves.</td></tr>
+          <tr><td class="nm">Subtract before you add</td><td>The answer to "can we add…?" starts at no.</td><td>The improvement line replaced a line on Home. Placeholder leaderboard tabs were cut. Planned driver modes will only remove things.</td></tr>
+          <tr><td class="nm">Your drives are yours</td><td>Your drives, your data. Period.</td><td>Drives are stored on the phone first; cloud rows are owner-only. The leaderboard is built on the server from saved drives. The VIN goes only to NHTSA's public decoder. Deleting a drive deletes its cloud copy.</td></tr>
+          <tr><td class="nm">Verify on the real thing</td><td>Looks right in code isn't the same as works in a car.</td><td>Every change gets an adversarial reviewer; screen changes are rendered at phone size. Pedal and stop thresholds are fitted to real drives. Untested features are labeled untested.</td></tr>
         </tbody>
       </table>
     </div>
@@ -212,8 +213,8 @@
   <!-- SCORING -->
   <section id="scoring">
     <span class="lbl">How scoring works</span>
-    <h2>The score, the clock, and points</h2>
-    <p class="col dim">Three measures, weighted. Sideways g from GPS heading is not scored: heading jitter produced hundreds of false "sharp turns."</p>
+    <h2>How we grade your driving</h2>
+    <p class="col dim">Three things, weighted. We tried scoring sideways g from GPS heading once. It invented hundreds of sharp turns that never happened, so it's benched.</p>
     <div class="wbar" role="img" aria-label="Weights: smoothness 50 percent, momentum 30 percent, braking 20 percent"><div class="w1">Smoothness 50%</div><div class="w2">Momentum 30%</div><div class="w3">Braking 20%</div></div>
     <div class="wscale" aria-hidden="true"><span style="left:0">0</span><span style="left:50%">50</span><span style="left:80%">80</span><span style="left:100%">100</span></div>
     <div class="scroll">
@@ -232,7 +233,7 @@
       <div class="card"><span class="lbl">Points</span><h3 style="margin-top:6px">Smooth miles</h3><p>Earned on every drive. On-time bonus stacks on top.</p><div class="f">10 × smooth miles<br>+ up to 50% if on time, base ≥ 80</div></div>
     </div>
     <div class="col" style="margin-top:18px">
-      <h3>Improvement verdict</h3>
+      <h3>The "are you getting better?" verdict</h3>
       <p class="dim">Compares the last 5 drives with the 10 before: hard brakes, launches and turns per 10 miles (pooled by distance), share of smooth miles, pedal smoothness, and score. A change counts at 20% on a rate or 3 points on a score. Improvements are shown first; a slip is shown only if nothing improved.</p>
     </div>
   </section>
@@ -240,12 +241,12 @@
   <!-- FINGERPRINT -->
   <section id="fingerprint">
     <span class="lbl">Driving fingerprint</span>
-    <h2>Where the scoring is heading</h2>
-    <p class="col dim">Two drivers can score the same through a corner. The accelerator pedal traced against sideways g shows the difference. The pedal is scored today; sideways g is not yet.</p>
+    <h2>Your right foot has a fingerprint</h2>
+    <p class="col dim">Two drivers can post the same score through the same corner. Their right foot tells the real story. The pedal is already in the score; sideways g joins once we can measure it properly.</p>
     <div class="corners">
       <div class="corner">
         <span class="lbl" style="color:var(--tang)">Brake and gun</span>
-        <p>Lift, brake hard into the apex, slam the throttle out. Late, lopsided g spike.</p>
+        <p>Lift, brake hard into the apex, mash it on the way out. The car hates it and so do your passengers.</p>
         <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Brake-and-gun corner: pedal drops to zero then spikes; sideways g is a late sharp spike">
           <line x1="34" y1="176" x2="330" y2="176" stroke="rgba(242,232,213,.18)" stroke-width="1"/>
           <line x1="118" y1="24" x2="118" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
@@ -260,7 +261,7 @@
       </div>
       <div class="corner">
         <span class="lbl" style="color:var(--good)">Carry the line</span>
-        <p>Ease off, carry speed to the apex, roll the throttle on. One even g curve.</p>
+        <p>Ease off, carry your speed, roll back on. One clean curve. Coffee stays in the cup.</p>
         <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Smooth corner: pedal eases down then rolls on; sideways g is an even arc">
           <line x1="34" y1="176" x2="330" y2="176" stroke="rgba(242,232,213,.18)" stroke-width="1"/>
           <line x1="118" y1="24" x2="118" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
@@ -285,7 +286,7 @@
   <!-- STATUS -->
   <section id="status">
     <span class="lbl">Product status</span>
-    <h2>Shipped, next, later</h2>
+    <h2>What's in the garage</h2>
     <div class="two">
       <div><span class="pill p-ship">Shipped</span><ul>
         <li>Drive scoring with recap: harsh-moment map, stop causes, coaching cards</li>
@@ -314,7 +315,7 @@
   <!-- HISTORY -->
   <section id="history">
     <span class="lbl">History</span>
-    <h2>How we got here</h2>
+    <h2>379 tasks and a few faceplants</h2>
     <p class="col dim">Tasks shipped per month, from git. October is to date.</p>
     <div role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 59">
       <div class="months">
@@ -335,7 +336,7 @@
       <div class="k">Sep</div><div class="v">Scoring rebuilt on reliable signals and fitted to real drives. Nine more OBD channels. Hosting consolidated on Cloudflare; admin dashboard with a daily digest email.</div>
       <div class="k">Oct</div><div class="v">Locked-screen GPS, throttle scoring, red-light credit, zero permission prompts, Dynamic Island, cleaned-up leaderboard. Then points, the improvement verdict, Car Health and VIN identification. First drivers beyond the founder.</div>
     </div>
-    <h3 style="margin-top:26px">Incidents that shaped the principles</h3>
+    <h3 style="margin-top:26px">Stuff we broke, and what it taught us</h3>
     <div class="facts">
       <div class="k">Phantom turns</div><div class="v">GPS heading jitter created false sharp turns; sideways g was removed from the score.</div>
       <div class="k">Silent leaderboard</div><div class="v">Score uploads went to a table that didn't exist, hidden by an error handler, for months. Now built on the server from drives.</div>
@@ -349,31 +350,31 @@
   <!-- ROLES -->
   <section id="roles">
     <span class="lbl">Notes by role</span>
-    <h2>What each role needs</h2>
+    <h2>Pick your seat</h2>
 
     <div class="role" id="for-drivers">
       <span class="lbl">Drivers</span>
-      <h3>Using Smooth AF</h3>
+      <h3>Hey, you. Behind the wheel.</h3>
       <div class="two">
         <div><h4>What you get</h4><ul>
-          <li>A score out of 100 for every drive, with a map of harsh moments and why they happened.</li>
-          <li>10 points per smooth mile, plus a bonus for beating the ETA while driving smoothly.</li>
-          <li>A line on Home telling you whether you're improving, and at what.</li>
+          <li>A score out of 100 for every drive, plus a map of every "oof" moment and why it happened.</li>
+          <li>10 points for every smooth mile. Beat the ETA without driving like a maniac and you get a bonus.</li>
+          <li>Home tells you straight: getting better or not, and at what.</li>
           <li>With an OBD-II plug-in reader: trouble codes in plain English, and your car added to the Garage automatically.</li>
         </ul></div>
         <div><h4>How we treat you</h4><ul>
-          <li>Your drives stay on your phone; the cloud copy is readable only by you.</li>
-          <li>Unavoidable stops at lights and stop signs barely count against you.</li>
-          <li>Anything that needs a decision waits until you've parked.</li>
+          <li>Your drives live on your phone. The cloud copy is for you, not us.</li>
+          <li>Red lights you couldn't dodge barely count against you.</li>
+          <li>Nothing that needs a decision while you're moving. Eyes up.</li>
           <li>If something can't be measured properly, the app says so instead of guessing.</li>
-          <li>Points can't be redeemed yet.</li>
+          <li>Points can't be cashed in yet. We're not going to pretend they can.</li>
         </ul></div>
       </div>
     </div>
 
     <div class="role" id="for-cto">
       <span class="lbl">CTO</span>
-      <h3>Engineering</h3>
+      <h3>Under the hood</h3>
       <div class="chips"><span>Vanilla JS PWA</span><span>Vite</span><span>Vitest</span><span>Capacitor 8 (iOS)</span><span>Swift plugins</span><span>Supabase Postgres + Auth</span><span>Cloudflare Pages + Functions</span><span>GitHub Actions → TestFlight</span><span>Leaflet, Mapbox, OSM</span></div>
       <div class="two">
         <div><h4>Architecture</h4><ul>
@@ -396,7 +397,7 @@
 
     <div class="role" id="for-cpo">
       <span class="lbl">CPO</span>
-      <h3>Product</h3>
+      <h3>The product, minus the fluff</h3>
       <div class="two">
         <div><h4>Current product</h4><ul>
           <li><b>Core loop:</b> drive, read the recap, see the improvement line on Home, drive again.</li>
@@ -417,10 +418,10 @@
 
     <div class="role" id="for-cmo">
       <span class="lbl">CMO</span>
-      <h3>Marketing</h3>
+      <h3>How we talk</h3>
       <div class="two">
         <div><h4>Positioning</h4><ul>
-          <li>Smooth driving as a skill worth getting better at. Confident, slightly irreverent voice.</li>
+          <li>Smooth is a flex. Confident, a little irreverent, never preachy. The name sets the tone.</li>
           <li><b>Use:</b> smooth, efficient, reading the road, getting better, your data is yours.</li>
           <li><b>Avoid:</b> "safer driving," insurance, discounts, crash prevention.</li>
           <li><b>Don't promise:</b> redeemable points or an Android app (neither exists).</li>
@@ -437,7 +438,7 @@
 
     <div class="role" id="for-investors">
       <span class="lbl">Investors</span>
-      <h3>Investment summary</h3>
+      <h3>The money page</h3>
       <div class="two">
         <div><h4>Business model</h4><ul>
           <li><b>Free:</b> scoring, points, improvement, basic car-health scan.</li>
@@ -459,7 +460,7 @@
   <!-- GAPS -->
   <section id="gaps" class="gaps">
     <span class="lbl">Known gaps</span>
-    <h2>Known gaps</h2>
+    <h2>Stuff we haven't nailed yet</h2>
     <div class="facts">
       <div class="k">Calibration</div><div class="v">Scoring thresholds are fitted to a few drivers' drives and will shift with more. Ride-composure thresholds are provisional.</div>
       <div class="k">Untested</div><div class="v">Car Health and VIN reading are tested against reader reply formats, not a real car.</div>
@@ -472,7 +473,7 @@
   </section>
 
   <footer>
-    <span>Smooth AF</span>
+    <span>Smooth AF · drive like you mean it</span>
     <span>Numbers match the live app · current status on the Build Log &amp; Roadmap</span>
   </footer>
 </div>
