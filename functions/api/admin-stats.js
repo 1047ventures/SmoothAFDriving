@@ -153,6 +153,21 @@ export async function onRequestPost(context) {
   try {
     const view = body.view || 'overview';
 
+    if (view === 'dev_pull') {
+      // The owner's "pull my latest drive" loop (scripts/pull-latest-drive.sh):
+      // full rows — samples + events — by account id or device id, newest first.
+      // Replaces the anon-callable *_dev RPCs; the service key stays server-side.
+      const uid = String(body.user_id || '');
+      const dev = String(body.device_id || '');
+      const limit = Math.min(Math.max(parseInt(body.limit, 10) || 1, 1), 50);
+      let filter;
+      if (/^[0-9a-f-]{36}$/i.test(uid)) filter = `user_id=eq.${uid}`;
+      else if (/^[\w-]+$/.test(dev)) filter = `device_id=eq.${dev}`;
+      else return json(400, { ok: false, error: 'missing user_id or device_id' });
+      const rows = await sbGet(`drives?${filter}&select=*&order=start_time.desc&limit=${limit}`);
+      return json(200, { ok: true, drives: rows });
+    }
+
     if (view === 'user') {
       // Accept a whole identity's device-id list (merged person), or a single id.
       const ids = (Array.isArray(body.device_ids) && body.device_ids.length ? body.device_ids

@@ -1,4 +1,4 @@
-import { loadDrives, getDeviceId, getSyncedIds, markSynced } from './storage.js';
+import { loadDrives, getDeviceId, getDeviceSecret, getDeviceSecretHash, getSyncedIds, markSynced } from './storage.js';
 import {
   DRIVER_NAME_KEY, USER_EMAIL_KEY, ONBOARDED_KEY, PROFILE_SYNCED_KEY,
   SB_URL, SB_ANON,
@@ -7,19 +7,24 @@ import { authHeaders, currentUser } from './auth.js';
 
 /**
  * Remove a drive's cloud row so the server-derived leaderboard and the operator
- * dashboard stop counting a drive the user deleted on the phone. Keyed on this
- * device's id + the drive's start_time via the delete_device_drive RPC. Fails
- * soft: offline, or before the RPC migration is applied, it just returns false
- * and the local delete still stands (the cloud row is reconciled next time).
+ * dashboard stop counting a drive the user deleted on the phone. Goes through
+ * delete_my_drive, which only deletes what the caller owns: signed in, by
+ * auth.uid(); signed out, by this device's id plus its private secret (the row
+ * stores the secret's hash). Fails soft: offline, or before the migration is
+ * applied, it just returns false and the local delete still stands.
  * Returns true only if the server confirmed a row was removed.
  */
 export async function deleteCloudDrive(startTime){
   if (startTime == null) return false;
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/rpc/delete_device_drive`, {
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/delete_my_drive`, {
       method:  'POST',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ p_device_id: getDeviceId(), p_start_time: startTime }),
+      body:    JSON.stringify({
+        p_start_time:    startTime,
+        p_device_id:     getDeviceId(),
+        p_device_secret: getDeviceSecret(),
+      }),
     });
     if (!res.ok) return false;
     const n = await res.json().catch(() => 0);
@@ -35,8 +40,12 @@ export async function pushDriveToSupabase(drive){
   if (getSyncedIds().has(driveId)) return;  // already uploaded
   try {
     const uid = currentUser()?.id;
+    const secretHash = await getDeviceSecretHash();
     const payload = {
       device_id:       getDeviceId(),
+      // Proof this install recorded the drive, so it can delete it while signed
+      // out (delete_my_drive). Only the hash is uploaded; the secret stays here.
+      ...(secretHash ? { device_secret_hash: secretHash } : {}),
       // Stamped at insert time — this is what makes a drive follow the driver to
       // a new phone instead of being stranded on this one.
       //
@@ -72,6 +81,12 @@ export async function pushDriveToSupabase(drive){
     let body = payload;
     let res = await postDrive(body);
 
+    // A database that predates 20261017120000 has no device_secret_hash column.
+    if (!res.ok && await mentionsColumn(res, /device_secret_hash/)){
+      const { device_secret_hash, ...rest } = body;
+      body = rest;
+      res = await postDrive(body);
+    }
     // A migration may not have reached this database yet, in which case
     // PostgREST rejects the unknown column (PGRST204 / 400). The drive is still
     // valid without the optional columns, and this function swallows failures —

@@ -15,6 +15,7 @@ export const INSTALL_URL = 'https://smoothafdriving.pages.dev/install';
 // ── Storage keys ──────────────────────────────────────────────────────────────
 export const STORAGE_KEY        = 'smoothaf.drives.v1';
 export const DEVICE_KEY         = 'smoothaf.device_id';
+export const DEVICE_SECRET_KEY  = 'smoothaf.device_secret';
 export const SYNCED_KEY         = 'smoothaf.synced_ids';
 export const LIFETIME_SCORE_KEY = 'smoothaf.lifetime_score';
 export const DRIVER_NAME_KEY    = 'smoothaf.driver_name';

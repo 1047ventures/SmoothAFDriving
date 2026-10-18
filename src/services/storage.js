@@ -1,6 +1,7 @@
 import {
   STORAGE_KEY,
   DEVICE_KEY,
+  DEVICE_SECRET_KEY,
   SYNCED_KEY,
   LIFETIME_SCORE_KEY,
   DRIVER_NAME_KEY,
@@ -164,6 +165,30 @@ export function getDeviceId(){
     localStorage.setItem(DEVICE_KEY, id);
   }
   return id;
+}
+
+/**
+ * This install's private delete key. Unlike the device id (an identifier that
+ * shows up in admin screens and copied debug output), this never leaves the
+ * phone except to prove ownership when deleting a drive; uploads carry only its
+ * SHA-256. Signed-out users delete their cloud drives with it.
+ */
+export function getDeviceSecret(){
+  let s = localStorage.getItem(DEVICE_SECRET_KEY);
+  if (!s){
+    const b = crypto.getRandomValues(new Uint8Array(32));
+    s = Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+    localStorage.setItem(DEVICE_SECRET_KEY, s);
+  }
+  return s;
+}
+
+/** Hex SHA-256 of the device secret, or null where Web Crypto is unavailable. */
+export async function getDeviceSecretHash(){
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(getDeviceSecret()));
+    return Array.from(new Uint8Array(buf), x => x.toString(16).padStart(2, '0')).join('');
+  } catch { return null; }
 }
 
 export function getSyncedIds(){
