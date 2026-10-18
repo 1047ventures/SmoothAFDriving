@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 17, 2026 · 6:03 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 17, 2026 · 6:09 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -155,8 +155,12 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">1 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="need-lockdown">
+        <summary><span class="tag t-wait">Pre-launch</span><span class="ent-t">Paste one SQL block to lock down drives</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Supabase &rarr; SQL editor &rarr; paste <code>supabase/migrations/20261017120000_close_bare_id_functions.sql</code> &rarr; Run. Then add <code>ADMIN_PASSWORD=&hellip;</code> to the repo&rsquo;s <code>.env</code> so the dev drive pull keeps working.<br><a class="ent-go" href="https://supabase.com/dashboard/project/dbreetxubxdxogmektxc/sql/new" target="_blank" rel="noopener">Open SQL editor &#8599;</a></div>
+      </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.<br><a class="ent-go" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank" rel="noopener">Open Cloudflare &#8599;</a></div>
@@ -366,7 +370,7 @@
     <div class="sec-body">
       <details class="ent">
         <summary><span class="tag t-flag">Pre-launch</span><span class="ent-t">Three database functions trust a bare ID</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Two developer read functions (<code>get_user_drives_dev</code>, <code>get_device_drives_dev</code>) return a driver&rsquo;s full drives to anyone with the account or device ID, and <code>delete_device_drive</code> deletes by device ID. Fine for a handful of testers; must be dropped or locked down before public launch.</div>
+        <div class="ent-body">Fix built and pushed; live once the SQL above is pasted. The two developer read functions are dropped (the dev pull now goes through the password-gated admin endpoint). Deleting, claiming and anonymous restore now need proof of ownership: your account when signed in, or a private key only the recording phone holds. What&rsquo;s left: drives uploaded before Oct 17 carry no key, so they stay reachable by device ID until they&rsquo;re claimed. The admin password check also has no lockout beyond a delay.</div>
       </details>
       <details class="ent">
         <summary><span class="tag t-flag">Integrity</span><span class="ent-t">Scores are computed on the phone</span><span class="ent-chev">&#9654;</span></summary>
