@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { pushDriveToSupabase, claimDeviceDrives, fetchDrivesForUser } from '../services/supabase.js';
 import { saveSession, trimSession, clearSession } from '../services/auth.js';
-import { getDeviceId } from '../services/storage.js';
+import { getDeviceId, getDeviceSecret } from '../services/storage.js';
 
 const session = () => trimSession({
   access_token: 'access-abc', refresh_token: 'r', expires_in: 3600,
@@ -103,7 +103,8 @@ describe('claimDeviceDrives', () => {
     // client can't widen it.
     expect(urlOf(f)).toContain('/rpc/claim_drives');
     expect(f.mock.calls[0][1].method).toBe('POST');
-    expect(bodyOf(f)).toEqual({ p_device_id: getDeviceId() });
+    // …and to rows this install can prove it recorded (the per-device secret).
+    expect(bodyOf(f)).toEqual({ p_device_id: getDeviceId(), p_device_secret: getDeviceSecret() });
   });
 
   it('reports zero when there is nothing left to claim', async () => {
