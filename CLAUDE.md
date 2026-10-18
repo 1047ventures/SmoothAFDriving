@@ -309,6 +309,21 @@ keep `favicon: 🏠`, and re-stamp the "Reviewed" line. Update it when home-scre
 elements are added, linked, or removed, so it never describes a screen that no
 longer exists.
 
+## Values & Vision artifact
+
+`docs/values.html` is the product manifesto: what the app is, the order we
+decide in (better drivers → tell the truth → safety third), the principles and
+where each shows up in the code, the live scoring rubric, and the driving
+fingerprint. It replaced "The Driving Fingerprint" at the same link:
+
+```
+https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm
+```
+
+Publish with **both** `file_path` and that `url`. Its numbers quote the live
+code (src/constants.js, points.js, improvement.js) — when a scoring constant
+changes, update the rubric section in the same commit.
+
 ## ⚠️ Two lockfiles — keep both in sync (operating rule)
 
 Cloudflare Pages detects `bun.lock` and runs `bun install --frozen-lockfile`;

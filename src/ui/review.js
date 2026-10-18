@@ -1,6 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
 import { improvementVerdict } from '../services/improvement.js';
+import { applyAnalysis } from '../services/drive.js';
 import { openTrends } from './trends.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
@@ -48,9 +49,7 @@ async function annotateStopCauses(drive, analysis){
   if (JSON.stringify(kinds) !== JSON.stringify(drive.stopCauses || null)){
     const before = Math.round(drive.score ?? analysis.score ?? 0);
     drive.stopCauses = kinds;
-    const a = analyzeDrive(drive);              // now cause-aware: forced stops discounted
-    drive.score = Math.round(a.score);
-    drive.dims  = a.dims;
+    applyAnalysis(drive, analyzeDrive(drive));  // now cause-aware: forced stops discounted; keeps the clock
     updateStoredDrive(drive);                   // make it stick…
     recomputeLifetimeScore();                   // …and follow through to the home/lifetime number
     if (drive.score !== before){

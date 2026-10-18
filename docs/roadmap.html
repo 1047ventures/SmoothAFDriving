@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 17, 2026 · 5:50 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 17, 2026 · 6:03 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -362,8 +362,20 @@
 
   <!-- ══ TECH DEBT ══ -->
   <details class="sec" id="techdebt">
-    <summary><h2>Tech debt</h2><span class="count">5 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Tech debt</h2><span class="count">8 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent">
+        <summary><span class="tag t-flag">Pre-launch</span><span class="ent-t">Three database functions trust a bare ID</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Two developer read functions (<code>get_user_drives_dev</code>, <code>get_device_drives_dev</code>) return a driver&rsquo;s full drives to anyone with the account or device ID, and <code>delete_device_drive</code> deletes by device ID. Fine for a handful of testers; must be dropped or locked down before public launch.</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-flag">Integrity</span><span class="ent-t">Scores are computed on the phone</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The leaderboard is built server-side from saved drives, but each drive&rsquo;s score is what the app uploaded. A determined user could post a score they didn&rsquo;t drive. Fix: score on the server from the uploaded track.</div>
+      </details>
+      <details class="ent">
+        <summary><span class="tag t-flag">Scoring</span><span class="ent-t">Braking approach length doesn&rsquo;t vary</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The braking score averages approach length and deceleration, but the approach length is a fixed 30-sample window, so only deceleration actually moves the number. Needs a real approach measure (from where you came off the gas).</div>
+      </details>
       <details class="ent">
         <summary><span class="tag t-flag">Small</span><span class="ent-t">Points don&rsquo;t follow you to a new phone yet</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Drives restored from the cloud come back without their GPS track or smoothness, so points are estimated from the score and the on-time bonus is lost. Fix: store each drive&rsquo;s points in the cloud row and read them back on restore (needs one small database column).</div>
@@ -426,7 +438,7 @@
           &bull; <b>Retention</b> &mdash; coached vs uncoached<br>
           &bull; <b>Marketplace GMV</b> &mdash; the far-horizon number
           <span class="mlabel">Tasks that move it</span>
-          &bull; the <a href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Driving Fingerprint</a> (the telemetry edge) &middot; harsh-moment markers (<a href="#ms">shipped</a>) &middot; async-review tooling (unbuilt)
+          &bull; the driving fingerprint in <a href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Values &amp; Vision</a> (the telemetry edge) &middot; harsh-moment markers (<a href="#ms">shipped</a>) &middot; async-review tooling (unbuilt)
         </div>
       </details>
     </div>
@@ -437,8 +449,8 @@
     <summary><h2>Key files</h2><span class="count">reference</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
-        <summary><span class="ent-t">&#127937; The Driving Fingerprint</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body kf-what">Every OBD + phone channel and how it becomes a profile &mdash; reading a corner, pedal vs the g-arc. The telemetry edge under <a href="#mission-coach">Mission &rarr; coaches</a>.<br><a class="ent-go" href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Open &#8599;</a></div>
+        <summary><span class="ent-t">&#127937; Values &amp; Vision</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body kf-what">What Smooth AF is, the order we decide in (safety third), the principles and where each shows up in the code, the live scoring rubric, and the driving fingerprint.<br><a class="ent-go" href="https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm" target="_blank" rel="noopener">Open &#8599;</a></div>
       </details>
       <details class="ent">
         <summary><span class="ent-t">&#129517; Customer Journey</span><span class="ent-chev">&#9654;</span></summary>

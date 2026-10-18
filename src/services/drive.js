@@ -391,6 +391,25 @@ export async function restoreDrivesForUser(){
 }
 
 /**
+ * Re-stamp a stored drive from a fresh analysis — the one place a re-score
+ * happens (engine rescore, and the recap's forced-stop credit). Efficiency is
+ * the smoothness-only figure; the headline score re-applies the ETA clock for
+ * destination drives so a re-score never strips an earned on-time bonus; points
+ * follow, since their bonus is gated on efficiency.
+ */
+export function applyAnalysis(d, a){
+  const next = Math.round(a.score);
+  if (a.dims) d.dims = a.dims;
+  d.efficiency = next;
+  d.score = compositeScore(next, d.targetEtaSec, d.movingSec, {
+    arrived: d.arrived, buffer: d.etaBuffer,
+    allowPenalty: d.etaBuffer === ETA_BUFFER_TRAFFIC,
+  });
+  d.points = drivePoints(d);
+  return d;
+}
+
+/**
  * One-time rescore: when the scoring engine changes, re-run analyzeDrive over
  * every stored drive that still has its GPS samples, so the user's history and
  * lifetime score reflect the current engine instead of whatever it was scored
@@ -416,16 +435,7 @@ export function rescoreStoredDrives(){
   for (const d of drives){
     if (!d.samples || !d.samples.length) continue;   // can't fairly rescore — leave it
     const before = d.score;
-    const a = analyzeDrive(d);
-    const next = Math.round(a.score);
-    if (a.dims) d.dims = a.dims;
-    // Efficiency is the smoothness-only figure; the headline score re-applies
-    // the ETA clock for destination drives so a rescore doesn't strip it.
-    d.efficiency = next;
-    d.score = compositeScore(next, d.targetEtaSec, d.movingSec, {
-      arrived: d.arrived, buffer: d.etaBuffer,
-      allowPenalty: d.etaBuffer === ETA_BUFFER_TRAFFIC,
-    });
+    applyAnalysis(d, analyzeDrive(d));
     rescored++;
     if (before != null && d.score !== before){ changed++; delta += d.score - before; }
   }
