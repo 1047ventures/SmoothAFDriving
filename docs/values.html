@@ -1,289 +1,322 @@
 <!--
-  Smooth AF — Values & Vision.
-  PUBLISHED ARTIFACT (replaces "The Driving Fingerprint" at the same link):
-    https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm
-  Publish with BOTH file_path: docs/values.html and that url. Keep facts in step
-  with the code: scoring constants live in src/constants.js, points in
-  src/services/points.js, improvement in src/services/improvement.js.
+  Smooth AF — Values & Vision (the onboarding doc).
+  PUBLISHED ARTIFACT: https://claude.ai/artifact/FQXsHZgozpP5AzLC15Dkcm
+  Publish with BOTH file_path: docs/values.html and that url.
+  Voice: plain "what you need to know". Facts only, no pitch lines.
+  Numbers quote live code: src/constants.js, points.js, improvement.js.
+  Look: the app's own branding (src/styles/variables.css) — one dark world.
 -->
 <title>Smooth AF Values &amp; Vision</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,700&display=swap">
 <style>
-  /* Layout: one reading column (≈66ch) that widens to a two-up grid for evidence
-     and the rubric; the ranked "order we decide in" is the single loud moment.
-     Dark-first, like the app and the rest of the doc suite; light mirrors it. */
+  /* Layout: the app's world — near-black ground, cream type, Playfair italic for
+     display, tracked uppercase labels, tangerine→gold gradient on key figures.
+     One reading column; tables and two-up lists widen it. Single dark theme by
+     choice, matching the app. */
   :root{
-    --bg:#0B0A09; --panel:#151210; --panel-2:#1D1815;
-    --ink:#F2E8D5; --dim:#B3A893; --muted:#857B6B;
-    --line:rgba(242,232,213,.11); --line-2:rgba(242,232,213,.2);
-    --tang:#E85D3A; --tang-soft:rgba(232,93,58,.14);
-    --gold:#C9AD66; --gold-soft:rgba(201,173,102,.14);
-    --sky:#78AECB; --good:#73B86C; --good-soft:rgba(115,184,108,.14);
-    --warn:#E6A445; --warn-soft:rgba(230,164,69,.14);
-    --display:"Newsreader",Georgia,"Times New Roman",serif;
-    --body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --bg:#0A0A0A; --bg2:#141111; --bg3:#1C1817;
+    --cream:#F2E8D5; --cream-dim:#C9BFAC; --muted:#8E8478;
+    --line:rgba(242,232,213,.10); --line2:rgba(242,232,213,.18);
+    --tang:#E8501A; --gold:#C49A28; --good:#6FB669; --warn:#E0A33A;
+    --grad:linear-gradient(135deg,#E8501A 0%,#C49A28 100%);
+    --serif:"Playfair Display",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
     color-scheme:dark;
   }
-  @media (prefers-color-scheme: light){
-    :root:not([data-theme="dark"]){
-      --bg:#F6F1E7; --panel:#FFFDF8; --panel-2:#EFE7D8;
-      --ink:#1E1914; --dim:#5B5146; --muted:#857A6C;
-      --line:rgba(30,25,20,.12); --line-2:rgba(30,25,20,.22);
-      --tang:#C8441F; --tang-soft:rgba(200,68,31,.10);
-      --gold:#94761F; --gold-soft:rgba(148,118,31,.12);
-      --sky:#2F6F93; --good:#3B7E35; --good-soft:rgba(59,126,53,.11);
-      --warn:#9A6210; --warn-soft:rgba(154,98,16,.11);
-      color-scheme:light;
-    }
-  }
-  :root[data-theme="light"]{
-    --bg:#F6F1E7; --panel:#FFFDF8; --panel-2:#EFE7D8;
-    --ink:#1E1914; --dim:#5B5146; --muted:#857A6C;
-    --line:rgba(30,25,20,.12); --line-2:rgba(30,25,20,.22);
-    --tang:#C8441F; --tang-soft:rgba(200,68,31,.10);
-    --gold:#94761F; --gold-soft:rgba(148,118,31,.12);
-    --sky:#2F6F93; --good:#3B7E35; --good-soft:rgba(59,126,53,.11);
-    --warn:#9A6210; --warn-soft:rgba(154,98,16,.11);
-    color-scheme:light;
-  }
-
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1040px;margin:0 auto;padding-inline:clamp(16px,4vw,32px);padding-block:0 120px}
-  .col{max-width:68ch}
-  a{color:var(--tang);text-underline-offset:3px;text-decoration-thickness:1px}
-  a:focus-visible,summary:focus-visible{outline:2px solid var(--tang);outline-offset:3px;border-radius:4px}
-  b,strong{color:var(--ink);font-weight:600}
-  code,.mono{font-family:var(--mono);font-size:.86em}
+  body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding-inline:clamp(16px,5vw,36px);padding-block:0 110px}
+  a{color:var(--tang);text-underline-offset:3px}
+  a:focus-visible{outline:2px solid var(--tang);outline-offset:3px;border-radius:4px}
+  b{font-weight:600;color:var(--cream)}
+  code{font-family:var(--mono);font-size:.85em;color:var(--cream-dim)}
+  ul{margin:0;padding-left:18px}
+  li{margin-bottom:6px}
+  p{margin:0 0 12px}
 
-  /* ── Hero ── */
-  header{padding-block:72px 12px}
-  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:0 0 22px}
-  h1{font-family:var(--display);font-weight:400;font-size:clamp(46px,10vw,104px);line-height:.95;letter-spacing:-.025em;margin:0;text-wrap:balance}
-  h1 em{font-style:italic;color:var(--tang)}
-  .lede{margin:28px 0 0;font-size:clamp(17px,2.3vw,20px);color:var(--dim);line-height:1.55;max-width:60ch}
-  .lede b{color:var(--ink)}
-  .toc{display:flex;flex-wrap:wrap;gap:8px 18px;margin:30px 0 0;padding:16px 0 0;border-top:1px solid var(--line);font-size:14px}
-  .toc a{color:var(--dim);text-decoration:none}
-  .toc a:hover{color:var(--ink)}
+  .lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--cream-dim)}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--tang)}
 
-  /* ── Sections ── */
-  section{margin-top:88px;scroll-margin-top:24px}
-  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--tang);margin:0 0 10px}
-  h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.05;letter-spacing:-.015em;margin:0 0 18px;text-wrap:balance}
-  h2 em{font-style:italic}
-  h3{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.2;margin:0 0 8px;text-wrap:balance}
-  p{margin:0 0 14px}
-  .sub{color:var(--dim);max-width:66ch}
+  /* Header */
+  header{padding-block:56px 8px;border-bottom:1px solid var(--line)}
+  .brand{font-family:var(--sans);font-size:11px;letter-spacing:.38em;text-transform:uppercase;color:var(--cream-dim);margin:0 0 18px}
+  h1{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(40px,8vw,72px);line-height:1.05;letter-spacing:-.02em;margin:0 0 16px}
+  .intro{color:var(--cream-dim);max-width:62ch;font-size:17px}
+  .toc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 18px;margin:22px 0;padding:0;list-style:none;font-size:14px}
+  @media(max-width:720px){.toc{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .toc li{margin:0}
+  .toc a{color:var(--cream-dim);text-decoration:none;display:block;padding:5px 0;border-bottom:1px solid var(--line)}
+  .toc a:hover{color:var(--cream)}
 
-  /* ── What it is: hook vs point ── */
-  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
-  @media(max-width:720px){.split{grid-template-columns:1fr}}
-  .pane{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-width:0}
-  .pane .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .pane h3{margin-top:6px}
-  .pane p{color:var(--dim);font-size:15px;margin:0}
-  .pane.point{border-color:var(--tang);background:linear-gradient(180deg,var(--tang-soft),transparent 70%),var(--panel)}
-  .pane.point .tag{color:var(--tang)}
+  /* Sections */
+  section{padding-top:60px;scroll-margin-top:12px}
+  h2{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(28px,4.6vw,38px);line-height:1.1;margin:8px 0 16px;letter-spacing:-.01em}
+  h3{font-family:var(--sans);font-size:17px;font-weight:600;margin:0 0 6px}
+  .col{max-width:66ch}
+  .dim{color:var(--cream-dim)}
 
-  /* ── The order we decide in (the loud moment) ── */
-  .rank{margin-top:34px;display:grid;gap:0;border-top:1px solid var(--line-2)}
-  .rk{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:8px 28px;padding:26px 0;border-bottom:1px solid var(--line-2);align-items:start}
-  .rk > div:last-child{padding-top:6px;min-width:0}
-  @media(max-width:640px){.rk{grid-template-columns:1fr}}
-  .rk .ord{font-family:var(--display);font-style:italic;font-weight:400;font-size:clamp(56px,9vw,92px);line-height:.85;color:var(--muted);letter-spacing:-.03em}
-  .rk .ord sup{font-size:.36em;vertical-align:super;letter-spacing:0}
-  .rk h3{font-size:clamp(24px,3.4vw,32px);font-weight:400;margin-bottom:8px}
-  .rk p{color:var(--dim);margin:0;max-width:62ch}
-  .rk.first .ord{color:var(--tang)}
-  .rk.third .ord{color:var(--gold)}
-  .rk.third h3{font-style:italic}
-  .test{margin-top:30px;padding:22px 24px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line)}
-  .test .q{font-family:var(--display);font-style:italic;font-size:clamp(22px,3.2vw,28px);line-height:1.25;margin:4px 0 10px;color:var(--ink)}
-  .test p{color:var(--dim);margin:0;font-size:15px}
+  /* Fact rows: label / value */
+  .facts{display:grid;grid-template-columns:170px minmax(0,1fr);border-top:1px solid var(--line);margin-top:4px}
+  .facts > div{padding:11px 0;border-bottom:1px solid var(--line);min-width:0}
+  .facts .k{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);padding-top:15px;padding-right:12px}
+  .facts .v{color:var(--cream-dim)}
+  @media(max-width:600px){.facts{grid-template-columns:1fr}.facts .k{border-bottom:0;padding-bottom:0}}
 
-  /* ── Principles ── */
-  .principles{margin-top:28px;display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--line)}
-  .pr{padding:24px 0 22px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:10px 34px}
-  @media(max-width:780px){.pr{grid-template-columns:1fr}}
-  .pr h3{font-size:24px;font-weight:400;font-style:italic;margin:0 0 6px}
-  .pr .why{color:var(--dim);font-size:15px;margin:0}
-  .seen{display:flex;flex-direction:column;gap:9px;margin:2px 0 0;padding:0;list-style:none}
-  .seen li{display:grid;grid-template-columns:86px 1fr;gap:12px;font-size:14.5px;color:var(--dim);line-height:1.5}
-  .seen .lens{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding-top:3px}
-  .l-algo{color:var(--tang)} .l-ux{color:var(--sky)} .l-data{color:var(--good)} .l-build{color:var(--gold)}
+  /* Decision order */
+  .order{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
+  @media(max-width:720px){.order{grid-template-columns:1fr}}
+  .ord{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+  .ord .n{font-family:var(--serif);font-style:italic;font-weight:700;font-size:44px;line-height:1}
+  .ord h3{margin-top:8px}
+  .ord p{color:var(--cream-dim);font-size:14.5px;margin:0}
 
-  /* ── Rubric ── */
-  .weights{margin:22px 0 8px}
-  .wbar{display:flex;height:46px;border-radius:10px;overflow:hidden;border:1px solid var(--line-2)}
-  .wbar div{display:flex;align-items:center;padding-inline:12px;font-family:var(--mono);font-size:12.5px;white-space:nowrap;overflow:hidden;min-width:0}
-  .w-s{flex:50;background:var(--tang-soft);color:var(--tang);border-right:1px solid var(--line-2)}
-  .w-m{flex:30;background:var(--gold-soft);color:var(--gold);border-right:1px solid var(--line-2)}
-  .w-b{flex:20;background:var(--good-soft);color:var(--good)}
-  .wscale{position:relative;height:16px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
-  .wscale span{position:absolute;top:0;transform:translateX(-50%)}
-  .wscale span:first-child{transform:none}
-  .wscale span:last-child{transform:translateX(-100%)}
-  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-top:18px}
-  table{width:100%;border-collapse:collapse;min-width:620px}
-  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px}
-  th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  /* Tables */
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--bg2);margin-top:8px}
+  table{width:100%;border-collapse:collapse;min-width:640px}
+  th,td{text-align:left;vertical-align:top;padding:12px 16px;border-bottom:1px solid var(--line);font-size:14.5px}
+  th{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);font-weight:500}
   tr:last-child td{border-bottom:0}
-  td .nm{font-weight:600;color:var(--ink)}
-  td .wt{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--tang)}
-  td.d{color:var(--dim)}
-  td .anch{font-family:var(--mono);font-size:12.5px;color:var(--gold);white-space:nowrap}
-  .layers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
-  @media(max-width:820px){.layers{grid-template-columns:1fr}}
-  .layer{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
-  .layer .tag{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .layer h3{margin:6px 0 6px;font-size:20px}
-  .layer p{color:var(--dim);font-size:14.5px;margin:0 0 10px}
-  .layer .f{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--panel-2);border-radius:8px;padding:9px 11px;line-height:1.55;overflow-x:auto}
+  td{color:var(--cream-dim)}
+  td.nm{color:var(--cream);font-weight:600;white-space:nowrap}
+  td .num{font-family:var(--mono);font-size:12.5px;color:var(--gold);white-space:nowrap}
 
-  /* ── Fingerprint ── */
-  .corners{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
-  @media(max-width:760px){.corners{grid-template-columns:1fr}}
-  .corner{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px 12px;min-width:0}
-  .corner.good{border-color:var(--good)}
-  .corner.bad{border-color:var(--tang)}
-  .corner .tag{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-  .corner.good .tag{color:var(--good)} .corner.bad .tag{color:var(--tang)}
-  .corner h3{margin:6px 0 4px;font-size:20px}
-  .corner p{color:var(--dim);font-size:14px;margin:0 0 8px}
+  /* Weights bar */
+  .wbar{display:flex;height:42px;border-radius:10px;overflow:hidden;border:1px solid var(--line2);margin-top:6px}
+  .wbar div{display:flex;align-items:center;padding-inline:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden;min-width:0;color:var(--bg);font-weight:700}
+  .w1{flex:50;background:#E8501A}.w2{flex:30;background:#D2762A}.w3{flex:20;background:#C49A28}
+  .wscale{position:relative;height:16px;font-family:var(--mono);font-size:11px;color:var(--muted);margin:6px 0 4px}
+  .wscale span{position:absolute;top:0;transform:translateX(-50%)}
+  .wscale span:first-child{transform:none}.wscale span:last-child{transform:translateX(-100%)}
+
+  /* Three-up formula cards */
+  .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+  @media(max-width:780px){.three{grid-template-columns:1fr}}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+  .card p{color:var(--cream-dim);font-size:14.5px}
+  .f{font-family:var(--mono);font-size:12.5px;background:var(--bg3);border-radius:8px;padding:9px 11px;color:var(--cream);line-height:1.55;overflow-x:auto}
+
+  /* Corner traces */
+  .corners{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media(max-width:720px){.corners{grid-template-columns:1fr}}
+  .corner{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px 16px 10px;min-width:0}
+  .corner p{color:var(--cream-dim);font-size:14px;margin:4px 0 8px}
   .trace{width:100%;height:auto;display:block}
-  .trace .ax{stroke:var(--line-2)} .trace .ph{stroke:var(--line)}
-  .trace text{font-family:var(--mono);fill:var(--muted)}
-  .trace .pedal{stroke:var(--tang)} .trace .latg{stroke:var(--gold)} .trace .latfill{fill:var(--gold-soft)} .trace .spd{stroke:var(--sky)}
-  .trace .warn-t{fill:var(--tang)} .trace .good-t{fill:var(--good)}
-  .legend{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:14px;font-size:13.5px;color:var(--dim)}
-  .legend i{display:inline-block;width:18px;height:3px;border-radius:2px;margin-right:8px;vertical-align:middle}
-  .tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
-  @media(max-width:820px){.tiers{grid-template-columns:1fr}}
-  .tier{border-top:2px solid var(--line-2);padding-top:12px;min-width:0}
-  .tier h3{font-size:18px;margin-bottom:6px}
-  .tier ul{margin:0;padding-left:18px;color:var(--dim);font-size:14.5px}
-  .tier li{margin-bottom:5px}
-  .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:5px;margin-left:4px;white-space:nowrap}
-  .st-live{background:var(--good-soft);color:var(--good)} .st-next{background:var(--gold-soft);color:var(--gold)}
+  .trace text{font-family:var(--sans);fill:var(--muted);letter-spacing:.12em}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:10px;font-size:13px;color:var(--cream-dim)}
+  .legend i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:7px;vertical-align:middle}
 
-  /* ── Vision ── */
-  .horizon{margin-top:24px;display:grid;gap:0;border-left:2px solid var(--line-2);padding-left:22px}
-  .hz{position:relative;padding:0 0 22px}
-  .hz::before{content:"";position:absolute;left:-29px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--muted)}
-  .hz.now::before{border-color:var(--good);background:var(--good)}
-  .hz.next::before{border-color:var(--tang)}
-  .hz .when{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .hz.now .when{color:var(--good)} .hz.next .when{color:var(--tang)}
-  .hz h3{margin:4px 0 4px;font-size:21px}
-  .hz p{color:var(--dim);margin:0;font-size:15px;max-width:66ch}
+  /* Two-up lists */
+  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 28px}
+  @media(max-width:720px){.two{grid-template-columns:1fr}}
+  .two > div{min-width:0}
+  .two ul{color:var(--cream-dim);font-size:15px}
+  .pill{display:inline-block;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;padding:3px 8px;border-radius:999px;margin-bottom:8px;font-weight:600}
+  .p-ship{background:rgba(111,182,105,.14);color:var(--good)}
+  .p-next{background:rgba(232,80,26,.15);color:var(--tang)}
+  .p-later{background:rgba(196,154,40,.15);color:var(--gold)}
 
-  /* ── Owed ── */
-  .owed{margin-top:22px;display:grid;gap:10px}
-  .ow{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:10px}
-  @media(max-width:560px){.ow{grid-template-columns:1fr;gap:4px}}
-  .ow .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--warn);padding-top:3px}
-  .ow p{margin:0;color:var(--dim);font-size:15px}
-
-  /* ── Audience chooser ── */
-  .who{margin:30px 0 0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
-  @media(max-width:820px){.who{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  .who a{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid var(--line-2);border-radius:12px;text-decoration:none;color:var(--ink);background:var(--panel);min-width:0}
-  .who a:hover{border-color:var(--tang)}
-  .who .r{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tang)}
-  .who .t{font-size:14px;color:var(--dim);line-height:1.4}
-
-  /* ── History ── */
-  .months{display:flex;align-items:flex-end;gap:10px;height:140px;margin:22px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line-2)}
+  /* Monthly chart */
+  .months{display:flex;align-items:flex-end;gap:10px;height:130px;border-bottom:1px solid var(--line2);margin-top:10px}
   .mo{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
-  .mo .bar{width:100%;max-width:46px;background:var(--tang-soft);border:1px solid var(--tang);border-bottom:0;border-radius:6px 6px 0 0}
-  .mo .n{font-family:var(--mono);font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
-  .mlab{display:flex;gap:10px}
-  .mlab span{flex:1;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  .eras{margin-top:26px;display:grid;gap:0;border-top:1px solid var(--line)}
-  .era{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 26px;padding:18px 0;border-bottom:1px solid var(--line)}
-  @media(max-width:640px){.era{grid-template-columns:1fr}}
-  .era .when{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);padding-top:5px}
-  .era h3{font-size:20px;margin:0 0 4px}
-  .era p{color:var(--dim);margin:0;font-size:15px}
-  .lessons{margin-top:26px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  @media(max-width:720px){.lessons{grid-template-columns:1fr}}
-  .lesson{padding:16px 18px;border-radius:12px;background:var(--panel);border:1px solid var(--line);min-width:0}
-  .lesson .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--warn)}
-  .lesson p{margin:6px 0 0;color:var(--dim);font-size:14.5px}
-  .lesson p b{font-weight:600}
+  .mo .bar{width:100%;max-width:44px;background:var(--grad);border-radius:5px 5px 0 0}
+  .mo .n{font-family:var(--mono);font-size:12px;color:var(--cream)}
+  .mlab{display:flex;gap:10px;margin-top:6px}
+  .mlab span{flex:1;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 
-  /* ── Briefings ── */
-  .brief{margin-top:30px;padding:26px clamp(18px,3vw,30px);border:1px solid var(--line-2);border-radius:16px;background:var(--panel);scroll-margin-top:24px}
-  .brief + .brief{margin-top:18px}
-  .brief .role{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--tang)}
-  .brief h3{font-family:var(--display);font-weight:400;font-size:clamp(24px,3.6vw,32px);margin:6px 0 12px}
-  .brief .intro{color:var(--dim);max-width:66ch;margin:0 0 18px}
-  .bgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 30px}
-  @media(max-width:760px){.bgrid{grid-template-columns:1fr}}
-  .bgrid > div{min-width:0}
-  .bgrid h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 8px}
-  .bgrid ul{margin:0;padding-left:18px;color:var(--dim);font-size:15px}
-  .bgrid li{margin-bottom:6px}
-  .bgrid li b{font-weight:600}
-  .brief.driver{background:linear-gradient(180deg,var(--tang-soft),transparent 60%),var(--panel);border-color:var(--tang)}
-  .brief.driver .big{font-family:var(--display);font-size:clamp(20px,2.8vw,24px);line-height:1.35;color:var(--ink);max-width:60ch;margin:0 0 16px}
-  .stack{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
-  .stack span{font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:7px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink)}
+  /* Role blocks */
+  .role{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:20px clamp(16px,3vw,24px);scroll-margin-top:12px}
+  .role h3{font-family:var(--serif);font-style:italic;font-weight:700;font-size:24px;margin:4px 0 12px}
+  .role h4{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+  .chips span{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line2);color:var(--cream-dim)}
 
-  footer{margin-top:90px;padding-top:22px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;color:var(--muted);font-size:13.5px}
-  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .gaps .facts .k{color:var(--warn)}
+
+  footer{margin-top:80px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
 </style>
 
 <div class="wrap">
 
   <header>
-    <p class="kicker">Smooth AF · values, vision &amp; onboarding · Oct 2026</p>
-    <h1>Smooth is <em>the skill.</em></h1>
-    <p class="lede">Smooth AF is a driving app that scores how smoothly you drive and coaches you to drive better. It reads your phone's motion sensors, GPS and, when you plug one in, your car's own computer. <b>This page is what we believe, how we decide, how we got here, and where you can see all of it in the product.</b> It is also how we onboard: pick your seat below.</p>
-    <nav class="who" aria-label="Briefings by role">
-      <a href="#for-drivers"><span class="r">Driver</span><span class="t">What the app does for you</span></a>
-      <a href="#for-cto"><span class="r">CTO</span><span class="t">Stack, data, debt</span></a>
-      <a href="#for-cpo"><span class="r">CPO</span><span class="t">Loop, surfaces, queue</span></a>
-      <a href="#for-cmo"><span class="r">CMO</span><span class="t">Position, voice, audience</span></a>
-      <a href="#for-investors"><span class="r">Investor</span><span class="t">Thesis, traction, risk</span></a>
-    </nav>
-    <nav class="toc" aria-label="Sections">
-      <a href="#what">What it is</a><a href="#history">How we got here</a><a href="#order">How we decide</a><a href="#principles">Principles</a><a href="#rubric">The scoring rubric</a><a href="#fingerprint">The driving fingerprint</a><a href="#vision">Where it's going</a><a href="#briefings">Briefings</a><a href="#owed">What we still owe</a>
-    </nav>
+    <p class="brand">Smooth AF · Values &amp; Vision · Updated Oct 17, 2026</p>
+    <h1>What you need <span class="grad">to know</span></h1>
+    <p class="intro">Smooth AF in one page: what it is, how decisions get made, how the scoring works, where the product stands, and notes for each role.</p>
+    <ul class="toc" aria-label="Contents">
+      <li><a href="#product">The product</a></li>
+      <li><a href="#decide">How we decide</a></li>
+      <li><a href="#principles">Principles</a></li>
+      <li><a href="#scoring">How scoring works</a></li>
+      <li><a href="#fingerprint">Driving fingerprint</a></li>
+      <li><a href="#status">Shipped, next, later</a></li>
+      <li><a href="#history">History</a></li>
+      <li><a href="#for-drivers">Drivers</a></li>
+      <li><a href="#for-cto">CTO</a></li>
+      <li><a href="#for-cpo">CPO</a></li>
+      <li><a href="#for-cmo">CMO</a></li>
+      <li><a href="#for-investors">Investors</a></li>
+      <li><a href="#gaps">Known gaps</a></li>
+    </ul>
   </header>
 
-  <!-- WHAT IT IS -->
-  <section id="what">
-    <p class="eyebrow">What it is</p>
-    <h2>A score you'll chase, and a teacher underneath it</h2>
-    <div class="col">
-      <p class="sub">US roads are rough because most people learned to drive at sixteen and never revisited it. Aggressive, reactive driving is the norm. We think the fix is drivers who read the whole road: the light two blocks ahead, the brake lights three cars up, the merge before it happens. That driver is smooth, efficient and calm, and they make everyone around them calmer too.</p>
+  <!-- PRODUCT -->
+  <section id="product">
+    <span class="lbl">The product</span>
+    <h2>What Smooth AF is</h2>
+    <div class="facts">
+      <div class="k">What it does</div><div class="v">Scores how smoothly you drive and coaches you to drive better. It uses the phone's motion sensors and GPS, plus the car's own computer when an OBD-II plug-in reader is connected.</div>
+      <div class="k">Mission</div><div class="v">Make people better drivers: efficient, smooth, reading the road ahead instead of reacting to it.</div>
+      <div class="k">North Star</div><div class="v">Improvement over time. The score, points and leaderboard keep people driving with the app; getting measurably better is the goal.</div>
+      <div class="k">Platforms</div><div class="v">Native iOS app via TestFlight, and a web app. No Android app.</div>
+      <div class="k">Stage</div><div class="v">Invite-only. At least three drivers besides the founder. No revenue.</div>
+      <div class="k">Team</div><div class="v">One founder, building with AI engineering sessions. 379 tasks shipped since April 30, 2026.</div>
     </div>
-    <div class="split">
-      <div class="pane">
-        <span class="tag">The hook</span>
-        <h3>A number, points, a leaderboard</h3>
-        <p>Every drive gets a score out of 100. Every smooth mile banks points. Beat the ETA while staying smooth and you earn a bonus. It's a game because games get played.</p>
+  </section>
+
+  <!-- DECIDE -->
+  <section id="decide">
+    <span class="lbl">How we decide</span>
+    <h2>Priority order</h2>
+    <p class="col dim">When two goals conflict, the higher one wins.</p>
+    <div class="order">
+      <div class="ord"><span class="n grad">1st</span><h3>Make a better driver</h3><p>Features that change how someone drives ship before features that are only interesting.</p></div>
+      <div class="ord"><span class="n grad">2nd</span><h3>Tell the truth</h3><p>The app shows a blank rather than a guess, and "couldn't read it" rather than a false all-clear.</p></div>
+      <div class="ord"><span class="n grad">3rd</span><h3>Safety third</h3><p>Safety is the result of smooth driving, not the pitch. We don't market as a safety or insurance product. While the car moves, the app shows only glanceable feedback; decisions wait until you park.</p></div>
+    </div>
+    <p class="col dim" style="margin-top:14px">Test for any feature: does this make someone a better driver?</p>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section id="principles">
+    <span class="lbl">Principles</span>
+    <h2>Principles and where they show up</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Principle</th><th>Rule</th><th>In the product</th></tr></thead>
+        <tbody>
+          <tr><td class="nm">Smooth before fast</td><td>Speed alone earns nothing extra.</td><td>The ETA bonus applies only when the drive scored 80+ before the clock. The speed bonus (up to +5) scales with how smooth the drive was.</td></tr>
+          <tr><td class="nm">The road's fault isn't yours</td><td>Don't penalize what the driver can't control.</td><td>Once the recap has looked up nearby signals, stops at lights, queues and stop signs count 0.25. Parked stretches over 3 minutes pause the ETA clock.</td></tr>
+          <tr><td class="nm">Miles, not minutes</td><td>Points measure distance driven well.</td><td>10 points per smooth mile. Road within 8 seconds of a harsh moment doesn't count. Badges at 10, 50, 100, 250, 500 and 1,000 smooth miles.</td></tr>
+          <tr><td class="nm">A blank beats a guess</td><td>Claim only what the data supports.</td><td>Drives without ride-quality data cap at 95. Improvement compares only drives scored the same way. A timed-out trouble-code read keeps the last report. A VIN read that disagrees with itself is discarded.</td></tr>
+          <tr><td class="nm">Eyes on the road</td><td>Nothing competes with the road.</td><td>Live feedback is edge color (green, amber, red) and at most one short message at a time. Trouble codes and "Is this your car?" wait for Home. The two on-road prompts ("Drive started, stop?" and "Looks like you've parked") are one tap and dismiss themselves.</td></tr>
+          <tr><td class="nm">Subtract before you add</td><td>Default answer to "add this to the screen?" is no.</td><td>The improvement line replaced a line on Home. Placeholder leaderboard tabs were cut. Planned driver modes will only remove things.</td></tr>
+          <tr><td class="nm">Your drives are yours</td><td>Driving data belongs to the driver.</td><td>Drives are stored on the phone first; cloud rows are owner-only. The leaderboard is built on the server from saved drives. The VIN goes only to NHTSA's public decoder. Deleting a drive deletes its cloud copy.</td></tr>
+          <tr><td class="nm">Verify on the real thing</td><td>Check behavior, not just code.</td><td>Every change gets an adversarial reviewer; screen changes are rendered at phone size. Pedal and stop thresholds are fitted to real drives. Untested features are labeled untested.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SCORING -->
+  <section id="scoring">
+    <span class="lbl">How scoring works</span>
+    <h2>The score, the clock, and points</h2>
+    <p class="col dim">Three measures, weighted. Sideways g from GPS heading is not scored: heading jitter produced hundreds of false "sharp turns."</p>
+    <div class="wbar" role="img" aria-label="Weights: smoothness 50 percent, momentum 30 percent, braking 20 percent"><div class="w1">Smoothness 50%</div><div class="w2">Momentum 30%</div><div class="w3">Braking 20%</div></div>
+    <div class="wscale" aria-hidden="true"><span style="left:0">0</span><span style="left:50%">50</span><span style="left:80%">80</span><span style="left:100%">100</span></div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Measure</th><th>Weight</th><th>What it measures</th><th>Scores 100 → 0</th></tr></thead>
+        <tbody>
+          <tr><td class="nm">Smoothness</td><td><span class="num">0.50</span></td><td>Typical forward/back g (85th percentile), pedal jerk, cabin calm (when the phone is mounted), and throttle changes (when a reader is connected). Missing inputs hand their weight to the others.</td><td><span class="num">0.30 → 2.5 m/s²</span><br><span class="num">0.05 → 0.6 m/s³</span><br><span class="num">2 → 15 %/s throttle</span></td></tr>
+          <tr><td class="nm">Momentum</td><td><span class="num">0.30</span></td><td>Full stops per mile. Forced stops (lights, queues, signs) count 0.25.</td><td><span class="num">0 → 4.5 stops/mi</span></td></tr>
+          <tr><td class="nm">Braking</td><td><span class="num">0.20</span></td><td>Average deceleration over the 30 seconds before each stop.</td><td><span class="num">0.5 → 2.0 m/s²</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="three">
+      <div class="card"><span class="lbl">Score</span><h3 style="margin-top:6px">Out of 100</h3><p>Weighted sum plus a speed bonus.</p><div class="f">Σ measure × weight<br>+ up to 5 (avg 25→65 mph) × base/100<br>max 95 without ride data</div></div>
+      <div class="card"><span class="lbl">Clock</span><h3 style="margin-top:6px">Destination drives</h3><p>Beat the ETA for up to +15. Late costs points only with a traffic-aware ETA.</p><div class="f">15 × beat/20% × base/100<br>only if base ≥ 80</div></div>
+      <div class="card"><span class="lbl">Points</span><h3 style="margin-top:6px">Smooth miles</h3><p>Earned on every drive. On-time bonus stacks on top.</p><div class="f">10 × smooth miles<br>+ up to 50% if on time, base ≥ 80</div></div>
+    </div>
+    <div class="col" style="margin-top:18px">
+      <h3>Improvement verdict</h3>
+      <p class="dim">Compares the last 5 drives with the 10 before: hard brakes, launches and turns per 10 miles (pooled by distance), share of smooth miles, pedal smoothness, and score. A change counts at 20% on a rate or 3 points on a score. Improvements are shown first; a slip is shown only if nothing improved.</p>
+    </div>
+  </section>
+
+  <!-- FINGERPRINT -->
+  <section id="fingerprint">
+    <span class="lbl">Driving fingerprint</span>
+    <h2>Where the scoring is heading</h2>
+    <p class="col dim">Two drivers can score the same through a corner. The accelerator pedal traced against sideways g shows the difference. The pedal is scored today; sideways g is not yet.</p>
+    <div class="corners">
+      <div class="corner">
+        <span class="lbl" style="color:var(--tang)">Brake and gun</span>
+        <p>Lift, brake hard into the apex, slam the throttle out. Late, lopsided g spike.</p>
+        <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Brake-and-gun corner: pedal drops to zero then spikes; sideways g is a late sharp spike">
+          <line x1="34" y1="176" x2="330" y2="176" stroke="rgba(242,232,213,.18)" stroke-width="1"/>
+          <line x1="118" y1="24" x2="118" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
+          <line x1="200" y1="24" x2="200" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
+          <line x1="282" y1="24" x2="282" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
+          <text x="118" y="194" font-size="8.5" text-anchor="middle">ENTRY</text><text x="200" y="194" font-size="8.5" text-anchor="middle">APEX</text><text x="282" y="194" font-size="8.5" text-anchor="middle">EXIT</text>
+          <polygon fill="rgba(196,154,40,.14)" points="34,176 34,172 90,166 140,150 185,80 200,48 214,92 250,150 300,170 330,173 330,176"/>
+          <polyline fill="none" stroke="#C49A28" stroke-width="2" stroke-linejoin="round" points="34,172 90,166 140,150 185,80 200,48 214,92 250,150 300,170 330,173"/>
+          <polyline fill="none" stroke="#C9BFAC" stroke-width="1.5" stroke-dasharray="1 5" stroke-linecap="round" points="34,52 90,70 140,112 185,152 200,158 230,132 280,92 330,66"/>
+          <polyline fill="none" stroke="#E8501A" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="34,92 96,96 112,172 190,172 198,172 205,34 216,30 244,58 300,50 330,52"/>
+        </svg>
       </div>
-      <div class="pane point">
-        <span class="tag">The point</span>
-        <h3>You, measurably better</h3>
-        <p>Improvement over time is the North Star. The app tells you whether you're getting smoother, what habit is holding you back, and what to try next drive. The score is how we keep you coming back long enough to change.</p>
+      <div class="corner">
+        <span class="lbl" style="color:var(--good)">Carry the line</span>
+        <p>Ease off, carry speed to the apex, roll the throttle on. One even g curve.</p>
+        <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Smooth corner: pedal eases down then rolls on; sideways g is an even arc">
+          <line x1="34" y1="176" x2="330" y2="176" stroke="rgba(242,232,213,.18)" stroke-width="1"/>
+          <line x1="118" y1="24" x2="118" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
+          <line x1="200" y1="24" x2="200" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
+          <line x1="282" y1="24" x2="282" y2="176" stroke="rgba(242,232,213,.08)" stroke-dasharray="3 4"/>
+          <text x="118" y="194" font-size="8.5" text-anchor="middle">ENTRY</text><text x="200" y="194" font-size="8.5" text-anchor="middle">APEX</text><text x="282" y="194" font-size="8.5" text-anchor="middle">EXIT</text>
+          <polygon fill="rgba(196,154,40,.14)" points="34,176 34,172 80,150 128,104 172,74 200,68 228,74 272,104 320,150 330,158 330,176"/>
+          <polyline fill="none" stroke="#C49A28" stroke-width="2" stroke-linejoin="round" points="34,172 80,150 128,104 172,74 200,68 228,74 272,104 320,150 330,158"/>
+          <polyline fill="none" stroke="#C9BFAC" stroke-width="1.5" stroke-dasharray="1 5" stroke-linecap="round" points="34,60 90,80 140,100 190,110 200,112 240,104 290,86 330,66"/>
+          <polyline fill="none" stroke="#E8501A" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="34,96 78,120 122,138 168,144 200,145 236,128 278,86 330,58"/>
+        </svg>
       </div>
+    </div>
+    <div class="legend"><span><i style="background:#E8501A"></i>Accelerator pedal (OBD)</span><span><i style="background:#C49A28"></i>Sideways g (phone)</span><span><i style="background:#C9BFAC;height:2px"></i>Speed (OBD)</span></div>
+    <div class="facts" style="margin-top:18px">
+      <div class="k">From the reader</div><div class="v">Throttle and pedal (scored). Wheel speed, RPM, load, gear, torque and horsepower, temperatures, fuel level, voltage (recorded). VIN and trouble codes (read on connect).</div>
+      <div class="k">From the phone</div><div class="v">Forward/back g and jerk, cabin vibration (scored). GPS route, used to compare the same road over time. Sideways g per corner (planned).</div>
+      <div class="k">Not available</div><div class="v">Brake pedal and steering angle are on the car's private network. Braking is reconstructed from pedal at zero, falling speed and backward g.</div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section id="status">
+    <span class="lbl">Product status</span>
+    <h2>Shipped, next, later</h2>
+    <div class="two">
+      <div><span class="pill p-ship">Shipped</span><ul>
+        <li>Drive scoring with recap: harsh-moment map, stop causes, coaching cards</li>
+        <li>Destination drives with traffic-aware ETA</li>
+        <li>Background GPS, native motion with no permission prompts, Dynamic Island</li>
+        <li>Points per smooth mile and badges</li>
+        <li>Improvement verdict on Home and in the recap</li>
+        <li>Car Health: trouble codes in plain English</li>
+        <li>Car identified by VIN when the reader connects</li>
+        <li>Accounts (Apple, email), cloud restore, server-built leaderboard</li>
+      </ul></div>
+      <div><span class="pill p-next">Next</span><ul>
+        <li>Coaching that tracks repeat habits and backs off once fixed</li>
+        <li>Leaderboard showing adjusted scores</li>
+        <li>Hands-free recording without a reader</li>
+      </ul>
+      <span class="pill p-later" style="margin-top:12px">Later</span><ul>
+        <li>Driver modes: First Timer, Teen (parent-linked), everyday, Pro</li>
+        <li>Car Concierge subscription: ongoing car-health watch, maintenance, plain-English manual</li>
+        <li>Redeemable rewards with partners</li>
+        <li>Human coaches working from drive data</li>
+      </ul></div>
     </div>
   </section>
 
   <!-- HISTORY -->
   <section id="history">
-    <p class="eyebrow">How we got here</p>
-    <h2>379 shipped tasks in under six months</h2>
-    <div class="col"><p class="sub">Smooth AF started on April 30, 2026 as a web app that scored a drive from the phone's sensors. It has been built by one founder working with AI engineering sessions, shipping small changes straight to production and verifying each one. Every shipped task is numbered in <code>TASKS.md</code>.</p></div>
-
-    <div role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 59 so far">
+    <span class="lbl">History</span>
+    <h2>How we got here</h2>
+    <p class="col dim">Tasks shipped per month, from git. October is to date.</p>
+    <div role="img" aria-label="Tasks shipped per month: April 5, May 97, June 112, July 18, August 62, September 26, October 59">
       <div class="months">
         <div class="mo"><span class="n">5</span><div class="bar" style="height:4%"></div></div>
         <div class="mo"><span class="n">97</span><div class="bar" style="height:79%"></div></div>
@@ -293,456 +326,153 @@
         <div class="mo"><span class="n">26</span><div class="bar" style="height:21%"></div></div>
         <div class="mo"><span class="n">59</span><div class="bar" style="height:48%"></div></div>
       </div>
-      <div class="mlab"><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct*</span></div>
+      <div class="mlab"><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
     </div>
-    <p class="sub" style="font-size:13px;margin-top:8px">* October to date. Tasks shipped per month, from git.</p>
-
-    <div class="eras">
-      <div class="era"><span class="when">Apr – Jun</span><div><h3>The prototype: does a phone know how you drive?</h3><p>Two hundred-plus fast iterations on event detection, maps, coaching cards and sensor debugging. The original single 2,900-line file was rebuilt into modules on Vite with unit tests, so the scoring could change without breaking everything around it. Drives on the same road began to be compared against each other, and a first admin dashboard went up.</p></div></div>
-      <div class="era"><span class="when">Jul</span><div><h3>A game, not just a gauge</h3><p>Destination Drive scored two things at once: on time and smooth. The screen edges started glowing with what the car was doing.</p></div></div>
-      <div class="era"><span class="when">Aug</span><div><h3>A real app with real accounts</h3><p>The native iOS app ran on a real phone, and a git push now builds and ships it to TestFlight with no manual steps. Sign-in and cloud restore made history follow the driver. ETAs became traffic-aware, the car's own numbers were recorded into every drive, and GPS tracks were locked down.</p></div></div>
-      <div class="era"><span class="when">Sep</span><div><h3>An honest score</h3><p>The scoring engine was rebuilt on the three signals the hardware measures reliably and fitted to real drives. The dongle learned nine more channels. Hosting consolidated on Cloudflare, and the admin dashboard moved there with a daily digest email.</p></div></div>
-      <div class="era"><span class="when">Oct</span><div><h3>From scoring to teaching</h3><p>GPS that survives a locked screen, the throttle foot in the score, red lights that don't cost you, zero permission prompts, the Dynamic Island, a leaderboard with the fake tabs cut. Then the shift toward the mission: points per smooth mile, "are you getting better?", plain-English Car Health, and the car identifying itself when you plug in. Drivers beyond the founder started using it: the admin dashboard shows at least three.</p></div></div>
+    <div class="facts" style="margin-top:18px">
+      <div class="k">Apr – Jun</div><div class="v">Prototype web app. Event detection, maps, coaching cards. The original 2,900-line file rebuilt into modules on Vite with tests. Same-road comparison. First admin dashboard.</div>
+      <div class="k">Jul</div><div class="v">Destination drives (on time and smooth). Edge-color live feedback.</div>
+      <div class="k">Aug</div><div class="v">Native iOS app; every push to main ships to TestFlight. Accounts and cloud restore. Traffic-aware ETAs. OBD data recorded into drives. GPS tracks locked to owners.</div>
+      <div class="k">Sep</div><div class="v">Scoring rebuilt on reliable signals and fitted to real drives. Nine more OBD channels. Hosting consolidated on Cloudflare; admin dashboard with a daily digest email.</div>
+      <div class="k">Oct</div><div class="v">Locked-screen GPS, throttle scoring, red-light credit, zero permission prompts, Dynamic Island, cleaned-up leaderboard. Then points, the improvement verdict, Car Health and VIN identification. First drivers beyond the founder.</div>
     </div>
-
-    <h3 style="margin-top:34px">What the mistakes taught us</h3>
-    <div class="col"><p class="sub">Several principles on this page exist because something broke. Each of these looked fine in code and failed the moment something real was exercised.</p></div>
-    <div class="lessons">
-      <div class="lesson"><span class="k">Phantom turns</span><p>GPS heading jitter fired hundreds of fake "sharp turns" per drive. Sideways g was dropped from the score until it can be measured properly. <b>A blank beats a guess.</b></p></div>
-      <div class="lesson"><span class="k">The silent leaderboard</span><p>Score uploads went to a table that never existed, and a quiet error handler hid it for months. Standings are now built on the server from real drives. <b>Verify on the real thing.</b></p></div>
-      <div class="lesson"><span class="k">Open GPS tracks</span><p>A database rule let anyone with the public key read every drive's route. It was locked to owners only and checked from outside. <b>Your drives are yours.</b></p></div>
-      <div class="lesson"><span class="k">8 digits, 6 boxes</span><p>Sign-in emailed an 8-digit code into a 6-character field. Both halves read fine on their own; only the live config showed it. <b>Verify on the real thing.</b></p></div>
-      <div class="lesson"><span class="k">A frozen deploy</span><p>A package was added for one build system but not the other, and the web app silently stopped updating for a day. Both lockfiles now move together. <b>Verify on the real thing.</b></p></div>
-      <div class="lesson"><span class="k">Unfair town scores</span><p>Pedal thresholds treated ordinary city speed changes as violent, so smooth town drives scored 59–75 while highways scored 95. Anchors were refitted to real drives. <b>The road's fault isn't yours.</b></p></div>
+    <h3 style="margin-top:26px">Incidents that shaped the principles</h3>
+    <div class="facts">
+      <div class="k">Phantom turns</div><div class="v">GPS heading jitter created false sharp turns; sideways g was removed from the score.</div>
+      <div class="k">Silent leaderboard</div><div class="v">Score uploads went to a table that didn't exist, hidden by an error handler, for months. Now built on the server from drives.</div>
+      <div class="k">Open GPS tracks</div><div class="v">A database rule let anyone with the public key read routes. Locked to owners and verified externally.</div>
+      <div class="k">Code length</div><div class="v">Sign-in sent an 8-digit code to a 6-character field. Found only by checking the live config.</div>
+      <div class="k">Frozen deploy</div><div class="v">A package added to one lockfile but not the other stopped web deploys for a day. Both lockfiles now change together.</div>
+      <div class="k">Town scores</div><div class="v">Pedal thresholds rated normal city driving 59–75 while highways got 95. Thresholds refitted to real drives.</div>
     </div>
   </section>
 
-  <!-- ORDER -->
-  <section id="order">
-    <p class="eyebrow">How we decide</p>
-    <h2>The order we decide in</h2>
-    <div class="col"><p class="sub">When two good things pull against each other, this is the tie-breaker. The ranking is deliberate, including the third one.</p></div>
-    <div class="rank">
-      <div class="rk first">
-        <div class="ord">1<sup>st</sup></div>
-        <div>
-          <h3>Make a better driver</h3>
-          <p>Every feature answers to this. A cool car feature that doesn't change how someone drives waits. A plain one that does ships first. That is why "are you getting better?" shipped before navigation, and why Car Health explains codes instead of just listing them.</p>
-        </div>
-      </div>
-      <div class="rk">
-        <div class="ord">2<sup>nd</sup></div>
-        <div>
-          <h3>Tell the truth</h3>
-          <p>A driver changes their habits based on what we show them, so a wrong number does real harm. We show a blank before a guess, and "we couldn't read it" before a false all-clear. If the data can't support a claim, the app doesn't make it.</p>
-        </div>
-      </div>
-      <div class="rk third">
-        <div class="ord">3<sup>rd</sup></div>
-        <div>
-          <h3>Safety third</h3>
-          <p>We don't sell fear, and we don't pitch ourselves as a safety or insurance product. Smooth, systems-thinking drivers are safer drivers, so safety is the result of the first two, and we let it be the result. In the product it shapes what a moving car gets: feedback you can read at a glance, one short message at a time. Anything that needs a real decision waits until you've parked.</p>
-        </div>
-      </div>
-    </div>
-    <div class="test">
-      <span class="eyebrow">The one-question test</span>
-      <p class="q">"Does this make someone a better driver?"</p>
-      <p>We ask it of every feature, screen and number. When the answer is "not really, but it's cool," the feature goes in the queue behind one that does.</p>
-    </div>
-  </section>
+  <!-- ROLES -->
+  <section id="roles">
+    <span class="lbl">Notes by role</span>
+    <h2>What each role needs</h2>
 
-  <!-- PRINCIPLES -->
-  <section id="principles">
-    <p class="eyebrow">Principles</p>
-    <h2>What we believe, and where it shows</h2>
-    <div class="col"><p class="sub">Each principle is tied to a real decision in the app. If a principle can't point to one, it isn't a principle yet.</p></div>
-    <div class="principles">
-
-      <div class="pr">
-        <div><h3>Smooth before fast</h3><p class="why">Speed is easy. Holding a car calm at speed is the skill, so that's what we reward, and fast-but-rough earns nothing extra.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-algo">Algorithm</span><span>Beating the ETA only adds to your score if the drive scored 80 or higher before the clock. Below that, the clock can't lift a rough drive.</span></li>
-          <li><span class="lens l-algo">Algorithm</span><span>A speed bonus of up to +5 rewards staying smooth at highway pace, scaled by how smooth you were. Sloppy-and-fast gets almost none.</span></li>
-          <li><span class="lens l-ux">UX</span><span>The on-time bonus on the Rewards screen is labelled as a bonus on top of smooth miles, never instead of them.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>The road's fault isn't yours</h3><p class="why">You can't will a red light green. We score what you control and discount what you don't.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-algo">Algorithm</span><span>Once the recap has looked up nearby signals, a stop at a light, its queue or a stop sign counts a quarter of a stop toward momentum. A stop with no signal nearby counts in full.</span></li>
-          <li><span class="lens l-algo">Algorithm</span><span>Parked stretches over 3 minutes (gas, coffee) pause the ETA clock. Moving time is what counts.</span></li>
-          <li><span class="lens l-ux">UX</span><span>The recap explains stops by cause, so a light-heavy commute reads as the road, not as you.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>Points for miles, not minutes</h3><p class="why">A clean hour on the highway is worth more than a clean minute in a parking lot. Points measure distance driven well.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-algo">Algorithm</span><span>10 points per smooth mile. Road within 8 seconds of a harsh moment doesn't count as smooth.</span></li>
-          <li><span class="lens l-ux">UX</span><span>Rewards shows smooth miles, the share of your miles that were smooth, and badges at 10, 50, 100, 250, 500 and 1,000 smooth miles.</span></li>
-          <li><span class="lens l-ux">UX</span><span>We removed vouchers that didn't exist. A promised reward we can't deliver breaks the second principle.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>A blank beats a guess</h3><p class="why">When the data can't support a claim, we say less, never more.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-algo">Algorithm</span><span>A drive with no ride-quality data is capped at 95. We can't certify a calm cabin we never sensed.</span></li>
-          <li><span class="lens l-algo">Algorithm</span><span>"Are you getting better?" only compares drives scored the same way, and skips anything that changed because the app changed.</span></li>
-          <li><span class="lens l-data">Data</span><span>A trouble-code read that times out keeps the last good report. It is never shown as "No trouble codes."</span></li>
-          <li><span class="lens l-data">Data</span><span>A VIN read that doesn't agree with itself is thrown away rather than matched to the wrong car.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>Eyes on the road</h3><p class="why">The app is used at 70 mph. Anything that competes with the road loses.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-ux">UX</span><span>Live feedback lives at the screen's edges as color you read with peripheral vision: green smooth, amber firm, red harsh.</span></li>
-          <li><span class="lens l-ux">UX</span><span>Trouble codes and "Is this your car?" wait on Home until you've parked.</span></li>
-          <li><span class="lens l-ux">UX</span><span>Mid-drive there's at most one short insight or harsh-moment flash on screen at a time. The two questions the app does ask on the road ("Drive started, stop?" when the dongle links, and "Looks like you've parked") are one tap and dismiss themselves if ignored.</span></li>
-          <li><span class="lens l-ux">UX</span><span>No permission prompts mid-drive. Motion and location go through native iOS services that ask once.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>Subtract before you add</h3><p class="why">Every element on a driving screen costs attention. The default answer to "should this be on screen?" is no.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-ux">UX</span><span>The improvement verdict replaced a line on Home instead of adding a card.</span></li>
-          <li><span class="lens l-ux">UX</span><span>Driver modes will remove things, never add them. A pro never sees "check your mirrors." A first-timer never sees peak g.</span></li>
-          <li><span class="lens l-ux">UX</span><span>Fake leaderboard tabs with placeholder rows were cut entirely rather than kept as decoration.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>Your drives are yours</h3><p class="why">We collect where you drove and how. That data belongs to the driver.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-data">Data</span><span>Drives are stored on your phone first. The cloud copy exists so your history follows you to a new phone.</span></li>
-          <li><span class="lens l-data">Data</span><span>Cloud drive rows are readable only by their owner. GPS tracks were locked down after we found they were readable by anyone.</span></li>
-          <li><span class="lens l-data">Data</span><span>The leaderboard is built on the server from your saved drives, not from a separate score the app sends.</span></li>
-          <li><span class="lens l-data">Data</span><span>Your VIN goes to NHTSA's public decoder and nowhere else. Deleting a drive deletes its cloud copy.</span></li>
-        </ul>
-      </div>
-
-      <div class="pr">
-        <div><h3>Verify on the real thing</h3><p class="why">Code that reads well has still shipped broken. We check what actually happens, then say so plainly.</p></div>
-        <ul class="seen">
-          <li><span class="lens l-build">Build</span><span>Every change gets an independent reviewer whose job is to find how it fails, and every screen change is rendered and critiqued at phone size.</span></li>
-          <li><span class="lens l-build">Build</span><span>The pedal and stop anchors are fitted to real drives; the ride-composure anchors are still provisional. When the engine changes, stored drives are rescored so history stays comparable.</span></li>
-          <li><span class="lens l-build">Build</span><span>When something hasn't been tested on a real car yet, the roadmap says so.</span></li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- RUBRIC -->
-  <section id="rubric">
-    <p class="eyebrow">The scoring rubric</p>
-    <h2>How a drive becomes a number</h2>
-    <div class="col"><p class="sub">The score uses three things the hardware can measure reliably. Sideways g from GPS heading was tried and dropped: it produced hundreds of phantom "sharp turns." The weights below are the live values in the app.</p></div>
-
-    <div class="weights" role="img" aria-label="Score weights: smoothness 50 percent, momentum 30 percent, braking 20 percent">
-      <div class="wbar"><div class="w-s">Smoothness 50%</div><div class="w-m">Momentum 30%</div><div class="w-b">Braking 20%</div></div>
-      <div class="wscale" aria-hidden="true"><span style="left:0">0</span><span style="left:50%">50</span><span style="left:80%">80</span><span style="left:100%">100</span></div>
-    </div>
-
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>Dimension</th><th>Weight</th><th>What it measures</th><th>Scores 100 → 0</th></tr></thead>
-        <tbody>
-          <tr><td><span class="nm">Smoothness</span></td><td><span class="wt">0.50</span></td><td class="d">How hard you push the car most of the time (85th-percentile forward/back g), how abruptly you change pedals (jerk), how calm the cabin felt (ride composure, when the phone is mounted), and how you work the throttle (when a dongle is plugged in). Missing signals hand their weight back to the ones present.</td><td><span class="anch">0.30 → 2.5 m/s²</span><br><span class="anch">0.05 → 0.6 m/s³</span><br><span class="anch">2 → 15 %/s throttle</span></td></tr>
-          <tr><td><span class="nm">Momentum</span></td><td><span class="wt">0.30</span></td><td class="d">Full stops per mile. Reading the road to keep rolling instead of stop-and-go. Forced stops (lights, queues, signs) count 0.25.</td><td><span class="anch">0 → 4.5 stops/mi</span></td></tr>
-          <tr><td><span class="nm">Braking anticipation</span></td><td><span class="wt">0.20</span></td><td class="d">How gently you slowed over the 30 seconds before each stop. Easing in early scores high; braking late and sharp scores low.</td><td><span class="anch">0.5 → 2.0 m/s² avg</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="layers">
-      <div class="layer">
-        <span class="tag">Layer 1 · the score</span>
-        <h3>Out of 100</h3>
-        <p>The weighted sum, plus a speed bonus for staying smooth at pace. A perfect 100 is meant to be nearly impossible.</p>
-        <div class="f">score = Σ dim × weight<br>+ up to 5 (avg 25→65 mph) × base/100<br>cap 95 without ride data</div>
-      </div>
-      <div class="layer">
-        <span class="tag">Layer 2 · the clock</span>
-        <h3>Destination drives</h3>
-        <p>Set a destination and arrive. Beating the ETA can lift the score by up to 15, only when the drive scored 80+ before the clock. Arriving late costs points only when the ETA was traffic-aware.</p>
-        <div class="f">bonus = 15 × beat/20% × base/100<br>if base ≥ 80, else 0</div>
-      </div>
-      <div class="layer">
-        <span class="tag">Layer 3 · points</span>
-        <h3>Smooth miles</h3>
-        <p>Points bank every drive, destination or not. The on-time bonus stacks on top under the same smoothness gate.</p>
-        <div class="f">points = 10 × smooth miles<br>+ up to 50% if on time &amp; base ≥ 80</div>
+    <div class="role" id="for-drivers">
+      <span class="lbl">Drivers</span>
+      <h3>Using Smooth AF</h3>
+      <div class="two">
+        <div><h4>What you get</h4><ul>
+          <li>A score out of 100 for every drive, with a map of harsh moments and why they happened.</li>
+          <li>10 points per smooth mile, plus a bonus for beating the ETA while driving smoothly.</li>
+          <li>A line on Home telling you whether you're improving, and at what.</li>
+          <li>With an OBD-II plug-in reader: trouble codes in plain English, and your car added to the Garage automatically.</li>
+        </ul></div>
+        <div><h4>How we treat you</h4><ul>
+          <li>Your drives stay on your phone; the cloud copy is readable only by you.</li>
+          <li>Unavoidable stops at lights and stop signs barely count against you.</li>
+          <li>Anything that needs a decision waits until you've parked.</li>
+          <li>If something can't be measured properly, the app says so instead of guessing.</li>
+          <li>Points can't be redeemed yet.</li>
+        </ul></div>
       </div>
     </div>
 
-    <div class="col" style="margin-top:24px">
-      <h3>And the verdict on you</h3>
-      <p class="sub">"Are you getting better?" compares your last 5 drives with the 10 before them: hard brakes, launches and turns per 10 miles (pooled by distance, so a short hop can't swamp a long drive), the share of miles driven smooth, pedal smoothness and score. A change has to clear 20% on a rate or 3 points on a score to count. It leads with progress, and only names a slip when nothing improved.</p>
-    </div>
-  </section>
-
-  <!-- FINGERPRINT -->
-  <section id="fingerprint">
-    <p class="eyebrow">The driving fingerprint</p>
-    <h2>A score says how smooth. A fingerprint says <em>how you drive.</em></h2>
-    <div class="col"><p class="sub">Two drivers can post the same score through the same bend. The difference shows up in the accelerator pedal traced through the corner, against the g-force the car actually pulled. That pairing is the richest signal we can read, and it's where the score is heading.</p></div>
-
-    <div class="corners">
-      <div class="corner bad">
-        <span class="tag">Brake &amp; gun</span>
-        <h3>In too hot, then a stab</h3>
-        <p>Full lift, hard brake into the apex, then slam the throttle out. The g-arc spikes late and lopsided.</p>
-        <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Brake-and-gun corner: pedal drops to zero then spikes on exit; lateral g is a late, sharp spike">
-          <line class="ax" x1="34" y1="176" x2="330" y2="176" stroke-width="1"/>
-          <line class="ph" x1="118" y1="24" x2="118" y2="176" stroke-width="1" stroke-dasharray="3 4"/>
-          <line class="ph" x1="200" y1="24" x2="200" y2="176" stroke-width="1" stroke-dasharray="3 4"/>
-          <line class="ph" x1="282" y1="24" x2="282" y2="176" stroke-width="1" stroke-dasharray="3 4"/>
-          <text x="118" y="194" font-size="9.5" text-anchor="middle">ENTRY</text>
-          <text x="200" y="194" font-size="9.5" text-anchor="middle">APEX</text>
-          <text x="282" y="194" font-size="9.5" text-anchor="middle">EXIT</text>
-          <polygon class="latfill" points="34,176 34,172 90,166 140,150 185,80 200,48 214,92 250,150 300,170 330,173 330,176"/>
-          <polyline class="latg" points="34,172 90,166 140,150 185,80 200,48 214,92 250,150 300,170 330,173" fill="none" stroke-width="2" stroke-linejoin="round"/>
-          <polyline class="spd" points="34,52 90,70 140,112 185,152 200,158 230,132 280,92 330,66" fill="none" stroke-width="1.6" stroke-dasharray="1 5" stroke-linecap="round"/>
-          <polyline class="pedal" points="34,92 96,96 112,172 190,172 198,172 205,34 216,30 244,58 300,50 330,52" fill="none" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-          <text class="warn-t" x="126" y="166" font-size="9.5" font-weight="600">full lift</text>
-          <text class="warn-t" x="222" y="26" font-size="9.5" font-weight="600">SLAM</text>
-        </svg>
-      </div>
-      <div class="corner good">
-        <span class="tag">Carry the line</span>
-        <h3>Steady in, smooth out</h3>
-        <p>Ease off, carry speed to the apex, roll the throttle back on. One clean, symmetric hump.</p>
-        <svg class="trace" viewBox="0 0 340 208" role="img" aria-label="Racing-line corner: pedal eases to a steady low then rolls on smoothly; lateral g is a clean symmetric arc">
-          <line class="ax" x1="34" y1="176" x2="330" y2="176" stroke-width="1"/>
-          <line class="ph" x1="118" y1="24" x2="118" y2="176" stroke-width="1" stroke-dasharray="3 4"/>
-          <line class="ph" x1="200" y1="24" x2="200" y2="176" stroke-width="1" stroke-dasharray="3 4"/>
-          <line class="ph" x1="282" y1="24" x2="282" y2="176" stroke-width="1" stroke-dasharray="3 4"/>
-          <text x="118" y="194" font-size="9.5" text-anchor="middle">ENTRY</text>
-          <text x="200" y="194" font-size="9.5" text-anchor="middle">APEX</text>
-          <text x="282" y="194" font-size="9.5" text-anchor="middle">EXIT</text>
-          <polygon class="latfill" points="34,176 34,172 80,150 128,104 172,74 200,68 228,74 272,104 320,150 330,158 330,176"/>
-          <polyline class="latg" points="34,172 80,150 128,104 172,74 200,68 228,74 272,104 320,150 330,158" fill="none" stroke-width="2" stroke-linejoin="round"/>
-          <polyline class="spd" points="34,60 90,80 140,100 190,110 200,112 240,104 290,86 330,66" fill="none" stroke-width="1.6" stroke-dasharray="1 5" stroke-linecap="round"/>
-          <polyline class="pedal" points="34,96 78,120 122,138 168,144 200,145 236,128 278,86 330,58" fill="none" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-          <text class="good-t" x="176" y="162" font-size="9.5" font-weight="600">steady, light</text>
-          <text class="good-t" x="290" y="50" font-size="9.5" font-weight="600">roll-on</text>
-        </svg>
+    <div class="role" id="for-cto">
+      <span class="lbl">CTO</span>
+      <h3>Engineering</h3>
+      <div class="chips"><span>Vanilla JS PWA</span><span>Vite</span><span>Vitest</span><span>Capacitor 8 (iOS)</span><span>Swift plugins</span><span>Supabase Postgres + Auth</span><span>Cloudflare Pages + Functions</span><span>GitHub Actions → TestFlight</span><span>Leaflet, Mapbox, OSM</span></div>
+      <div class="two">
+        <div><h4>Architecture</h4><ul>
+          <li><b>Sensors:</b> native Core Motion (custom Swift plugin, 60 Hz), native background GPS, ELM327 OBD reader over Bluetooth LE. Live Activity plugin for the Dynamic Island.</li>
+          <li><b>Scoring:</b> pure JS on the phone (<code>services/scoring.js</code>), unit-tested; stored drives are rescored when the engine changes.</li>
+          <li><b>Data:</b> local-first (up to 200 drives on device), mirrored to Supabase with owner-only row security. Sign-in via Apple or email. Server endpoints are Cloudflare Pages Functions, including the password-gated admin dashboard.</li>
+          <li><b>Deploy:</b> push to <code>main</code> deploys web on Cloudflare and builds, signs and uploads iOS to TestFlight.</li>
+          <li><b>Process:</b> two AI sessions push to <code>main</code> with a rebase loop, no force-push. Adversarial review on every change. <code>package.json</code> changes update both lockfiles. Rules in <code>CLAUDE.md</code>.</li>
+        </ul></div>
+        <div><h4>Open items</h4><ul>
+          <li>Scores are computed on the phone and uploaded; server-side scoring is needed before the leaderboard matters.</li>
+          <li>Database lockdown for three ID-trusting functions is built; it goes live when the migration is applied.</li>
+          <li>The auto-migrate job's secret is broken; migrations are applied by hand.</li>
+          <li>OBD trouble codes and VIN reading are untested on a real car.</li>
+          <li>No Android app.</li>
+          <li>Full tech-debt list is on the roadmap.</li>
+        </ul></div>
       </div>
     </div>
-    <div class="legend">
-      <span><i style="background:var(--tang)"></i>Accelerator pedal (OBD)</span>
-      <span><i style="background:var(--gold)"></i>Sideways g (phone)</span>
-      <span><i style="background:var(--sky);height:2px"></i>Speed (OBD)</span>
+
+    <div class="role" id="for-cpo">
+      <span class="lbl">CPO</span>
+      <h3>Product</h3>
+      <div class="two">
+        <div><h4>Current product</h4><ul>
+          <li><b>Core loop:</b> drive, read the recap, see the improvement line on Home, drive again.</li>
+          <li><b>Home:</b> lifetime score, improvement line, drives, trends, Routes, Rewards, Board, Garage, Start Drive.</li>
+          <li><b>Driving screen:</b> speed, live score, edge color, one insight at a time; auto-starts when the reader connects.</li>
+          <li><b>Recap:</b> harsh-moment map, drive summary, facts, coaching cards, stop causes.</li>
+          <li><b>Garage:</b> cars (added by VIN) and Car Health. <b>Rewards</b> and <b>leaderboard</b>.</li>
+          <li><b>Decided:</b> no settings screen; modes only remove things; coaching lives in the recap and on Home; nothing undeliverable is shown.</li>
+        </ul></div>
+        <div><h4>Open items</h4><ul>
+          <li>Next build: coaching that tracks repeat habits.</li>
+          <li>Fleet-wide improvement rate is not yet measured.</li>
+          <li>Decisions pending: when to start driver modes; build navigation or hand off to map apps; what points redeem for.</li>
+          <li>Hands-free recording without a reader.</li>
+        </ul></div>
+      </div>
     </div>
 
-    <div class="tiers">
-      <div class="tier">
-        <h3>From the dongle</h3>
-        <ul>
-          <li>Throttle and pedal <span class="st st-live">in the score</span></li>
-          <li>True wheel speed, RPM, load, gear <span class="st st-live">recorded</span></li>
-          <li>Torque → horsepower, temps, fuel level, voltage <span class="st st-live">recorded</span></li>
-          <li>VIN and trouble codes <span class="st st-live">read on connect</span></li>
-        </ul>
+    <div class="role" id="for-cmo">
+      <span class="lbl">CMO</span>
+      <h3>Marketing</h3>
+      <div class="two">
+        <div><h4>Positioning</h4><ul>
+          <li>Smooth driving as a skill worth getting better at. Confident, slightly irreverent voice.</li>
+          <li><b>Use:</b> smooth, efficient, reading the road, getting better, your data is yours.</li>
+          <li><b>Avoid:</b> "safer driving," insurance, discounts, crash prevention.</li>
+          <li><b>Don't promise:</b> redeemable points or an Android app (neither exists).</li>
+          <li><b>Competition:</b> insurer tracking apps score drivers for the insurer; Waze rewards reporting, not driving.</li>
+        </ul></div>
+        <div><h4>Current state</h4><ul>
+          <li>Invite-only TestFlight; web app installs from <code>smoothafdriving.pages.dev/install</code>.</li>
+          <li>Built-in share points: post-drive score card, leaderboard, badges, Dynamic Island.</li>
+          <li>Candidate first audiences: driving enthusiasts, daily commuters, teens with parents.</li>
+          <li><code>smoothafdriving.com/tracker</code> still serves an old tracker and should become a download link.</li>
+        </ul></div>
       </div>
-      <div class="tier">
-        <h3>From the phone</h3>
-        <ul>
-          <li>Forward/back g and jerk <span class="st st-live">in the score</span></li>
-          <li>Cabin vibration (ride composure) <span class="st st-live">in the score</span></li>
-          <li>GPS route, so the same road is compared against itself <span class="st st-live">live</span></li>
-          <li>Sideways g through each corner <span class="st st-next">next</span></li>
-        </ul>
-      </div>
-      <div class="tier">
-        <h3>Not on a standard dongle</h3>
-        <ul>
-          <li>Brake pedal and steering angle live on the car's private network. We rebuild both from what we can see: pedal at zero + speed falling + backward g is a brake, graded by its shape.</li>
-          <li>We say so up front rather than promise data we can't read.</li>
-        </ul>
+    </div>
+
+    <div class="role" id="for-investors">
+      <span class="lbl">Investors</span>
+      <h3>Investment summary</h3>
+      <div class="two">
+        <div><h4>Business model</h4><ul>
+          <li><b>Free:</b> scoring, points, improvement, basic car-health scan.</li>
+          <li><b>Subscription (planned):</b> Car Concierge, with ongoing car-health watch, maintenance timelines and car-specific help.</li>
+          <li><b>Marketplace (planned):</b> human driving coaches working from drive data, starting with teens and parents.</li>
+          <li><b>Partners (planned):</b> redeemable rewards such as fuel and car care.</li>
+        </ul></div>
+        <div><h4>Current state</h4><ul>
+          <li>Working iOS and web app; 379 tasks shipped in under six months by one founder with AI engineering.</li>
+          <li>Last dashboard snapshot: 195 drives (many the founder's), 5 drivers active in a week, 2 returning drivers. At least three drivers besides the founder.</li>
+          <li>No revenue. Paid tiers are designed, not built.</li>
+          <li>Risks: scoring tuned on few drivers, iOS only, retention unproven.</li>
+          <li>Funding would go to real-car testing, Android, server-side scoring, and reaching the first thousand drivers.</li>
+        </ul></div>
       </div>
     </div>
   </section>
 
-  <!-- VISION -->
-  <section id="vision">
-    <p class="eyebrow">Where it's going</p>
-    <h2>Your car's concierge, and a coach in the passenger seat</h2>
-    <div class="col"><p class="sub">Maps apps have grown bloated and Waze rewards you for reporting, not for how you drive. There is room for one honest, driver-first app that covers a driver's whole life with their car.</p></div>
-    <div class="horizon">
-      <div class="hz now"><span class="when">Shipped</span><h3>Score, points, improvement, car health</h3><p>Smooth-mile points, "are you getting better?", plain-English trouble codes, and the car identifying itself when you plug in.</p></div>
-      <div class="hz next"><span class="when">Next</span><h3>Coaching that remembers</h3><p>Tips that notice a pattern ("third drive braking late"), suggest a drill, and back off once you've fixed it.</p></div>
-      <div class="hz"><span class="when">Later</span><h3>Modes, from never-driven to pro</h3><p>Same engine, different voice. First Timer gets a pre-drive walkthrough and gentle reminders to scan; Teen links to a parent; Pro gets every number and the leaderboard. Modes remove things, never add them.</p></div>
-      <div class="hz"><span class="when">Later</span><h3>The concierge</h3><p>Your car's manual in plain English, what each warning light means, maintenance timelines, and a proactive heads-up before a code becomes a breakdown. The free scan stays free; the ongoing watch is the paid tier.</p></div>
-      <div class="hz"><span class="when">Horizon</span><h3>Human coaches</h3><p>When a habit won't budge, a real coach reviews telemetry no driving instructor has ever had: every harsh moment on a map, the pedal through every corner. Async review, then ride-alongs, then programs. Teens and their parents first.</p></div>
-    </div>
-  </section>
-
-  <!-- BRIEFINGS -->
-  <section id="briefings">
-    <p class="eyebrow">Briefings</p>
-    <h2>Where you come in</h2>
-    <div class="col"><p class="sub">The same company, seen from five seats. Each briefing says what you need to know, where things stand today, and what you'll own first.</p></div>
-
-    <div class="brief driver" id="for-drivers">
-      <span class="role">For drivers</span>
-      <h3>Drive like you mean it</h3>
-      <p class="big">You already know how to drive. Smooth AF shows you how well, one drive at a time, and helps you get better at the part most people never practice: reading the road so the car barely notices you're there.</p>
-      <div class="bgrid">
-        <div>
-          <h4>What you get</h4>
-          <ul>
-            <li>A score out of 100 for every drive, with a map of every harsh moment and why it happened.</li>
-            <li>Points for every smooth mile, and a bonus when you beat the ETA without rushing.</li>
-            <li>A straight answer on Home: are you getting better, and at what?</li>
-            <li>With an inexpensive plug-in reader: your car's trouble codes explained in plain English, often before the dashboard light comes on.</li>
-          </ul>
-        </div>
-        <div>
-          <h4>What we promise you</h4>
-          <ul>
-            <li>Your drives are yours. They live on your phone, and the cloud copy is readable only by you.</li>
-            <li>We won't scare you or lecture you. Red lights you couldn't avoid don't count against you.</li>
-            <li>Nothing that needs a decision shows up while you're moving.</li>
-            <li>If we can't measure something properly, we won't pretend to.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="brief" id="for-cto">
-      <span class="role">For the CTO</span>
-      <h3>A small, fast, honest stack</h3>
-      <p class="intro">One codebase runs as a web app and as a native iOS app. It was built for speed of change by a solo founder with AI engineering sessions, with verification standing in for a QA team. Your first job is to keep that speed while adding the guard rails a real user base needs.</p>
-      <div class="stack"><span>Vanilla JS PWA</span><span>Vite</span><span>Vitest</span><span>Capacitor 8 · iOS</span><span>Swift plugins</span><span>Supabase Postgres + Auth</span><span>Cloudflare Pages + Functions</span><span>GitHub Actions → TestFlight</span><span>Leaflet · Mapbox · OSM</span></div>
-      <div class="bgrid" style="margin-top:14px">
-        <div>
-          <h4>How it fits together</h4>
-          <ul>
-            <li><b>Sensing:</b> native Core Motion (custom Swift plugin) at 60 Hz, native background GPS, and an ELM327 OBD dongle over Bluetooth LE. A Live Activity plugin drives the Dynamic Island.</li>
-            <li><b>Scoring</b> is pure JS on the phone (<code>services/scoring.js</code>), unit-tested and rescored in place when the engine changes.</li>
-            <li><b>Data</b> is local-first (up to 200 drives on the device), mirrored to Supabase with owner-only row security. Sign-in is Apple or email. Server endpoints are Cloudflare Pages Functions (<code>/api/*</code>), including the password-gated admin dashboard.</li>
-            <li><b>Shipping:</b> push to <code>main</code> deploys the web app on Cloudflare and builds, signs and uploads an iOS build to TestFlight.</li>
-          </ul>
-        </div>
-        <div>
-          <h4>What you'll own first</h4>
-          <ul>
-            <li><b>Score integrity:</b> scores are computed on the phone and uploaded. Move scoring of the uploaded track to the server before the leaderboard matters.</li>
-            <li><b>Pre-launch security:</b> the bare-ID database functions are fixed in code; confirm the migration is live, then audit the rest.</li>
-            <li><b>Migrations:</b> the auto-migrate job's secret is broken, so schema changes are pasted by hand. Fix the pipeline.</li>
-            <li><b>Real-car testing</b> for OBD features (trouble codes, VIN), which are tested against reply formats only.</li>
-            <li><b>Android:</b> not shipped. The web app works there; the native shell doesn't exist yet.</li>
-          </ul>
-        </div>
-      </div>
-      <p class="intro" style="margin:16px 0 0;font-size:14.5px">House rules worth keeping: two engineering sessions push to <code>main</code> with a rebase loop and never force-push; every change gets an adversarial reviewer and screen changes get rendered at phone size; any <code>package.json</code> change updates both lockfiles. The full list is in <code>CLAUDE.md</code>, and open debt is on the roadmap.</p>
-    </div>
-
-    <div class="brief" id="for-cpo">
-      <span class="role">For the CPO</span>
-      <h3>The loop is built. Now make it teach.</h3>
-      <p class="intro">The core loop works end to end: drive, read the recap, see on Home whether you're improving, drive again. The product question for the next quarter is how much coaching the loop can carry before it becomes clutter.</p>
-      <div class="bgrid">
-        <div>
-          <h4>The surfaces today</h4>
-          <ul>
-            <li><b>Home:</b> lifetime score, the improvement line, drives, trends, Routes, Rewards, Board, Garage, Start Drive.</li>
-            <li><b>Driving screen:</b> speed, live score, edge colors, one insight at a time, auto-start when the dongle links.</li>
-            <li><b>Recap:</b> map of harsh moments, a two-line story of the drive, facts, coaching cards, stop causes.</li>
-            <li><b>Garage:</b> cars (added by VIN when you plug in) and Car Health.</li>
-            <li><b>Rewards and leaderboard:</b> smooth-mile points and badges; a server-built board.</li>
-          </ul>
-        </div>
-        <div>
-          <h4>What you'll own first</h4>
-          <ul>
-            <li><b>Next build:</b> coaching that remembers patterns and backs off when you've fixed them.</li>
-            <li><b>Instrument the North Star:</b> each driver sees their own improvement, but the fleet-wide improvement rate isn't measured yet.</li>
-            <li><b>Calls waiting on you:</b> when to start modes (First Timer, Teen, Pro); whether to build navigation or hand off to existing map apps; what points should redeem for.</li>
-            <li><b>Hands-free recording without a dongle,</b> so any drive starts without a tap.</li>
-          </ul>
-        </div>
-      </div>
-      <p class="intro" style="margin:16px 0 0;font-size:14.5px">Calls already made: no settings screen (tuning lives in code), modes only remove things, coaching lives in the recap and on Home rather than mid-drive, and anything that can't be delivered doesn't get shown.</p>
-    </div>
-
-    <div class="brief" id="for-cmo">
-      <span class="role">For the CMO</span>
-      <h3>Smooth is a flex</h3>
-      <p class="intro">Most driving apps sell fear (insurance, crash detection) or convenience (navigation). Smooth AF sells skill and status: being the driver who reads the road three cars ahead and never spills the coffee. The voice is confident and a little irreverent. The name sets the tone.</p>
-      <div class="bgrid">
-        <div>
-          <h4>Positioning</h4>
-          <ul>
-            <li><b>Say:</b> efficient, smooth, systems-thinking, reading the road, getting better, your data is yours.</li>
-            <li><b>Don't say:</b> "safer driving," insurance, discounts, crash prevention. Safety is the outcome, never the pitch, and it brings liability framing we don't want.</li>
-            <li><b>Never promise</b> what isn't shipped: points don't redeem for anything yet, and there's no Android app.</li>
-            <li><b>Against the field:</b> insurer tracking apps score you for the insurer's benefit; Waze rewards reporting, not driving. We reward how you drive, for you.</li>
-          </ul>
-        </div>
-        <div>
-          <h4>Where things stand</h4>
-          <ul>
-            <li>Invite-only on TestFlight, with a handful of invited drivers. The web app installs from <code>smoothafdriving.pages.dev/install</code>.</li>
-            <li>Built-in hooks: a shareable score card after each drive, the leaderboard, smooth-mile badges, the Dynamic Island.</li>
-            <li>Likely first audiences: driving enthusiasts who love a number, commuters with the same route every day, and teens with their parents.</li>
-            <li>The marketing site at smoothafdriving.com still serves an old tracker at <code>/tracker</code>; it should become a download link.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="brief" id="for-investors">
-      <span class="role">For investors</span>
-      <h3>Every car has a driver nobody is coaching</h3>
-      <p class="intro">Drivers learn once, at sixteen, and are never measured again. Phones and inexpensive plug-in readers can now measure how someone drives with more detail than any instructor has ever had. Smooth AF turns that into a habit people want: a score to chase, proof they're improving, and a path to coaching.</p>
-      <div class="bgrid">
-        <div>
-          <h4>The business</h4>
-          <ul>
-            <li><b>Free:</b> scoring, points, improvement, and a basic car-health scan. This is the hook and the data engine.</li>
-            <li><b>Subscription:</b> the Car Concierge, with ongoing car-health watch, maintenance timelines and plain-English help for your specific car.</li>
-            <li><b>Marketplace:</b> human driving coaches who work from real telemetry, starting with teens and their parents.</li>
-            <li><b>Partners:</b> redeemable rewards (fuel, car care) once points have a track record.</li>
-          </ul>
-        </div>
-        <div>
-          <h4>Where it stands, honestly</h4>
-          <ul>
-            <li>A working native iOS app and web app, built in under six months by one founder with AI engineering: 379 shipped tasks.</li>
-            <li>Early usage: invite-only, with at least three drivers besides the founder. The last dashboard snapshot showed 195 drives logged (many of them the founder's own), 5 drivers active in a week and 2 returning drivers. This is a working product, not yet traction.</li>
-            <li>No revenue yet. The paid tiers are designed, not built.</li>
-            <li>Main risks: scoring tuned on few drivers so far, iOS only, and retention not yet proven at scale. What money accelerates: real-car testing, Android, server-side scoring, and getting the app to the first thousand drivers.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- OWED -->
-  <section id="owed">
-    <p class="eyebrow">What we still owe</p>
-    <h2>Where we fall short today</h2>
-    <div class="col"><p class="sub">The second principle applies to this page too.</p></div>
-    <div class="owed">
-      <div class="ow"><span class="k">Calibration</span><p>The scoring anchors are fitted to a few drivers' real drives. With more drivers they will move, and a city-heavy driver may still read a little low.</p></div>
-      <div class="ow"><span class="k">Untested</span><p>Car Health and the VIN read are tested against the reply formats dongles use, not yet on a real car.</p></div>
-      <div class="ow"><span class="k">Security</span><p>Three database functions trusted a bare device or account ID. The fix is built and goes live with one database update: the two developer read functions are removed, and deleting, claiming or restoring a drive needs proof it's yours (your account, or a key only the phone that recorded it holds). Drives uploaded before Oct 17, 2026 carry no key, so they stay reachable by device ID until they're claimed.</p></div>
-      <div class="ow"><span class="k">Integrity</span><p>The app computes each drive's score on the phone and uploads it, so a determined user could post a score they didn't earn. Scoring on the server from the uploaded track would close that.</p></div>
-      <div class="ow"><span class="k">Braking</span><p>The braking score was meant to reward longer approaches too, but the approach length currently comes out the same for almost every stop, so only how gently you slowed counts.</p></div>
-      <div class="ow"><span class="k">Portability</span><p>On a new phone, points for older drives are estimated from the score, because the cloud doesn't store them yet.</p></div>
-      <div class="ow"><span class="k">Rewards</span><p>Points can't be redeemed for anything yet. Until they can, the app says so.</p></div>
+  <!-- GAPS -->
+  <section id="gaps" class="gaps">
+    <span class="lbl">Known gaps</span>
+    <h2>Known gaps</h2>
+    <div class="facts">
+      <div class="k">Calibration</div><div class="v">Scoring thresholds are fitted to a few drivers' drives and will shift with more. Ride-composure thresholds are provisional.</div>
+      <div class="k">Untested</div><div class="v">Car Health and VIN reading are tested against reader reply formats, not a real car.</div>
+      <div class="k">Security</div><div class="v">Three database functions trusted a bare device or account ID. The fix is built and goes live with one database update: developer read functions are removed, and deleting, claiming or restoring a drive requires proof of ownership. Drives uploaded before Oct 17, 2026 stay reachable by device ID until claimed.</div>
+      <div class="k">Integrity</div><div class="v">Scores are computed on the phone, so a determined user could upload a score they didn't earn.</div>
+      <div class="k">Braking</div><div class="v">The approach-length half of the braking score doesn't vary between stops; only deceleration counts.</div>
+      <div class="k">Portability</div><div class="v">On a new phone, points for older drives are estimated because the cloud doesn't store them.</div>
+      <div class="k">Rewards</div><div class="v">Points can't be redeemed yet.</div>
     </div>
   </section>
 
   <footer>
-    <span>Smooth AF · effective &amp; efficient</span>
-    <span>Linked from the Build Log &amp; Roadmap · numbers match the live app</span>
+    <span>Smooth AF</span>
+    <span>Numbers match the live app · current status on the Build Log &amp; Roadmap</span>
   </footer>
 </div>
