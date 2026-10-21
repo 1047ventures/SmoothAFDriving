@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 17, 2026 · 7:05 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 20, 2026 · 10:46 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -230,6 +230,10 @@
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
+        <summary><span class="tag t-ship tn">T395</span><span class="ent-t">Connect your reader from the Garage</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The OBD reader could only be connected mid-drive, from a panel called &ldquo;Sensors&rdquo;. The Garage now has an <b>OBD reader</b> row &mdash; status, Connect reader / Disconnect, the adapter list, and one line of setup help &mdash; right above Car Health. Same connection as the drive screen, always in sync; connecting from the Garage never starts a drive. Wireframes audit item F2 (now closed).</div>
+      </details>
+      <details class="ent">
         <summary><span class="tag t-ship tn">T377</span><span class="ent-t">Plug in &rarr; your car joins the Garage by itself</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">On connect the dongle reads the car&rsquo;s VIN; NHTSA&rsquo;s free decoder turns it into year, make, model, trim and body type. A car already in the Garage becomes the active one silently (two-car households get the right car every time). A new car is asked about on Home after the drive &mdash; <b>Add to Garage</b>, <b>It&rsquo;s my &lt;car&gt;</b> (fills in the VIN and blanks), or <b>Not my car</b>. Car Health now files under the real car. Doubtful VIN reads are rejected rather than guessed. Untested on a real car yet &mdash; your next dongle connect is the first live read.</div>
       </details>
@@ -240,10 +244,6 @@
       <details class="ent">
         <summary><span class="tag t-ship tn">T373</span><span class="ent-t">&ldquo;Are you getting better?&rdquo; &mdash; answered on Home</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The line under your name now says whether you&rsquo;re improving &mdash; e.g. <b>&ldquo;Hard brakes down to 1.0 per 10 mi, from 4.0 &mdash; over your last 5 drives&rdquo;</b> (green), or what slipped plus one tip (amber). Tap it for that trend. Your newest drive&rsquo;s recap carries the same line. It only compares like with like: drives scored by today&rsquo;s engine, hard-event counts only since the Oct 15 motion change, and enough miles and events that a swing means something.</div>
-      </details>
-      <details class="ent">
-        <summary><span class="tag t-ship tn">T371</span><span class="ent-t">Points for every smooth mile &mdash; honest rewards</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">10 points per smooth mile. Beating the ETA stacks up to +50% &mdash; only if you stayed smooth; rough-but-fast earns nothing and no longer lifts the score. Rewards shows points, smooth miles and smooth-mile badges instead of vouchers that didn&rsquo;t exist.</div>
       </details>
       <details class="ent" id="ip-q3">
         <summary><span class="tag t-ship tn">Q3</span><span class="ent-t">Background GPS &mdash; denser tracks, locked-screen drives</span><span class="ent-chev">&#9654;</span></summary>

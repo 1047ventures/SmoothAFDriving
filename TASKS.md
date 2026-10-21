@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**379 tasks shipped** as of 2026-10-17.
+**395 tasks shipped** as of 2026-10-20.
 
 
 ## 2026-04
@@ -399,3 +399,19 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T377** · VIN review fixes: never a wrong VIN; prompt polish  _( 2026-10-16 )_
 - **T378** · Kill the 'localhost would like to use your location' prompt on iOS  _( 2026-10-17 )_
 - **T379** · Drive-start location read leaves the permission ask to the drive watcher  _( 2026-10-17 )_
+- **T380** · Values & Vision page (replaces the Driving Fingerprint); recap rescore keeps the clock  _( 2026-10-17 )_
+- **T381** · Close bare-ID database functions: drop *_dev pull RPCs, owner-only delete_my_drive  _( 2026-10-17 )_
+- **T382** · Values page: correct the mid-drive claim (owner comment)  _( 2026-10-17 )_
+- **T383** · Claim + anonymous restore need the device secret for new rows; upload retry loops over lagging columns  _( 2026-10-17 )_
+- **T384** · Test: claim_drives call carries the device secret  _( 2026-10-17 )_
+- **T385** · Values: Security item reflects the built bare-ID lockdown  _( 2026-10-17 )_
+- **T386** · Values & Vision becomes the onboarding doc: history + role briefings  _( 2026-10-17 )_
+- **T387** · Values & Vision: plain need-to-know rewrite in the app's branding  _( 2026-10-17 )_
+- **T388** · Values & Vision: Smooth AF voice back in  _( 2026-10-17 )_
+- **T389** · Wireframes artifact: every screen, every tap, plus a UX audit  _( 2026-10-17 )_
+- **T390** · Wireframes: real screenshots with measured pins instead of word boxes  _( 2026-10-17 )_
+- **T391** · Wireframes: number the audit findings F1-F22  _( 2026-10-20 )_
+- **T392** · Car prompt: only default to 'It's my <car>' when the model matches  _( 2026-10-20 )_
+- **T393** · F2: connect the OBD reader from the Garage  _( 2026-10-20 )_
+- **T394** · F2 review fixes: explicit startDrive option, Safari message, dropped link  _( 2026-10-20 )_
+- **T395** · F2 UI review fixes + wireframes update  _( 2026-10-20 )_
