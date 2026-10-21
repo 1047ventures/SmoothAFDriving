@@ -35,6 +35,17 @@
   .gs-card-detail{font-size:11px;color:var(--cream-dim);letter-spacing:.04em;margin-bottom:0}
   .gs-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,235,217,.07)}
   .gs-card-stats{display:flex;gap:18px}
+  /* OBD reader — connect from the Garage (mirrors the Sensors drawer controls) */
+  .gs-reader{border:1px solid rgba(244,235,217,.12);border-radius:14px;padding:14px 16px;margin:4px 0 14px;background:rgba(244,235,217,.03)}
+  .gs-reader-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .gs-reader-text{min-width:0}
+  .gs-reader-title{font-family:var(--sans);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream-dim)}
+  .gs-reader-status{font-family:var(--sans);font-size:14px;color:var(--cream);margin-top:3px;overflow-wrap:anywhere}
+  .gs-reader-btn{appearance:none;cursor:pointer;flex-shrink:0;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(232,93,58,.55);background:rgba(232,93,58,.12);color:var(--tang);font-family:var(--sans);font-size:13px;font-weight:600}
+  .gs-reader-btn:disabled{opacity:.55;cursor:default}
+  .gs-reader-help{font-family:var(--sans);font-size:12.5px;line-height:1.5;color:rgba(244,235,217,.7);margin:10px 0 0}
+  .gs-reader-help.hidden{display:none}
+  .gs-reader .obd-scan{padding-inline:0;padding-bottom:0}
   /* Car Health — last trouble-code read for the active vehicle */
   .gs-health{border:1px solid rgba(244,235,217,.12);border-radius:14px;padding:14px 16px;margin:4px 0 14px;background:rgba(244,235,217,.03)}
   .gs-health--attention{border-color:rgba(224,80,58,.55);background:rgba(224,80,58,.06)}
