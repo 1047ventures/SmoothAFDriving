@@ -36,10 +36,12 @@ export function showPendingCarPrompt(){
   const linkable = active && !active.vin ? active : null;
   const activeName = linkable ? ([linkable.make, linkable.model].filter(Boolean).join(' ') || 'current car') : '';
 
-  // Same make as the hand-entered car → it's almost certainly that car, so
-  // linking is the default; otherwise adding a new car is.
-  const sameMake = linkable && linkable.make && car.make
-    && linkable.make.toLowerCase() === car.make.toLowerCase();
+  // Linking is the default only when it's clearly the same car: same make, and
+  // the hand-entered car's model matches or was left blank. A same-make,
+  // different-model car (an Accord vs your Civic) defaults to adding a new car.
+  const norm = t => String(t || '').trim().toLowerCase();
+  const sameMake = linkable && norm(linkable.make) && norm(linkable.make) === norm(car.make)
+    && (!norm(linkable.model) || !norm(car.model) || norm(linkable.model) === norm(car.model));
   const name = [car.year, car.make, car.model].filter(Boolean).join(' ') || carLabel(car);
   const addBtn  = `<button id="car-id-add" class="${sameMake ? 'car-id-link' : 'signup-submit'}">Add to Garage</button>`;
   const linkBtn = linkable ? `<button id="car-id-link" class="${sameMake ? 'signup-submit' : 'car-id-link'}">It&rsquo;s my ${esc(activeName)}</button>` : '';
