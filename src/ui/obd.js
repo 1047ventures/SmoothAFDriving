@@ -141,7 +141,8 @@ const both = id => [el(id), el('g-' + id)].filter(Boolean);
 const CONNECT_LABEL = 'Connect reader';
 const BTN = {
   set textContent(t){ both('obd-connect').forEach(b => { b.textContent = t; }); },
-  set disabled(v){ both('obd-connect').forEach(b => { b.disabled = v; }); },
+  // The Garage button stays disabled on the web build, which can't scan for readers.
+  set disabled(v){ both('obd-connect').forEach(b => { b.disabled = v || (b.id === 'g-obd-connect' && !Capacitor.isNativePlatform()); }); },
 };
 // True while a manual connect is in flight, so the background reconnect loop
 // can't start a second connection (or a drive) on top of it.
@@ -151,7 +152,20 @@ const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c =>
 
 function setStatus(text){
   both('obd-status').forEach(n => { n.textContent = text; });
-  el('g-obd-help')?.classList.toggle('hidden', isConnected());
+  syncGarageReader();
+}
+
+/**
+ * Garage reader row: green dot + quiet Disconnect when connected; setup help
+ * only until a reader has been set up once; on the web build (no Bluetooth
+ * scanning) a disabled button instead of one that can't work.
+ */
+function syncGarageReader(){
+  const connected = isConnected();
+  el('g-obd-reader')?.classList.toggle('is-connected', connected);
+  el('g-obd-help')?.classList.toggle('hidden', connected || Boolean(loadDevice()) || !Capacitor.isNativePlatform());
+  const gBtn = el('g-obd-connect');
+  if (gBtn && !Capacitor.isNativePlatform()) gBtn.disabled = true;
 }
 
 /**
@@ -416,7 +430,7 @@ async function startScan(){
     // The web build can't scan for Bluetooth readers (Safari has no Web
     // Bluetooth; Chrome has no LE scan); say so instead of the browser's error.
     setStatus(!Capacitor.isNativePlatform()
-      ? 'Readers connect in the Smooth AF iPhone app.'
+      ? 'Connect a reader from the Smooth AF iPhone app.'
       : `Couldn’t scan — ${err?.message || 'Bluetooth unavailable'}`);
     return;
   }
@@ -443,7 +457,7 @@ async function connectChosen(deviceId, name, { startDrive = true } = {}){
     rememberDevice(info.deviceId, info.name);
     showScan(false);
     if (btn) btn.textContent = 'Disconnect';
-    setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
+    setStatus(`${info.name} · Connected`);
     setPill(true);
     startPolling();
     onCarLinked();
@@ -473,7 +487,7 @@ async function useSystemPicker({ startDrive = true } = {}){
     const info = await connect({ onStatus: setStatus });
     rememberDevice(info.deviceId, info.name);
     if (btn) btn.textContent = 'Disconnect';
-    setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
+    setStatus(`${info.name} · Connected`);
     setPill(true);
     startPolling();
     onCarLinked();
@@ -537,7 +551,7 @@ async function autoReconnect(){
     const info = await reconnectSaved(saved.deviceId, saved.name, { onStatus: setStatus });
     rememberDevice(info.deviceId, info.name);
     if (btn) btn.textContent = 'Disconnect';
-    setStatus(`${info.name} · ${info.supported?.length || 0} PIDs`);
+    setStatus(`${info.name} · Connected`);
     setPill(true);
     startPolling();
     onCarLinked();
@@ -568,7 +582,8 @@ export function wireObdPanel(){
   });
   el('g-obd-scan-fallback')?.addEventListener('click', () => useSystemPicker({ startDrive: false }));
   BTN.textContent = isConnected() ? 'Disconnect' : CONNECT_LABEL;
-  el('g-obd-help')?.classList.toggle('hidden', isConnected());
+  if (!Capacitor.isNativePlatform()) el('g-obd-status') && (el('g-obd-status').textContent = 'Connect a reader from the Smooth AF iPhone app.');
+  syncGarageReader();
   renderReadout();
   renderLiveStrip();
   setPill(isConnected());

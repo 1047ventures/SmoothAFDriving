@@ -497,18 +497,16 @@
       <!-- OBD reader: same controls as the drive screen's Sensors drawer (ids
            prefixed g-, kept in sync by ui/obd.js). Connecting here never
            starts a drive. -->
-      <section class="gs-reader" aria-label="OBD reader">
+      <div class="gs-section-label">OBD reader</div>
+      <section class="gs-reader" id="g-obd-reader" aria-label="OBD reader">
         <div class="gs-reader-row">
-          <div class="gs-reader-text">
-            <div class="gs-reader-title">OBD reader</div>
-            <div id="g-obd-status" class="gs-reader-status" aria-live="polite">Not connected</div>
-          </div>
+          <div id="g-obd-status" class="gs-reader-status" aria-live="polite">Not connected</div>
           <button id="g-obd-connect" class="gs-reader-btn" type="button">Connect reader</button>
         </div>
-        <p id="g-obd-help" class="gs-reader-help">Plug an OBD-II reader into the port under the dashboard, turn the car on, then connect. After that it reconnects on its own, reads your trouble codes and adds the car here.</p>
+        <p id="g-obd-help" class="gs-reader-help">Plug a reader into the port under the steering wheel, turn the car on, tap Connect. We&rsquo;ll read warning lights and add your car.</p>
         <div id="g-obd-scan" class="obd-scan hidden">
           <div id="g-obd-scan-list" class="obd-scan-list"></div>
-          <button id="g-obd-scan-fallback" class="obd-scan-fallback" type="button">Don’t see it? Open full device list</button>
+          <button id="g-obd-scan-fallback" class="obd-scan-fallback" type="button">Don&rsquo;t see it? Open full device list</button>
         </div>
       </section>
       <div id="garage-list"></div>
