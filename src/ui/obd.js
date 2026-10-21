@@ -12,6 +12,7 @@ import { buildReport, saveHealthReport } from '../services/carHealth.js';
 import { getActiveVehicle, findVehicleByVin, activateVehicle } from './garage.js';
 import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendingCar } from '../services/carIdentity.js';
 import { state } from '../state.js';
+import { Capacitor } from '@capacitor/core';
 import { OBD_DEVICE_KEY } from '../constants.js';
 
 /**
@@ -95,7 +96,6 @@ async function onCarLinked(){
 
 let lastAutoStartAt = 0;
 function autoStartDrive(){
-  if (fromGarage){ fromGarage = false; return; }
   if (state.recording) return;
   if (document.getElementById('obd-nudge')) return;
   const startBtn = document.getElementById('btn-start');
@@ -143,9 +143,9 @@ const BTN = {
   set textContent(t){ both('obd-connect').forEach(b => { b.textContent = t; }); },
   set disabled(v){ both('obd-connect').forEach(b => { b.disabled = v; }); },
 };
-// A connect started from the Garage is the driver setting things up, not
-// pulling away — so it must not auto-start a drive.
-let fromGarage = false;
+// True while a manual connect is in flight, so the background reconnect loop
+// can't start a second connection (or a drive) on top of it.
+let connecting = false;
 const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
@@ -302,7 +302,12 @@ function startPolling(){
   // take seconds) would otherwise let ticks pile up behind it in the queue.
   let busy = false;
   timer = setInterval(async () => {
-    if (!isConnected()){ setPill(false); return stopPolling(); }
+    if (!isConnected()){
+      // The link dropped (car off, out of range). Say so in both places instead
+      // of leaving "<name> · N PIDs" and a Disconnect button that would scan.
+      setPill(false); setStatus('Not connected'); BTN.textContent = CONNECT_LABEL;
+      return stopPolling();
+    }
     if (busy) return;
     busy = true;
     try { await poll(); publish(); renderReadout(); renderLiveStrip(); setPill(true); }
@@ -408,9 +413,9 @@ async function startScan(){
     await endScan();
     showScan(false);
     if (btn) btn.textContent = CONNECT_LABEL;
-    // The web build can't scan for Bluetooth readers (no LE scan API); say so
-    // plainly instead of surfacing the browser's API error.
-    setStatus(/requestLEScan|not a function|not supported/i.test(err?.message || '')
+    // The web build can't scan for Bluetooth readers (Safari has no Web
+    // Bluetooth; Chrome has no LE scan); say so instead of the browser's error.
+    setStatus(!Capacitor.isNativePlatform()
       ? 'Readers connect in the Smooth AF iPhone app.'
       : `Couldn’t scan — ${err?.message || 'Bluetooth unavailable'}`);
     return;
@@ -427,7 +432,9 @@ async function startScan(){
 }
 
 /** A row was tapped — stop scanning and connect to that specific adapter. */
-async function connectChosen(deviceId, name){
+// startDrive:false for a connect from the Garage — the driver is setting up, not pulling away.
+async function connectChosen(deviceId, name, { startDrive = true } = {}){
+  connecting = true;
   await endScan();
   const btn = BTN;
   if (btn){ btn.disabled = true; btn.textContent = 'Connecting…'; }
@@ -440,7 +447,7 @@ async function connectChosen(deviceId, name){
     setPill(true);
     startPolling();
     onCarLinked();
-    autoStartDrive();
+    if (startDrive) autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'not an ELM327 adapter'
       ? 'That device isn’t an OBD adapter'
@@ -450,12 +457,14 @@ async function connectChosen(deviceId, name){
     // device list" escape hatch, stranding the driver with no way forward.
     showScan(true);
   } finally {
+    connecting = false;
     if (btn) btn.disabled = false;
   }
 }
 
 /** Escape hatch: hand off to the OS picker for an adapter the filter missed. */
-async function useSystemPicker(){
+async function useSystemPicker({ startDrive = true } = {}){
+  connecting = true;
   await endScan();
   showScan(false);
   const btn = BTN;
@@ -468,13 +477,14 @@ async function useSystemPicker(){
     setPill(true);
     startPolling();
     onCarLinked();
-    autoStartDrive();
+    if (startDrive) autoStartDrive();
   } catch (err){
     setStatus(err?.message === 'no device chosen'
       ? 'No device selected.'
       : `Couldn’t connect — ${err?.message || 'unknown error'}`);
     if (btn) btn.textContent = CONNECT_LABEL;
   } finally {
+    connecting = false;
     if (btn) btn.disabled = false;
   }
 }
@@ -515,8 +525,7 @@ async function onConnectClick(){
  * fails quietly and leaves the manual Connect button exactly as before.
  */
 async function autoReconnect(){
-  if (isConnected() || scanning) return;
-  fromGarage = false;   // a background reconnect is the "pulling away" case
+  if (isConnected() || scanning || connecting) return;
   const saved = loadDevice();
   if (!saved?.deviceId) return;
 
@@ -544,20 +553,20 @@ async function autoReconnect(){
 }
 
 export function wireObdPanel(){
-  el('obd-connect')?.addEventListener('click', () => { fromGarage = false; onConnectClick(); });
+  el('obd-connect')?.addEventListener('click', onConnectClick);
   // Event delegation — the rows are re-rendered on every scan update.
   el('obd-scan-list')?.addEventListener('click', (e) => {
     const row = e.target.closest?.('.obd-device');
-    if (row){ fromGarage = false; connectChosen(row.dataset.id, row.dataset.name || ''); }
+    if (row) connectChosen(row.dataset.id, row.dataset.name || '');
   });
-  el('obd-scan-fallback')?.addEventListener('click', () => { fromGarage = false; useSystemPicker(); });
-  // Garage copies: same handlers, flagged so a connect from here doesn't start a drive.
-  el('g-obd-connect')?.addEventListener('click', () => { fromGarage = true; onConnectClick(); });
+  el('obd-scan-fallback')?.addEventListener('click', () => useSystemPicker());
+  // Garage copies: same handlers, but a connect from here never starts a drive.
+  el('g-obd-connect')?.addEventListener('click', onConnectClick);
   el('g-obd-scan-list')?.addEventListener('click', (e) => {
     const row = e.target.closest?.('.obd-device');
-    if (row){ fromGarage = true; connectChosen(row.dataset.id, row.dataset.name || ''); }
+    if (row) connectChosen(row.dataset.id, row.dataset.name || '', { startDrive: false });
   });
-  el('g-obd-scan-fallback')?.addEventListener('click', () => { fromGarage = true; useSystemPicker(); });
+  el('g-obd-scan-fallback')?.addEventListener('click', () => useSystemPicker({ startDrive: false }));
   BTN.textContent = isConnected() ? 'Disconnect' : CONNECT_LABEL;
   el('g-obd-help')?.classList.toggle('hidden', isConnected());
   renderReadout();
