@@ -14,6 +14,7 @@
  *     they typed in by hand.
  */
 
+import { CLOUD_WRITES } from './supabase.js';
 import { SB_URL, SB_ANON, GARAGE_KEY, SOCIAL_HANDLES_KEY,
          CAR_POS_KEY, REC_POS_KEY, ONBOARDED_KEY,
          CAR_PROMPTED_KEY, SHARE_PROMPTED_KEY } from '../constants.js';
@@ -119,6 +120,7 @@ export async function fetchProfile(){
  * by asking nicely.
  */
 export async function pushProfile(patch = {}){
+  if (!CLOUD_WRITES) return null;   // dev server shares the production database
   const headers = authHeaders();
   if (!headers) return false;
   const session = getSession();

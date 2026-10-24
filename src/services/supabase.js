@@ -6,6 +6,17 @@ import {
 import { authHeaders, currentUser } from './auth.js';
 
 /**
+ * The local dev server (`npm run dev`, Vite mode "development") talks to the
+ * SAME Supabase project as production. Test drives seeded or simulated there
+ * used to upload as a phantom anonymous driver and inflate the real numbers
+ * (Oct 2026: two devices, ~95 fake drives). So in dev, nothing is written to
+ * the cloud. Reads still work. Vitest runs in mode "test" and the shipped app
+ * in "production", so neither is affected. Note `npm run preview` serves a
+ * production build — don't seed test data there either.
+ */
+export const CLOUD_WRITES = import.meta.env?.MODE !== 'development';
+
+/**
  * Remove a drive's cloud row so the server-derived leaderboard and the operator
  * dashboard stop counting a drive the user deleted on the phone. Goes through
  * delete_my_drive, which only deletes what the caller owns: signed in, by
@@ -15,6 +26,7 @@ import { authHeaders, currentUser } from './auth.js';
  * Returns true only if the server confirmed a row was removed.
  */
 export async function deleteCloudDrive(startTime){
+  if (!CLOUD_WRITES) return false;
   if (startTime == null) return false;
   try {
     const res = await fetch(`${SB_URL}/rest/v1/rpc/delete_my_drive`, {
@@ -35,7 +47,9 @@ export async function deleteCloudDrive(startTime){
 }
 
 export async function pushDriveToSupabase(drive){
+  if (!CLOUD_WRITES) return;
   if (!drive || !drive.startTime) return;
+  if (drive.simulated) return;   // demo/replay drives are never real driving
   const driveId = String(drive.startTime); // stable local ID
   if (getSyncedIds().has(driveId)) return;  // already uploaded
   try {
@@ -174,6 +188,7 @@ export async function fetchLeaderboard(){
 }
 
 export async function registerUser({ name, email, device_id }) {
+  if (!CLOUD_WRITES) return;
   try {
     const res = await fetch('/api/register-user', {
       method: 'POST',
@@ -272,6 +287,7 @@ async function selectDrives(filter){
  * The function claims only rows already stamped with the device_id we pass.
  */
 export async function claimDeviceDrives(){
+  if (!CLOUD_WRITES) return null;
   const uid = currentUser()?.id;
   if (!uid) return null;
   try {
