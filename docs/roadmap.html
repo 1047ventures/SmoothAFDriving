@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 24, 2026 · 1:32 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 24, 2026 · 3:24 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -155,12 +155,8 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">3 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
-      <details class="ent" id="need-testdata">
-        <summary><span class="tag t-wait">Data</span><span class="ent-t">Paste one SQL block to delete leaked test drives</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">~97 fake drives from the dev server (anonymous devices <code>0f57d83f</code> and <code>f5ba8800</code>, Oct 16&ndash;17) are inflating /admin. The leak is fixed (T-dev guard); the rows still need deleting. Supabase &rarr; SQL editor &rarr; paste the block from chat &rarr; Run.<br><a class="ent-go" href="https://supabase.com/dashboard/project/dbreetxubxdxogmektxc/sql/new" target="_blank" rel="noopener">Open SQL editor &#8599;</a></div>
-      </details>
       <details class="ent" id="need-lockdown">
         <summary><span class="tag t-wait">Pre-launch</span><span class="ent-t">Paste one SQL block to lock down drives</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Supabase &rarr; SQL editor &rarr; paste <code>supabase/migrations/20261017120000_close_bare_id_functions.sql</code> &rarr; Run. Then add <code>ADMIN_PASSWORD=&hellip;</code> to the repo&rsquo;s <code>.env</code> so the dev drive pull keeps working.<br><a class="ent-go" href="https://supabase.com/dashboard/project/dbreetxubxdxogmektxc/sql/new" target="_blank" rel="noopener">Open SQL editor &#8599;</a></div>
@@ -329,7 +325,7 @@
         <div class="cell"><span class="v">2.4<span class="u">k mi</span></span><span class="k">Scored</span></div>
         <div class="cell"><span class="v">86</span><span class="k">Avg<br>score</span></div>
       </div>
-      <p class="chart-note">&#9733; From <a href="https://smoothafdriving.pages.dev/admin.html" target="_blank" rel="noopener">/admin</a> on Oct 24, excluding ~97 test drives that leaked in from the dev server on Oct 16&ndash;17 (fixed; cleanup SQL pending).</p>
+      <p class="chart-note">&#9733; From <a href="https://smoothafdriving.pages.dev/admin.html" target="_blank" rel="noopener">/admin</a> on Oct 24, after deleting 99 test drives that leaked in from the dev server on Oct 16&ndash;17 (leak fixed, rows removed).</p>
     </div>
   </details>
 
