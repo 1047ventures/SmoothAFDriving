@@ -91,6 +91,10 @@ export function closeAuthSheet(){
 async function maybeShowAppleButton(){
   const btn = el('auth-apple-btn');
   if (!btn || isSignedIn()) return;
+  // Needs both the server provider AND the native plugin: in the web app (a
+  // browser or Add-to-Home-Screen install) there is no Sign in with Apple, and
+  // the button used to show anyway and always fail.
+  if (!globalThis.Capacitor?.Plugins?.SignInWithApple?.authorize) return;
   if (await isAppleConfigured()){
     btn.classList.remove('hidden');
     // The "or" divider only makes sense once there are two methods on screen.
@@ -203,8 +207,9 @@ export function initAuthUI(){
   el('auth-apple-btn')?.addEventListener('click', async () => {
     setStatus('Opening Apple…');
     const cred = await requestAppleCredential();
-    if (!cred){
-      setStatus('Apple sign-in isn’t available on this device yet.', true);
+    if (cred?.cancelled){ setStatus(''); return; }   // the driver backed out — not an error
+    if (!cred?.identityToken){
+      setStatus(cred?.error || 'Apple sign-in isn’t available here — use your email instead.', true);
       return;
     }
     const res = await signInWithAppleToken(cred.identityToken, cred.nonce,
@@ -252,8 +257,13 @@ async function requestAppleCredential(){
     // so the account can keep the name; they're undefined on every later sign-in.
     return r.identityToken
       ? { identityToken: r.identityToken, nonce: r.nonce, givenName: r.givenName, familyName: r.familyName, email: r.email }
-      : null;
-  } catch {
-    return null;
+      : { error: 'Apple didn’t send a sign-in token. Try again, or use your email.' };
+  } catch (err){
+    // ASAuthorizationError: 1001 = the driver cancelled; 1000 = unknown, most
+    // often a phone not signed into iCloud / no Apple ID on the device.
+    const msg = String(err?.message || err?.code || err || '');
+    if (/1001|cancel/i.test(msg)) return { cancelled: true };
+    if (/1000/.test(msg)) return { error: 'Apple sign-in needs this iPhone to be signed into an Apple ID (Settings → your name). Or use your email.' };
+    return { error: `Apple sign-in failed${msg ? ` (${msg.slice(0, 60)})` : ''}. Try again, or use your email.` };
   }
 }
