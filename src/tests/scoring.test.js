@@ -434,3 +434,34 @@ describe('compositeScore', () => {
     expect(compositeScore(95, 600, 864, { arrived: true, allowPenalty: true })).toBe(80); // 95 - 15
   });
 });
+
+describe('traffic amplifies the score both ways', () => {
+  // 3 min of gentle cruising at ~13 m/s — no stops, small inputs.
+  const samples = Array.from({ length: 180 }, (_, i) => ({ t: i * 1000, lat: 39.7 + i * 0.00012, lon: -104.9, speed: 13, h: 0.3, la: 0.05, ra: 0.03 }));
+  const drive = (traffic) => ({ samples, events: [], durationMs: 180000, distanceMeters: 2340, topSpeedMps: 14, traffic });
+
+  it('leaves the score alone in light or unknown traffic', () => {
+    const none = analyzeDrive(drive(undefined));
+    expect(analyzeDrive(drive({ ratio: 1.1 })).score).toBe(none.score);
+    expect(none.trafficBonus).toBe(0);
+  });
+  it('lifts a smooth drive in heavy traffic, capped at full traffic', () => {
+    const none  = analyzeDrive(drive(undefined));
+    const heavy = analyzeDrive(drive({ ratio: 2.0 }));
+    const jam   = analyzeDrive(drive({ ratio: 4.0 }));
+    expect(heavy.trafficBonus).toBeGreaterThan(0);
+    expect(heavy.score).toBeGreaterThanOrEqual(none.score);
+    expect(jam.trafficBonus).toBe(heavy.trafficBonus);
+  });
+  it('drops a rough drive in heavy traffic', () => {
+    const rough = samples.map((s, i) => ({ ...s, speed: i % 20 < 4 ? 0 : 13, h: 3.5, la: i % 2 ? 4 : -4, ra: 3 }));
+    const r = (traffic) => analyzeDrive({ samples: rough, events: [], durationMs: 180000, distanceMeters: 2340, topSpeedMps: 14, traffic });
+    const none = r(undefined), heavy = r({ ratio: 2.0 });
+    if (none.score < 75){
+      expect(heavy.trafficBonus).toBeLessThan(0);
+      expect(heavy.score).toBeLessThanOrEqual(none.score);
+    } else {
+      throw new Error(`fixture not rough enough: ${none.score}`);
+    }
+  });
+});

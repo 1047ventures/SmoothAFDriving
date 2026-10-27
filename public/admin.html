@@ -262,7 +262,7 @@
       const o = drive.obd || null;
       const scoreRow = [
         ['Smoothness', dims.smoothness], ['Braking', dims.braking], ['Momentum', dims.momentum],
-        ['Ride composure', dims.rideComposure], ['Speed mult', dims.speedBonus],
+        ['Ride composure', dims.rideComposure], ['Speed mult', dims.speedBonus], ['Traffic mult', dims.trafficBonus],
         ['Efficiency', drive.efficiency], ['vs ETA', drive.effectiveness != null ? drive.effectiveness + '%' : null],
       ].filter(([, v]) => v != null && v !== '')
        .map(([l, v]) => `<span class="chip">${l}: <b>${v}</b></span>`).join('') || '<span class="anon">No breakdown stored (older drive).</span>';

@@ -282,6 +282,7 @@ export function finalizeAndReview(callbacks = {}){
     ...analysis.dims,
     rideComposure: analysis.rideComposure ?? null,
     speedBonus:    analysis.speedBonus ?? null,
+    trafficBonus:  analysis.trafficBonus ?? null,
   };
   // Destination Drive: only score effectiveness if you actually REACHED the
   // destination — otherwise ending short of it looks like arriving early. No
@@ -399,7 +400,12 @@ export async function restoreDrivesForUser(){
  */
 export function applyAnalysis(d, a){
   const next = Math.round(a.score);
-  if (a.dims) d.dims = a.dims;
+  if (a.dims) d.dims = {
+    ...a.dims,
+    rideComposure: a.rideComposure ?? null,
+    speedBonus:    a.speedBonus ?? null,
+    trafficBonus:  a.trafficBonus ?? null,
+  };
   d.efficiency = next;
   d.score = compositeScore(next, d.targetEtaSec, d.movingSec, {
     arrived: d.arrived, buffer: d.etaBuffer,

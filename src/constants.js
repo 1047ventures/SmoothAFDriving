@@ -241,6 +241,12 @@ export const POINTS_PACE_BONUS_MAX  = 0.5;   // beating the ETA fully = +50% on 
 export const TRAFFIC_MIN_RATIO      = 1.15;  // under this, no traffic worth crediting
 export const TRAFFIC_FULL_RATIO     = 2.0;   // twice as slow as open road = full bonus
 export const TRAFFIC_BONUS_MAX      = 0.5;   // heaviest traffic = +50% on the base
+// Score: heavy traffic AMPLIFIES the drive, both ways. More cues to manage means
+// skill (or its absence) shows more, so the distance from the pivot is stretched:
+//   score = base + (base − PIVOT) × AMP_MAX × trafficFactor
+// At full traffic a 90 becomes ~94.5 and a 60 becomes ~55.5. Light traffic: no change.
+export const TRAFFIC_SCORE_PIVOT   = 75;   // the neutral drive — neither lifted nor dropped
+export const TRAFFIC_SCORE_AMP_MAX = 0.3;  // full traffic stretches the gap from the pivot by 30%
 export const TRAFFIC_FRESH_MS       = 20 * 60 * 1000; // only read traffic this soon after the drive ended
 export const TRAFFIC_MIN_TRIP_M     = 1000;  // start→end closer than this (a loop) gets no traffic reading
 

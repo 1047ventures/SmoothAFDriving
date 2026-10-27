@@ -25,6 +25,9 @@ import {
   RIDE_RR_HI,
   NO_RIDE_DATA_CEILING,
   TRAFFIC_MIN_RATIO,
+  TRAFFIC_FULL_RATIO,
+  TRAFFIC_SCORE_PIVOT,
+  TRAFFIC_SCORE_AMP_MAX,
 } from '../constants.js';
 import { clamp, linMap, pct, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
 
@@ -33,7 +36,7 @@ export function analyzeDrive(drive){
   const n   = smp.length;
   if (n < 3){
     const dims = { smoothness:85, braking:85, momentum:85 };
-    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0, transitionScore:85, speedBonus:0, stopMarkers:[] };
+    return { score:85, dims, fullStops:0, stopsPerMile:0, longFlipsPerMin:0, latFlipsPerMin:0, p90Harshness:0, transitionScore:85, speedBonus:0, trafficBonus:0, stopMarkers:[] };
   }
 
   const durationMin = (drive.durationMs || 0) / 60000;
@@ -210,11 +213,17 @@ export function analyzeDrive(drive){
   const movAvgMph  = moving.length > 0 ? mpsToMph(moving.reduce((s,x) => s+(x.speed||0), 0) / moving.length) : 0;
   const speedFactor = clamp(linMap(movAvgMph, SPEED_DIFF_LO_MPH, SPEED_DIFF_HI_MPH, 0, 1), 0, 1);
   const speedBonus  = SPEED_BONUS_MAX * speedFactor * (base / 100);
+  // Heavy traffic (drive.traffic, read from Mapbox right after the drive) has more
+  // cues to manage, so it magnifies the drive both ways: a smooth drive in a jam
+  // scores higher, a rough one lower. Signed — negative below the pivot.
+  const tRatio        = drive.traffic?.ratio || 0;
+  const trafficFactor = tRatio >= TRAFFIC_MIN_RATIO ? clamp(linMap(tRatio, TRAFFIC_MIN_RATIO, TRAFFIC_FULL_RATIO, 0, 1), 0, 1) : 0;
+  const trafficBonus  = (base - TRAFFIC_SCORE_PIVOT) * TRAFFIC_SCORE_AMP_MAX * trafficFactor;
   // A perfect 100 is meant to be nearly impossible. A drive we couldn't measure
   // for ride quality (GPS-only) can't be certified calm, so it's capped short of
   // the top; only a drive the sensors confirmed as smooth can approach 100.
   const ceiling = hasRide ? 100 : NO_RIDE_DATA_CEILING;
-  const score = Math.round(clamp(base + speedBonus, 0, ceiling));
+  const score = Math.round(clamp(base + speedBonus + trafficBonus, 0, ceiling));
 
   // Kept for the review "Transitions" info stat (jerk quality) — informational,
   // no longer a scored dimension.
@@ -307,6 +316,7 @@ export function analyzeDrive(drive){
     p90Harshness:    +p90H.toFixed(2),
     transitionScore,
     speedBonus:      +speedBonus.toFixed(1),
+    trafficBonus:    +trafficBonus.toFixed(1),
     rideComposure,   // null on GPS-only drives (ride quality unmeasured)
     smoothThrottle,  // null unless the drive carried OBD throttle data
     // extended

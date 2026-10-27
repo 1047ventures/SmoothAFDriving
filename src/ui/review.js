@@ -13,7 +13,6 @@ import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFea
 import { showToast } from '../utils/toast.js';
 import { engineerNotes } from '../services/engineerNotes.js';
 import { fetchTrafficRatio } from '../services/routing.js';
-import { drivePoints } from '../services/points.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -140,15 +139,14 @@ async function annotateTraffic(drive, analysis){
     if (drive.traffic !== undefined) return;
     if (!tr && tripM >= TRAFFIC_MIN_TRIP_M) return;          // network/API failure: retry on next open
     drive.traffic = tr && tr.freeSec >= 120 ? { ...tr, at: Date.now() } : null;
-    drive.points  = drivePoints(drive);
+    if (!drive.traffic){ updateStoredDrive(drive); return; }   // remember "no reading"; nothing to rescore
+    // Heavy traffic lifts the score and the points: rescore through the one path
+    // (keeps any ETA clock and stop-cause credit), save, follow through to lifetime.
+    applyAnalysis(drive, analyzeDrive(drive));
     updateStoredDrive(drive);
-    // Update the two places traffic shows, in place — a full repaint would
-    // restart the stop-cause lookups and pull the user back to this screen.
-    if (document.getElementById('screen-review')?.classList.contains('active')){
-      renderFacts(drive, analysis);
-      renderNotes(drive, analysis);
-      annotateNoteCauses(drive, analysis);
-    }
+    recomputeLifetimeScore();
+    // Repaint only if the recap is still on screen — never pull the user back to it.
+    if (document.getElementById('screen-review')?.classList.contains('active')) renderReview(drive);
   } finally {
     _trafficInFlight.delete(drive.startTime);
   }
