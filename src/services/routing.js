@@ -46,6 +46,26 @@ export async function fetchRoute(from, to){
   return useMapbox() ? mapboxRoute(from, to) : osmRoute(from, to);
 }
 
+// How much traffic is on the trip right now: live-traffic time ÷ open-road time
+// for the same start and end. Mapbox only (OSM has no traffic) → else null.
+// from/to are { lat, lng } -> { ratio, trafficSec, freeSec } | null
+export async function fetchTrafficRatio(from, to){
+  if (!useMapbox()) return null;
+  try {
+    const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
+    const get = async (profile) => {
+      const res = await fetch(`${MAPBOX_BASE}/directions/v5/mapbox/${profile}/${coords}?overview=false&access_token=${MAPBOX_TOKEN}`);
+      if (!res.ok) return null;
+      return (await res.json())?.routes?.[0]?.duration ?? null;
+    };
+    const [trafficSec, freeSec] = await Promise.all([get('driving-traffic'), get('driving')]);
+    if (!(trafficSec > 0) || !(freeSec > 0)) return null;
+    return { ratio: +(trafficSec / freeSec).toFixed(2), trafficSec: Math.round(trafficSec), freeSec: Math.round(freeSec) };
+  } catch {
+    return null;
+  }
+}
+
 // ── OSM: Nominatim + OSRM ─────────────────────────────────────────────────────
 async function osmGeocode(q){
   try {

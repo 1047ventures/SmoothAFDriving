@@ -6,11 +6,14 @@ import { openTrends } from './trends.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
-import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER } from '../constants.js';
+import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER, TRAFFIC_FRESH_MS } from '../constants.js';
 import { loadDrives, loadDriverName, updateStoredDrive, recomputeLifetimeScore } from '../services/storage.js';
 import { baseTiles } from '../utils/maptiles.js';
 import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
 import { showToast } from '../utils/toast.js';
+import { engineerNotes } from '../services/engineerNotes.js';
+import { fetchTrafficRatio } from '../services/routing.js';
+import { drivePoints } from '../services/points.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -75,6 +78,61 @@ async function annotateStopCauses(drive, analysis){
   note.className = 'rv-stopcauses';
   note.textContent = `Why you stopped: ${text}`;
   factsEl.insertAdjacentElement('afterend', note);
+}
+
+/**
+ * Engineer's notes: the moments that mattered and what to do next time. Each
+ * note with a position is a button that flies the map to where it happened.
+ * Rendered first without map features, then again once the road around the
+ * brakes is known (so "it was traffic" vs "a light was ahead" can be said).
+ */
+function renderNotes(drive, analysis, features = null){
+  const block = document.getElementById('rv-notes');
+  const list  = document.getElementById('rv-notes-list');
+  if (!block || !list) return;
+  const notes = engineerNotes(drive, analysis, features);
+  block.style.display = notes.length ? '' : 'none';
+  list.innerHTML = notes.map((n, i) => {
+    const located = n.lat != null && n.lon != null;
+    const tag = located ? 'button' : 'div';
+    const at  = located ? ` data-lat="${n.lat}" data-lon="${n.lon}"` : '';
+    return `<${tag} class="rv-note rv-note--${n.tone}"${at}><span class="rv-note-n">0${i + 1}</span>` +
+      `<span class="rv-note-txt"><span class="rv-note-title">${escapeHtml(n.title)}</span>` +
+      `<span class="rv-note-body">${escapeHtml(n.body)}</span></span></${tag}>`;
+  }).join('');
+  list.querySelectorAll('button.rv-note').forEach(b => {
+    b.onclick = () => { if (mapInstance) mapInstance.setView([+b.dataset.lat, +b.dataset.lon], 17, { animate: true }); };
+  });
+}
+
+let _noteToken = 0;
+async function annotateNoteCauses(drive, analysis){
+  const token = ++_noteToken;
+  const brakes = (drive.events || []).filter(e => e.type === 'brake' && e.lat != null && e.lon != null);
+  if (!brakes.length || !drive.samples?.length) return;
+  const features = await fetchStopFeatures(`${drive.startTime}:ev`, brakes.map(e => ({ lat: e.lat, lon: e.lon })));
+  if (token !== _noteToken || features == null) return;   // a newer recap opened, or no data
+  renderNotes(drive, analysis, features);
+}
+
+// Traffic is read once, right after the drive (live traffic later would describe
+// a different road), from Mapbox: live-traffic time ÷ open-road time for the trip.
+// It feeds the points bonus and the notes, never the score.
+let _shownStart = null;
+async function annotateTraffic(drive){
+  _shownStart = drive.startTime;
+  if (drive.traffic !== undefined || drive.simulated) return;
+  const ended = (drive.startTime || 0) + (drive.durationMs || 0);
+  if (Date.now() - ended > TRAFFIC_FRESH_MS) return;
+  const pts = (drive.samples || []).filter(s => s.lat != null && s.lon != null);
+  if (pts.length < 2) return;
+  const a = pts[0], b = pts[pts.length - 1];
+  const tr = await fetchTrafficRatio({ lat: a.lat, lng: a.lon }, { lat: b.lat, lng: b.lon });
+  if (!tr || drive.traffic !== undefined) return;
+  drive.traffic = { ...tr, at: Date.now() };
+  drive.points  = drivePoints(drive);
+  updateStoredDrive(drive);
+  if (_shownStart === drive.startTime) renderReview(drive);
 }
 
 export function renderReview(drive){
@@ -227,24 +285,6 @@ export function renderReview(drive){
       ? `${accels} accel · ${turns} turn${turns !== 1 ? 's' : ''}`
       : (turns && (brakes || accels)) ? `${turns} turn${turns !== 1 ? 's' : ''}` : '';
 
-    const worst = drive.events
-      .filter(e => e.type === 'brake' || e.type === 'turn' || e.type === 'accel')
-      .sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
-
-    const worstEl    = document.getElementById('rv-worst-text');
-    const worstBlock = document.getElementById('rv-worst-block');
-    if (worstEl){
-      if (worst){
-        const isWorstExtreme = (worst.tier || 2) >= 4;
-        const lbl = isWorstExtreme
-          ? (worst.type === 'brake' ? 'Extreme brake' : worst.type === 'accel' ? 'Extreme accel' : 'Extreme turn')
-          : (worst.type === 'brake' ? 'Hard brake'    : worst.type === 'accel' ? 'Hard accel'    : 'Sharp turn');
-        worstEl.textContent = `${lbl} · ${fmtDuration(worst.t || 0)} in · ${worst.speedMph || 0} mph`;
-      } else {
-        worstEl.textContent = 'No harsh events — clean drive!';
-      }
-    }
-    if (worstBlock) worstBlock.style.display = totalEvs === 0 ? 'none' : '';
   }
 
   // ── Coaching persona card ──────────────────────────────────────────────────
@@ -265,20 +305,11 @@ export function renderReview(drive){
 
   // ── Momentum line + best stretch ──────────────────────────────────────────
   renderMomentum(drive, analysis);
-  {
-    const bestBlock = document.getElementById('rv-best-block');
-    const bestText  = document.getElementById('rv-best-text');
-    const streak    = analysis.smoothStreakMi;
-    if (bestBlock && bestText && streak != null && streak >= 0.3){
-      const distMi = metersToMiles(drive.distanceMeters || 0);
-      bestText.textContent = (distMi > 0 && streak >= distMi * 0.95)
-        ? 'Clean the whole way — not a single harsh input.'
-        : `${streak.toFixed(1)} mi with zero harsh inputs — your smoothest run of the drive.`;
-      bestBlock.style.display = '';
-    } else if (bestBlock){
-      bestBlock.style.display = 'none';
-    }
-  }
+
+  // ── Engineer's notes (replace best stretch / hardest moment) ──────────────
+  renderNotes(drive, analysis);
+  annotateNoteCauses(drive, analysis);
+  annotateTraffic(drive);
 
   // ── Route history comparison (collapsed by default) ───────────────────────
   const routeHistBlock = document.getElementById('rv-route-history');

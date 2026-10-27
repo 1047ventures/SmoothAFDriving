@@ -2,6 +2,8 @@
 //   1. BASE: you bank points for every SMOOTH mile, destination or not.
 //   2. BONUS: beating the ETA stacks on top, but only if you stayed smooth.
 //      Rough-but-fast earns nothing extra.
+//   3. TRAFFIC: the same smooth mile in rush hour is harder than on an empty
+//      road, so it earns up to +50% more (drive.traffic, read after the drive).
 //
 // A mile is "smooth" when no harsh event fired near it: each recorded event
 // blacks out the road within ±EVENT_WINDOW_MS of it. Drives restored without
@@ -11,6 +13,7 @@ import { haversine, metersToMiles, clamp } from '../utils/math.js';
 import {
   POINTS_PER_SMOOTH_MILE, POINTS_EVENT_WINDOW_MS, POINTS_SMOOTH_GATE,
   POINTS_PACE_BONUS_MAX, CLOCK_BEAT_FULL, ETA_BUFFER,
+  TRAFFIC_MIN_RATIO, TRAFFIC_FULL_RATIO, TRAFFIC_BONUS_MAX,
 } from '../constants.js';
 
 // Miles of the drive that were driven clean. Returns { smoothMi, totalMi }.
@@ -59,12 +62,22 @@ export function paceBonusFrac(drive){
   return POINTS_PACE_BONUS_MAX * Math.min(1, margin / CLOCK_BEAT_FULL);
 }
 
+// Traffic multiplier (0..TRAFFIC_BONUS_MAX), scaled linearly from the floor
+// ratio to the full one. It multiplies the smooth-mile base, so only the miles
+// you drove clean get the credit — rough driving in a jam earns nothing extra.
+export function trafficBonusFrac(drive){
+  const r = drive.traffic?.ratio;
+  if (!(r >= TRAFFIC_MIN_RATIO)) return 0;
+  return TRAFFIC_BONUS_MAX * Math.min(1, (r - TRAFFIC_MIN_RATIO) / (TRAFFIC_FULL_RATIO - TRAFFIC_MIN_RATIO));
+}
+
 // Full points breakdown for one drive.
 export function drivePoints(drive){
   const { smoothMi, totalMi } = smoothMiles(drive);
-  const base  = Math.round(smoothMi * POINTS_PER_SMOOTH_MILE);
-  const bonus = Math.round(base * paceBonusFrac(drive));
-  return { smoothMi, totalMi, base, bonus, total: base + bonus };
+  const base    = Math.round(smoothMi * POINTS_PER_SMOOTH_MILE);
+  const bonus   = Math.round(base * paceBonusFrac(drive));
+  const traffic = Math.round(base * trafficBonusFrac(drive));
+  return { smoothMi, totalMi, base, bonus, traffic, total: base + bonus + traffic };
 }
 
 // Points for a drive, preferring the breakdown stamped at finalize time.

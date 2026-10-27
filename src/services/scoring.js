@@ -24,6 +24,7 @@ import {
   RIDE_RR_LO,
   RIDE_RR_HI,
   NO_RIDE_DATA_CEILING,
+  TRAFFIC_MIN_RATIO,
 } from '../constants.js';
 import { clamp, linMap, pct, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
 
@@ -472,6 +473,7 @@ export function driveFacts(drive, analysis){
     if (tier) facts.push({ label: 'Grade', value: tier });
   }
   if ((drive.pitStopMs || 0) > 60000) facts.push({ label: 'Pit', value: String(Math.round(drive.pitStopMs / 60000)), unit: 'min' });
+  if ((drive.traffic?.ratio || 0) >= TRAFFIC_MIN_RATIO) facts.push({ label: 'Traffic', value: drive.traffic.ratio.toFixed(1), unit: '×' });
   return facts;
 }
 

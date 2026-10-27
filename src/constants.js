@@ -235,6 +235,13 @@ export const POINTS_PER_SMOOTH_MILE = 10;
 export const POINTS_EVENT_WINDOW_MS = 8000;  // road within ±8s of a harsh event isn't "smooth"
 export const POINTS_SMOOTH_GATE     = 80;    // efficiency needed to earn any clock reward
 export const POINTS_PACE_BONUS_MAX  = 0.5;   // beating the ETA fully = +50% on the base
+// Traffic: the same smooth mile is harder in rush hour, so it earns more.
+// ratio = Mapbox live-traffic time ÷ open-road time for the trip, read right after
+// the drive. Below the floor it's normal road; at FULL the bonus maxes out.
+export const TRAFFIC_MIN_RATIO      = 1.15;  // under this, no traffic worth crediting
+export const TRAFFIC_FULL_RATIO     = 2.0;   // twice as slow as open road = full bonus
+export const TRAFFIC_BONUS_MAX      = 0.5;   // heaviest traffic = +50% on the base
+export const TRAFFIC_FRESH_MS       = 20 * 60 * 1000; // only read traffic this soon after the drive ended
 
 // ── Live ETA + pit-stop detection ──────────────────────────────────────────────
 export const LIVE_ETA_REFRESH_MS = 60000;  // re-fetch the traffic-aware ETA at most this often

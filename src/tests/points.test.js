@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { smoothMiles, paceBonusFrac, drivePoints, lifetimePoints } from '../services/points.js';
+import { smoothMiles, paceBonusFrac, trafficBonusFrac, drivePoints, lifetimePoints } from '../services/points.js';
 
 // A straight track: n samples 1s apart, ~0.001° lat (~111 m) between each.
 function track(n){
@@ -59,5 +59,25 @@ describe('drivePoints', () => {
   });
   it('lifetimePoints prefers stamped points', () => {
     expect(lifetimePoints([{ points: { total: 42 } }, { distanceMeters: 1 * MI, efficiency: 95 }])).toBe(52);
+  });
+});
+
+describe('trafficBonusFrac', () => {
+  it('is zero with no traffic reading or light traffic', () => {
+    expect(trafficBonusFrac({})).toBe(0);
+    expect(trafficBonusFrac({ traffic: { ratio: 1.1 } })).toBe(0);
+  });
+  it('scales up to +50% at twice the open-road time, then caps', () => {
+    expect(trafficBonusFrac({ traffic: { ratio: 1.575 } })).toBeCloseTo(0.25, 5);
+    expect(trafficBonusFrac({ traffic: { ratio: 2.0 } })).toBeCloseTo(0.5, 5);
+    expect(trafficBonusFrac({ traffic: { ratio: 3.5 } })).toBeCloseTo(0.5, 5);
+  });
+  it('multiplies only the smooth-mile base, stacking with the ETA bonus', () => {
+    const p = drivePoints({ distanceMeters: 10 * MI, efficiency: 90, traffic: { ratio: 2.0 } });
+    expect(p.base).toBe(100);
+    expect(p.traffic).toBe(50);
+    expect(p.total).toBe(p.base + p.bonus + p.traffic);
+    const rough = drivePoints({ distanceMeters: 10 * MI, efficiency: 40, traffic: { ratio: 2.0 } });
+    expect(rough.traffic).toBe(0);
   });
 });

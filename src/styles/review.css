@@ -208,15 +208,18 @@
   .rv-momentum-canvas{width:100%;flex:1 1 auto;min-height:44px;display:block}
   .rv-momentum-axis{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,232,213,.32);flex-shrink:0}
 
-  /* Highlights — best stretch + hardest moment, side by side, compact */
-  .rv-highlights{display:flex;gap:9px;flex-shrink:0}
-  .rv-best,.rv-worst{flex:1 1 0;min-width:0;padding:9px 12px;border-radius:0 8px 8px 0}
-  .rv-best{background:rgba(90,158,82,.06);border-left:3px solid #5A9E52}
-  .rv-worst{background:rgba(201,56,40,.05);border-left:3px solid #C93828}
-  .rv-best-label,.rv-worst-label{font-family:var(--sans);font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;margin-bottom:4px}
-  .rv-best-label{color:rgba(111,182,105,.9)}
-  .rv-worst-label{color:rgba(224,96,80,.9)}
-  .rv-best-text,.rv-worst-text{font-family:var(--sans);font-size:12px;line-height:1.35;color:var(--cream)}
+  /* Engineer's notes — numbered moments; fix = signal, praise = green. A note
+     with a position is a button that flies the map there. */
+  .rv-notes{flex-shrink:0;display:flex;flex-direction:column}
+  .rv-notes-head{font-family:var(--sans);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:2px}
+  .rv-note{display:flex;gap:10px;align-items:flex-start;width:100%;padding:7px 0;margin:0;border:0;border-top:1px solid rgba(242,232,213,.08);background:transparent;text-align:left;color:var(--cream);font:inherit;appearance:none}
+  button.rv-note{cursor:pointer}
+  .rv-note-n{flex:0 0 20px;font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;line-height:1.15}
+  .rv-note--fix .rv-note-n{color:#E8501A}
+  .rv-note--praise .rv-note-n{color:#6FB669}
+  .rv-note-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .rv-note-title{font-family:var(--sans);font-size:12.5px;font-weight:600;line-height:1.3;color:var(--cream)}
+  .rv-note-body{font-family:var(--sans);font-size:11.5px;line-height:1.35;color:rgba(242,232,213,.7)}
 
   /* Actions */
   .rv-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
