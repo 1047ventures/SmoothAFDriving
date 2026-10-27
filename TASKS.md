@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**395 tasks shipped** as of 2026-10-20.
+**402 tasks shipped** as of 2026-10-27.
 
 
 ## 2026-04
@@ -415,3 +415,10 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T393** · F2: connect the OBD reader from the Garage  _( 2026-10-20 )_
 - **T394** · F2 review fixes: explicit startDrive option, Safari message, dropped link  _( 2026-10-20 )_
 - **T395** · F2 UI review fixes + wireframes update  _( 2026-10-20 )_
+- **T396** · Wireframes: keep audit numbers stable; fixed items stay marked Fixed  _( 2026-10-20 )_
+- **T397** · Dev server never writes to the production database  _( 2026-10-24 )_
+- **T398** · Docs: real usage numbers (test drives excluded); cleanup SQL in Needs you  _( 2026-10-24 )_
+- **T399** · Apple sign-in: hide on web, real error messages (Zvi's report)  _( 2026-10-24 )_
+- **T400** · Engineer's notes on the recap + traffic-adjusted points  _( 2026-10-27 )_
+- **T401** · Notes/traffic: fixes from adversarial review  _( 2026-10-27 )_
+- **T402** · Recap: notes take priority over the momentum chart; fits 375x667 to 390x844  _( 2026-10-27 )_
