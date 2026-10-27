@@ -51,10 +51,11 @@ export function renderRewards(){
       const p = per[i];
       const when = new Date(d.startTime);
       const bonus = p.bonus > 0 ? ` · +${p.bonus} on-time bonus` : '';
+      const traffic = p.traffic > 0 ? ` · +${p.traffic} traffic bonus` : '';
       return `<div class="rw-activity-row">
         <div>
           <div class="rw-activity-main">${when.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'})}</div>
-          <div class="rw-activity-sub">${p.smoothMi.toFixed(1)} of ${p.totalMi.toFixed(1)} mi smooth${bonus}</div>
+          <div class="rw-activity-sub">${p.smoothMi.toFixed(1)} of ${p.totalMi.toFixed(1)} mi smooth${bonus}${traffic}</div>
         </div>
         <div class="rw-activity-pts rw-earned">+${p.total}</div>
       </div>`;

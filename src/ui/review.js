@@ -4,9 +4,9 @@ import { improvementVerdict } from '../services/improvement.js';
 import { applyAnalysis } from '../services/drive.js';
 import { openTrends } from './trends.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
-import { mpsToMph, metersToMiles, fmtDuration, clamp } from '../utils/math.js';
+import { mpsToMph, metersToMiles, fmtDuration, clamp, haversine } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
-import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER, TRAFFIC_FRESH_MS } from '../constants.js';
+import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER, TRAFFIC_FRESH_MS, TRAFFIC_MIN_TRIP_M } from '../constants.js';
 import { loadDrives, loadDriverName, updateStoredDrive, recomputeLifetimeScore } from '../services/storage.js';
 import { baseTiles } from '../utils/maptiles.js';
 import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
@@ -43,7 +43,7 @@ async function annotateStopCauses(drive, analysis){
   const markers = analysis.stopMarkers || [];
   if (!markers.length || !drive.samples?.length) return;
 
-  const features = await fetchStopFeatures(drive.startTime, markers);
+  const features = await fetchStopFeatures(drive.startTime ?? drive.id ?? drive.ts, markers);
   if (token !== _causeToken || features == null) return;          // a newer recap opened, or no data
   const causes = classifyStops(markers, drive.samples, features);
 
@@ -108,9 +108,11 @@ function renderNotes(drive, analysis, features = null){
 let _noteToken = 0;
 async function annotateNoteCauses(drive, analysis){
   const token = ++_noteToken;
-  const brakes = (drive.events || []).filter(e => e.type === 'brake' && e.lat != null && e.lon != null);
-  if (!brakes.length || !drive.samples?.length) return;
-  const features = await fetchStopFeatures(`${drive.startTime}:ev`, brakes.map(e => ({ lat: e.lat, lon: e.lon })));
+  // Only the worst brake is ever explained, so only its surroundings are fetched.
+  const worst = (drive.events || []).filter(e => e.type === 'brake' && e.lat != null && e.lon != null)
+    .sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
+  if (!worst || !drive.samples?.length) return;
+  const features = await fetchStopFeatures(`${drive.startTime ?? drive.id ?? drive.ts}:ev`, [{ lat: worst.lat, lon: worst.lon }]);
   if (token !== _noteToken || features == null) return;   // a newer recap opened, or no data
   renderNotes(drive, analysis, features);
 }
@@ -118,21 +120,46 @@ async function annotateNoteCauses(drive, analysis){
 // Traffic is read once, right after the drive (live traffic later would describe
 // a different road), from Mapbox: live-traffic time ÷ open-road time for the trip.
 // It feeds the points bonus and the notes, never the score.
-let _shownStart = null;
-async function annotateTraffic(drive){
-  _shownStart = drive.startTime;
-  if (drive.traffic !== undefined || drive.simulated) return;
-  const ended = (drive.startTime || 0) + (drive.durationMs || 0);
+const _trafficInFlight = new Set();
+async function annotateTraffic(drive, analysis){
+  if (drive.traffic !== undefined || drive.simulated || drive.startTime == null) return;
+  if (_trafficInFlight.has(drive.startTime)) return;
+  const ended = drive.startTime + (drive.durationMs || 0);
   if (Date.now() - ended > TRAFFIC_FRESH_MS) return;
   const pts = (drive.samples || []).filter(s => s.lat != null && s.lon != null);
   if (pts.length < 2) return;
   const a = pts[0], b = pts[pts.length - 1];
-  const tr = await fetchTrafficRatio({ lat: a.lat, lng: a.lon }, { lat: b.lat, lng: b.lon });
-  if (!tr || drive.traffic !== undefined) return;
-  drive.traffic = { ...tr, at: Date.now() };
-  drive.points  = drivePoints(drive);
-  updateStoredDrive(drive);
-  if (_shownStart === drive.startTime) renderReview(drive);
+  _trafficInFlight.add(drive.startTime);
+  try {
+    // A loop that ends where it started has no start→end trip to price: the
+    // ratio of two few-second routes is noise, so record "no reading" instead.
+    const tripM = haversine(a, b);
+    const tr = tripM >= TRAFFIC_MIN_TRIP_M
+      ? await fetchTrafficRatio({ lat: a.lat, lng: a.lon }, { lat: b.lat, lng: b.lon })
+      : null;
+    if (drive.traffic !== undefined) return;
+    if (!tr && tripM >= TRAFFIC_MIN_TRIP_M) return;          // network/API failure: retry on next open
+    drive.traffic = tr && tr.freeSec >= 120 ? { ...tr, at: Date.now() } : null;
+    drive.points  = drivePoints(drive);
+    updateStoredDrive(drive);
+    // Update the two places traffic shows, in place — a full repaint would
+    // restart the stop-cause lookups and pull the user back to this screen.
+    if (document.getElementById('screen-review')?.classList.contains('active')){
+      renderFacts(drive, analysis);
+      renderNotes(drive, analysis);
+      annotateNoteCauses(drive, analysis);
+    }
+  } finally {
+    _trafficInFlight.delete(drive.startTime);
+  }
+}
+
+function renderFacts(drive, analysis){
+  const factsEl = document.getElementById('rv-facts');
+  if (!factsEl) return;
+  factsEl.innerHTML = driveFacts(drive, analysis).map(f =>
+    `<span class="rv-fact"><span class="rv-fact-v">${escapeHtml(f.value)}</span>${f.unit ? `<span class="rv-fact-u">${escapeHtml(f.unit)}</span>` : ''}<span class="rv-fact-l">${escapeHtml(f.label)}</span></span>`
+  ).join('');
 }
 
 export function renderReview(drive){
@@ -179,12 +206,7 @@ export function renderReview(drive){
       progEl.onclick = show && v.trend ? () => openTrends(v.trend) : null;
     }
     // Numbers pulled out of the prose into a compact facts row.
-    const factsEl = document.getElementById('rv-facts');
-    if (factsEl){
-      factsEl.innerHTML = driveFacts(drive, analysis).map(f =>
-        `<span class="rv-fact"><span class="rv-fact-v">${escapeHtml(f.value)}</span>${f.unit ? `<span class="rv-fact-u">${escapeHtml(f.unit)}</span>` : ''}<span class="rv-fact-l">${escapeHtml(f.label)}</span></span>`
-      ).join('');
-    }
+    renderFacts(drive, analysis);
   }
 
   const exportBtn = document.getElementById('rv-export-btn');
@@ -309,7 +331,7 @@ export function renderReview(drive){
   // ── Engineer's notes (replace best stretch / hardest moment) ──────────────
   renderNotes(drive, analysis);
   annotateNoteCauses(drive, analysis);
-  annotateTraffic(drive);
+  annotateTraffic(drive, analysis);
 
   // ── Route history comparison (collapsed by default) ───────────────────────
   const routeHistBlock = document.getElementById('rv-route-history');

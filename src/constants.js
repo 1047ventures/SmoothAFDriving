@@ -242,6 +242,7 @@ export const TRAFFIC_MIN_RATIO      = 1.15;  // under this, no traffic worth cre
 export const TRAFFIC_FULL_RATIO     = 2.0;   // twice as slow as open road = full bonus
 export const TRAFFIC_BONUS_MAX      = 0.5;   // heaviest traffic = +50% on the base
 export const TRAFFIC_FRESH_MS       = 20 * 60 * 1000; // only read traffic this soon after the drive ended
+export const TRAFFIC_MIN_TRIP_M     = 1000;  // start→end closer than this (a loop) gets no traffic reading
 
 // ── Live ETA + pit-stop detection ──────────────────────────────────────────────
 export const LIVE_ETA_REFRESH_MS = 60000;  // re-fetch the traffic-aware ETA at most this often
