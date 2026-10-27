@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 27, 2026 · 3:49 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 27, 2026 · 3:58 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -185,7 +185,7 @@
     <div class="sec-body">
       <details class="ent">
         <summary><span class="tag t-next tn">Q2</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Uploaded drive rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you see.</div>
+        <div class="ent-body">Uploaded drive rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you see. Now also covers the traffic stretch (T403), which lands after the upload.</div>
       </details>
 
       <details class="ent" id="trk-always">
@@ -229,6 +229,10 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="trk-traffic">
+        <summary><span class="tag t-ship tn">T403</span><span class="ent-t">Rush hour shows your skill &mdash; in the score too</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Heavy traffic now stretches the score both ways: more cues to manage means smooth driving shows more, and so does rough driving. The gap from 75 grows by up to 30% at twice the open-road time &mdash; a 90 becomes ~94, a 60 becomes ~56. Light traffic changes nothing. The recap updates the score the moment the traffic reading lands (T403&ndash;404).</div>
+      </details>
       <details class="ent" id="trk-notes">
         <summary><span class="tag t-ship tn">T400</span><span class="ent-t">Engineer&rsquo;s notes + rush-hour points</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The recap&rsquo;s Best stretch / Hardest moment cards became numbered <b>engineer&rsquo;s notes</b>: the worst moment of each kind with when, how fast, and what to do next time &mdash; and for a hard brake, what was ahead (a light, a queue, a stop sign, or nothing = traffic). Tap a note and the map flies there. Right after each drive the app also reads <b>traffic</b> on your trip from Mapbox (live time &divide; open-road time); in heavy traffic your smooth miles earn up to <b>+50% points</b> and a Traffic chip shows on the recap. The score itself doesn&rsquo;t change. Checked on phones from iPhone SE to Pro size (T400&ndash;402).</div>
