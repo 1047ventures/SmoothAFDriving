@@ -142,11 +142,17 @@ async function annotateTraffic(drive, analysis){
     if (!drive.traffic){ updateStoredDrive(drive); return; }   // remember "no reading"; nothing to rescore
     // Heavy traffic lifts the score and the points: rescore through the one path
     // (keeps any ETA clock and stop-cause credit), save, follow through to lifetime.
+    const before = `${drive.score}|${drive.points?.total}`;
     applyAnalysis(drive, analyzeDrive(drive));
     updateStoredDrive(drive);
     recomputeLifetimeScore();
-    // Repaint only if the recap is still on screen — never pull the user back to it.
-    if (document.getElementById('screen-review')?.classList.contains('active')) renderReview(drive);
+    // Repaint only if something visible changed AND this drive's recap is still
+    // the one on screen — never pull the user back, never swap in another drive.
+    const onScreen = document.getElementById('screen-review')?.classList.contains('active')
+      && reviewDrive?.startTime === drive.startTime;
+    if (!onScreen) return;
+    if (`${drive.score}|${drive.points?.total}` !== before) renderReview(drive);
+    else { renderFacts(drive, analysis); renderNotes(drive, analysis); annotateNoteCauses(drive, analysis); }
   } finally {
     _trafficInFlight.delete(drive.startTime);
   }

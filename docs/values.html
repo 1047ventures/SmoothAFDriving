@@ -142,7 +142,7 @@
 <div class="wrap">
 
   <header>
-    <p class="brand">Smooth AF · Values &amp; Vision · Updated Oct 17, 2026</p>
+    <p class="brand">Smooth AF · Values &amp; Vision · Updated Oct 27, 2026</p>
     <h1>What you need <span class="grad">to know</span></h1>
     <p class="intro">Everything about Smooth AF on one page: what it is, how we make calls, how we grade your driving, what's shipped, and a cheat sheet for whatever seat you're in. Read it once, then go drive like you mean it.</p>
     <ul class="toc" aria-label="Contents">
@@ -198,6 +198,7 @@
         <thead><tr><th>Rule</th><th>In plain English</th><th>Where you'll see it</th></tr></thead>
         <tbody>
           <tr><td class="nm">Smooth before fast</td><td>Fast is easy. Calm at speed is the skill.</td><td>The ETA bonus applies only when the drive scored 80+ before the clock. The speed bonus (up to +5) scales with how smooth the drive was.</td></tr>
+          <tr><td class="nm">Traffic shows your skill</td><td>Rush hour has more to manage, so it shows who&rsquo;s smooth.</td><td>Right after a drive the app reads traffic on the trip (live time &divide; open-road time). Heavy traffic stretches the score away from 75 by up to 30%: a 90 becomes ~94, a 60 becomes ~56. Smooth miles in heavy traffic earn up to +50% points.</td></tr>
           <tr><td class="nm">The road's fault isn't yours</td><td>You can't will a red light green.</td><td>Once the recap has looked up nearby signals, stops at lights, queues and stop signs count 0.25. Parked stretches over 3 minutes pause the ETA clock.</td></tr>
           <tr><td class="nm">Miles, not minutes</td><td>A clean hour beats a clean minute.</td><td>10 points per smooth mile. Road within 8 seconds of a harsh moment doesn't count. Badges at 10, 50, 100, 250, 500 and 1,000 smooth miles.</td></tr>
           <tr><td class="nm">A blank beats a guess</td><td>If we can't measure it, we don't make it up.</td><td>Drives without ride-quality data cap at 95. Improvement compares only drives scored the same way. A timed-out trouble-code read keeps the last report. A VIN read that disagrees with itself is discarded.</td></tr>
@@ -228,7 +229,7 @@
       </table>
     </div>
     <div class="three">
-      <div class="card"><span class="lbl">Score</span><h3 style="margin-top:6px">Out of 100</h3><p>Weighted sum plus a speed bonus.</p><div class="f">Σ measure × weight<br>+ up to 5 (avg 25→65 mph) × base/100<br>max 95 without ride data</div></div>
+      <div class="card"><span class="lbl">Score</span><h3 style="margin-top:6px">Out of 100</h3><p>Weighted sum, a speed bonus, and a traffic stretch.</p><div class="f">Σ measure × weight<br>+ up to 5 (avg 25→65 mph) × base/100<br>+ (base − 75) × 0.3 × traffic (1.15×→2× open-road)<br>max 95 without ride data</div></div>
       <div class="card"><span class="lbl">Clock</span><h3 style="margin-top:6px">Destination drives</h3><p>Beat the ETA for up to +15. Late costs points only with a traffic-aware ETA.</p><div class="f">15 × beat/20% × base/100<br>only if base ≥ 80</div></div>
       <div class="card"><span class="lbl">Points</span><h3 style="margin-top:6px">Smooth miles</h3><p>Earned on every drive. On-time bonus stacks on top.</p><div class="f">10 × smooth miles<br>+ up to 50% if on time, base ≥ 80</div></div>
     </div>
