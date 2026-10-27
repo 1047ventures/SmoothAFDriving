@@ -201,7 +201,7 @@
   .rv-fact-l{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.5);margin-left:2px}
 
   /* Momentum — smoothness across the drive; flexes to absorb spare height */
-  .rv-momentum{flex:1 1 auto;min-height:62px;display:flex;flex-direction:column}
+  .rv-momentum{flex:1 1 0;min-height:80px;max-height:150px;display:flex;flex-direction:column}
   .rv-momentum-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-shrink:0}
   .rv-momentum-title{font-family:var(--sans);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(242,232,213,.86)}
   .rv-momentum-sub{font-family:var(--sans);font-size:11px;color:rgba(242,232,213,.5)}
@@ -209,20 +209,24 @@
   .rv-momentum-axis{display:flex;justify-content:space-between;margin-top:4px;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,232,213,.32);flex-shrink:0}
 
   /* Engineer's notes — numbered moments; fix = signal, praise = green. A note
-     with a position is a button that flies the map there. */
-  .rv-notes{flex-shrink:0;display:flex;flex-direction:column}
+     with a position is a button that flies the map there. On short phones the
+     list gives up height (and scrolls inside itself) before the buttons do. */
+  .rv-notes{flex:0 1 auto;min-height:72px;display:flex;flex-direction:column}
+  .rv-notes-list{min-height:0;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory}
   .rv-notes-head{font-family:var(--sans);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(242,232,213,.86);margin-bottom:2px}
   .rv-note{display:flex;gap:10px;align-items:flex-start;width:100%;padding:7px 0;margin:0;border:0;border-top:1px solid rgba(242,232,213,.08);background:transparent;text-align:left;color:var(--cream);font:inherit;appearance:none}
   button.rv-note{cursor:pointer}
+  .rv-note{scroll-snap-align:start}
   .rv-note-n{flex:0 0 20px;font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;line-height:1.15}
   .rv-note--fix .rv-note-n{color:#E8501A}
   .rv-note--praise .rv-note-n{color:#6FB669}
   .rv-note-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
   .rv-note-title{font-family:var(--sans);font-size:12.5px;font-weight:600;line-height:1.3;color:var(--cream)}
-  .rv-note-body{font-family:var(--sans);font-size:11.5px;line-height:1.35;color:rgba(242,232,213,.7)}
+  .rv-note-body{font-family:var(--sans);font-size:11.5px;line-height:1.35;color:rgba(242,232,213,.7);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  @media (max-height:700px){ .rv-note:nth-child(3){display:none} .rv-momentum-axis{display:none} .rv-note-body{-webkit-line-clamp:1} }
 
   /* Actions */
-  .rv-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+  .rv-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-top:auto}
   .rv-btn-export{flex:0 0 auto;width:48px;height:46px;background:transparent;border:1px solid rgba(242,232,213,.28);border-radius:8px;color:var(--cream);font-size:18px;cursor:pointer;appearance:none}
   .rv-btn-share{flex:0 0 30%;height:46px;background:transparent;border:1px solid rgba(242,232,213,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);cursor:pointer;appearance:none}
   .rv-btn-next{flex:1;height:46px;background:#E8501A;border:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#080808;font-weight:600;cursor:pointer;appearance:none}
