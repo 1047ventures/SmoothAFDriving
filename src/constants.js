@@ -236,10 +236,12 @@ export const POINTS_EVENT_WINDOW_MS = 8000;  // road within ±8s of a harsh even
 export const POINTS_SMOOTH_GATE     = 80;    // efficiency needed to earn any clock reward
 export const POINTS_PACE_BONUS_MAX  = 0.5;   // beating the ETA fully = +50% on the base
 // Traffic: the same smooth mile is harder in rush hour, so it earns more.
-// ratio = Mapbox live-traffic time ÷ open-road time for the trip, read right after
-// the drive. Below the floor it's normal road; at FULL the bonus maxes out.
-export const TRAFFIC_MIN_RATIO      = 1.15;  // under this, no traffic worth crediting
-export const TRAFFIC_FULL_RATIO     = 2.0;   // twice as slow as open road = full bonus
+// ratio = the trip's time in traffic ÷ the same trip at 3am (Mapbox typical
+// traffic), read right after the drive — or, for older drives, estimated from
+// the same weekday and time. Below the floor it's ordinary daytime road (Denver
+// midday ≈ 1.2×, Saturday ≈ 1.2×, weekday 8am ≈ 1.4×, 5pm ≈ 1.7–1.8×).
+export const TRAFFIC_MIN_RATIO      = 1.25;  // under this, no traffic worth crediting
+export const TRAFFIC_FULL_RATIO     = 2.0;   // twice the 3am time = full bonus
 export const TRAFFIC_BONUS_MAX      = 0.5;   // heaviest traffic = +50% on the base
 // Score: heavy traffic AMPLIFIES the drive, both ways. More cues to manage means
 // skill (or its absence) shows more, so the distance from the pivot is stretched:

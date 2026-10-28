@@ -483,7 +483,7 @@ export function driveFacts(drive, analysis){
     if (tier) facts.push({ label: 'Grade', value: tier });
   }
   if ((drive.pitStopMs || 0) > 60000) facts.push({ label: 'Pit', value: String(Math.round(drive.pitStopMs / 60000)), unit: 'min' });
-  if ((drive.traffic?.ratio || 0) >= TRAFFIC_MIN_RATIO) facts.push({ label: 'Traffic', value: drive.traffic.ratio.toFixed(1), unit: '×' });
+  if ((drive.traffic?.ratio || 0) >= TRAFFIC_MIN_RATIO) facts.push({ label: drive.traffic.estimated ? 'Usual traffic' : 'Traffic', value: drive.traffic.ratio.toFixed(1), unit: '×' });
   return facts;
 }
 

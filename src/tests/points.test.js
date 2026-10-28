@@ -65,10 +65,10 @@ describe('drivePoints', () => {
 describe('trafficBonusFrac', () => {
   it('is zero with no traffic reading or light traffic', () => {
     expect(trafficBonusFrac({})).toBe(0);
-    expect(trafficBonusFrac({ traffic: { ratio: 1.1 } })).toBe(0);
+    expect(trafficBonusFrac({ traffic: { ratio: 1.2 } })).toBe(0);
   });
   it('scales up to +50% at twice the open-road time, then caps', () => {
-    expect(trafficBonusFrac({ traffic: { ratio: 1.575 } })).toBeCloseTo(0.25, 5);
+    expect(trafficBonusFrac({ traffic: { ratio: 1.625 } })).toBeCloseTo(0.25, 5);
     expect(trafficBonusFrac({ traffic: { ratio: 2.0 } })).toBeCloseTo(0.5, 5);
     expect(trafficBonusFrac({ traffic: { ratio: 3.5 } })).toBeCloseTo(0.5, 5);
   });

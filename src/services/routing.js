@@ -46,21 +46,68 @@ export async function fetchRoute(from, to){
   return useMapbox() ? mapboxRoute(from, to) : osmRoute(from, to);
 }
 
-// How much traffic is on the trip right now: live-traffic time ÷ open-road time
-// for the same start and end. Mapbox only (OSM has no traffic) → else null.
+// ── Traffic ───────────────────────────────────────────────────────────────────
+// The yardstick is the same trip at 3am — Mapbox's typical traffic on empty
+// roads. (Its plain `driving` profile is NOT empty roads: it's about midday
+// traffic, so it hid most of rush hour.) ratio = trip time ÷ 3am trip time.
+
+// Mapbox `depart_at` takes the origin's local wall-clock time, no offset.
+function localStamp(d){
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+// The next 3am after `now`.
+export function nextQuietTime(now = new Date()){
+  const d = new Date(now);
+  d.setHours(3, 0, 0, 0);
+  if (d <= now) d.setDate(d.getDate() + 1);
+  return d;
+}
+
+// The next time it's the same weekday and clock time as `when`, at least an
+// hour out (depart_at must be in the future).
+export function nextSameSlot(when, now = new Date()){
+  const w = new Date(when), d = new Date(now);
+  d.setHours(w.getHours(), w.getMinutes(), 0, 0);
+  d.setDate(d.getDate() + ((w.getDay() - d.getDay() + 7) % 7));
+  if (d.getTime() < now.getTime() + 3600e3) d.setDate(d.getDate() + 7);
+  return d;
+}
+
+async function mapboxTrafficSec(from, to, departAt = null){
+  const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
+  const at = departAt ? `&depart_at=${localStamp(departAt)}` : '';
+  const res = await fetch(`${MAPBOX_BASE}/directions/v5/mapbox/driving-traffic/${coords}?overview=false${at}&access_token=${MAPBOX_TOKEN}`);
+  if (!res.ok) return null;
+  return (await res.json())?.routes?.[0]?.duration ?? null;
+}
+
+function ratioOf(trafficSec, freeSec){
+  if (!(trafficSec > 0) || !(freeSec > 0)) return null;
+  return { ratio: +(trafficSec / freeSec).toFixed(2), trafficSec: Math.round(trafficSec), freeSec: Math.round(freeSec) };
+}
+
+// Traffic on the trip right now (read right after a drive). Mapbox only → else null.
 // from/to are { lat, lng } -> { ratio, trafficSec, freeSec } | null
 export async function fetchTrafficRatio(from, to){
   if (!useMapbox()) return null;
   try {
-    const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
-    const get = async (profile) => {
-      const res = await fetch(`${MAPBOX_BASE}/directions/v5/mapbox/${profile}/${coords}?overview=false&access_token=${MAPBOX_TOKEN}`);
-      if (!res.ok) return null;
-      return (await res.json())?.routes?.[0]?.duration ?? null;
-    };
-    const [trafficSec, freeSec] = await Promise.all([get('driving-traffic'), get('driving')]);
-    if (!(trafficSec > 0) || !(freeSec > 0)) return null;
-    return { ratio: +(trafficSec / freeSec).toFixed(2), trafficSec: Math.round(trafficSec), freeSec: Math.round(freeSec) };
+    const [live, quiet] = await Promise.all([mapboxTrafficSec(from, to), mapboxTrafficSec(from, to, nextQuietTime())]);
+    return ratioOf(live, quiet);
+  } catch {
+    return null;
+  }
+}
+
+// Typical traffic for a past drive: the same trip at the same weekday and time
+// next week (Mapbox predicts typical traffic for future departures). An estimate
+// of what the road is usually like then, not what was there that day.
+export async function fetchTypicalTrafficRatio(from, to, whenMs){
+  if (!useMapbox()) return null;
+  try {
+    const [slot, quiet] = await Promise.all([mapboxTrafficSec(from, to, nextSameSlot(whenMs)), mapboxTrafficSec(from, to, nextQuietTime())]);
+    return ratioOf(slot, quiet);
   } catch {
     return null;
   }
