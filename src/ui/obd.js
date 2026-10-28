@@ -7,8 +7,8 @@
  * this panel exists to answer.
  */
 
-import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes, readVin, readVoltage, readRpm, ecuAnswering, refreshSupported } from '../services/obd.js';
-import { createBatteryWatch, saveBatteryReading, saveLastRun, loadBattery, REST_AFTER_RUN_MS } from '../services/battery.js';
+import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes, readVin, readVoltage, readRpm, readSpeed, ecuAnswering, refreshSupported } from '../services/obd.js';
+import { createBatteryWatch, saveBatteryReading, saveLastRun, loadBattery, keepResting } from '../services/battery.js';
 import { buildReport, saveHealthReport } from '../services/carHealth.js';
 import { getActiveVehicle, findVehicleByVin, activateVehicle } from './garage.js';
 import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendingCar } from '../services/carIdentity.js';
@@ -99,14 +99,17 @@ async function onCarLinked(){
 }
 
 // ── Battery watch ───────────────────────────────────────────────────────────
-// While the engine is off the poll loop only reads the adapter's voltage, fast
-// enough (~4 Hz) to catch the starting dip; once the engine runs, normal polling
-// resumes and the voltage rides along in the slow set. See services/battery.js.
-let bw = null, bwKey, bwQueue = [], bwTick = 0, bwOffSince = 0, bwRunSavedAt = 0;
+// Once the car is known to be parked (services/battery.js decides, on evidence
+// only), the poll loop reads just the adapter's voltage — fast enough (~4 Hz)
+// to catch the starting dip — plus RPM and speed every tick while the engine
+// computer is awake, so a start or an EV pulling away resumes full polling
+// within one tick. Otherwise normal polling runs and the voltage rides along
+// in its slow set.
+let bw = null, bwKey, bwQueue = [], bwTick = 0, bwOffSince = 0, bwRunSavedAt = 0, bwStartAt = 0, stillSince = 0, carReadQueued = false;
 
 function startBatteryWatch(){
   bw = createBatteryWatch();
-  bwKey = undefined; bwQueue = []; bwTick = 0; bwOffSince = 0; carRead = false;
+  bwKey = undefined; bwQueue = []; bwTick = 0; bwOffSince = 0; bwStartAt = 0; carRead = false; carReadQueued = false;
 }
 
 /** The car is known (or known to be someone else's: null) — file what's waiting. */
@@ -120,9 +123,7 @@ function fileBattery(readings){
   for (const r of readings){
     if (bwKey === undefined){ bwQueue.push(r); continue; }
     if (bwKey === null) continue;
-    // A resting figure within an hour of the last drive is surface charge.
-    const last = loadBattery(bwKey)?.lastRunAt || 0;
-    if (r.kind === 'resting' && r.at - last < REST_AFTER_RUN_MS) continue;
+    if (r.kind === 'resting' && !keepResting(r, loadBattery(bwKey)?.lastRunAt || 0)) continue;
     saveBatteryReading(bwKey, r);
     window.dispatchEvent(new CustomEvent('smoothaf:carhealth'));
   }
@@ -132,27 +133,44 @@ function fileBattery(readings){
   }
 }
 
-/** One engine-off tick: the voltage, plus an RPM check every ~2 s so a running
- *  engine with a lazy alternator is never mistaken for a parked one. */
+// Read this moment, not a value left over from before a NO DATA.
+const fresh = (at, ms = 1500) => at && Date.now() - at < ms;
+// Awake = it answered RPM or speed lately (some EVs never answer RPM).
+const ecuLive = () => fresh(getLatest().rpmAt, 5000) || fresh(getLatest().speedAt, 5000);
+
 async function batteryOffTick(){
   bwTick++;
   if (!bwOffSince) bwOffSince = Date.now();
-  if (Date.now() - bwOffSince > 15 * 60_000 && bwTick % 20) return;   // parked a while: every ~5 s
+  if (Date.now() - bwOffSince > 15 * 60_000 && bwTick % 8) return;   // parked a while: every ~2 s
   const v = await readVoltage();
-  let rpm = null;
-  if (bwTick % 8 === 0){
-    if (ecuAnswering()) rpm = await readRpm();
-    else if (bwTick % 40 === 0) await refreshSupported();
+  let rpm = null, speed = null;
+  const live = ecuLive();
+  if (live || bwTick % 8 === 0){
+    rpm = await readRpm(live ? 800 : 1000);
+    if (rpm != null || live || ecuAnswering()) speed = await readSpeed();
+    if ((rpm != null || speed != null) && !ecuAnswering()) await refreshSupported();   // computer just woke up
   }
   const wasOff = bw.mode === 'off';
-  fileBattery(bw.feed({ t: Date.now(), v, rpm, ignitionOff: !ecuAnswering() }));
-  if (bw.mode !== 'running') return;
+  fileBattery(bw.feed({ t: Date.now(), v, rpm, speed, ecuOn: ecuLive() }));
+  if (bw.mode === 'off') return;
   bwOffSince = 0;
-  // Just started: wake the engine computer, and read the car now if the
-  // ignition was off when we linked (VIN and codes need it on).
-  if (wasOff){
-    if (!ecuAnswering()) await refreshSupported();
-    if (!carRead) onCarLinked();
+  if (wasOff) bwStartAt = Date.now();
+}
+
+/** Running: feed the slow-set voltage with this cycle's RPM and speed. Also
+ *  catch up on a car read that failed at link (ignition was off) — only once
+ *  the car has stood still for 30 s and no drive is recording, so the ~25 s
+ *  read never sits in front of a pull-away. */
+function batteryRunningTick(batteryAtBefore){
+  const l = getLatest();
+  const rpm = fresh(l.rpmAt) ? l.rpm : null;
+  const speed = fresh(l.speedAt) ? l.speed : null;
+  if (l.batteryAt !== batteryAtBefore) fileBattery(bw.feed({ t: l.batteryAt, v: l.batteryV, rpm, speed, ecuOn: ecuLive() }));
+  if (speed !== 0) stillSince = 0;
+  else if (!stillSince) stillSince = Date.now();
+  if (!carRead && !carReadQueued && bwStartAt && stillSince && Date.now() - stillSince >= 30_000 && !state.recording){
+    carReadQueued = true;
+    onCarLinked();
   }
 }
 
@@ -388,11 +406,10 @@ function startPolling(){
     if (busy) return;
     busy = true;
     try {
-      if (bw && bw.mode !== 'running'){ await batteryOffTick(); setPill(true); return; }
+      if (bw?.mode === 'off'){ await batteryOffTick(); setPill(true); return; }
       const before = getLatest().batteryAt;
       await poll(); publish(); renderReadout(); renderLiveStrip(); setPill(true);
-      const l = getLatest();
-      if (bw && l.batteryAt !== before) fileBattery(bw.feed({ t: l.batteryAt, v: l.batteryV, rpm: l.rpm }));
+      if (bw) batteryRunningTick(before);
     }
     catch { /* a dropped frame is not worth interrupting a drive over */ }
     finally { busy = false; }

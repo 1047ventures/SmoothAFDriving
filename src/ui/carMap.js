@@ -4,6 +4,7 @@
  * Grey, dashed parts weren't read by the scan (see carZones.js): never green.
  */
 import { zoneScores } from '../services/carZones.js';
+import { fmtVolts } from '../services/battery.js';
 
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
@@ -69,7 +70,7 @@ function batteryHtml(b){
   if (!b) return '';
   const rows = b.parts.map(p => p.v == null
     ? `<li class="cz-bat-row cz-unread"><span class="cz-bat-name">${p.name}</span><span class="cz-bat-v">–</span><span class="cz-bat-say">${esc(p.missing)}</span></li>`
-    : `<li class="cz-bat-row cz-${p.state}"><span class="cz-bat-name">${p.name}</span><span class="cz-bat-v">${p.v.toFixed(1)} V</span><span class="cz-bat-say">${esc(p.label)}</span></li>`).join('');
+    : `<li class="cz-bat-row cz-${p.state}"><span class="cz-bat-name">${p.name}</span><span class="cz-bat-v">${fmtVolts(p)}</span><span class="cz-bat-say">${esc(p.label)}</span></li>`).join('');
   return `<div class="cz-bat"><div class="cz-bat-head">Battery</div><ul class="cz-bat-list">${rows}</ul></div>`;
 }
 

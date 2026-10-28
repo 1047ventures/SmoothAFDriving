@@ -325,7 +325,10 @@ function healthBlock(v){
         <div class="gs-hc-what">${c.pending ? '<b>Early warning</b> — no dashboard light yet. ' : ''}${esc(c.what)}</div>
       </details>`).join('');
   const status = carStatus(r, bat);
-  const headline = r ? reportHeadline(r) : 'Battery checked';
+  // When the battery is what's wrong, say so — not "No trouble codes" on a red card.
+  const batWorse = bat && status !== (r?.status || 'clear');
+  const headline = batWorse ? { watch: 'Battery: heads-up', attention: 'Battery needs attention' }[status]
+                 : r ? reportHeadline(r) : 'Battery checked';
   const t = new Date(Math.max(r?.checkedAt || 0, ...(bat?.parts || []).map(p => p.at || 0)));
   const when = t.toDateString() === new Date().toDateString()
     ? t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
@@ -339,9 +342,10 @@ function healthBlock(v){
         ${carScoreHtml(r, bat)}
         <span class="gs-hc-when">Checked ${esc(when)} · ${esc(carCoverage(r, bat))}</span>
       </div>
+      ${r?.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : ''}
       ${carMapHtml(r, bat)}
       ${r?.milOn ? '<div class="gs-hc-what gs-hc-mil"><b>Check-engine light is on.</b></div>' : ''}
-      ${r?.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : codes}
+      ${r?.status === 'clear' ? '' : codes}
     </section>`;
 }
 

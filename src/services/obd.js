@@ -222,7 +222,9 @@ const state = {
                torqueNm: null, horsepower: null, gear: null, gearRatio: null,
                coolant: null, intakeTemp: null, ambientTemp: null,
                map: null, baro: null, timingAdv: null, maf: null,
-               fuelLevel: null, voltage: null, batteryV: null, batteryAt: 0, at: 0 },
+               fuelLevel: null, voltage: null, batteryV: null, batteryAt: 0,
+               rpmAt: 0, speedAt: 0,   // when rpm / speed were last actually read (a NO DATA keeps the old value)
+               at: 0 },
   supported: null,
   gearSupported: false,   // set once at connect by probing PID 0xA4
   pollN:     0,           // loop counter, so slow PIDs poll every SLOW_EVERY loops
@@ -515,13 +517,19 @@ export async function readVoltage(){
   return v;
 }
 
-/** Engine speed alone — one quick query, for telling a running engine from a parked one. */
-export async function readRpm(){
+/**
+ * Engine speed or road speed alone — one quick query each, for telling a
+ * running (or rolling) car from a parked one. Short timeouts: with the
+ * ignition off these go unanswered, and the voltage sampling must not stall.
+ */
+async function readOne(name, timeoutMs){
   if (!state.deviceId) return null;
-  const v = decodePid('rpm', await send('010C'));
-  if (v != null) state.latest.rpm = v;
+  const v = decodePid(name, await send('01' + PIDS[name].pid, timeoutMs));
+  if (v != null){ state.latest[name] = v; state.latest[name + 'At'] = Date.now(); }
   return v;
 }
+export const readRpm   = (timeoutMs = 800) => readOne('rpm', timeoutMs);
+export const readSpeed = (timeoutMs = 800) => readOne('speed', timeoutMs);
 
 /** True once the engine computer has answered (ignition on). */
 export function ecuAnswering(){ return Boolean(state.supported?.length); }
@@ -529,7 +537,7 @@ export function ecuAnswering(){ return Boolean(state.supported?.length); }
 /** Ask again what the car supports — after a start, when the computer wakes up. */
 export async function refreshSupported(){
   if (!state.deviceId) return;
-  const s = decodeSupportedPids(await send('0100'));
+  const s = decodeSupportedPids(await send('0100', 1200));
   if (s?.length) state.supported = s;
 }
 
@@ -571,7 +579,10 @@ export async function poll(){
   for (const name of wanted){
     const reply = await send('01' + PIDS[name].pid);
     const value = decodePid(name, reply);
-    if (value != null) state.latest[name] = value;
+    if (value != null){
+      state.latest[name] = value;
+      if (name === 'rpm' || name === 'speed') state.latest[name + 'At'] = Date.now();
+    }
   }
   // Some cars report pedal position instead of throttle plate position.
   if (state.latest.throttle == null && has('pedal')){
