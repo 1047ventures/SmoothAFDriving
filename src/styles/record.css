@@ -10,59 +10,17 @@
     position:absolute;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg,rgba(4,2,2,.92) 0%,rgba(4,2,2,.12) 24%,rgba(4,2,2,0) 44%,rgba(4,2,2,0) 54%,rgba(4,2,2,.92) 100%);
   }
-  /* Top strip */
-  .rec-top-strip{position:absolute;top:0;left:0;right:0;z-index:5;padding-top:env(safe-area-inset-top,0px)}
-  .rec-stats-row{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 22px 6px}
-  .rec-sub-row{display:flex;justify-content:space-between;align-items:center;padding:0 22px 10px}
-  .rec-corner{display:flex;flex-direction:column}
-  .rec-corner--right{align-items:flex-end}
-  .rec-corner-lbl{font-size:8px;letter-spacing:.4em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:2px;font-family:var(--sans)}
-  .rec-corner-val{font-size:min(7vw,27px);font-family:var(--serif);font-style:italic;font-weight:700;color:var(--cream);line-height:1;letter-spacing:-.02em}
-  .rec-corner-unit{font-family:var(--sans);font-style:normal;font-size:min(3.5vw,14px);font-weight:500;color:rgba(244,235,217,.86)}
-  .rec-dot{width:7px;height:7px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
+  /* Top strip */  .rec-dot{width:7px;height:7px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 8px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
-  .rec-label{font-size:10px;letter-spacing:.25em;color:rgba(244,235,217,.86);text-transform:uppercase;display:flex;align-items:center;gap:8px}
-
   /* Center gauge zone */
-  .rec-gauge-zone{
-    position:absolute;inset:0;z-index:3;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding-top:72px;padding-bottom:156px;gap:0;
-  }
-
   /* SVG arc gauge */
   .arc-gauge-wrap{position:relative;width:min(88vw,310px);aspect-ratio:300/215;flex-shrink:0}
   .arc-svg{width:100%;height:100%;display:block;overflow:visible;transition:filter .35s}
-  .arc-score-overlay{
-    position:absolute;top:14%;left:0;right:0;
-    display:flex;flex-direction:column;align-items:center;pointer-events:none;
-  }
-  .arc-score-num{
-    font-family:var(--serif);font-style:italic;font-weight:700;
-    font-size:min(13vw,52px);line-height:1;letter-spacing:-.03em;color:var(--cream);
-  }
-  .arc-score-lbl{font-size:8px;letter-spacing:.34em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-top:4px;font-family:var(--sans)}
-
   /* Speed: the hero number */
-  .rec-speed-row{display:flex;align-items:baseline;gap:6px;margin-top:-6px}
-  .speed-big{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(33vw,132px);line-height:.88;letter-spacing:-.04em;color:var(--cream)}
-  .speed-unit-inline{font-family:var(--sans);font-size:min(7vw,28px);font-weight:600;color:rgba(244,235,217,.68);letter-spacing:.1em;text-transform:uppercase;padding-bottom:14px}
-
   /* Force lines — hidden, kept for JS compat */
   .force-line{display:none}
 
   /* Bottom stats: pipe-accented corners */
-  .rec-bottom-row{
-    position:absolute;left:0;right:0;z-index:4;
-    display:flex;justify-content:space-between;align-items:flex-end;
-    padding:0 22px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);
-  }
-  .rec-bottom-stat{display:flex;flex-direction:column;border-left:2px solid rgba(244,235,217,.18);padding-left:10px}
-  .rec-bottom-stat--right{align-items:flex-end;border-left:none;border-right:2px solid rgba(244,235,217,.18);padding-left:0;padding-right:10px}
-  .rec-bottom-lbl{font-size:8px;letter-spacing:.4em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
-  .rec-bottom-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:min(6.5vw,26px);color:var(--cream);line-height:1;letter-spacing:-.02em}
-  .rec-bottom-unit{font-family:var(--sans);font-style:normal;font-size:min(3.4vw,14px);font-weight:500;color:rgba(244,235,217,.86)}
-
   /* G-force radar crosshair */
   .g-radar{position:relative;width:54px;height:54px;flex-shrink:0;margin-top:2px}
   .g-radar-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(244,235,217,.16)}
@@ -80,20 +38,12 @@
   /* Off-screen needle (JS compat) */
   .live-g-bar{position:absolute;left:-999px;top:-999px;width:110px;height:18px}
   .live-g-needle{position:absolute;top:50%;left:50%;width:44px;height:44px;border-radius:50%}
-  .live-g-zero,.live-g-label{display:none}
+  .live-g-zero{display:none}
 
   /* Smooth ring — hidden, kept in DOM for flashEvent JS compat */
   .smooth-ring-wrap,.smooth-ring{display:none}
 
-  /* Event flashes */
-  .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);display:flex;justify-content:center;align-items:center;pointer-events:none}
-  .event-flash{padding:6px 14px;border-radius:999px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;background:rgba(224,59,47,.14);color:var(--danger);border:1px solid rgba(224,59,47,.35);animation:flash-in .25s ease,flash-out .6s ease 1.8s forwards}
-  .event-flash.warn{background:rgba(232,160,58,.14);color:var(--warn);border-color:rgba(232,160,58,.35)}
-  .event-flash.turn-warn{background:rgba(196,169,98,.14);color:var(--gold);border-color:rgba(196,169,98,.35)}
-  .event-flash.extreme{background:rgba(180,20,20,.28);color:rgb(255,80,60);border-color:rgba(255,60,40,.75);font-size:12px;letter-spacing:.28em;animation:flash-in .15s ease,flash-out .6s ease 2.2s forwards}
-  .event-flash.extreme.warn{background:rgba(180,90,0,.28);color:rgb(255,150,40);border-color:rgba(255,130,20,.75)}
-  .event-flash.extreme.turn-warn{background:rgba(120,95,0,.28);color:rgb(220,185,60);border-color:rgba(200,165,40,.75)}
-  @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  /* Event flashes */  @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
   /* Stop button */
   .stop-btn{position:absolute;z-index:5;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:16px;border-radius:16px;box-shadow:0 8px 28px rgba(244,235,217,.12);transition:transform .1s ease}
@@ -115,19 +65,9 @@
   .burst.b-right.fire{animation:burst-side-r .75s ease-out forwards}
 
   /* Camera button on recording screen */
-  .rec-photo-btn,.rec-action-btn{
-    display:flex;align-items:center;justify-content:center;
-    width:32px;height:32px;border-radius:50%;flex-shrink:0;
-    background:rgba(10,8,8,.5);border:1px solid rgba(244,235,217,.18);
-    color:rgba(244,235,217,.86);font-size:15px;cursor:pointer;appearance:none;
-  }
-  .rec-photo-btn:active,.rec-action-btn:active{background:rgba(244,235,217,.1)}
-
   /* ── RECORDING v3 ──*/
   /* hide legacy layout elements not in new DOM */
-  .rec-gauge-zone,.rec-bottom-row,.rec-speed-row,.speed-unit-inline,
-  .arc-score-overlay,.arc-score-lbl,.rec-sub-row,.rec-waveform,
-  .smooth-ring-wrap,.force-line,.rec-road-strip{display:none}
+  .smooth-ring-wrap,.force-line{display:none}
   .arc-gauge-wrap{position:absolute;left:-9999px;top:-9999px;width:310px}
   .live-g-bar{position:absolute;left:-9999px;top:-9999px}
 
@@ -164,9 +104,6 @@
   .rec-dot{width:8px;height:8px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
   @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 8px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
   .rec-source{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.86)}
-  .corner-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.34em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:2px;text-align:right}
-  .corner-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;color:var(--cream);letter-spacing:-.01em;line-height:1;text-align:right}
-
   /* destination drive: live pace strip */
   /* Big, translucent, glanceable countdown — floats over the drive, taps pass through */
   .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 64px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
@@ -228,9 +165,7 @@
   /* "rolled N" hangs under Stops — reserve its room only when it has something to say */
   .rec-bottom:has(.bot-sub:not(:empty)){padding-bottom:18px}
   .bot-stat{display:flex;flex-direction:column;flex:1}
-  .bot-stat--center{align-items:center}
-  .bot-stat--right{align-items:flex-end}
-  .bot-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
+  .bot-stat--center{align-items:center}  .bot-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
   .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);letter-spacing:-.02em;line-height:1;white-space:nowrap}
   .bot-val--time{font-variant-numeric:tabular-nums}
   .bot-unit{font-family:var(--sans);font-style:normal;font-size:13px;color:rgba(244,235,217,.86)}
@@ -244,9 +179,7 @@
   .obdl-cell b{font-family:var(--serif);font-style:italic;font-weight:700;font-size:19px;color:var(--cream);line-height:1;letter-spacing:-.02em}
   .obdl-cell i{font-family:var(--sans);font-style:normal;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.6)}
 
-  /* event ticker + stop button */
-  .event-ticker{position:absolute;z-index:6;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 112px);display:flex;justify-content:center;align-items:center;pointer-events:none}
-  .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+  /* event ticker + stop button */  .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
   .stop-btn:active{background:rgba(244,235,217,.88);transform:scale(.98)}
 
   /* ── Live insights: clean streak · inputs ribbon · one-line insight ── */
@@ -312,10 +245,6 @@
   @media(prefers-reduced-motion:reduce){.rec-insight,.streak-fill,.rec-mid{transition:none}.rec-streak.reset .streak-num{animation:none}}
 
   /* ── Calibration ── */
-  .calib-overlay{position:absolute;inset:0;z-index:50;background:rgba(6,4,4,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px}
-  .calib-title{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);text-align:center}
-  .calib-sub{font-size:13px;color:var(--cream-dim);text-align:center;line-height:1.5;max-width:280px}
-
   /* ── Debug sensor chart panel ── */
   /* Lifted well clear of the full-width End Drive button (whose top edge sits
      ~70px above the safe area) so tapping to open the panel can't misfire the

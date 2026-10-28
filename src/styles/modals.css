@@ -81,9 +81,6 @@
   .dest-map-confirm:active{filter:brightness(.88)}
 
   /* ── Onboarding modal extras ── */
-  .onboard-error { color:var(--danger,#e84a2f); font-size:12px; min-height:16px; margin:-6px 0 10px; text-align:center; }
-  .onboard-trust { font-size:12px; color:var(--cream-dim); text-align:center; margin-top:4px; }
-
   /* ── Share socials modal ── */
   .share-overlay{position:fixed;inset:0;z-index:910;background:rgba(4,2,2,.88);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .share-overlay.hidden{display:none}
