@@ -84,7 +84,7 @@ export function scoreState(score){
  * note says what it's based on ("Light braking · 3 mo"), not "brakes healthy".
  */
 export function zoneScores(report, battery = null, wear = null){
-  if (!report && !battery && !wear?.brakes && !wear?.steering) return null;
+  if (!report && !battery && !wear?.brakes && !wear?.steering) return null;   // nothing at all to show
   const scanned = Boolean(report);
   report = report || { codes: [], milOn: null, unread: 0 };
   const zones = ZONES.map(z => {
@@ -107,16 +107,22 @@ export function zoneScores(report, battery = null, wear = null){
     let note = zoneNote(z.id, codes, report);
     for (const extra of [bat, wz]){
       if (!extra) continue;
-      score = Math.min(score, extra.score);
+      if (extra.score != null) score = Math.min(score, extra.score);
       note = codes.length ? `${note} · ${extra.note}` : extra.note;
     }
-    return { id: z.id, label: z.label, read, score, state: scoreState(score), codes, note };
+    // Lit only by driving, with nothing flagged: no number. Driving can say
+    // "light braking", not "brakes healthy", so it doesn't count as read.
+    const fromDriving = Boolean(wz) && !codes.length && !(scanned && z.scanned);
+    if (fromDriving && wz.score == null) return { id: z.id, label: z.label, read, score: null, state: 'good', codes, note, fromDriving };
+    return { id: z.id, label: z.label, read, score, state: scoreState(score), codes, note, fromDriving };
   });
-  const scored = zones.filter(z => z.read);
+  const scored = zones.filter(z => z.read && z.score != null);
+  const read = zones.filter(z => z.read && !z.fromDriving).length;
+  if (!scored.length) return { zones, overall: null, overallState: null, read, total: zones.length };
   const mean = scored.reduce((s, z) => s + z.score, 0) / scored.length;
   const worst = Math.min(...scored.map(z => z.score));
   const overall = Math.round(Math.min(mean, worst + 15, BAND_CAP[scoreState(worst)]));
-  return { zones, overall, overallState: scoreState(overall), read: scored.length, total: zones.length };
+  return { zones, overall, overallState: scoreState(overall), read, total: zones.length };
 }
 
 function zoneNote(id, codes, report){

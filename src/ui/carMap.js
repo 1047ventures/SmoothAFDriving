@@ -37,12 +37,12 @@ export function carMapHtml(report, battery = null, wear = null){
   const byId = Object.fromEntries(s.zones.map(z => [z.id, z]));
   const cls = z => `cz-${z.read ? z.state : 'unread'}`;
   const parts = ORDER.map(id => `<g class="cz-zone ${cls(byId[id])}" data-zone="${id}">${PARTS[id]}</g>`).join('');
-  const label = s.zones.map(z => `${z.label} ${z.read ? z.score : 'not read'}`).join(', ');
+  const label = s.zones.map(z => `${z.label} ${!z.read ? 'not read' : z.score ?? z.note}`).join(', ');
   const rows = s.zones.map(z => `
       <button type="button" class="cz-row ${cls(z)}" data-zone="${z.id}" aria-pressed="false">
         <span class="cz-dot"></span>
         <span class="cz-name">${esc(z.label)}</span>
-        <span class="cz-score">${z.read ? z.score : '–'}</span>
+        <span class="cz-score">${!z.read ? '–' : z.score ?? 'OK'}</span>
         <span class="cz-note">${esc(z.note)}</span>
       </button>`).join('');
   return `
@@ -56,13 +56,14 @@ export function carMapHtml(report, battery = null, wear = null){
 /** Overall score chip for the card header. */
 export function carScoreHtml(report, battery = null, wear = null){
   const s = zoneScores(report, battery, wear);
-  return s ? `<span class="cz-overall cz-${s.overallState}" aria-label="Health score ${s.overall} out of 100">${s.overall}</span>` : '';
+  return s?.overall != null ? `<span class="cz-overall cz-${s.overallState}" aria-label="Health score ${s.overall} out of 100">${s.overall}</span>` : '';
 }
 
 /** "4 of 7 parts read" — so a 100 never reads as a whole-car all-clear. */
 export function carCoverage(report, battery = null, wear = null){
   const s = zoneScores(report, battery, wear);
-  return s ? `${s.read} of ${s.total} parts read` : '';
+  if (!s) return '';
+  return s.read ? `${s.read} of ${s.total} parts read` : 'No reader scan yet';
 }
 
 /** The three battery readings, each with what it means or how to get it. */

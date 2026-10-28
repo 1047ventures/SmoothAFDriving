@@ -1,16 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { descents, bigHits, driveWear, stampWear, wearWindow } from '../services/carWear.js';
 import { drivingContext, maintenance, findings, wearZones, odometerNow, setOdometer, logService, loadCare,
-  parseRecalls, fetchRecalls, learnUrl, bookUrl, askText } from '../services/carCare.js';
+  parseRecalls, fetchRecalls, modelNames, backfillLogMiles, learnUrl, bookUrl, askText } from '../services/carCare.js';
+import { zoneScores } from '../services/carZones.js';
 
 const DAY = 86_400_000;
 const NOW = 1000 * DAY;
 const MI = 1609.344;
 const brake = (tier) => ({ type: 'brake', tier, t: 1000 });
 // A drive `daysAgo`, `mi` long, with `stops` hard stops.
-const drive = ({ daysAgo = 1, mi = 10, stops = 0, mins = 20, samples = [], vid = 'car1' } = {}) => {
+const SMP = [{ t: 0, lat: 1, lon: 1, speed: 10 }];   // a recorded track (no jolts)
+const drive = ({ daysAgo = 1, mi = 10, stops = 0, mins = 20, samples = SMP, vid = 'car1', ...extra } = {}) => {
   const d = { startTime: NOW - daysAgo * DAY, distanceMeters: mi * MI, durationMs: mins * 60_000,
-    events: Array.from({ length: stops }, () => brake(2)), samples, vehicleId: vid };
+    events: Array.from({ length: stops }, () => brake(2)), samples, vehicleId: vid, ...extra };
   d.wear = driveWear(d, vid);
   return d;
 };
@@ -100,7 +102,7 @@ describe('maintenance', () => {
   });
   it('calls for an alignment check after a hard hit', () => {
     expect(maintenance({ log: {} }, { now: NOW, hitsSinceAlign: 2 }).find(x => x.id === 'alignment'))
-      .toMatchObject({ status: 'soon', due: 'After a hard hit' });
+      .toMatchObject({ status: 'soon', due: '2 hard hits since tracking began' });
   });
 });
 
@@ -147,5 +149,60 @@ describe('learn / ask / book', () => {
     expect(bookUrl('brake inspection')).toBe('https://www.google.com/maps/search/brake%20inspection%20near%20me');
     expect(askText(car, { title: 'Heavy braking lately', evidence: 'X.' }, 48210)).toBe(
       'I drive a 2019 Honda Civic with about 48,210 miles. My driving app flagged: Heavy braking lately. X. What should I check, what are the warning signs, and is this a job I can do myself?');
+  });
+});
+
+describe('review fixes', () => {
+  it('never counts restored or sample-less miles as clean driving', () => {
+    const restored = Array.from({ length: 10 }, (_, i) => drive({ daysAgo: i + 1, mi: 20, samples: [], restored: true }));
+    const ctx = drivingContext(restored, 'car1', NOW);
+    expect(ctx.w90.mi).toBe(0);
+    expect(wearZones(ctx, findings(ctx))).toEqual({});
+    // Shed samples keep their events: stops still count, hits don't.
+    const shed = Array.from({ length: 10 }, (_, i) => drive({ daysAgo: i + 1, mi: 20, samples: [], samplesDropped: true }));
+    const c2 = drivingContext(shed, 'car1', NOW);
+    expect([c2.w90.mi, c2.w90.hitMi]).toEqual([200, 0]);
+    expect(wearZones(c2, []).steering).toBeUndefined();
+  });
+  it('ignores simulated drives for wear and the odometer', () => {
+    localStorage.clear();
+    setOdometer('car1', 1000, NOW - 10 * DAY);
+    const ds = [drive({ mi: 50, stops: 40, simulated: true }), drive({ mi: 5 })];
+    expect(drivingContext(ds, 'car1', NOW).w90.hardStops).toBe(0);
+    expect(odometerNow(loadCare('car1'), ds, 'car1')).toBe(1005);
+  });
+  it('gives drives recorded before any car to the first car added', () => {
+    const d = drive({ vid: null });
+    expect(d.wear.vid).toBeNull();
+    expect(stampWear([d], 'car9')).toBe(true);
+    expect(d.wear.vid).toBe('car9');
+  });
+  it('a driving-only "good" part has no score and does not count as read', () => {
+    const ctx = drivingContext(Array.from({ length: 10 }, (_, i) => drive({ daysAgo: i + 1, mi: 15 })), 'car1', NOW);
+    const s = zoneScores(null, null, wearZones(ctx, []));
+    expect(s.zones.find(z => z.id === 'brakes')).toMatchObject({ read: true, score: null, state: 'good', fromDriving: true });
+    expect(s).toMatchObject({ read: 0, overall: null });
+  });
+  it('tries NHTSA model names until one is known', async () => {
+    localStorage.clear();
+    expect(modelNames('F150')).toEqual(['F150', 'F-150']);
+    expect(modelNames('Civic Si')).toEqual(['Civic Si', 'Civic']);
+    const seen = [];
+    const fetchImpl = async url => { const m = new URL(url).searchParams.get('model'); seen.push(m);
+      return m === 'F-150' ? { ok: true, status: 200, json: async () => ({ results: [{ NHTSACampaignNumber: 'X', Component: 'TIRES' }] }) } : { ok: false, status: 400 }; };
+    expect(await fetchRecalls({ make: 'Ford', model: 'F150', year: '2018' }, { now: NOW, fetchImpl })).toHaveLength(1);
+    expect(seen).toEqual(['F150', 'F-150']);
+    // A name NHTSA never knows is cached as "none", not refetched every render.
+    const n = seen.length;
+    await fetchRecalls({ make: 'Zed', model: 'Q', year: '2018' }, { now: NOW, fetchImpl });
+    await fetchRecalls({ make: 'Zed', model: 'Q', year: '2018' }, { now: NOW + 1000, fetchImpl });
+    expect(seen.length).toBe(n + 1);
+  });
+  it('fills a no-odometer service log once the odometer is entered', () => {
+    localStorage.clear();
+    logService('car1', 'oil', null, NOW - 20 * DAY);
+    setOdometer('car1', 50000, NOW);
+    backfillLogMiles('car1', [drive({ daysAgo: 10, mi: 300 })]);
+    expect(loadCare('car1').log.oil.mi).toBe(49700);
   });
 });

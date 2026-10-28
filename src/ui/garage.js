@@ -335,9 +335,11 @@ function healthBlock(v, care = null){
   const headline = RANK[batSt] > RANK[r?.status || 'clear']
     ? { watch: 'Battery: heads-up', attention: 'Battery needs attention' }[batSt]
     : r ? reportHeadline(r) : bat ? 'Battery checked' : 'From your driving';
-  const careLine = !cs ? '' : care.findings.some(f => f.part === 'recall')
-    ? '<div class="gs-hc-what"><b>Open recalls for your model.</b> See Car care below.</div>'
-    : '<div class="gs-hc-what"><b>Service overdue.</b> See Car care below.</div>';
+  const careLine = care?.findings.some(f => f.parkIt)
+    ? '<div class="gs-hc-what gs-hc-mil"><b>A recall says don’t drive this car until it’s fixed.</b> <button type="button" class="cc-link" data-cc-jump>See Car care ↓</button></div>'
+    : care?.findings.some(f => f.part === 'recall')
+    ? '<div class="gs-hc-what"><b>Open recalls for your model.</b> <button type="button" class="cc-link" data-cc-jump>See Car care ↓</button></div>'
+    : cs ? '<div class="gs-hc-what"><b>Service overdue.</b> <button type="button" class="cc-link" data-cc-jump>See Car care ↓</button></div>' : '';
   const t = new Date(Math.max(r?.checkedAt || 0, ...(bat?.parts || []).map(p => p.at || 0)));
   const when = t.toDateString() === new Date().toDateString()
     ? t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
@@ -370,7 +372,7 @@ function renderGarageList(){
   }
 
   const drives = loadDrives();
-  const active = vehicles.find(v => v.active) || null;
+  const active = getActiveVehicle() || null;   // same pick as Home's chip
   const care = active ? careFor(active, drives) : null;
   bindCare(care, renderGarageList);
   if (active) refreshRecalls(active, renderGarageList);

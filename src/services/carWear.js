@@ -69,9 +69,17 @@ export function driveWear(drive, vehicleId = null){
   const smp = drive.samples || [];
   const hits = bigHits(smp);
   const desc = descents(smp);
+  // What this drive can actually vouch for. A drive restored from the cloud
+  // carries no samples or events; one whose samples were shed for storage
+  // keeps its events (stops) but lost the jolts (hits). Counting their miles
+  // as clean would be a false all-clear.
+  const stopsEvid = !drive.restored && (smp.length > 0 || Boolean(drive.samplesDropped));
+  const hitsEvid = smp.length > 0;
   return {
     v: WEAR_VERSION,
     vid: vehicleId,
+    sim: Boolean(drive.simulated),
+    stopsEvid, hitsEvid,
     mi: +metersToMiles(drive.distanceMeters || 0).toFixed(2),
     hardStops: ev.filter(e => e.type === 'brake' && (e.tier || 0) >= HARD_STOP_TIER).length,
     hardCorners: ev.filter(e => e.type === 'turn' && (e.tier || 0) >= HARD_CORNER_TIER).length,
@@ -94,7 +102,11 @@ export function driveWear(drive, vehicleId = null){
 export function stampWear(drives, fallbackVid = null){
   let changed = false;
   for (const d of drives){
-    if (d.wear?.v === WEAR_VERSION) continue;
+    if (d.wear?.v === WEAR_VERSION){
+      // Recorded before any car was in the garage: give it to the first one.
+      if (d.wear.vid == null && fallbackVid != null && !d.wear.sim){ d.wear.vid = fallbackVid; changed = true; }
+      continue;
+    }
     d.wear = driveWear(d, d.vehicleId ?? fallbackVid);
     changed = true;
   }
@@ -109,13 +121,17 @@ const startOf = d => d.startTime ?? d.drivenAt ?? d.ts ?? 0;
  * the worst pothole hits with when they happened.
  */
 export function wearWindow(drives, vid, days, now = Date.now()){
-  const mine = drives.filter(d => d.wear && (d.wear.vid ?? null) === (vid ?? null) && now - startOf(d) <= days * DAY);
-  const sum = k => mine.reduce((s, d) => s + (d.wear[k] || 0), 0);
-  const mi = sum('mi');
-  const hitList = mine.flatMap(d => (d.wear.hitList || []).map(h => ({ ...h, at: startOf(d) + (h.t || 0) })))
+  const mine = drives.filter(d => d.wear && !d.wear.sim && (d.wear.vid ?? null) === (vid ?? null) && now - startOf(d) <= days * DAY);
+  const sum = (k, ds = mine) => ds.reduce((s, d) => s + (d.wear[k] || 0), 0);
+  // Rates only over the miles that could have shown the thing being counted.
+  const stopsDs = mine.filter(d => d.wear.stopsEvid !== false);
+  const hitsDs = mine.filter(d => d.wear.hitsEvid !== false);
+  const mi = sum('mi', stopsDs);
+  const hitMi = sum('mi', hitsDs);
+  const hitList = hitsDs.flatMap(d => (d.wear.hitList || []).map(h => ({ ...h, at: startOf(d) + (h.t || 0) })))
     .sort((a, b) => b.mps2 - a.mps2);
   return {
-    days, drives: mine.length, mi,
+    days, drives: mine.length, mi, hitMi,
     hardStops: sum('hardStops'), hardCorners: sum('hardCorners'),
     hits: sum('hits'), hitList,
     descents: sum('descents'), descentM: sum('descentM'),

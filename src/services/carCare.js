@@ -41,6 +41,25 @@ export function setOdometer(vid, mi, now = Date.now()){
   saveCare(vid, care);
 }
 
+/**
+ * When the odometer is first entered, a service logged earlier as "done today"
+ * (no odometer then) gets its mileage back: the anchor minus the miles
+ * recorded for this car since that day.
+ */
+export function backfillLogMiles(vid, drives){
+  const care = loadCare(vid);
+  if (!care.odo) return;
+  let changed = false;
+  for (const [id, l] of Object.entries(care.log || {})){
+    if (l.mi != null) continue;
+    const since = drives.filter(d => d.wear && !d.wear.sim && (d.wear.vid ?? null) === (vid ?? null)
+      && startOf(d) > l.at && startOf(d) <= care.odo.at).reduce((s, d) => s + (d.wear.mi || 0), 0);
+    care.log[id] = { ...l, mi: Math.round(care.odo.mi - since) };
+    changed = true;
+  }
+  if (changed) saveCare(vid, care);
+}
+
 /** "I've run my VIN" — these recalls stop counting as open. New campaigns still show. */
 export function markRecallsChecked(vid, ids){
   const care = loadCare(vid);
@@ -61,7 +80,7 @@ const startOf = d => d.startTime ?? d.drivenAt ?? d.ts ?? 0;
 /** Today's odometer: the anchor plus the miles recorded for this car since. */
 export function odometerNow(care, drives, vid){
   if (!care?.odo) return null;
-  const since = drives.filter(d => d.wear && (d.wear.vid ?? null) === (vid ?? null) && startOf(d) > care.odo.at)
+  const since = drives.filter(d => d.wear && !d.wear.sim && (d.wear.vid ?? null) === (vid ?? null) && startOf(d) > care.odo.at)
     .reduce((s, d) => s + (d.wear.mi || 0), 0);
   return Math.round(care.odo.mi + since);
 }
@@ -107,7 +126,7 @@ export function maintenance(care, { odoNow = null, now = Date.now(), severe = fa
     if (it.id === 'brakes' && heavyBraking){ mi = 8000; why = 'Sooner: heavy braking lately'; }
     const last = care?.log?.[it.id] || null;
     if (it.id === 'alignment' && hitsSinceAlign > 0){
-      return { ...it, last, status: 'soon', due: 'After a hard hit', why: `${hitsSinceAlign} hard hit${hitsSinceAlign === 1 ? '' : 's'} since ${last ? 'the last check' : 'tracking began'}` };
+      return { ...it, last, status: 'soon', due: `${hitsSinceAlign} hard hit${hitsSinceAlign === 1 ? '' : 's'} since ${last ? 'your last alignment' : 'tracking began'}`, why: null };
     }
     if (!last) return { ...it, last, status: 'unknown', due: 'No record yet', why };
     const byDate = last.at + mo * MONTH;
@@ -167,22 +186,25 @@ export function findings(ctx, recalls = [], { checked = [], car = null } = {}){
       advice: `Check your VIN to see which apply to yours. Recall repairs are free at any ${car?.make || 'brand'} dealer.`,
       learn: null, book: null, recalls: open, parkIt: open.some(r => r.parkIt) });
   }
-  return out;
+  // Act-now (recalls) before watch-items.
+  return out.sort((a, b) => (a.level === 'act' ? 0 : 1) - (b.level === 'act' ? 0 : 1));
 }
 
 /** What the driving says about the brakes and steering parts of the x-ray car. */
 export function wearZones(ctx, fnd){
   const z = {};
+  // Driving can raise a flag but can't certify a part: a "good" from driving
+  // carries no score (the scan-read parts own the number) and needs 50+ miles
+  // that could actually have shown the problem.
   const { w90 } = ctx;
-  const enough = w90.mi >= 50;
   const brake = fnd.find(f => f.part === 'brakes');
   if (brake) z.brakes = { state: 'watch', score: 70, note: 'Heavy braking · 3 mo' };
-  else if (enough) z.brakes = { state: 'good', score: 100, note: 'Light braking · 3 mo' };
+  else if (w90.mi >= 50) z.brakes = { state: 'good', score: null, note: 'Light braking · 3 mo' };
   const hit = fnd.find(f => f.part === 'steering');
   // One hit is advice ("if it pulls, check it"); two or more turn the part yellow.
   if (hit && w90.hits >= 2) z.steering = { state: 'watch', score: 75, note: `${w90.hits} hard hits · 3 mo` };
-  else if (hit) z.steering = { state: 'good', score: 90, note: '1 hard hit · 3 mo' };
-  else if (enough) z.steering = { state: 'good', score: 100, note: 'No hard hits · 3 mo' };
+  else if (hit) z.steering = { state: 'good', score: null, note: '1 hard hit · 3 mo' };
+  else if (w90.hitMi >= 50) z.steering = { state: 'good', score: null, note: 'No hard hits · 3 mo' };
   return z;
 }
 
@@ -226,16 +248,31 @@ export async function fetchRecalls(car, { now = Date.now(), fetchImpl = fetch } 
   const k = ymmKey(car);
   if (all[k] && now - all[k].at < RECALL_TTL) return all[k].items;
   try {
-    const q = new URLSearchParams({ make: car.make, model: car.model, modelYear: String(car.year) });
-    const res = await fetchImpl(`https://api.nhtsa.gov/recalls/recallsByVehicle?${q}`);
-    if (!res.ok) throw new Error(String(res.status));
-    const items = parseRecalls(await res.json());
+    // NHTSA wants its own model names: "F-150" not "F150", "Civic" not
+    // "Civic Si". It answers 400 for a name it doesn't know, so try the
+    // normalised name, then the first word.
+    let items = [];
+    for (const model of modelNames(car.model)){
+      const q = new URLSearchParams({ make: car.make, model, modelYear: String(car.year) });
+      const res = await fetchImpl(`https://api.nhtsa.gov/recalls/recallsByVehicle?${q}`);
+      if (res.status === 400) continue;
+      if (!res.ok) throw new Error(String(res.status));
+      items = parseRecalls(await res.json());
+      if (items.length) break;
+    }
     all[k] = { at: now, items };
     writeJson(RECALL_KEY, all);
     return items;
   } catch {
     return all[k]?.items ?? null;
   }
+}
+
+/** Model names to try, most specific first: as typed, letter+digits hyphenated, first word. */
+export function modelNames(model){
+  const m = String(model || '').trim();
+  const hyph = m.replace(/^([A-Za-z]{1,3})(\d{2,4})\b/, '$1-$2');
+  return [...new Set([m, hyph, m.split(/\s+/)[0], hyph.split(/\s+/)[0]])].filter(Boolean);
 }
 
 // ── Learn · Ask · Book ──────────────────────────────────────────────────────

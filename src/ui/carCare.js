@@ -4,7 +4,7 @@
  * maintenance timeline. Every finding offers Learn · Ask · Book.
  */
 import {
-  loadCare, setOdometer, logService, markRecallsChecked, odometerNow, drivingContext, findings, wearZones,
+  loadCare, setOdometer, logService, markRecallsChecked, backfillLogMiles, odometerNow, drivingContext, findings, wearZones,
   maintenance, cachedRecalls, fetchRecalls, learnUrl, bookUrl, askText, RECALL_VIN_URL,
 } from '../services/carCare.js';
 import { wearWindow } from '../services/carWear.js';
@@ -28,22 +28,33 @@ export function careFor(v, drives, now = Date.now()){
   const alignAt = care.log?.alignment?.at || 0;
   const hitsSinceAlign = wearWindow(drives, vid, 3650, now).hitList.filter(h => h.at > alignAt).length;
   const timeline = maintenance(care, { odoNow: odo, now, severe: ctx.severe, heavyBraking: ctx.heavyBraking, hitsSinceAlign });
-  return { vid, car: v, care, odo, ctx, findings: fnd, wear: wearZones(ctx, fnd), timeline };
+  return { vid, car: v, care, odo, ctx, findings: fnd, wear: wearZones(ctx, fnd), timeline, drives };
 }
 
-/** Home's chip: an open recall or overdue service is a heads-up; a park-it recall more. */
+/**
+ * Home's chip: overdue service is a heads-up; a "don't drive it" recall is
+ * more. Ordinary recalls stay in the Garage: nearly every model year has some,
+ * and many won't apply to this car, so they'd keep Home amber for good.
+ */
 export function careStatus(c){
   if (!c) return null;
   if (c.findings.some(f => f.parkIt)) return 'attention';
-  if (c.findings.some(f => f.part === 'recall') || c.timeline.some(t => t.status === 'overdue')) return 'watch';
+  if (c.timeline.some(t => t.status === 'overdue')) return 'watch';
   return null;
+}
+
+/** Same part, several campaigns → one line with a count. */
+function groupRecalls(rs){
+  const m = new Map();
+  for (const r of rs) m.set(r.component, (m.get(r.component) || 0) + 1);
+  return [...m];
 }
 
 function actions(c, f, i){
   if (f.recalls) return `
-      <ul class="cc-rc">${f.recalls.map(r => `<li><span class="cc-rc-c">${esc(r.component)}</span><span class="cc-rc-id">${esc(r.id)}</span></li>`).join('')}</ul>
+      <ul class="cc-rc">${groupRecalls(f.recalls).map(([c, n]) => `<li><span class="cc-rc-c">${esc(c)}</span>${n > 1 ? `<span class="cc-rc-id">${n} recalls</span>` : ''}</li>`).join('')}</ul>
       <div class="cc-acts">
-        <button type="button" class="cc-act" data-cc-open="${esc(RECALL_VIN_URL)}">Check my VIN</button>
+        <button type="button" class="cc-act" data-cc-open="${esc(RECALL_VIN_URL)}">Check VIN</button>
         <button type="button" class="cc-act" data-cc-ask="${i}">Ask</button>
         <button type="button" class="cc-act" data-cc-open="${esc(bookUrl(`${c.car?.make || ''} dealer`.trim()))}">Book</button>
       </div>
@@ -88,8 +99,9 @@ export function careHtml(c){
   // Items with no record fold away: they're a nudge to log, not a to-do list.
   const known = c.timeline.filter(t => t.status !== 'unknown');
   const unknown = c.timeline.filter(t => t.status === 'unknown');
-  const tl = known.map(row).join('') + (unknown.length ? `
-      <li class="cc-tl-more"><details><summary>${unknown.length} more with no record yet<span class="cc-tl-hint">Tap Done today when you next have it done</span></summary>
+  const tl = (known.length ? '' : '<li class="cc-tl-empty">No service history yet. Log your last oil change to start the timeline.</li>')
+    + known.map(row).join('') + (unknown.length ? `
+      <li class="cc-tl-more"><details><summary><span>${unknown.length} ${known.length ? 'more ' : ''}with no record yet</span><span class="cc-tl-hint">Tap Done today when you next have it done</span></summary>
         <ul class="cc-tl">${unknown.map(row).join('')}</ul></details></li>` : '');
   return `
     <div class="gs-section-label">Car care · ${esc(name)}</div>
@@ -116,6 +128,8 @@ let rerender = () => {};
 export function bindCare(c, onChange){ current = c; rerender = onChange; }
 
 document.addEventListener('click', async e => {
+  const jump = e.target.closest?.('[data-cc-jump]');
+  if (jump) return document.querySelector('.cc')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const el = e.target.closest?.('[data-cc-open],[data-cc-ask],[data-cc-done],[data-cc-learn],[data-cc-odo-edit],[data-cc-recalls-checked]');
   if (!el || !current) return;
   if (el.dataset.ccOpen) return openUrl(el.dataset.ccOpen);
@@ -134,7 +148,8 @@ document.addEventListener('click', async e => {
   }
   if (el.dataset.ccDone){
     logService(current.vid, el.dataset.ccDone, current.odo);
-    showToast('Logged. The next one is timed from today.');
+    const name = current.timeline.find(t => t.id === el.dataset.ccDone)?.name || 'Service';
+    showToast(`${name} logged. The next one is timed from today.`);
     return rerender();
   }
   if (el.dataset.ccAsk != null){
@@ -158,5 +173,6 @@ document.addEventListener('submit', e => {
   const mi = Number(form.querySelector('input')?.value);
   if (!(mi >= 0 && mi < 1_000_000)) return;
   setOdometer(current.vid, mi);
+  backfillLogMiles(current.vid, current.drives || []);
   rerender();
 });
