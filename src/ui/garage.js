@@ -2,6 +2,7 @@ import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, 
 import { loadDrives } from '../services/storage.js';
 import { pushProfile } from '../services/profile.js';
 import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
+import { carMapHtml, carScoreHtml, carCoverage } from './carMap.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
@@ -331,8 +332,10 @@ function healthBlock(v){
       <div class="gs-hc-head">
         <span class="gs-hc-dot"></span>
         <span class="gs-hc-headline">${esc(reportHeadline(r))}</span>
-        <span class="gs-hc-when">Checked ${esc(when)}</span>
+        ${carScoreHtml(r)}
+        <span class="gs-hc-when">Checked ${esc(when)} · ${esc(carCoverage(r))}</span>
       </div>
+      ${carMapHtml(r)}
       ${r.milOn ? '<div class="gs-hc-what gs-hc-mil"><b>Check-engine light is on.</b></div>' : ''}
       ${r.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : codes}
     </section>`;
