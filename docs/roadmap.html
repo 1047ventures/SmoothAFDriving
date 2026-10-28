@@ -142,7 +142,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 1:54 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 2:06 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -225,6 +225,10 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="trk-xray">
+        <summary><span class="tag t-ship tn">T409</span><span class="ent-t">X-ray car &mdash; every part&rsquo;s health at a glance</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">After a dongle scan, the Garage shows a see-through car with its engine, transmission, exhaust, electrical, brakes, steering and body lit green, yellow or red, a score out of 100 for each part, and an overall score. Tap a part to spotlight it. A plain code scan can&rsquo;t see the brakes, steering or body, so those stay grey (&ldquo;not read&rdquo;) and never show a false all-clear. The card says how many parts were read. They light up as the Concierge&rsquo;s driving-data and battery checks land. Checked on phones from 320 to 430 px wide; untested on a real car until your next dongle connect.</div>
+      </details>
       <details class="ent" id="trk-sweep">
         <summary><span class="tag t-ship tn">T407</span><span class="ent-t">Code sweep &mdash; ~10,900 lines lighter</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Removed the pre-Vite app, old service worker, five mockups, duplicate root assets, an unused database client and dead functions; dropped 184 CSS rules that matched nothing (styles 126&nbsp;&rarr;&nbsp;106&nbsp;KB, pixel-identical on 19 screens). Found and fixed a live bug on the way: the web app&rsquo;s install icons pointed at files that were never deployed. The traffic backfill now does one storage write per batch instead of one per drive (T407&ndash;408).</div>
