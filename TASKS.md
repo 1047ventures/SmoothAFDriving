@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**411 tasks shipped** as of 2026-10-28.
+**415 tasks shipped** as of 2026-10-28.
 
 
 ## 2026-04
@@ -431,3 +431,7 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T409** · Car health: x-ray car lights each part green/yellow/red with a score  _( 2026-10-28 )_
 - **T410** · Battery voltage on dongle connect: resting, starting dip, charging  _( 2026-10-28 )_
 - **T411** · Battery watch: decide engine-off on evidence only (review fixes)  _( 2026-10-28 )_
+- **T412** · CLAUDE.md: keep the roadmap's Where-we-stand briefing current on every ship  _( 2026-10-28 )_
+- **T413** · iOS: background-location purpose string was silently dropped (ITMS-90683)  _( 2026-10-28 )_
+- **T414** · Car Concierge: wear from driving, maintenance timeline, recalls, Learn/Ask/Book (wip)  _( 2026-10-28 )_
+- **T415** · Car Concierge: review fixes (evidence-only miles, sim drives, recall names, zone honesty, UI)  _( 2026-10-28 )_
