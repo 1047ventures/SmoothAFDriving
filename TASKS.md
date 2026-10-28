@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**404 tasks shipped** as of 2026-10-27.
+**406 tasks shipped** as of 2026-10-28.
 
 
 ## 2026-04
@@ -424,3 +424,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T402** · Recap: notes take priority over the momentum chart; fits 375x667 to 390x844  _( 2026-10-27 )_
 - **T403** · Heavy traffic amplifies the score both ways  _( 2026-10-27 )_
 - **T404** · Traffic score: review fixes + rubric  _( 2026-10-27 )_
+- **T405** · Traffic: 3am baseline + typical-traffic backfill for older drives  _( 2026-10-28 )_
+- **T406** · Traffic backfill: review fixes  _( 2026-10-28 )_
