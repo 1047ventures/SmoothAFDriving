@@ -31,8 +31,8 @@ const SHELL = `<path class="cz-shell" d="M80 8C112 8 128 14 132 34L136 90C138 12
   <path class="cz-shell" d="M40 112Q80 100 120 112M44 232Q80 242 116 232"/>`;
 
 /** Scan report (+ battery summary) → the x-ray car block, '' with neither. */
-export function carMapHtml(report, battery = null){
-  const s = zoneScores(report, battery);
+export function carMapHtml(report, battery = null, wear = null){
+  const s = zoneScores(report, battery, wear);
   if (!s) return '';
   const byId = Object.fromEntries(s.zones.map(z => [z.id, z]));
   const cls = z => `cz-${z.read ? z.state : 'unread'}`;
@@ -54,14 +54,14 @@ export function carMapHtml(report, battery = null){
 }
 
 /** Overall score chip for the card header. */
-export function carScoreHtml(report, battery = null){
-  const s = zoneScores(report, battery);
+export function carScoreHtml(report, battery = null, wear = null){
+  const s = zoneScores(report, battery, wear);
   return s ? `<span class="cz-overall cz-${s.overallState}" aria-label="Health score ${s.overall} out of 100">${s.overall}</span>` : '';
 }
 
 /** "4 of 7 parts read" — so a 100 never reads as a whole-car all-clear. */
-export function carCoverage(report, battery = null){
-  const s = zoneScores(report, battery);
+export function carCoverage(report, battery = null, wear = null){
+  const s = zoneScores(report, battery, wear);
   return s ? `${s.read} of ${s.total} parts read` : '';
 }
 

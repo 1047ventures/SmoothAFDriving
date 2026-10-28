@@ -4,6 +4,7 @@ import { pushProfile } from '../services/profile.js';
 import { loadHealthReport, reportHeadline, carStatus } from '../services/carHealth.js';
 import { carMapHtml, carScoreHtml, carCoverage } from './carMap.js';
 import { loadBattery, batterySummary } from '../services/battery.js';
+import { careFor, careHtml, careStatus, bindCare, refreshRecalls } from './carCare.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
@@ -309,10 +310,11 @@ const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
  * dongle. Nothing until a read has happened, so a car without a dongle never
  * sees an empty "health" box it can't fill.
  */
-function healthBlock(v){
+function healthBlock(v, care = null){
   const r = loadHealthReport(v?.id);
   const bat = batterySummary(loadBattery(v?.id));
-  if (!r && !bat) return '';
+  const wear = care?.wear || null;
+  if (!r && !bat && !wear?.brakes && !wear?.steering) return '';
   const carName = v ? ([v.make, v.model].filter(Boolean).join(' ') || 'your car') : 'your car';
   // Explanations collapse so a long list never pushes the car itself off a
   // small screen; anything urgent opens by default.
@@ -324,11 +326,18 @@ function healthBlock(v){
         </summary>
         <div class="gs-hc-what">${c.pending ? '<b>Early warning</b> — no dashboard light yet. ' : ''}${esc(c.what)}</div>
       </details>`).join('');
-  const status = carStatus(r, bat);
-  // When the battery is what's wrong, say so — not "No trouble codes" on a red card.
-  const batWorse = bat && status !== (r?.status || 'clear');
-  const headline = batWorse ? { watch: 'Battery: heads-up', attention: 'Battery needs attention' }[status]
-                 : r ? reportHeadline(r) : 'Battery checked';
+  const cs = careStatus(care);
+  const status = carStatus(r, bat, cs);
+  const RANK = { clear: 0, watch: 1, attention: 2 };
+  const batSt = { good: 'clear', watch: 'watch', bad: 'attention' }[bat?.state] || 'clear';
+  // The headline speaks for the parts on the car; recalls and overdue service
+  // get their own line pointing down to Car care.
+  const headline = RANK[batSt] > RANK[r?.status || 'clear']
+    ? { watch: 'Battery: heads-up', attention: 'Battery needs attention' }[batSt]
+    : r ? reportHeadline(r) : bat ? 'Battery checked' : 'From your driving';
+  const careLine = !cs ? '' : care.findings.some(f => f.part === 'recall')
+    ? '<div class="gs-hc-what"><b>Open recalls for your model.</b> See Car care below.</div>'
+    : '<div class="gs-hc-what"><b>Service overdue.</b> See Car care below.</div>';
   const t = new Date(Math.max(r?.checkedAt || 0, ...(bat?.parts || []).map(p => p.at || 0)));
   const when = t.toDateString() === new Date().toDateString()
     ? t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
@@ -339,11 +348,12 @@ function healthBlock(v){
       <div class="gs-hc-head">
         <span class="gs-hc-dot"></span>
         <span class="gs-hc-headline">${esc(headline)}</span>
-        ${carScoreHtml(r, bat)}
-        <span class="gs-hc-when">Checked ${esc(when)} · ${esc(carCoverage(r, bat))}</span>
+        ${carScoreHtml(r, bat, wear)}
+        <span class="gs-hc-when">${t.getTime() ? `Checked ${esc(when)} · ` : ''}${esc(carCoverage(r, bat, wear))}</span>
       </div>
       ${r?.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : ''}
-      ${carMapHtml(r, bat)}
+      ${careLine}
+      ${carMapHtml(r, bat, wear)}
       ${r?.milOn ? '<div class="gs-hc-what gs-hc-mil"><b>Check-engine light is on.</b></div>' : ''}
       ${r?.status === 'clear' ? '' : codes}
     </section>`;
@@ -354,17 +364,22 @@ function renderGarageList(){
   if (!container) return;
   const vehicles = loadGarage();
   if (vehicles.length === 0){
+    bindCare(null, renderGarageList);
     container.innerHTML = healthBlock(null) + '<div class="gs-empty">No vehicles yet. Add one below.</div>';
     return;
   }
 
   const drives = loadDrives();
+  const active = vehicles.find(v => v.active) || null;
+  const care = active ? careFor(active, drives) : null;
+  bindCare(care, renderGarageList);
+  if (active) refreshRecalls(active, renderGarageList);
   const scored = drives.filter(d => d.score > 0);
   const driveCount = drives.length;
   const avgScore = scored.length ? Math.round(scored.reduce((s,d) => s+d.score, 0) / scored.length) : '--';
   const bestScore = scored.length ? Math.max(...scored.map(d => d.score)) : '--';
 
-  container.innerHTML = healthBlock(vehicles.find(v => v.active)) + vehicles.map(v => {
+  container.innerHTML = healthBlock(active, care) + careHtml(care) + vehicles.map(v => {
     const vt = VEHICLE_TYPES.find(t => t.id === v.type) || { label:'Vehicle' };
     const makeModel = [v.make, v.model].filter(Boolean).join(' ') || vt.label;
     const detail = [v.color, v.licensePlate].filter(Boolean).join(' · ');

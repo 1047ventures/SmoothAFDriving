@@ -164,15 +164,15 @@ export function buildReport({ milRaw, storedRaw, pendingRaw }, now = Date.now())
 }
 
 /**
- * The car's status for Home and the Garage: the worse of the code scan and the
- * battery (a batterySummary). Null when neither has been read.
+ * The car's status for Home and the Garage: the worst of the code scan, the
+ * battery (a batterySummary) and car care ('watch' | 'attention' | null, from
+ * open recalls and overdue service). Null when nothing has been read yet.
  */
-export function carStatus(report, battery){
-  if (!report && !battery) return null;
+export function carStatus(report, battery, care = null){
+  if (!report && !battery && !care) return null;
   const RANK = { clear: 0, watch: 1, attention: 2 };
   const fromBattery = { good: 'clear', watch: 'watch', bad: 'attention' }[battery?.state] || 'clear';
-  const fromCodes = report?.status || 'clear';
-  return RANK[fromBattery] > RANK[fromCodes] ? fromBattery : fromCodes;
+  return [report?.status || 'clear', fromBattery, care || 'clear'].reduce((a, b) => RANK[b] > RANK[a] ? b : a);
 }
 
 /** Headline for the report — the one line Home and the Garage show. */

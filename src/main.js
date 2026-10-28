@@ -2,6 +2,8 @@ import { APP_VERSION, INSTALL_URL } from './constants.js';
 import { migrateLifetimeScore, getDeviceId } from './services/storage.js';
 import { checkRecoveredDrive, rescoreStoredDrives } from './services/drive.js';
 import { stampMissingPoints } from './services/points.js';
+import { stampWear } from './services/carWear.js';
+import { activeVehicleId } from './services/carCare.js';
 import { backfillTypicalTraffic } from './services/trafficBackfill.js';
 import { loadDrives, saveDrives } from './services/storage.js';
 import { syncPendingDrives } from './services/supabase.js';
@@ -77,7 +79,8 @@ function boot(){
   // Rescore stored drives under the current engine BEFORE the lifetime migration,
   // so lifetime averages the new scores. One-time (gated by RESCORE_VERSION).
   safeInit('rescoreStoredDrives',  () => { const r = rescoreStoredDrives(); if (r) console.log(`[rescore] ${r.rescored} drives, ${r.changed} changed, avg ${r.avgDelta > 0 ? '+' : ''}${r.avgDelta}`); });
-  safeInit('stampMissingPoints',   () => { const all = loadDrives(); if (stampMissingPoints(all)) saveDrives(all); });
+  // One parse + one save for both one-time stamps: points, and the car-wear tally.
+  safeInit('stampMissingPoints',   () => { const all = loadDrives(); const a = stampMissingPoints(all); const b = stampWear(all, activeVehicleId()); if (a || b) saveDrives(all); });
   safeInit('migrateLifetimeScore', () => migrateLifetimeScore());
   // Older drives get typical traffic for their weekday + time (background, a batch per launch).
   safeInit('backfillTypicalTraffic', () => { backfillTypicalTraffic().then(r => { if (r?.estimated){ console.log(`[traffic] ${r.estimated} drives estimated, ${r.changed} changed, avg ${r.avgDelta}`); renderDriveList(); } }).catch(() => {}); });

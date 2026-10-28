@@ -33,6 +33,8 @@ function arrivedAtDestination(drive){
 }
 import { detectCorridors } from './corridors.js';
 import { drivePoints } from './points.js';
+import { driveWear } from './carWear.js';
+import { activeVehicleId } from './carCare.js';
 import { syncProfile } from './profile.js';
 
 // Map one in-memory sample to its compact stored shape (short keys, rounded).
@@ -52,6 +54,7 @@ function storeSample(s, startTime){
   };
   if (s.roadRoughness) out.rr = +s.roadRoughness.toFixed(3);
   if (s.roadJolt)      out.rj = +s.roadJolt.toFixed(3);
+  if (s.alt != null)   out.al = Math.round(s.alt);
   if (s.throttle   != null) out.thr = +s.throttle.toFixed(1);
   if (s.rpm        != null) out.rpm = Math.round(s.rpm);
   if (s.load       != null) out.ld  = +s.load.toFixed(1);
@@ -308,6 +311,8 @@ export function finalizeAndReview(callbacks = {}){
   drive.score = compositeScore(analysis.score, drive.targetEtaSec, moveSec,
     { arrived: drive.arrived, allowPenalty: penalize, buffer: drive.etaBuffer });
   drive.points = drivePoints(drive);
+  drive.vehicleId = activeVehicleId();
+  drive.wear = driveWear(drive, drive.vehicleId);
   saveDrive(drive);
   pushDriveToSupabase(drive);
   // Non-blocking — corridor detection runs after review renders

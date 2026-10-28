@@ -86,7 +86,7 @@ describe('zoneScores', () => {
   it('lights only Electrical from a battery reading with no code scan', () => {
     const s = zoneScores(null, { score: 100, state: 'good', note: 'Battery 12.6 V' });
     expect(s).toMatchObject({ overall: 100, read: 1 });
-    expect(s.zones.find(z => z.id === 'engine')).toMatchObject({ read: false, note: 'Needs a scan with the ignition on' });
+    expect(s.zones.find(z => z.id === 'engine')).toMatchObject({ read: false, note: 'Needs a code scan' });
   });
   it('returns null without a report', () => {
     expect(zoneScores(null)).toBeNull();

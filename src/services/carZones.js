@@ -78,16 +78,21 @@ export function scoreState(score){
  * of the codes' and the battery's, and the voltages join its note. A battery
  * reading alone (the dongle linked with the ignition off, so no code scan)
  * still lights Electrical; everything else stays unread.
+ *
+ * `wear` (carCare wearZones: { brakes, steering }) lights those two parts from
+ * your driving — the one honest source for parts the code scan can't see. Its
+ * note says what it's based on ("Light braking · 3 mo"), not "brakes healthy".
  */
-export function zoneScores(report, battery = null){
-  if (!report && !battery) return null;
+export function zoneScores(report, battery = null, wear = null){
+  if (!report && !battery && !wear?.brakes && !wear?.steering) return null;
   const scanned = Boolean(report);
   report = report || { codes: [], milOn: null, unread: 0 };
   const zones = ZONES.map(z => {
     const codes = report.codes.filter(c => zoneFor(c.code) === z.id);
     const bat = z.id === 'electrical' ? battery : null;
-    const read = (scanned && z.scanned) || codes.length > 0 || Boolean(bat);
-    if (!read) return { id: z.id, label: z.label, read, score: null, state: null, codes, note: scanned ? 'Not read by this scan' : 'Needs a scan with the ignition on' };
+    const wz = wear?.[z.id] || null;
+    const read = (scanned && z.scanned) || codes.length > 0 || Boolean(bat) || Boolean(wz);
+    if (!read) return { id: z.id, label: z.label, read, score: null, state: null, codes, note: scanned ? 'Not read by this scan' : 'Needs a code scan' };
     let off = codes.reduce((s, c) => s + PENALTY[c.pending ? 'pending' : 'stored'][c.severity], 0);
     // Codes the car holds but didn't hand over, or a check-engine light no
     // stored code explains, land on the engine: the scan can't say more.
@@ -100,9 +105,10 @@ export function zoneScores(report, battery = null){
     if (flagged) score = Math.min(score, WATCH_CAP);
     if (codes.some(c => !c.pending && c.severity === 'urgent')) score = Math.min(score, BAD_CAP);
     let note = zoneNote(z.id, codes, report);
-    if (bat){
-      score = Math.min(score, bat.score);
-      note = codes.length ? `${note} · ${bat.note}` : bat.note;
+    for (const extra of [bat, wz]){
+      if (!extra) continue;
+      score = Math.min(score, extra.score);
+      note = codes.length ? `${note} · ${extra.note}` : extra.note;
     }
     return { id: z.id, label: z.label, read, score, state: scoreState(score), codes, note };
   });

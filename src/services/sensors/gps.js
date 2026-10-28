@@ -234,6 +234,9 @@ export function onGpsUpdate(pos, callbacks = {}){
   }
   const speed = deriveSpeed(c, prev);
   const s = processSample({ t: Date.now(), lat: c.latitude, lon: c.longitude, speed, heading }, prev);
+  // Altitude, for long downhill runs (brake heat) in the car's wear tally.
+  // Skipped when the fix's vertical accuracy is poor (> 25 m) or missing.
+  if (c.altitude != null && !Number.isNaN(c.altitude) && (c.altitudeAccuracy == null || c.altitudeAccuracy <= 25)) s.alt = c.altitude;
   state.samples.push(s);
   if (wasFirstSample && onFirstSample) onFirstSample();
 

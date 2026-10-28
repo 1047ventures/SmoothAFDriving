@@ -18,6 +18,7 @@ import { improvementVerdict } from '../services/improvement.js';
 import { openTrends } from './trends.js';
 import { loadHealthReport, reportHeadline, carStatus } from '../services/carHealth.js';
 import { loadBattery, batterySummary } from '../services/battery.js';
+import { careFor, careStatus } from './carCare.js';
 import { showPendingCarPrompt } from './carPrompt.js';
 
 export function renderHomeStats(){
@@ -48,16 +49,17 @@ export function renderHomeStats(){
   // trouble-code read and battery check for this car. Neither yet → "Garage".
   const card = document.getElementById('btn-vehicle-type');
   if (card){
-    const id = getActiveVehicle()?.id;
+    const v = getActiveVehicle();
+    const id = v?.id;
     const r = loadHealthReport(id);
     const bat = batterySummary(loadBattery(id));
-    const status = carStatus(r, bat);
+    const status = carStatus(r, bat, v ? careStatus(careFor(v, all)) : null);
     const lbl = card.querySelector('.hgc-label');
     card.classList.remove('hgc--clear', 'hgc--watch', 'hgc--attention');
     if (status){
       card.classList.add(`hgc--${status}`);
       if (lbl) lbl.textContent = { clear: 'Car OK', watch: 'Heads-up', attention: 'Check car' }[status];
-      card.setAttribute('aria-label', `My Garage — ${[r && reportHeadline(r), bat?.note].filter(Boolean).join(' · ')}`);
+      card.setAttribute('aria-label', `My Garage — ${[r && reportHeadline(r), bat?.note].filter(Boolean).join(' · ') || 'car care'}`);
     } else {
       if (lbl) lbl.textContent = 'Garage';
       card.setAttribute('aria-label', 'My Garage');
