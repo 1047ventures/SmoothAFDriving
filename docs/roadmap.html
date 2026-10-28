@@ -18,7 +18,9 @@
 
   STRUCTURE (Oct 2026): a nested accordion. Every section is a collapsed
   <details class="sec">; every entry under it is a collapsed <details class="ent">.
-  The page opens to just the header + the section list. Sections are ordered by
+  The page opens to the header, the always-open WHERE WE STAND briefing (Now ·
+  Last shipped = the 4 most recent T# · Next = top 2 Q# · Needs you), then the
+  section list. Update the briefing with every ship. Sections are ordered by
   TIME HORIZON, then measurement, then history:
     Needs You · Up Next · In the Queue · Long-Term Vision · Major Milestones
     · Progress · Bugs · Tech Debt · Mission (KPIs + the tasks that move each) ·
@@ -55,6 +57,29 @@
   .hlink a{color:var(--tang);text-decoration:none;font-weight:600}
   .hlink a:hover{text-decoration:underline}
   .hlink .sep{color:var(--muted)}
+
+  /* ── Where we stand (always open, top of page) ──────────────────────────── */
+  .brief{margin:18px 0 6px;border:1px solid var(--line-2);border-radius:14px;background:var(--panel);overflow:hidden}
+  .brief-row{display:grid;grid-template-columns:104px 1fr;gap:4px 14px;padding:13px 16px;border-top:1px solid var(--line)}
+  .brief-row:first-child{border-top:0}
+  @media(max-width:520px){.brief-row{grid-template-columns:1fr}}
+  .brief-k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700;padding-top:4px}
+  .brief-you .brief-k{color:var(--tang)}
+  .brief-v{margin:0;font-size:14px;color:var(--cream);min-width:0}
+  .brief-v > b{font-family:var(--serif);font-style:italic;font-size:17px}
+  .pips{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+  .pips li{font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px dashed var(--line-2);color:var(--muted)}
+  .pips li.done{border:1px solid rgba(111,182,105,.4);background:rgba(111,182,105,.12);color:var(--good)}
+  .pips li.done::before{content:"✓ "}
+  .pips li.next{border:1px solid rgba(232,93,58,.5);background:rgba(232,93,58,.12);color:var(--tang)}
+  .pips li.next::before{content:"→ "}
+  .brief-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:2px}
+  .brief-list li{display:flex;align-items:center;gap:8px;min-height:32px}
+  .brief-list a{display:flex;align-items:center;gap:9px;flex:1;min-width:0;color:var(--cream);text-decoration:none}
+  .brief-list a:hover .bl-t{text-decoration:underline;text-underline-offset:2px}
+  .bl-t{font-size:14px;line-height:1.35;min-width:0}
+  .bl-d{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .brief-list li.is-new .bl-d::before{content:"NEW";font-size:9px;letter-spacing:.1em;font-weight:800;color:var(--bg);background:var(--tang);padding:2px 6px;border-radius:4px;margin-right:7px}
 
   /* ── Section accordion ──────────────────────────────────────────────────── */
   .sec{border-bottom:1px solid var(--line)}
@@ -140,9 +165,9 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 220</b>
+      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 236</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 2:29 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 2:42 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -152,6 +177,41 @@
       <a href="https://smoothafdriving.pages.dev/admin.html" target="_blank" rel="noopener">Live numbers /admin &#8599;</a>
     </p>
   </header>
+
+  <!-- ══ WHERE WE STAND — always open; keep it to Now / Last shipped / Next / Needs you ══ -->
+  <section class="brief" aria-label="Where we stand">
+    <div class="brief-row">
+      <span class="brief-k">Now</span>
+      <div class="brief-v">
+        <b>Car Concierge</b> &mdash; the app watches your car&rsquo;s health
+        <ol class="pips">
+          <li class="done">X-ray car</li><li class="done">Battery</li><li class="next">Wear from driving</li><li>Recalls</li><li>Maintenance timeline</li><li>Learn &middot; Ask &middot; Book</li>
+        </ol>
+      </div>
+    </div>
+    <div class="brief-row">
+      <span class="brief-k">Last shipped</span>
+      <ul class="brief-v brief-list">
+        <li data-at="2026-10-28T14:29"><a href="#trk-battery"><span class="tag t-ship tn">T410</span><span class="bl-t">Battery check: resting, starting dip, charging</span></a><span class="bl-d">Oct 28</span></li>
+        <li data-at="2026-10-28T14:05"><a href="#trk-xray"><span class="tag t-ship tn">T409</span><span class="bl-t">X-ray car: every part&rsquo;s health at a glance</span></a><span class="bl-d">Oct 28</span></li>
+        <li data-at="2026-10-28T00:42"><a href="#trk-sweep"><span class="tag t-ship tn">T407</span><span class="bl-t">Code sweep: ~10,900 lines lighter</span></a><span class="bl-d">Oct 28</span></li>
+        <li data-at="2026-10-27T15:56"><a href="#trk-traffic"><span class="tag t-ship tn">T403</span><span class="bl-t">Rush hour counts in your score</span></a><span class="bl-d">Oct 27</span></li>
+      </ul>
+    </div>
+    <div class="brief-row">
+      <span class="brief-k">Next</span>
+      <ul class="brief-v brief-list">
+        <li><a href="#trk-concierge"><span class="tag t-next tn">Q1</span><span class="bl-t">Concierge: wear from your driving</span></a></li>
+        <li><a href="#trk-coach"><span class="tag t-next tn">Q2</span><span class="bl-t">Coaching that remembers</span></a></li>
+      </ul>
+    </div>
+    <div class="brief-row brief-you">
+      <span class="brief-k">Needs you</span>
+      <ul class="brief-v brief-list">
+        <li><a href="#need-admin"><span class="tag t-wait">Soon</span><span class="bl-t">Rotate the admin password</span></a></li>
+      </ul>
+    </div>
+  </section>
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
@@ -168,8 +228,12 @@
   <details class="sec" id="upnext" open>
     <summary><h2>Up next</h2><span class="count">in this order</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="trk-concierge">
+        <summary><span class="tag t-next tn">Q1</span><span class="ent-t">Car Concierge: wear from your driving</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The next piece of <a href="#vision">the Concierge</a>. Each car keeps a month-by-month tally from your drives: hard stops, long downhill runs, short trips, pothole hits. That lights the x-ray car&rsquo;s Brakes and Steering, and gives advice with evidence, like &ldquo;180 hard stops since July: have the pads measured.&rdquo; Works without the dongle. After that: recalls for your car, then a maintenance timeline.</div>
+      </details>
       <details class="ent" id="trk-coach">
-        <summary><span class="tag t-next tn">Q1</span><span class="ent-t">Coaching that remembers</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q2</span><span class="ent-t">Coaching that remembers</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Tips that notice patterns (&ldquo;third drive in a row braking late &mdash; try this&rdquo;), pick a focus, and back off once you&rsquo;ve fixed it. Builds on the per-drive <a href="#trk-notes">engineer&rsquo;s notes</a> (T400).</div>
       </details>
     </div>
@@ -180,23 +244,23 @@
     <summary><h2>In the queue</h2><span class="count">after that</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
-        <summary><span class="tag t-next tn">Q2</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q3</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Uploaded drive rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you see. Now also covers the traffic stretch (T403), which lands after the upload.</div>
       </details>
 
       <details class="ent" id="trk-always">
-        <summary><span class="tag t-next tn">Q3&ndash;5</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q3)</span><br>&bull; a drive starts without you opening the app <span class="tn">(Q4)</span><br>&bull; a drive starts the moment the dongle powers up <span class="tn">(Q5)</span></div>
+        <summary><span class="tag t-next tn">Q4&ndash;6</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q4)</span><br>&bull; a drive starts without you opening the app <span class="tn">(Q5)</span><br>&bull; a drive starts the moment the dongle powers up <span class="tn">(Q6)</span></div>
       </details>
 
       <details class="ent" id="trk-motiv">
-        <summary><span class="tag t-wait tn">Q6</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-wait tn">Q7</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Turning points into gas, car care or coaching &mdash; a partnership step, not just code. Waits until points (shipped T371) have run for a while.</div>
       </details>
 
       <details class="ent" id="trk-polish">
-        <summary><span class="tag t-wait tn">Q7&ndash;8</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q7)</span> and a better set of car icons <span class="tn">(Q8)</span>.</div>
+        <summary><span class="tag t-wait tn">Q8&ndash;9</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q8)</span> and a better set of car icons <span class="tn">(Q9)</span>.</div>
       </details>
     </div>
   </details>
@@ -508,3 +572,24 @@
     <span>Kept current by Claude · ask me to refresh it anytime</span>
   </footer>
 </div>
+
+<script>
+// Tapping a briefing line opens its entry (and the section around it).
+document.querySelectorAll('.brief a[href^="#"]').forEach(a => a.addEventListener('click', () => {
+  const t = document.getElementById(a.getAttribute('href').slice(1));
+  if (!t) return;
+  for (let d = t; d; d = d.parentElement?.closest('details')) d.open = true;
+}));
+// "NEW" on anything shipped since your last visit. The baseline only moves
+// once you've been away 30+ minutes, so a reload doesn't wipe the badges.
+try {
+  const K = 'saf-roadmap-visit', now = Date.now();
+  const v = JSON.parse(localStorage.getItem(K) || 'null') || { seen: 0, base: 0 };
+  if (now - v.seen > 30 * 60 * 1000) v.base = v.seen;
+  v.seen = now;
+  localStorage.setItem(K, JSON.stringify(v));
+  if (v.base) document.querySelectorAll('.brief li[data-at]').forEach(li => {
+    if (new Date(li.dataset.at).getTime() > v.base) li.classList.add('is-new');
+  });
+} catch {}
+</script>
