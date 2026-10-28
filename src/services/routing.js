@@ -65,13 +65,13 @@ export function nextQuietTime(now = new Date()){
   return d;
 }
 
-// The next time it's the same weekday and clock time as `when`, at least an
-// hour out (depart_at must be in the future).
+// The next time it's the same weekday and clock time as `when`, at least a day
+// out — near-term departures blend in today's live traffic, and we want the usual.
 export function nextSameSlot(when, now = new Date()){
   const w = new Date(when), d = new Date(now);
   d.setHours(w.getHours(), w.getMinutes(), 0, 0);
   d.setDate(d.getDate() + ((w.getDay() - d.getDay() + 7) % 7));
-  if (d.getTime() < now.getTime() + 3600e3) d.setDate(d.getDate() + 7);
+  if (d.getTime() < now.getTime() + 24 * 3600e3) d.setDate(d.getDate() + 7);
   return d;
 }
 
@@ -85,7 +85,8 @@ async function mapboxTrafficSec(from, to, departAt = null){
 
 function ratioOf(trafficSec, freeSec){
   if (!(trafficSec > 0) || !(freeSec > 0)) return null;
-  return { ratio: +(trafficSec / freeSec).toFixed(2), trafficSec: Math.round(trafficSec), freeSec: Math.round(freeSec) };
+  // base marks the 3am yardstick; readings without it used the old midday one.
+  return { ratio: +(trafficSec / freeSec).toFixed(2), trafficSec: Math.round(trafficSec), freeSec: Math.round(freeSec), base: '3am' };
 }
 
 // Traffic on the trip right now (read right after a drive). Mapbox only → else null.

@@ -6,7 +6,7 @@ import { openTrends } from './trends.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp, haversine } from '../utils/math.js';
 import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
-import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER, TRAFFIC_FRESH_MS, TRAFFIC_MIN_TRIP_M } from '../constants.js';
+import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER, TRAFFIC_FRESH_MS, TRAFFIC_MIN_TRIP_M, TRAFFIC_MIN_FREE_SEC } from '../constants.js';
 import { loadDrives, loadDriverName, updateStoredDrive, recomputeLifetimeScore } from '../services/storage.js';
 import { baseTiles } from '../utils/maptiles.js';
 import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
@@ -138,7 +138,7 @@ async function annotateTraffic(drive, analysis){
       : null;
     if (drive.traffic !== undefined) return;
     if (!tr && tripM >= TRAFFIC_MIN_TRIP_M) return;          // network/API failure: retry on next open
-    drive.traffic = tr && tr.freeSec >= 120 ? { ...tr, at: Date.now() } : null;
+    drive.traffic = tr && tr.freeSec >= TRAFFIC_MIN_FREE_SEC ? { ...tr, at: Date.now() } : null;
     if (!drive.traffic){ updateStoredDrive(drive); return; }   // remember "no reading"; nothing to rescore
     // Heavy traffic lifts the score and the points: rescore through the one path
     // (keeps any ETA clock and stop-cause credit), save, follow through to lifetime.

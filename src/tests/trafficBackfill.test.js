@@ -24,20 +24,32 @@ describe('typical-traffic backfill', () => {
     expect(tripEnds(drive())).not.toBeNull();
   });
   it('stamps an estimate and rescores, without touching other drives', async () => {
-    saveDrives([drive({ startTime: now - 3 * DAY }), drive({ startTime: now - 2 * DAY, traffic: { ratio: 1.1 } })]);
+    saveDrives([drive({ startTime: now - 3 * DAY }), drive({ startTime: now - 2 * DAY, traffic: { ratio: 1.1, base: '3am' } })]);
     const calls = [];
-    const r = await backfillTypicalTraffic({ now, fetchRatio: async (a, b, when) => { calls.push(when); return { ratio: 1.8, trafficSec: 900, freeSec: 500 }; } });
+    const r = await backfillTypicalTraffic({ now, fetchRatio: async (a, b, when) => { calls.push(when); return { ratio: 1.8, trafficSec: 900, freeSec: 500, base: '3am' }; } });
     expect(calls).toEqual([now - 3 * DAY]);
     expect(r.estimated).toBe(1);
     const [a, b] = loadDrives().sort((x, y) => x.startTime - y.startTime);
     expect(a.traffic).toMatchObject({ ratio: 1.8, estimated: true });
     expect(a.dims.trafficBonus).not.toBe(0);
-    expect(b.traffic).toEqual({ ratio: 1.1 });
+    expect(b.traffic).toEqual({ ratio: 1.1, base: '3am' });
   });
-  it('leaves a drive to retry when the lookup fails', async () => {
+  it('retries a failed lookup a few launches, then gives up', async () => {
     saveDrives([drive()]);
-    await backfillTypicalTraffic({ now, fetchRatio: async () => null });
+    const fail = { now, fetchRatio: async () => null };
+    await backfillTypicalTraffic(fail);
     expect(loadDrives()[0].traffic).toBeUndefined();
+    await backfillTypicalTraffic(fail); await backfillTypicalTraffic(fail);
+    expect(loadDrives()[0].traffic).toBeNull();
+  });
+  it('treats very short trips as noise', async () => {
+    saveDrives([drive()]);
+    await backfillTypicalTraffic({ now, fetchRatio: async () => ({ ratio: 1.7, trafficSec: 150, freeSec: 90, base: '3am' }) });
+    expect(loadDrives()[0].traffic).toBeNull();
+  });
+  it('re-estimates a live reading taken on the old midday yardstick', () => {
+    expect(needsTraffic(drive({ traffic: { ratio: 1.17 } }), now)).toBe(true);
+    expect(needsTraffic(drive({ traffic: { ratio: 1.6, base: '3am' } }), now)).toBe(false);
   });
 });
 
@@ -54,5 +66,7 @@ describe('traffic times', () => {
     expect(s.getDate()).toBe(29);
     const soon = nextSameSlot(new Date('2026-10-21T12:30:00'), new Date('2026-10-28T12:00:00'));
     expect(soon.getDate()).toBe(4);                          // 30 min away → next week
+    const tomorrowish = nextSameSlot(new Date('2026-10-22T10:00:00'), new Date('2026-10-28T12:00:00'));
+    expect(tomorrowish.getDate()).toBe(5);                   // 22h away is too close to be 'usual' → next week
   });
 });

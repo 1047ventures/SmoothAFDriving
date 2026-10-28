@@ -251,6 +251,7 @@ export const TRAFFIC_SCORE_PIVOT   = 75;   // the neutral drive — neither lift
 export const TRAFFIC_SCORE_AMP_MAX = 0.3;  // full traffic stretches the gap from the pivot by 30%
 export const TRAFFIC_FRESH_MS       = 20 * 60 * 1000; // only read traffic this soon after the drive ended
 export const TRAFFIC_MIN_TRIP_M     = 1000;  // start→end closer than this (a loop) gets no traffic reading
+export const TRAFFIC_MIN_FREE_SEC   = 120;   // trips under 2 min at 3am: the ratio is rounding noise
 
 // ── Live ETA + pit-stop detection ──────────────────────────────────────────────
 export const LIVE_ETA_REFRESH_MS = 60000;  // re-fetch the traffic-aware ETA at most this often

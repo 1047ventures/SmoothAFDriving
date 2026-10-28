@@ -12,7 +12,9 @@ import { loadDrives, saveDrives, recomputeLifetimeScore } from './storage.js';
 import { applyAnalysis } from './drive.js';
 import { analyzeDrive } from './scoring.js';
 import { haversine } from '../utils/math.js';
-import { TRAFFIC_FRESH_MS, TRAFFIC_MIN_TRIP_M } from '../constants.js';
+import { TRAFFIC_FRESH_MS, TRAFFIC_MIN_TRIP_M, TRAFFIC_MIN_FREE_SEC } from '../constants.js';
+
+const MAX_TRIES = 3;   // a drive Mapbox can't route after this many launches gets no reading
 
 // Start and end of the drive's track, or null if it has none worth pricing.
 export function tripEnds(drive){
@@ -22,13 +24,17 @@ export function tripEnds(drive){
   return haversine(a, b) >= TRAFFIC_MIN_TRIP_M ? { a, b } : null;
 }
 
+// No reading yet — or a live one taken against the old midday yardstick (pre-3am
+// baseline, no `base`), which under-read rush hour; those get re-estimated.
+const unread = (t) => t === undefined || (t !== null && !t.base && !t.estimated);
+
 export function needsTraffic(drive, now = Date.now()){
-  return drive.traffic === undefined && !drive.simulated && drive.startTime != null
+  return unread(drive.traffic) && !drive.simulated && drive.startTime != null
     && (drive.samples?.length || 0) >= 2
     && now - (drive.startTime + (drive.durationMs || 0)) > TRAFFIC_FRESH_MS;   // the live read owns fresh drives
 }
 
-export async function backfillTypicalTraffic({ limit = 30, now = Date.now(), fetchRatio = fetchTypicalTrafficRatio } = {}){
+export async function backfillTypicalTraffic({ limit = 15, now = Date.now(), fetchRatio = fetchTypicalTrafficRatio } = {}){
   if (fetchRatio === fetchTypicalTrafficRatio && !isTrafficAware()) return null;
   const todo = loadDrives().filter(d => needsTraffic(d, now)).slice(0, limit).map(d => d.startTime);
   let estimated = 0, changed = 0, delta = 0;
@@ -37,14 +43,21 @@ export async function backfillTypicalTraffic({ limit = 30, now = Date.now(), fet
     if (!snap || !needsTraffic(snap, now)) continue;
     const ends = tripEnds(snap);
     const tr = ends ? await fetchRatio({ lat: ends.a.lat, lng: ends.a.lon }, { lat: ends.b.lat, lng: ends.b.lon }, snap.startTime) : null;
-    if (ends && !tr) continue;                                // network/API failure: try again next launch
-
     const all = loadDrives();
     const d = all.find(x => x.startTime === id);
-    if (!d || d.traffic !== undefined) continue;              // changed while we waited
+    if (!d || !needsTraffic(d, now)) continue;                // changed while we waited
+    if (ends && !tr){                                         // Mapbox failed: retry next launch, a few times
+      d.trafficTries = (d.trafficTries || 0) + 1;
+      if (d.trafficTries >= MAX_TRIES){ d.traffic = null; applyAnalysis(d, analyzeDrive(d)); }
+      saveDrives(all);
+      continue;
+    }
     const before = d.score;
-    d.traffic = tr ? { ...tr, estimated: true, at: now } : null;   // null = a loop, nothing to price
-    if (tr){
+    const usable = tr && tr.freeSec >= TRAFFIC_MIN_FREE_SEC;
+    d.traffic = usable ? { ...tr, estimated: true, at: now } : null;   // null = a loop or a hop, nothing to price
+    delete d.trafficTries;
+    applyAnalysis(d, analyzeDrive(d));                        // also clears an old-yardstick reading's effect
+    if (usable){
       applyAnalysis(d, analyzeDrive(d));
       estimated++;
       if (before != null && d.score !== before){ changed++; delta += d.score - before; }
