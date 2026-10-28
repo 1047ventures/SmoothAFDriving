@@ -73,13 +73,21 @@ export function scoreState(score){
  * `overall` scores only the zones that were read: the average, but never more
  * than 15 above the worst one and never in a better colour band, so one sick
  * system can't hide behind healthy ones.
+ *
+ * `battery` (a batterySummary) folds into Electrical: its score is the lower
+ * of the codes' and the battery's, and the voltages join its note. A battery
+ * reading alone (the dongle linked with the ignition off, so no code scan)
+ * still lights Electrical; everything else stays unread.
  */
-export function zoneScores(report){
-  if (!report) return null;
+export function zoneScores(report, battery = null){
+  if (!report && !battery) return null;
+  const scanned = Boolean(report);
+  report = report || { codes: [], milOn: null, unread: 0 };
   const zones = ZONES.map(z => {
     const codes = report.codes.filter(c => zoneFor(c.code) === z.id);
-    const read = z.scanned || codes.length > 0;
-    if (!read) return { id: z.id, label: z.label, read, score: null, state: null, codes, note: 'Not read by this scan' };
+    const bat = z.id === 'electrical' ? battery : null;
+    const read = (scanned && z.scanned) || codes.length > 0 || Boolean(bat);
+    if (!read) return { id: z.id, label: z.label, read, score: null, state: null, codes, note: scanned ? 'Not read by this scan' : 'Needs a scan with the ignition on' };
     let off = codes.reduce((s, c) => s + PENALTY[c.pending ? 'pending' : 'stored'][c.severity], 0);
     // Codes the car holds but didn't hand over, or a check-engine light no
     // stored code explains, land on the engine: the scan can't say more.
@@ -91,7 +99,12 @@ export function zoneScores(report){
     let score = Math.max(FLOOR, 100 - off);
     if (flagged) score = Math.min(score, WATCH_CAP);
     if (codes.some(c => !c.pending && c.severity === 'urgent')) score = Math.min(score, BAD_CAP);
-    return { id: z.id, label: z.label, read, score, state: scoreState(score), codes, note: zoneNote(z.id, codes, report) };
+    let note = zoneNote(z.id, codes, report);
+    if (bat){
+      score = Math.min(score, bat.score);
+      note = codes.length ? `${note} · ${bat.note}` : bat.note;
+    }
+    return { id: z.id, label: z.label, read, score, state: scoreState(score), codes, note };
   });
   const scored = zones.filter(z => z.read);
   const mean = scored.reduce((s, z) => s + z.score, 0) / scored.length;

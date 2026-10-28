@@ -25,6 +25,7 @@
 
 import { BleClient } from '@capacitor-community/bluetooth-le';
 import { derive as deriveMetrics, decodeGearA4 } from './obdDerived.js';
+import { parseAtrv } from './battery.js';
 
 // ── Pure decoding ─────────────────────────────────────────────────────────────
 // Everything below this heading is deterministic string→number work, which is
@@ -221,7 +222,7 @@ const state = {
                torqueNm: null, horsepower: null, gear: null, gearRatio: null,
                coolant: null, intakeTemp: null, ambientTemp: null,
                map: null, baro: null, timingAdv: null, maf: null,
-               fuelLevel: null, voltage: null, at: 0 },
+               fuelLevel: null, voltage: null, batteryV: null, batteryAt: 0, at: 0 },
   supported: null,
   gearSupported: false,   // set once at connect by probing PID 0xA4
   pollN:     0,           // loop counter, so slow PIDs poll every SLOW_EVERY loops
@@ -503,6 +504,36 @@ export async function readVin(){
 }
 
 /**
+ * Battery voltage at the OBD port, read by the adapter itself (AT RV). Fast —
+ * no round trip to the car — and it answers with the ignition off, which is
+ * what makes the resting and starting-dip readings possible (battery.js).
+ */
+export async function readVoltage(){
+  if (!state.deviceId) return null;
+  const v = parseAtrv(await send('ATRV', 1500));
+  if (v != null){ state.latest.batteryV = v; state.latest.batteryAt = Date.now(); }
+  return v;
+}
+
+/** Engine speed alone — one quick query, for telling a running engine from a parked one. */
+export async function readRpm(){
+  if (!state.deviceId) return null;
+  const v = decodePid('rpm', await send('010C'));
+  if (v != null) state.latest.rpm = v;
+  return v;
+}
+
+/** True once the engine computer has answered (ignition on). */
+export function ecuAnswering(){ return Boolean(state.supported?.length); }
+
+/** Ask again what the car supports — after a start, when the computer wakes up. */
+export async function refreshSupported(){
+  if (!state.deviceId) return;
+  const s = decodeSupportedPids(await send('0100'));
+  if (s?.length) state.supported = s;
+}
+
+/**
  * Read the car's trouble codes: check-engine status (0101), stored codes (03)
  * and pending codes (07). Returns the raw replies for services/carHealth.js to
  * parse — kept raw here so the parsing stays pure and testable. Mode 03/07 can
@@ -535,6 +566,7 @@ export async function poll(){
   state.pollN = (state.pollN + 1) % SLOW_EVERY;
   const wanted = FAST_PIDS.filter(has);
   if (state.pollN === 0) wanted.push(...SLOW_PIDS.filter(has));
+  if (state.pollN === 0) await readVoltage();   // battery / charging voltage
 
   for (const name of wanted){
     const reply = await send('01' + PIDS[name].pid);

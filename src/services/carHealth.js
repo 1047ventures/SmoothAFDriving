@@ -12,6 +12,7 @@
  * without a car. The transport (send) lives in obd.js and is injected.
  */
 import { lookupDtc, systemFor } from './dtcCodes.js';
+import { moveBattery, deleteBattery } from './battery.js';
 
 export const CAR_HEALTH_KEY = 'smoothaf.car_health.v1';
 
@@ -162,6 +163,18 @@ export function buildReport({ milRaw, storedRaw, pendingRaw }, now = Date.now())
   };
 }
 
+/**
+ * The car's status for Home and the Garage: the worse of the code scan and the
+ * battery (a batterySummary). Null when neither has been read.
+ */
+export function carStatus(report, battery){
+  if (!report && !battery) return null;
+  const RANK = { clear: 0, watch: 1, attention: 2 };
+  const fromBattery = { good: 'clear', watch: 'watch', bad: 'attention' }[battery?.state] || 'clear';
+  const fromCodes = report?.status || 'clear';
+  return RANK[fromBattery] > RANK[fromCodes] ? fromBattery : fromCodes;
+}
+
 /** Headline for the report — the one line Home and the Garage show. */
 export function reportHeadline(r){
   if (!r) return null;
@@ -196,6 +209,7 @@ export function saveHealthReport(vehicleId, report){
 
 /** Move a report filed under one key (e.g. an unconfirmed car's VIN) to another. */
 export function moveHealthReport(fromKey, toKey){
+  moveBattery(fromKey, toKey);   // the battery readings belong to the same car
   const all = loadHealthReports();
   if (!all[fromKey]) return;
   all[toKey] = all[fromKey];
@@ -204,6 +218,7 @@ export function moveHealthReport(fromKey, toKey){
 }
 
 export function deleteHealthReport(key){
+  deleteBattery(key);
   const all = loadHealthReports();
   if (!(key in all)) return;
   delete all[key];

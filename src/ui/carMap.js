@@ -29,9 +29,9 @@ const ORDER = ['body', 'steering', 'brakes', 'transmission', 'exhaust', 'engine'
 const SHELL = `<path class="cz-shell" d="M80 8C112 8 128 14 132 34L136 90C138 120 138 200 136 240L133 278C131 292 112 296 80 296C48 296 29 292 27 278L24 240C22 200 22 120 24 90L28 34C32 14 48 8 80 8Z"/>
   <path class="cz-shell" d="M40 112Q80 100 120 112M44 232Q80 242 116 232"/>`;
 
-/** Scan report → the x-ray car block (empty string without a report). */
-export function carMapHtml(report){
-  const s = zoneScores(report);
+/** Scan report (+ battery summary) → the x-ray car block, '' with neither. */
+export function carMapHtml(report, battery = null){
+  const s = zoneScores(report, battery);
   if (!s) return '';
   const byId = Object.fromEntries(s.zones.map(z => [z.id, z]));
   const cls = z => `cz-${z.read ? z.state : 'unread'}`;
@@ -48,19 +48,29 @@ export function carMapHtml(report){
     <div class="cz">
       <svg class="cz-car" viewBox="0 0 304 160" role="img" aria-label="Car health by part: ${esc(label)}"><g transform="translate(304 0) rotate(90)">${SHELL}${parts}</g></svg>
       <div class="cz-list">${rows}</div>
+      ${batteryHtml(battery)}
     </div>`;
 }
 
 /** Overall score chip for the card header. */
-export function carScoreHtml(report){
-  const s = zoneScores(report);
+export function carScoreHtml(report, battery = null){
+  const s = zoneScores(report, battery);
   return s ? `<span class="cz-overall cz-${s.overallState}" aria-label="Health score ${s.overall} out of 100">${s.overall}</span>` : '';
 }
 
 /** "4 of 7 parts read" — so a 100 never reads as a whole-car all-clear. */
-export function carCoverage(report){
-  const s = zoneScores(report);
+export function carCoverage(report, battery = null){
+  const s = zoneScores(report, battery);
   return s ? `${s.read} of ${s.total} parts read` : '';
+}
+
+/** The three battery readings, each with what it means or how to get it. */
+function batteryHtml(b){
+  if (!b) return '';
+  const rows = b.parts.map(p => p.v == null
+    ? `<li class="cz-bat-row cz-unread"><span class="cz-bat-name">${p.name}</span><span class="cz-bat-v">–</span><span class="cz-bat-say">${esc(p.missing)}</span></li>`
+    : `<li class="cz-bat-row cz-${p.state}"><span class="cz-bat-name">${p.name}</span><span class="cz-bat-v">${p.v.toFixed(1)} V</span><span class="cz-bat-say">${esc(p.label)}</span></li>`).join('');
+  return `<div class="cz-bat"><div class="cz-bat-head">Battery</div><ul class="cz-bat-list">${rows}</ul></div>`;
 }
 
 // Tap a part's row to spotlight it on the car; tap again to clear.

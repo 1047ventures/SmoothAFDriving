@@ -3,7 +3,7 @@ import { zoneFor, zoneScores, scoreState } from '../services/carZones.js';
 
 const code = (c, severity = 'soon', pending = false) => ({ code: c, title: '', what: '', severity, pending, known: true });
 const report = (codes = [], over = {}) => ({ checkedAt: 0, milOn: false, unread: 0, codes, status: 'clear', ...over });
-const zone = (r, id) => zoneScores(r).zones.find(z => z.id === id);
+const zone = (r, id, bat) => zoneScores(r, bat).zones.find(z => z.id === id);
 
 describe('zoneFor', () => {
   it('maps generic powertrain ranges to parts of the car', () => {
@@ -77,6 +77,16 @@ describe('zoneScores', () => {
   });
   it('counts codes and early warnings in the note', () => {
     expect(zone(report([code('P0171'), code('P0174', 'soon', true)]), 'engine').note).toBe('1 code · 1 early warning');
+  });
+  it('folds the battery into Electrical', () => {
+    const bat = { score: 70, state: 'watch', note: 'Battery 12.3 V' };
+    expect(zone(report(), 'electrical', bat)).toMatchObject({ score: 70, state: 'watch', note: 'Battery 12.3 V' });
+    expect(zone(report([code('P0562')]), 'electrical', bat).note).toBe('1 code · Battery 12.3 V');
+  });
+  it('lights only Electrical from a battery reading with no code scan', () => {
+    const s = zoneScores(null, { score: 100, state: 'good', note: 'Battery 12.6 V' });
+    expect(s).toMatchObject({ overall: 100, read: 1 });
+    expect(s.zones.find(z => z.id === 'engine')).toMatchObject({ read: false, note: 'Needs a scan with the ignition on' });
   });
   it('returns null without a report', () => {
     expect(zoneScores(null)).toBeNull();

@@ -1,8 +1,9 @@
 import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY, CAR_PROMPTED_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 import { pushProfile } from '../services/profile.js';
-import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
+import { loadHealthReport, reportHeadline, carStatus } from '../services/carHealth.js';
 import { carMapHtml, carScoreHtml, carCoverage } from './carMap.js';
+import { loadBattery, batterySummary } from '../services/battery.js';
 
 // ── Photo helpers ─────────────────────────────────────────────────────────────
 function loadCarPhoto(){ try { return localStorage.getItem(CAR_PHOTO_KEY); } catch { return null; } }
@@ -310,11 +311,12 @@ const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
  */
 function healthBlock(v){
   const r = loadHealthReport(v?.id);
-  if (!r) return '';
+  const bat = batterySummary(loadBattery(v?.id));
+  if (!r && !bat) return '';
   const carName = v ? ([v.make, v.model].filter(Boolean).join(' ') || 'your car') : 'your car';
   // Explanations collapse so a long list never pushes the car itself off a
   // small screen; anything urgent opens by default.
-  const codes = r.codes.map(c => `
+  const codes = (r?.codes || []).map(c => `
       <details class="gs-hc-code gs-hc-${c.severity}${c.pending ? ' gs-hc-pending' : ''}"${c.severity === 'urgent' && !c.pending ? ' open' : ''}>
         <summary class="gs-hc-code-top">
           <span class="gs-hc-id">${esc(c.code)}</span>
@@ -322,22 +324,24 @@ function healthBlock(v){
         </summary>
         <div class="gs-hc-what">${c.pending ? '<b>Early warning</b> — no dashboard light yet. ' : ''}${esc(c.what)}</div>
       </details>`).join('');
-  const t = new Date(r.checkedAt);
+  const status = carStatus(r, bat);
+  const headline = r ? reportHeadline(r) : 'Battery checked';
+  const t = new Date(Math.max(r?.checkedAt || 0, ...(bat?.parts || []).map(p => p.at || 0)));
   const when = t.toDateString() === new Date().toDateString()
     ? t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
     : t.toLocaleDateString([], { month: 'short', day: 'numeric' });
   return `
     <div class="gs-section-label">Car health · ${esc(carName)}</div>
-    <section class="gs-health gs-health--${r.status}" aria-label="Car health">
+    <section class="gs-health gs-health--${status}" aria-label="Car health">
       <div class="gs-hc-head">
         <span class="gs-hc-dot"></span>
-        <span class="gs-hc-headline">${esc(reportHeadline(r))}</span>
-        ${carScoreHtml(r)}
-        <span class="gs-hc-when">Checked ${esc(when)} · ${esc(carCoverage(r))}</span>
+        <span class="gs-hc-headline">${esc(headline)}</span>
+        ${carScoreHtml(r, bat)}
+        <span class="gs-hc-when">Checked ${esc(when)} · ${esc(carCoverage(r, bat))}</span>
       </div>
-      ${carMapHtml(r)}
-      ${r.milOn ? '<div class="gs-hc-what gs-hc-mil"><b>Check-engine light is on.</b></div>' : ''}
-      ${r.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : codes}
+      ${carMapHtml(r, bat)}
+      ${r?.milOn ? '<div class="gs-hc-what gs-hc-mil"><b>Check-engine light is on.</b></div>' : ''}
+      ${r?.status === 'clear' ? '<div class="gs-hc-what">Your car’s computer reports no faults.</div>' : codes}
     </section>`;
 }
 

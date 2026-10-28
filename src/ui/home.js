@@ -16,7 +16,8 @@ import { displayName } from '../services/auth.js';
 import { getActiveVehicle } from './garage.js';
 import { improvementVerdict } from '../services/improvement.js';
 import { openTrends } from './trends.js';
-import { loadHealthReport, reportHeadline } from '../services/carHealth.js';
+import { loadHealthReport, reportHeadline, carStatus } from '../services/carHealth.js';
+import { loadBattery, batterySummary } from '../services/battery.js';
 import { showPendingCarPrompt } from './carPrompt.js';
 
 export function renderHomeStats(){
@@ -44,16 +45,19 @@ export function renderHomeStats(){
   }
 
   // Car Health on the Garage card: the dot and label carry the last
-  // trouble-code read for this car. No read yet → the plain "Garage" label.
+  // trouble-code read and battery check for this car. Neither yet → "Garage".
   const card = document.getElementById('btn-vehicle-type');
   if (card){
-    const r = loadHealthReport(getActiveVehicle()?.id);
+    const id = getActiveVehicle()?.id;
+    const r = loadHealthReport(id);
+    const bat = batterySummary(loadBattery(id));
+    const status = carStatus(r, bat);
     const lbl = card.querySelector('.hgc-label');
     card.classList.remove('hgc--clear', 'hgc--watch', 'hgc--attention');
-    if (r){
-      card.classList.add(`hgc--${r.status}`);
-      if (lbl) lbl.textContent = { clear: 'Car OK', watch: 'Heads-up', attention: 'Check car' }[r.status];
-      card.setAttribute('aria-label', `My Garage — ${reportHeadline(r)}`);
+    if (status){
+      card.classList.add(`hgc--${status}`);
+      if (lbl) lbl.textContent = { clear: 'Car OK', watch: 'Heads-up', attention: 'Check car' }[status];
+      card.setAttribute('aria-label', `My Garage — ${[r && reportHeadline(r), bat?.note].filter(Boolean).join(' · ')}`);
     } else {
       if (lbl) lbl.textContent = 'Garage';
       card.setAttribute('aria-label', 'My Garage');
