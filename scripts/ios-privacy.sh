@@ -22,7 +22,18 @@ set_string(){
   local key="$1" value="$2"
   # Delete-then-add so re-runs update the text rather than erroring on a dup.
   "$PB" -c "Delete :$key" "$PLIST" >/dev/null 2>&1 || true
-  "$PB" -c "Add :$key string $value" "$PLIST"
+  # PlistBuddy parses its command line: an unquoted apostrophe ("you're") made
+  # the Add fail silently after the Delete had already removed the key, so a
+  # build shipped without the background-location string (ITMS-90683, build
+  # 236). Quote the value, escaping \ and ", then read it back and fail the
+  # build if it didn't stick.
+  local q=${value//\\/\\\\}; q=${q//\"/\\\"}; q=${q//\'/\\\'}
+  "$PB" -c "Add :$key string \"$q\"" "$PLIST"
+  local got; got=$("$PB" -c "Print :$key" "$PLIST" 2>/dev/null || true)
+  if [ "$got" != "$value" ]; then
+    echo "[ios-privacy] FAILED to set $key (read back: '$got')" >&2
+    exit 1
+  fi
   echo "[ios-privacy] set $key"
 }
 
