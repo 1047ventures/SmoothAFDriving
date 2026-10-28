@@ -101,9 +101,15 @@ Roadmap task badges are tinted by status (`.tn--ship` green, `.tn--prog` gold,
 `.tn--next` tangerine, `.tn--wait` amber, `.tn--pend` amber for claimed-but-
 unpushed). Keep the colour matching the lane when you add or move a task.
 
-The **Just shipped** lane holds only the **4 most recent shipped tasks** — when
-a new one lands, add it at the top and drop the oldest. Older shipped work lives
-in the Completed fold and `TASKS.md`, not the glance.
+The top of the roadmap is an always-open **Where we stand** briefing — the owner
+juggles ~10 projects and uses it to get back up to speed in seconds. Update it
+with **every** ship, in the same commit:
+- **Now** — the current focus and its pieces (done ✓ / next → / later).
+- **Last shipped** — the **4 most recent** T# with their date and `data-at`
+  (commit time); add at the top, drop the oldest. Each links to its milestone
+  entry. Lines newer than the owner's last visit get a NEW badge automatically.
+- **Next** — the top 2 Q items. **Needs you** — mirrors that section.
+Older shipped work lives in Major milestones and `TASKS.md`, not the glance.
 
 ## The wake routine (SessionStart hook)
 
