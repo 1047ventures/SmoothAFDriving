@@ -171,24 +171,3 @@ export async function syncProfile(){
   return merged;
 }
 
-/**
- * Claim this device's anonymous drives.
- *
- * Goes through an RPC rather than a direct update: the old RLS policy allowed
- * any signed-in user to adopt ANY unowned row, which with a scoring leaderboard
- * is free history for whoever asks first. The function only takes rows already
- * stamped with the device_id passed in.
- */
-export async function claimDrives(deviceId){
-  const headers = authHeaders();
-  if (!headers || !deviceId) return 0;
-  try {
-    const res = await fetch(`${SB_URL}/rest/v1/rpc/claim_drives`, {
-      method:  'POST',
-      headers,
-      body:    JSON.stringify({ p_device_id: deviceId }),
-    });
-    if (!res.ok) return 0;
-    return Number(await res.json()) || 0;
-  } catch { return 0; }
-}

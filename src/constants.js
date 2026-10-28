@@ -186,8 +186,7 @@ export const RIDE_RR_HI = 3.0;  // vertical RMS that scores 0 (rumble strips / h
 // for drives where the sensors actually confirmed a smooth ride.
 export const NO_RIDE_DATA_CEILING = 95;
 
-// ── Voice labels ──────────────────────────────────────────────────────────────
-export const VOICE_LABELS = { brake: 'Hard brake!', accel: 'Hard acceleration!', turn: 'Sharp turn!', shift: 'Rough shift!' };
+
 
 // ── Photo / garage keys ───────────────────────────────────────────────────────
 export const CAR_PHOTO_KEY = 'smoothaf.car_photo';

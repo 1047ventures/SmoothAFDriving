@@ -174,81 +174,6 @@ export function buildShareCanvas(drive, analysis){
   return canvas;
 }
 
-export function buildLifetimeCanvas(lifetimeScore, driverName, totalDrives, totalMiles){
-  const score = Math.round(lifetimeScore);
-  const accentColor = score >= 90 ? '#5A9E52' : score >= 75 ? '#E8A03A' : '#E03B2F';
-
-  const SIZE = 1080;
-  const canvas = document.createElement('canvas');
-  canvas.width  = SIZE;
-  canvas.height = SIZE;
-  const ctx = canvas.getContext('2d');
-
-  drawBackground(ctx, SIZE, accentColor);
-
-  // Brand
-  ctx.font = 'italic 700 52px "Playfair Display", Georgia, serif';
-  ctx.fillStyle = 'rgba(244,235,217,0.92)';
-  ctx.textAlign = 'left';
-  ctx.fillText('Smooth AF', 80, 110);
-
-  // "Lifetime Score" label
-  ctx.font = '400 28px -apple-system, Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(244,235,217,0.32)';
-  ctx.textAlign = 'center';
-  ctx.fillText('LIFETIME SCORE', SIZE / 2, 208);
-
-  // Score
-  const sg = ctx.createLinearGradient(SIZE/2 - 200, 230, SIZE/2 + 200, 520);
-  sg.addColorStop(0, '#F4EBD9');
-  sg.addColorStop(1, accentColor);
-  ctx.font = 'italic 700 340px "Playfair Display", Georgia, serif';
-  ctx.fillStyle = sg;
-  ctx.textAlign = 'center';
-  ctx.fillText(String(score), SIZE / 2, 490);
-
-  // Stats: drives and miles
-  const stats = [
-    { val: String(totalDrives), lbl: 'Drives' },
-    { val: String(Math.round(totalMiles)), lbl: 'Miles' },
-  ];
-  const colW = 380;
-  const x0   = (SIZE - colW * 2) / 2;
-  const rowY = 660;
-
-  stats.forEach((s, i) => {
-    const cx = x0 + colW * i + colW / 2;
-    ctx.font = 'italic 700 64px "Playfair Display", Georgia, serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.92)';
-    ctx.textAlign = 'center';
-    ctx.fillText(s.val, cx, rowY);
-    ctx.font = '400 24px -apple-system, Inter, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.35)';
-    ctx.fillText(s.lbl.toUpperCase(), cx, rowY + 40);
-  });
-
-  ctx.strokeStyle = 'rgba(244,235,217,0.12)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(SIZE/2, rowY - 58); ctx.lineTo(SIZE/2, rowY + 48); ctx.stroke();
-
-  // Handle / name
-  const displayHandle = getDisplayHandle() || driverName;
-  if (displayHandle){
-    ctx.font = '400 28px -apple-system, Inter, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.42)';
-    ctx.textAlign = 'center';
-    ctx.fillText(displayHandle, SIZE / 2, 828);
-  }
-
-  // Watermark
-  ctx.font = '400 22px -apple-system, Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(244,235,217,0.18)';
-  ctx.textAlign = 'center';
-  ctx.fillText('smoothafdriving.com', SIZE / 2, 1034);
-
-  return canvas;
-}
-
 async function doShare(canvas, title, text){
   try {
     const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
@@ -272,13 +197,4 @@ export async function shareCurrentDrive(drive, analysis){
   const h = getDisplayHandle();
   const text = `Scored ${analysis.score}/100 on a ${mi} mi drive${h ? ' ' + h : ''} 🚗 ${INSTALL_URL} #SmoothAF`;
   await doShare(canvas, 'My Smooth AF Drive', text);
-}
-
-export async function shareLifetimeScore(score, driverName, totalDrives, totalMiles){
-  if (!localStorage.getItem(SHARE_PROMPTED_KEY)) await openHandlesModal();
-  await ensureFontLoaded();
-  const canvas = buildLifetimeCanvas(score, driverName, totalDrives, totalMiles);
-  const h = getDisplayHandle();
-  const text = `My lifetime Smooth AF driving score: ${Math.round(score)}/100${h ? ' ' + h : ''} 🚗 ${INSTALL_URL} #SmoothAF`;
-  await doShare(canvas, 'My Smooth AF Lifetime Score', text);
 }

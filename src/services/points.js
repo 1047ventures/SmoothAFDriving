@@ -89,10 +89,6 @@ export function lifetimePoints(drives){
   return drives.reduce((s, d) => s + pointsFor(d), 0);
 }
 
-export function lifetimeSmoothMiles(drives){
-  return drives.reduce((s, d) => s + (d.points?.smoothMi ?? smoothMiles(d).smoothMi), 0);
-}
-
 // One-time-per-drive stamp for drives recorded before points existed. Storage
 // strips samples from the oldest drives under quota, which would silently move
 // them onto the fallback estimate — stamping now freezes the walked figure.

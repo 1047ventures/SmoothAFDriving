@@ -378,6 +378,8 @@ dashboard and signup capture all run on Cloudflare.
 - `main` — production
 - `claude/step-1-avg-speed-*` — active dev branch
 
-## What lives where (legacy files)
-- `app.js` — the original monolithic 2900-line file. **Not used in the Vite build.** Kept as a migration reference; will be deleted once the Vite path is confirmed stable in production.
-- `sw.js` (root) — legacy service worker for the non-Vite version. `public/sw.js` is the active one.
+## What lives where
+Everything served lives in `public/` (copied to `dist/` as-is: `sw.js`, `manifest.json`,
+`icons/`, `vehicles/`, `_headers`, `_redirects`, `admin.html`, `install.html`). Files at the
+repo root are NOT deployed — the pre-Vite `app.js`, root `sw.js` and mockups were
+removed in the Oct 2026 sweep. `assets/icon.png` is the source for `@capacitor/assets`.

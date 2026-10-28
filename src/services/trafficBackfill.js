@@ -4,9 +4,8 @@
 // time next week, which Mapbox predicts from typical traffic. Stored with
 // `estimated: true` so the recap can say "usual traffic", not "measured".
 //
-// Runs at launch, a batch at a time, in the background. Each drive is patched
-// onto a fresh copy from storage and saved on its own, so a drive finished or
-// annotated meanwhile is never overwritten by a stale copy.
+// Runs at launch, a batch at a time, in the background: all the Mapbox lookups
+// first, then one read-patch-write of the stored list.
 import { fetchTypicalTrafficRatio, isTrafficAware } from './routing.js';
 import { loadDrives, saveDrives, recomputeLifetimeScore } from './storage.js';
 import { applyAnalysis } from './drive.js';
@@ -36,34 +35,38 @@ export function needsTraffic(drive, now = Date.now()){
 
 export async function backfillTypicalTraffic({ limit = 15, now = Date.now(), fetchRatio = fetchTypicalTrafficRatio } = {}){
   if (fetchRatio === fetchTypicalTrafficRatio && !isTrafficAware()) return null;
-  const todo = loadDrives().filter(d => needsTraffic(d, now)).slice(0, limit).map(d => d.startTime);
+
+  // 1. Network first, off the stored list: ask Mapbox about each drive.
+  const todo = loadDrives().filter(d => needsTraffic(d, now)).slice(0, limit);
+  const found = new Map();   // startTime -> ratio | null (nothing to price) | undefined (lookup failed)
+  for (const d of todo){
+    const ends = tripEnds(d);
+    found.set(d.startTime, ends ? await fetchRatio({ lat: ends.a.lat, lng: ends.a.lon }, { lat: ends.b.lat, lng: ends.b.lon }, d.startTime) ?? undefined : null);
+  }
+  if (!found.size) return { checked: 0, estimated: 0, changed: 0, avgDelta: 0 };
+
+  // 2. One read-patch-write onto a fresh copy (no awaits in between), so a drive
+  //    finished, deleted or annotated meanwhile is never overwritten by a stale one.
+  const all = loadDrives();
   let estimated = 0, changed = 0, delta = 0;
-  for (const id of todo){
-    const snap = loadDrives().find(d => d.startTime === id);
-    if (!snap || !needsTraffic(snap, now)) continue;
-    const ends = tripEnds(snap);
-    const tr = ends ? await fetchRatio({ lat: ends.a.lat, lng: ends.a.lon }, { lat: ends.b.lat, lng: ends.b.lon }, snap.startTime) : null;
-    const all = loadDrives();
-    const d = all.find(x => x.startTime === id);
-    if (!d || !needsTraffic(d, now)) continue;                // changed while we waited
-    if (ends && !tr){                                         // Mapbox failed: retry next launch, a few times
+  for (const d of all){
+    if (!found.has(d.startTime) || !needsTraffic(d, now)) continue;
+    const tr = found.get(d.startTime);
+    if (tr === undefined){                                    // Mapbox failed: retry next launch, a few times
       d.trafficTries = (d.trafficTries || 0) + 1;
-      if (d.trafficTries >= MAX_TRIES){ d.traffic = null; applyAnalysis(d, analyzeDrive(d)); }
-      saveDrives(all);
-      continue;
+      if (d.trafficTries < MAX_TRIES) continue;
     }
-    const before = d.score;
     const usable = tr && tr.freeSec >= TRAFFIC_MIN_FREE_SEC;
-    d.traffic = usable ? { ...tr, estimated: true, at: now } : null;   // null = a loop or a hop, nothing to price
+    const before = d.score;
+    d.traffic = usable ? { ...tr, estimated: true, at: now } : null;   // null = a loop, a hop, or unroutable
     delete d.trafficTries;
     applyAnalysis(d, analyzeDrive(d));                        // also clears an old-yardstick reading's effect
     if (usable){
-      applyAnalysis(d, analyzeDrive(d));
       estimated++;
       if (before != null && d.score !== before){ changed++; delta += d.score - before; }
     }
-    saveDrives(all);
   }
+  saveDrives(all);
   if (estimated) recomputeLifetimeScore();
-  return { checked: todo.length, estimated, changed, avgDelta: changed ? +(delta / changed).toFixed(1) : 0 };
+  return { checked: found.size, estimated, changed, avgDelta: changed ? +(delta / changed).toFixed(1) : 0 };
 }
