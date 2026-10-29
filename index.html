@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Smooth AF">
-<meta name="theme-color" content="#0A0808">
+<meta name="theme-color" content="#0B0B0C">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <title>Smooth AF — Driving</title>
@@ -82,8 +82,8 @@
     <div class="home-sparkline">
       <div class="home-sparkline-label">Driving Trends</div>
       <svg id="home-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline id="home-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-        <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#E8501A"/>
+        <polyline id="home-sparkline-line" points="" stroke="rgba(242,241,238,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <circle id="home-sparkline-dot" cx="0" cy="0" r="0" fill="#FF6A3D"/>
       </svg>
     </div>
 
@@ -149,12 +149,12 @@
     <svg class="rec-texture" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
       <defs>
         <pattern id="rec-diag-gray" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="0" x2="18" y2="18" stroke="rgba(244,235,217,.022)" stroke-width="0.5"/>
-          <line x1="18" y1="0" x2="0" y2="18" stroke="rgba(244,235,217,.022)" stroke-width="0.5"/>
+          <line x1="0" y1="0" x2="18" y2="18" stroke="rgba(242,241,238,.022)" stroke-width="0.5"/>
+          <line x1="18" y1="0" x2="0" y2="18" stroke="rgba(242,241,238,.022)" stroke-width="0.5"/>
         </pattern>
         <pattern id="rec-diag-green" x="0" y="0" width="126" height="126" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="0" x2="126" y2="126" stroke="rgba(90,158,82,.20)" stroke-width="1"/>
-          <line x1="126" y1="0" x2="0" y2="126" stroke="rgba(90,158,82,.20)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="126" y2="126" stroke="rgba(63,196,106,.20)" stroke-width="1"/>
+          <line x1="126" y1="0" x2="0" y2="126" stroke="rgba(63,196,106,.20)" stroke-width="1"/>
         </pattern>
       </defs>
       <rect width="390" height="844" fill="url(#rec-diag-gray)"/>
@@ -263,23 +263,23 @@
         <svg width="268" height="268" viewBox="0 0 268 268" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="rzone-brake" cx="50%" cy="100%" r="60%"><stop offset="0%" stop-color="rgba(201,56,40,.07)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            <radialGradient id="rzone-accel" cx="50%" cy="0%"   r="60%"><stop offset="0%" stop-color="rgba(90,158,82,.07)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            <radialGradient id="rzone-left"  cx="0%"  cy="50%"  r="60%"><stop offset="0%" stop-color="rgba(196,169,98,.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            <radialGradient id="rzone-right" cx="100%" cy="50%" r="60%"><stop offset="0%" stop-color="rgba(196,169,98,.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <radialGradient id="rzone-accel" cx="50%" cy="0%"   r="60%"><stop offset="0%" stop-color="rgba(63,196,106,.07)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <radialGradient id="rzone-left"  cx="0%"  cy="50%"  r="60%"><stop offset="0%" stop-color="rgba(255,178,61,.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <radialGradient id="rzone-right" cx="100%" cy="50%" r="60%"><stop offset="0%" stop-color="rgba(255,178,61,.05)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
           </defs>
           <circle cx="134" cy="134" r="132" fill="url(#rzone-brake)"/>
           <circle cx="134" cy="134" r="132" fill="url(#rzone-accel)"/>
           <circle cx="134" cy="134" r="132" fill="url(#rzone-left)"/>
           <circle cx="134" cy="134" r="132" fill="url(#rzone-right)"/>
-          <circle cx="134" cy="134" r="132" stroke="rgba(90,158,82,.28)" stroke-width="1.5"/>
-          <circle cx="134" cy="134" r="88"  stroke="rgba(90,158,82,.13)" stroke-width="1"/>
-          <circle cx="134" cy="134" r="44"  stroke="rgba(90,158,82,.07)" stroke-width="1"/>
-          <line x1="4"   y1="134" x2="264" y2="134" stroke="rgba(242,232,213,.07)" stroke-width="0.5"/>
-          <line x1="134" y1="4"   x2="134" y2="264" stroke="rgba(242,232,213,.07)" stroke-width="0.5"/>
-          <text x="134" y="16"  font-family="system-ui" font-size="8" fill="rgba(90,158,82,.55)"  text-anchor="middle" letter-spacing="2">ACCEL</text>
-          <text x="134" y="260" font-family="system-ui" font-size="8" fill="rgba(201,56,40,.45)" text-anchor="middle" letter-spacing="2">BRAKE</text>
-          <text x="12"  y="138" font-family="system-ui" font-size="8" fill="rgba(196,169,98,.35)" text-anchor="middle" letter-spacing="1">L</text>
-          <text x="256" y="138" font-family="system-ui" font-size="8" fill="rgba(196,169,98,.35)" text-anchor="middle" letter-spacing="1">R</text>
+          <circle cx="134" cy="134" r="132" stroke="rgba(63,196,106,.28)" stroke-width="1.5"/>
+          <circle cx="134" cy="134" r="88"  stroke="rgba(63,196,106,.13)" stroke-width="1"/>
+          <circle cx="134" cy="134" r="44"  stroke="rgba(63,196,106,.07)" stroke-width="1"/>
+          <line x1="4"   y1="134" x2="264" y2="134" stroke="rgba(242,241,238,.07)" stroke-width="0.5"/>
+          <line x1="134" y1="4"   x2="134" y2="264" stroke="rgba(242,241,238,.07)" stroke-width="0.5"/>
+          <text x="134" y="16"  font-family="JetBrains Mono, ui-monospace, monospace" font-size="8" fill="rgba(63,196,106,.55)"  text-anchor="middle" letter-spacing="2">ACCEL</text>
+          <text x="134" y="260" font-family="JetBrains Mono, ui-monospace, monospace" font-size="8" fill="rgba(201,56,40,.45)" text-anchor="middle" letter-spacing="2">BRAKE</text>
+          <text x="12"  y="138" font-family="JetBrains Mono, ui-monospace, monospace" font-size="8" fill="rgba(255,178,61,.35)" text-anchor="middle" letter-spacing="1">L</text>
+          <text x="256" y="138" font-family="JetBrains Mono, ui-monospace, monospace" font-size="8" fill="rgba(255,178,61,.35)" text-anchor="middle" letter-spacing="1">R</text>
         </svg>
         <div class="g-radar-dot" id="g-radar-dot"></div>
         <div class="burst b-brake" id="burst-brake"></div>
@@ -306,8 +306,8 @@
     <label style="display:none"><input type="file" accept="image/*" id="rec-photo-input"></label>
     <div class="arc-gauge-wrap" aria-hidden="true">
       <svg class="arc-svg" id="arc-svg" viewBox="0 0 300 215" width="300" height="215" xmlns="http://www.w3.org/2000/svg">
-        <path id="arc-track" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(244,235,217,.1)" stroke-width="2.5" stroke-linecap="round"/>
-        <path id="arc-progress" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(244,235,217,.9)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="499.2" stroke-dashoffset="0"/>
+        <path id="arc-track" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(242,241,238,.1)" stroke-width="2.5" stroke-linecap="round"/>
+        <path id="arc-progress" d="M 27.84 194.46 A 130 130 0 1 1 272.16 194.46" fill="none" stroke="rgba(242,241,238,.9)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="499.2" stroke-dashoffset="0"/>
       </svg>
     </div>
 
@@ -350,10 +350,10 @@
         <button id="btn-back" class="back-btn" aria-label="Back">×</button>
       </div>
       <div class="legend">
-        <div class="lg-row"><div class="lg-sw" style="background:#6FB669"></div><span>Coast</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#3FC46A"></div><span>Coast</span></div>
         <div class="lg-row"><div class="lg-sw" style="background:#E03B2F"></div><span>Brake</span></div>
-        <div class="lg-row"><div class="lg-sw" style="background:#E8A03A"></div><span>Accel</span></div>
-        <div class="lg-row"><div class="lg-sw" style="background:#C4A962"></div><span>Turn</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#E8B83A"></div><span>Accel</span></div>
+        <div class="lg-row"><div class="lg-sw" style="background:#FFB23D"></div><span>Turn</span></div>
       </div>
       <button class="map-expand-btn" id="btn-map-expand" aria-label="Expand map">⤢</button>
       <div class="map-filter-badge" id="map-filter-badge">
@@ -669,7 +669,7 @@
         <span class="corridor-sparkline-trend" id="corridor-trend"></span>
       </div>
       <svg id="corridor-sparkline-svg" width="100%" height="52" viewBox="0 0 342 52" fill="none" preserveAspectRatio="none">
-        <polyline id="corridor-sparkline-line" points="" stroke="rgba(242,232,213,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <polyline id="corridor-sparkline-line" points="" stroke="rgba(242,241,238,0.4)" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
         <g id="corridor-sparkline-dots"></g>
       </svg>
     </div>

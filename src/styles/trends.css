@@ -7,14 +7,14 @@
 .trends-topbar{display:flex; align-items:center; gap:12px; margin-bottom:18px}
 .trends-back-btn{
   flex:0 0 auto; width:40px; height:40px; border-radius:12px;
-  background:var(--bg2); border:1px solid rgba(242,232,213,.10);
+  background:var(--bg2); border:1px solid rgba(242,241,238,.10);
   color:var(--cream); font-size:24px; line-height:1; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
   -webkit-tap-highlight-color:transparent;
 }
 .trends-back-btn:active{background:var(--ink)}
 .trends-title{
-  font-family:var(--serif); font-style:italic; font-weight:700;
+  font-family:var(--serif);  font-weight:700;
   font-size:24px; color:var(--cream); letter-spacing:-.01em; margin-right:auto;
 }
 .trends-window{font-size:12px; color:var(--muted); letter-spacing:.02em; white-space:nowrap}
@@ -27,20 +27,20 @@
 .trends-metrics::-webkit-scrollbar{display:none}
 .trends-chip{
   flex:0 0 auto; padding:9px 15px; border-radius:999px;
-  background:var(--bg2); border:1px solid rgba(242,232,213,.10);
+  background:var(--bg2); border:1px solid rgba(242,241,238,.10);
   color:var(--cream-dim); font:600 13px/1 var(--sans); white-space:nowrap; cursor:pointer;
   -webkit-tap-highlight-color:transparent; transition:background .14s, color .14s, border-color .14s;
 }
 .trends-chip:active{transform:translateY(1px)}
-.trends-chip.on{background:rgba(232,93,58,.16); color:var(--tang); border-color:rgba(232,93,58,.4)}
+.trends-chip.on{background:rgba(255,106,61,.16); color:var(--tang); border-color:rgba(255,106,61,.4)}
 
 .trends-chart-card{
-  background:var(--bg2); border:1px solid rgba(242,232,213,.09);
+  background:var(--bg2); border:1px solid rgba(242,241,238,.09);
   border-radius:18px; padding:18px 16px 8px;
 }
 .trends-chart-hd{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px}
 .trends-metric-name{
-  font-family:var(--serif); font-style:italic; font-weight:700; font-size:19px; color:var(--cream);
+  font-family:var(--serif);  font-weight:700; font-size:19px; color:var(--cream);
 }
 .trends-trend{font:700 12px/1 var(--sans); letter-spacing:.02em; display:flex; align-items:center; gap:4px}
 .trends-trend.up{color:var(--good)}
@@ -59,17 +59,16 @@
 
 .trends-summary{
   display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:16px;
-  background:rgba(242,232,213,.09); border:1px solid rgba(242,232,213,.09);
+  background:rgba(242,241,238,.09); border:1px solid rgba(242,241,238,.09);
   border-radius:16px; overflow:hidden;
 }
 .trends-sum{background:var(--bg2); padding:16px 12px; text-align:center}
 .trends-sum .v{
-  font-family:var(--serif); font-style:italic; font-weight:700; font-size:26px;
+  font-family:var(--serif);  font-weight:700; font-size:26px;
   color:var(--cream); font-variant-numeric:tabular-nums; line-height:1;
 }
 .trends-sum .l{
-  margin-top:8px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
-}
+  margin-top:8px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);font-family:var(--mono)}
 
 /* The home sparkline is now a doorway — make it read as tappable. */
 .home-sparkline{cursor:pointer; -webkit-tap-highlight-color:transparent}

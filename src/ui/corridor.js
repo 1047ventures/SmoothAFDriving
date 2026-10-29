@@ -91,7 +91,7 @@ export function renderCorridor(corridorId){
         const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         dot.setAttribute('cx', c.x); dot.setAttribute('cy', c.y);
         dot.setAttribute('r', isLast ? '4' : '3');
-        dot.setAttribute('fill', isLast ? '#E8501A' : 'rgba(242,232,213,0.5)');
+        dot.setAttribute('fill', isLast ? '#FF6A3D' : 'rgba(242,241,238,0.5)');
         sparkDots.appendChild(dot);
       });
     }
@@ -103,7 +103,7 @@ export function renderCorridor(corridorId){
       trendEl.textContent = Math.abs(delta) < 5
         ? `Holding steady at ${vals[vals.length - 1]}`
         : `${delta > 0 ? '↑' : '↓'} ${delta > 0 ? '+' : ''}${delta} pts`;
-      trendEl.style.color = delta >= 5 ? 'rgba(90,158,82,.9)' : delta <= -5 ? 'rgba(224,59,47,.8)' : 'rgba(242,232,213,.4)';
+      trendEl.style.color = delta >= 5 ? 'rgba(63,196,106,.9)' : delta <= -5 ? 'rgba(224,59,47,.8)' : 'rgba(242,241,238,.4)';
     }
   }
 

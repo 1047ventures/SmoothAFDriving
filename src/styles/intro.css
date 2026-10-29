@@ -7,7 +7,7 @@
 .intro-overlay{
   position:fixed; inset:0; z-index:120;
   background:var(--bg);
-  background-image:radial-gradient(120% 68% at 50% 0%, rgba(232,93,58,.12), transparent 60%);
+  background-image:radial-gradient(120% 68% at 50% 0%, rgba(255,106,61,.12), transparent 60%);
   display:flex; flex-direction:column;
   font-family:var(--sans); color:var(--cream);
   overflow:hidden;
@@ -19,7 +19,7 @@
 .intro-skip{
   position:absolute; top:calc(env(safe-area-inset-top,0px) + 12px); right:12px; z-index:4;
   background:none; border:0; color:var(--muted); cursor:pointer;
-  font:600 11px/1 var(--sans); letter-spacing:.16em; text-transform:uppercase; padding:12px;
+  font:600 11px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase; padding:12px;
   -webkit-tap-highlight-color:transparent;
 }
 .intro-skip:active{color:var(--cream-dim)}
@@ -45,7 +45,7 @@
 .intro-art{height:220px; display:flex; align-items:center; justify-content:center; position:relative}
 .intro-copy{display:flex; flex-direction:column; gap:12px; align-items:center}
 .intro-h{
-  font-family:var(--serif); font-style:italic; font-weight:700;
+  font-family:var(--serif);  font-weight:700;
   font-size:clamp(30px,8.5vw,44px); line-height:1.02; margin:0; letter-spacing:-.015em;
   text-wrap:balance; max-width:12ch; color:var(--cream);
 }
@@ -56,23 +56,23 @@
 /* ── Slide 1 · the score ──────────────────────────────────────────────────*/
 .intro-glow{
   position:absolute; width:230px; height:230px; border-radius:50%;
-  background:radial-gradient(circle, rgba(232,93,58,.30), transparent 62%);
+  background:radial-gradient(circle, rgba(255,106,61,.30), transparent 62%);
   filter:blur(6px);
 }
 .intro-score{
-  font-family:var(--serif); font-style:italic; font-weight:800;
+  font-family:var(--serif);  font-weight:800;
   font-size:150px; line-height:1; color:var(--cream); position:relative; z-index:2;
   font-variant-numeric:tabular-nums; text-shadow:0 6px 40px rgba(0,0,0,.5);
 }
 .intro-cap{
   position:relative; z-index:2; align-self:flex-end; margin-bottom:26px; margin-left:4px;
-  font-family:var(--serif); font-style:italic; font-size:22px; color:var(--gold);
+  font-family:var(--serif);  font-size:22px; color:var(--gold);
 }
 
 /* ── Slide 2 · the live edge glow ─────────────────────────────────────────*/
 .intro-phone{
   position:relative; width:118px; height:212px; border-radius:22px;
-  background:var(--bg2); border:1px solid rgba(242,232,213,.12);
+  background:var(--bg2); border:1px solid rgba(242,241,238,.12);
   box-shadow:0 20px 50px rgba(0,0,0,.5);
 }
 .intro-phone .edge{position:absolute; border-radius:6px; opacity:.95}
@@ -86,11 +86,11 @@
   background:var(--gold); box-shadow:0 0 16px 3px var(--gold)}
 .intro-phone .glyph{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:var(--serif); font-style:italic; font-weight:800; font-size:52px; color:var(--cream-dim);
+  font-family:var(--serif);  font-weight:800; font-size:52px; color:var(--cream-dim);
 }
 .intro-edge-labels{position:absolute; inset:-30px; pointer-events:none}
 .intro-edge-labels span{
-  position:absolute; font:700 9px/1 var(--sans); letter-spacing:.16em; text-transform:uppercase;
+  position:absolute; font:700 9px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase;
 }
 .intro-edge-labels .l-top{top:-6px; left:50%; transform:translateX(-50%); color:var(--danger)}
 .intro-edge-labels .l-bottom{bottom:-6px; left:50%; transform:translateX(-50%); color:var(--good)}
@@ -101,48 +101,48 @@
 .intro-mphone{
   position:absolute; left:50%; top:6px; transform:translateX(-50%) rotate(-7deg);
   width:96px; height:150px; border-radius:16px;
-  background:var(--bg2); border:1px solid rgba(242,232,213,.14);
+  background:var(--bg2); border:1px solid rgba(242,241,238,.14);
   box-shadow:0 16px 34px rgba(0,0,0,.5);
 }
 .intro-mphone::after{ /* a little live-score tick on the mounted phone */
   content:"92"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:var(--serif); font-style:italic; font-weight:800; font-size:34px; color:var(--gold);
+  font-family:var(--serif);  font-weight:800; font-size:34px; color:var(--gold);
 }
 .intro-mbase{
   position:absolute; left:50%; bottom:0; transform:translateX(-50%);
   width:120px; height:26px; border-radius:0 0 40px 40px / 0 0 26px 26px;
-  background:linear-gradient(180deg,#241b19,#150f0e); border:1px solid rgba(242,232,213,.08);
+  background:linear-gradient(180deg,#241b19,#161618); border:1px solid rgba(242,241,238,.08);
 }
 .intro-mbase::before{
   content:""; position:absolute; left:50%; top:-16px; transform:translateX(-50%);
-  width:14px; height:22px; border-radius:4px; background:#150f0e; border:1px solid rgba(242,232,213,.08);
+  width:14px; height:22px; border-radius:4px; background:#161618; border:1px solid rgba(242,241,238,.08);
 }
 
 /* ── Slide 4 · permission prime ───────────────────────────────────────────*/
 .intro-badge{
   width:118px; height:118px; border-radius:50%;
-  background:radial-gradient(circle at 50% 34%, rgba(232,93,58,.22), rgba(232,93,58,.06));
-  border:1.5px solid rgba(232,93,58,.5);
+  background:radial-gradient(circle at 50% 34%, rgba(255,106,61,.22), rgba(255,106,61,.06));
+  border:1.5px solid rgba(255,106,61,.5);
   display:flex; align-items:center; justify-content:center;
-  color:var(--tang); font-size:52px; box-shadow:0 0 40px rgba(232,93,58,.22);
+  color:var(--tang); font-size:52px; box-shadow:0 0 40px rgba(255,106,61,.22);
 }
 
 /* ── Footer: progress dots + primary action ───────────────────────────────*/
 .intro-foot{flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:20px; padding:0 34px}
 .intro-dots{display:flex; gap:9px}
 .intro-dots i{
-  width:7px; height:7px; border-radius:50%; background:rgba(242,232,213,.22);
+  width:7px; height:7px; border-radius:50%; background:rgba(242,241,238,.22);
   transition:width .3s ease, background .3s ease;
 }
 .intro-dots i.on{width:22px; border-radius:5px; background:var(--tang)}
 .intro-next{
   width:100%; max-width:420px; min-height:54px; border:0; border-radius:15px;
-  background:var(--tang); color:#160b08; cursor:pointer;
+  background:var(--tang); color:#161618; cursor:pointer;
   font:700 16px/1 var(--sans); letter-spacing:.01em;
   -webkit-tap-highlight-color:transparent; transition:transform .12s ease, filter .12s ease;
 }
 .intro-next:active{transform:translateY(1px); filter:brightness(.94)}
-.intro-next.cta{box-shadow:0 10px 30px rgba(232,93,58,.32)}
+.intro-next.cta{box-shadow:0 10px 30px rgba(255,106,61,.32)}
 
 @media(prefers-reduced-motion:reduce){
   .intro-overlay,.intro-slide,.intro-dots i,.intro-next{transition:none}

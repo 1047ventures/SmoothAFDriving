@@ -516,7 +516,7 @@ export function renderReview(drive){
 // Momentum line — smoothness score across the drive (the recap narrative)
 // -------------------------------------------------------------------------
 function momentumColor(score){
-  return score >= 88 ? '#6FB669' : score >= 72 ? '#E8A03A' : '#E03B2F';
+  return score >= 88 ? '#3FC46A' : score >= 72 ? '#E8B83A' : '#E03B2F';
 }
 
 function renderMomentum(drive, analysis){
@@ -547,7 +547,7 @@ function renderMomentum(drive, analysis){
     const y = v => H - pad - (clamp(v, 0, 100) / 100) * (H - pad * 2);
 
     // Gridlines at 50 / 90
-    ctx.strokeStyle = 'rgba(244,235,217,.08)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(242,241,238,.08)'; ctx.lineWidth = 1;
     [50, 90].forEach(v => { ctx.beginPath(); ctx.moveTo(pad, y(v)); ctx.lineTo(W - pad, y(v)); ctx.stroke(); });
 
     // Gradient fill under the line
@@ -606,7 +606,7 @@ function buildAnalysisSheet(drive, analysis, verdict, vColor){
       return `<div class="as-peak-row">
         <div class="as-peak-label">${r.label}</div>
         <div class="as-peak-nums">
-          <span class="as-peak-val" style="color:${hasPeak ? r.color : 'rgba(242,232,213,.2)'}">${hasPeak ? r.peak + 'G' : '—'}</span>
+          <span class="as-peak-val" style="color:${hasPeak ? r.color : 'rgba(242,241,238,.2)'}">${hasPeak ? r.peak + 'G' : '—'}</span>
           ${hasPeak && r.avg ? `<span class="as-peak-avg">avg ${r.avg}G</span>` : ''}
         </div>
         ${hasPeak && r.ev ? `<button class="as-map-btn" data-lat="${r.ev.lat}" data-lon="${r.ev.lon}">map ›</button>` : '<div></div>'}
@@ -748,13 +748,13 @@ export function renderForceTimeline(drive){
     ctx.clearRect(0, 0, W, H);
 
     // Subtle zone backgrounds
-    ctx.fillStyle = 'rgba(232,160,58,.05)';
+    ctx.fillStyle = 'rgba(232,184,58,.05)';
     ctx.fillRect(0, 0, W, zero);            // upper = accel zone
     ctx.fillStyle = 'rgba(224,59,47,.05)';
     ctx.fillRect(0, zero, W, H - zero);    // lower = brake zone
 
     // Zero line
-    ctx.strokeStyle = 'rgba(244,235,217,.18)';
+    ctx.strokeStyle = 'rgba(242,241,238,.18)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, zero); ctx.lineTo(W, zero); ctx.stroke();
 
@@ -765,8 +765,8 @@ export function renderForceTimeline(drive){
     ctx.lineTo(tx(smp[smp.length-1].t), zero);
     ctx.closePath();
     const aGrad = ctx.createLinearGradient(0, 0, 0, zero);
-    aGrad.addColorStop(0, 'rgba(232,160,58,.6)');
-    aGrad.addColorStop(1, 'rgba(232,160,58,.08)');
+    aGrad.addColorStop(0, 'rgba(232,184,58,.6)');
+    aGrad.addColorStop(1, 'rgba(232,184,58,.08)');
     ctx.fillStyle = aGrad;
     ctx.fill();
 
@@ -788,7 +788,7 @@ export function renderForceTimeline(drive){
       const x = tx(s.t), y = ty(s.la || 0);
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
-    ctx.strokeStyle = 'rgba(244,235,217,.4)';
+    ctx.strokeStyle = 'rgba(242,241,238,.4)';
     ctx.lineWidth   = 1.5;
     ctx.lineJoin    = 'round';
     ctx.stroke();
@@ -799,7 +799,7 @@ export function renderForceTimeline(drive){
       const x = tx(s.t), y = ty(s.ra || 0);
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
-    ctx.strokeStyle = 'rgba(196,169,98,.55)';
+    ctx.strokeStyle = 'rgba(255,178,61,.55)';
     ctx.lineWidth   = 1;
     ctx.lineJoin    = 'round';
     ctx.stroke();
@@ -811,7 +811,7 @@ export function renderForceTimeline(drive){
       const x       = tx(e.t);
       const opacity = isExtreme ? 1.0 : 0.6;
       const tickH   = isExtreme ? H * 0.30 : H * 0.18;
-      const color   = e.type === 'brake' ? `rgba(224,59,47,${opacity})` : e.type === 'accel' ? `rgba(232,160,58,${opacity})` : `rgba(196,169,98,${opacity})`;
+      const color   = e.type === 'brake' ? `rgba(224,59,47,${opacity})` : e.type === 'accel' ? `rgba(232,184,58,${opacity})` : `rgba(255,178,61,${opacity})`;
       ctx.strokeStyle = color;
       ctx.lineWidth   = isExtreme ? 1.5 : 1;
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, tickH); ctx.stroke();
@@ -906,7 +906,7 @@ function drawBrakeSparkline(canvas, slice, eventT, minLa, maxLa){
   const zero = ty(0);
 
   // Zero baseline
-  ctx.strokeStyle = 'rgba(244,235,217,.14)';
+  ctx.strokeStyle = 'rgba(242,241,238,.14)';
   ctx.lineWidth   = 1;
   ctx.beginPath(); ctx.moveTo(0, zero); ctx.lineTo(W, zero); ctx.stroke();
 

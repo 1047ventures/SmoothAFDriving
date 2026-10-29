@@ -51,14 +51,14 @@ function openHandlesModal(){
 }
 
 async function ensureFontLoaded(){
-  try { await document.fonts.load('italic 700 64px "Playfair Display"'); } catch {}
+  try { await document.fonts.load('800 64px "Barlow Condensed"'); } catch {}
 }
 
 function drawBackground(ctx, SIZE, accentColor){
   ctx.fillStyle = '#0D0A09';
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  ctx.strokeStyle = 'rgba(244,235,217,0.022)';
+  ctx.strokeStyle = 'rgba(242,241,238,0.022)';
   ctx.lineWidth = 0.5;
   for (let i = -SIZE; i < SIZE * 2; i += 22){
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + SIZE, SIZE); ctx.stroke();
@@ -75,7 +75,7 @@ function drawBackground(ctx, SIZE, accentColor){
 
 export function buildShareCanvas(drive, analysis){
   const score = analysis.score || 0;
-  const accentColor = score >= 90 ? '#5A9E52' : score >= 75 ? '#E8A03A' : '#E03B2F';
+  const accentColor = score >= 90 ? '#3FC46A' : score >= 75 ? '#E8B83A' : '#E03B2F';
   const verdict = drivingStyleVerdict(analysis, drive);
 
   const SIZE = 1080;
@@ -87,8 +87,8 @@ export function buildShareCanvas(drive, analysis){
   drawBackground(ctx, SIZE, accentColor);
 
   // Brand
-  ctx.font = 'italic 700 52px "Playfair Display", Georgia, serif';
-  ctx.fillStyle = 'rgba(244,235,217,0.92)';
+  ctx.font = '800 52px "Barlow Condensed", "Arial Narrow", sans-serif';
+  ctx.fillStyle = 'rgba(242,241,238,0.92)';
   ctx.textAlign = 'left';
   ctx.fillText('Smooth AF', 80, 110);
 
@@ -97,7 +97,7 @@ export function buildShareCanvas(drive, analysis){
   const dateStr = when.toLocaleDateString([], { month:'short', day:'numeric', year:'numeric' }) +
     ' · ' + when.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
   ctx.font = '400 26px -apple-system, Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(244,235,217,0.3)';
+  ctx.fillStyle = 'rgba(242,241,238,0.3)';
   ctx.textAlign = 'left';
   ctx.fillText(dateStr, 80, 156);
 
@@ -105,14 +105,14 @@ export function buildShareCanvas(drive, analysis){
   const sg = ctx.createLinearGradient(SIZE/2 - 200, 180, SIZE/2 + 200, 520);
   sg.addColorStop(0, '#F4EBD9');
   sg.addColorStop(1, accentColor);
-  ctx.font = 'italic 700 340px "Playfair Display", Georgia, serif';
+  ctx.font = '800 340px "Barlow Condensed", "Arial Narrow", sans-serif';
   ctx.fillStyle = sg;
   ctx.textAlign = 'center';
   ctx.fillText(String(score), SIZE / 2, 490);
 
   // Letter grade
   const grade = analysis.letterGrade || '—';
-  ctx.font = 'italic 700 80px "Playfair Display", Georgia, serif';
+  ctx.font = '800 80px "Barlow Condensed", "Arial Narrow", sans-serif';
   ctx.fillStyle = accentColor;
   ctx.textAlign = 'center';
   ctx.fillText(grade, SIZE / 2, 588);
@@ -120,7 +120,7 @@ export function buildShareCanvas(drive, analysis){
   // Verdict label
   if (verdict?.label){
     ctx.font = '400 32px -apple-system, Inter, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.5)';
+    ctx.fillStyle = 'rgba(242,241,238,0.5)';
     ctx.textAlign = 'center';
     ctx.fillText(verdict.label, SIZE / 2, 650);
   }
@@ -140,16 +140,16 @@ export function buildShareCanvas(drive, analysis){
 
   stats.forEach((s, i) => {
     const cx = x0 + colW * i + colW / 2;
-    ctx.font = 'italic 700 54px "Playfair Display", Georgia, serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.92)';
+    ctx.font = '800 54px "Barlow Condensed", "Arial Narrow", sans-serif';
+    ctx.fillStyle = 'rgba(242,241,238,0.92)';
     ctx.textAlign = 'center';
     ctx.fillText(s.val, cx, rowY);
     ctx.font = '400 22px -apple-system, Inter, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.35)';
+    ctx.fillStyle = 'rgba(242,241,238,0.35)';
     ctx.fillText(s.lbl.toUpperCase(), cx, rowY + 38);
   });
 
-  ctx.strokeStyle = 'rgba(244,235,217,0.12)';
+  ctx.strokeStyle = 'rgba(242,241,238,0.12)';
   ctx.lineWidth = 1;
   for (let i = 1; i < 3; i++){
     const x = x0 + colW * i;
@@ -160,14 +160,14 @@ export function buildShareCanvas(drive, analysis){
   const displayHandle = getDisplayHandle() || loadDriverName();
   if (displayHandle){
     ctx.font = '400 28px -apple-system, Inter, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(244,235,217,0.42)';
+    ctx.fillStyle = 'rgba(242,241,238,0.42)';
     ctx.textAlign = 'center';
     ctx.fillText(displayHandle, SIZE / 2, 888);
   }
 
   // Watermark
   ctx.font = '400 22px -apple-system, Inter, Arial, sans-serif';
-  ctx.fillStyle = 'rgba(244,235,217,0.18)';
+  ctx.fillStyle = 'rgba(242,241,238,0.18)';
   ctx.textAlign = 'center';
   ctx.fillText('smoothafdriving.com', SIZE / 2, 1034);
 

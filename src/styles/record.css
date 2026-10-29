@@ -1,5 +1,5 @@
   /* ============ RECORDING ============ */
-  #screen-record{background:#060404;overflow:hidden;padding:0}
+  #screen-record{background:#060607;overflow:hidden;padding:0}
   .rec-bg{
     position:absolute;inset:0;z-index:0;
     background-size:cover;background-position:center 30%;background-repeat:no-repeat;
@@ -8,10 +8,10 @@
   }
   .rec-overlay{
     position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg,rgba(4,2,2,.92) 0%,rgba(4,2,2,.12) 24%,rgba(4,2,2,0) 44%,rgba(4,2,2,0) 54%,rgba(4,2,2,.92) 100%);
+    background:linear-gradient(180deg,rgba(5,5,6,.92) 0%,rgba(5,5,6,.12) 24%,rgba(5,5,6,0) 44%,rgba(5,5,6,0) 54%,rgba(5,5,6,.92) 100%);
   }
   /* Top strip */  .rec-dot{width:7px;height:7px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
-  @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 8px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
+  @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(255,106,61,.6)}70%{box-shadow:0 0 0 8px rgba(255,106,61,0)}100%{box-shadow:0 0 0 0 rgba(255,106,61,0)}}
   /* Center gauge zone */
   /* SVG arc gauge */
   .arc-gauge-wrap{position:relative;width:min(88vw,310px);aspect-ratio:300/215;flex-shrink:0}
@@ -23,16 +23,16 @@
   /* Bottom stats: pipe-accented corners */
   /* G-force radar crosshair */
   .g-radar{position:relative;width:54px;height:54px;flex-shrink:0;margin-top:2px}
-  .g-radar-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(244,235,217,.16)}
-  .g-radar-ring2{position:absolute;inset:28%;border-radius:50%;border:1px solid rgba(244,235,217,.07)}
-  .g-radar-h{position:absolute;top:50%;left:6px;right:6px;height:1px;background:rgba(244,235,217,.09);transform:translateY(-50%)}
-  .g-radar-v{position:absolute;left:50%;top:6px;bottom:6px;width:1px;background:rgba(244,235,217,.09);transform:translateX(-50%)}
+  .g-radar-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(242,241,238,.16)}
+  .g-radar-ring2{position:absolute;inset:28%;border-radius:50%;border:1px solid rgba(242,241,238,.07)}
+  .g-radar-h{position:absolute;top:50%;left:6px;right:6px;height:1px;background:rgba(242,241,238,.09);transform:translateY(-50%)}
+  .g-radar-v{position:absolute;left:50%;top:6px;bottom:6px;width:1px;background:rgba(242,241,238,.09);transform:translateX(-50%)}
   .g-radar-dot{
     position:absolute;width:10px;height:10px;border-radius:50%;
-    background:rgba(244,235,217,.95);
+    background:rgba(242,241,238,.95);
     top:50%;left:50%;transform:translate(-50%,-50%);
     transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s;
-    box-shadow:0 0 8px rgba(244,235,217,.55);
+    box-shadow:0 0 8px rgba(242,241,238,.55);
   }
 
   /* Off-screen needle (JS compat) */
@@ -46,15 +46,15 @@
   /* Event flashes */  @keyframes flash-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes flash-out{to{opacity:0;transform:scale(.95)}}
   /* Stop button */
-  .stop-btn{position:absolute;z-index:5;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-style:italic;font-weight:700;font-size:22px;padding:16px;border-radius:16px;box-shadow:0 8px 28px rgba(244,235,217,.12);transition:transform .1s ease}
+  .stop-btn{position:absolute;z-index:5;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);appearance:none;border:0;cursor:pointer;background:var(--cream);color:var(--bg);font-family:var(--serif);font-weight:700;font-size:22px;padding:16px;border-radius:16px;box-shadow:0 8px 28px rgba(242,241,238,.12);transition:transform .1s ease}
   .stop-btn:active{transform:scale(.985)}
 
   /* Burst effects */
   .burst{position:absolute;pointer-events:none;opacity:0;border-radius:50%}
   .burst.b-brake{bottom:-18px;left:50%;transform:translateX(-50%);width:90px;height:30px;background:radial-gradient(ellipse,rgba(239,68,68,.95) 0%,transparent 75%)}
-  .burst.b-accel{top:-18px;left:50%;transform:translateX(-50%);width:90px;height:30px;background:radial-gradient(ellipse,rgba(111,182,105,.95) 0%,transparent 75%)}
-  .burst.b-left{left:-18px;top:50%;transform:translateY(-50%);width:30px;height:90px;background:radial-gradient(ellipse,rgba(196,169,98,.9) 0%,transparent 75%)}
-  .burst.b-right{right:-18px;top:50%;transform:translateY(-50%);width:30px;height:90px;background:radial-gradient(ellipse,rgba(196,169,98,.9) 0%,transparent 75%)}
+  .burst.b-accel{top:-18px;left:50%;transform:translateX(-50%);width:90px;height:30px;background:radial-gradient(ellipse,rgba(63,196,106,.95) 0%,transparent 75%)}
+  .burst.b-left{left:-18px;top:50%;transform:translateY(-50%);width:30px;height:90px;background:radial-gradient(ellipse,rgba(255,178,61,.9) 0%,transparent 75%)}
+  .burst.b-right{right:-18px;top:50%;transform:translateY(-50%);width:30px;height:90px;background:radial-gradient(ellipse,rgba(255,178,61,.9) 0%,transparent 75%)}
   @keyframes burst-out{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(2)}}
   @keyframes burst-accel{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(2)}}
   @keyframes burst-side-l{0%{opacity:0;transform:translateY(-50%) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(2)}}
@@ -72,16 +72,18 @@
   .live-g-bar{position:absolute;left:-9999px;top:-9999px}
 
   /* screen base */
-  #screen-record{background:#060404;overflow:hidden;padding:0}
+  #screen-record{background:#060607;overflow:hidden;padding:0}
 
   /* crosshatch texture */
   .rec-texture{position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
 
   /* ambient state glow */
   .rec-glow{position:absolute;inset:0;z-index:1;pointer-events:none;transition:background .4s}
-  #screen-record.smooth  .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(90,158,82,.16) 0%,transparent 65%)}
-  #screen-record.braking .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(201,56,40,.22) 0%,transparent 65%)}
-  #screen-record.accel   .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(232,160,58,.18) 0%,transparent 65%)}
+  /* The screen's edge carries the state: green while smooth, red braking, amber on the throttle */
+  .rec-glow{transition:background .4s,box-shadow .4s}
+  #screen-record.smooth  .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(63,196,106,.12) 0%,transparent 65%);box-shadow:inset 0 0 0 3px rgba(63,196,106,.9),inset 0 0 48px rgba(63,196,106,.35)}
+  #screen-record.braking .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(201,56,40,.18) 0%,transparent 65%);box-shadow:inset 0 0 0 3px rgba(229,72,77,.9),inset 0 0 48px rgba(229,72,77,.4)}
+  #screen-record.accel   .rec-glow{background:radial-gradient(ellipse 90% 70% at 50% 62%,rgba(232,184,58,.14) 0%,transparent 65%);box-shadow:inset 0 0 0 3px rgba(232,184,58,.9),inset 0 0 48px rgba(232,184,58,.35)}
 
   /* Directional G-force edge glows — each edge lights when force pushes that way
      (top=brake, bottom=accel, sides=turns). Colour + opacity set inline from
@@ -96,34 +98,34 @@
   .eg-right {top:0;bottom:0;right:0;width:36%;background:radial-gradient(100% 135% at 100% 50%,var(--eg-col,transparent) 0%,transparent 70%)}
 
   /* vignette */
-  .rec-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(6,4,4,.85) 0%,rgba(6,4,4,.12) 28%,rgba(6,4,4,.05) 50%,rgba(6,4,4,.18) 72%,rgba(6,4,4,.92) 100%)}
+  .rec-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(6,6,7,.85) 0%,rgba(6,6,7,.12) 28%,rgba(6,6,7,.05) 50%,rgba(6,6,7,.18) 72%,rgba(6,6,7,.92) 100%)}
 
   /* top bar */
   .rec-topbar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 18px) 28px 0}
   .rec-indicator{position:static;display:flex;align-items:center;gap:7px}
   .rec-dot{width:8px;height:8px;border-radius:50%;background:var(--tang);animation:rec-pulse 1.6s infinite;flex-shrink:0}
-  @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(232,93,58,.6)}70%{box-shadow:0 0 0 8px rgba(232,93,58,0)}100%{box-shadow:0 0 0 0 rgba(232,93,58,0)}}
-  .rec-source{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.86)}
+  @keyframes rec-pulse{0%{box-shadow:0 0 0 0 rgba(255,106,61,.6)}70%{box-shadow:0 0 0 8px rgba(255,106,61,0)}100%{box-shadow:0 0 0 0 rgba(255,106,61,0)}}
+  .rec-source{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.86)}
   /* destination drive: live pace strip */
   /* Big, translucent, glanceable countdown — floats over the drive, taps pass through */
   .pace-strip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 64px);left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;white-space:nowrap;text-align:center}
   .pace-strip.hidden{display:none}
-  .pace-target{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,235,217,.5)}
-  .pace-target #pace-target-time,#pace-target-time{color:rgba(244,235,217,.62);font-weight:600}
-  .pace-delta{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(30px,9vw,44px);line-height:1.04;letter-spacing:-.02em;color:rgba(244,235,217,.55);transition:color .25s}
+  .pace-target{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.5)}
+  .pace-target #pace-target-time,#pace-target-time{color:rgba(242,241,238,.62);font-weight:600}
+  .pace-delta{font-family:var(--serif);font-weight:700;font-size:clamp(30px,9vw,44px);line-height:1.04;letter-spacing:-.02em;color:rgba(242,241,238,.55);transition:color .25s}
   /* Ahead/behind is carried by colour (+ the ▲/▼ glyph) so the big number stays
      just the clock delta — no "ahead"/"behind" words to overflow the strip. */
-  .pace-delta.ahead {color:rgba(125,196,118,.72)}
-  .pace-delta.behind{color:rgba(232,160,58,.72)}
+  .pace-delta.ahead {color:rgba(63,196,106,.72)}
+  .pace-delta.behind{color:rgba(232,184,58,.72)}
 
   /* Fix 1: "Acquiring GPS…" — subtle pill sitting just under the Score hero
      number, cleared by markGpsAcquired() once the first GPS sample lands */
   .gps-acquiring{
     position:absolute;top:calc(env(safe-area-inset-top,0px) + 76px + 92px);right:20px;z-index:11;
     padding:4px 11px;border-radius:999px;
-    background:rgba(244,235,217,.06);border:1px solid rgba(244,235,217,.14);
-    font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    color:rgba(244,235,217,.86);white-space:nowrap;
+    background:rgba(242,241,238,.06);border:1px solid rgba(242,241,238,.14);
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:rgba(242,241,238,.86);white-space:nowrap;
   }
 
   /* hero numbers */
@@ -132,43 +134,43 @@
      heroes down to make room for it (only when a target is set). */
   #screen-record.has-target .rec-heroes{top:calc(env(safe-area-inset-top,0px) + 150px)}
   .hero-speed{display:flex;flex-direction:column;flex:1 1 0;min-width:0}
-  .hero-num-speed{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(88px,36vw,144px);line-height:.86;letter-spacing:-.05em;color:var(--cream)}
-  .hero-speed-unit{font-family:var(--sans);font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,235,217,.86);margin-top:7px;align-self:flex-end}
-  .hero-slash{font-family:var(--serif);font-style:italic;font-weight:200;font-size:clamp(80px,33vw,130px);line-height:1;color:rgba(244,235,217,.10);align-self:center;margin-top:20px;flex-shrink:0}
+  .hero-num-speed{font-family:var(--serif);font-weight:800;font-size:clamp(88px,36vw,144px);line-height:.86;letter-spacing:-.05em;color:var(--cream)}
+  .hero-speed-unit{font-family:var(--mono);font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.86);margin-top:7px;align-self:flex-end}
+  .hero-slash{display:none}
   .hero-score{display:flex;flex-direction:column;align-items:flex-end;margin-top:44px;flex:1 1 0;min-width:0}
-  .hero-score-lbl{font-family:var(--sans);font-size:11px;letter-spacing:.34em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:3px}
+  .hero-score-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:rgba(242,241,238,.86);text-transform:uppercase;margin-bottom:3px}
   /* colour is set from the score's value by ui/hud.js */
-  .hero-num-score{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(66px,28vw,110px);line-height:.86;letter-spacing:-.04em;transition:color .25s}
+  /* The score wears the brand gradient (hud.js still sets a colour; the gradient fill wins) */
+  .hero-num-score{font-family:var(--serif);font-weight:800;font-size:clamp(66px,28vw,110px);line-height:.86;letter-spacing:-.02em;padding-right:2px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
-  .hero-score-delta{height:18px;margin-top:8px;font-family:var(--sans);font-size:15px;font-weight:700;letter-spacing:.12em;color:rgba(244,235,217,.55);font-variant-numeric:tabular-nums}
-  .hero-score-delta.up{color:rgba(125,196,118,.95)}
+  .hero-score-delta{height:18px;margin-top:8px;font-family:var(--sans);font-size:15px;font-weight:700;letter-spacing:.12em;color:rgba(242,241,238,.55);font-variant-numeric:tabular-nums}
+  .hero-score-delta.up{color:rgba(63,196,106,.95)}
   .hero-score-delta.down{color:rgba(224,96,80,.95)}
 
   /* g-radar */
   /* Replaced by .rec-mid (live insights). Kept in the DOM — flashEvent/updateLiveUI still write to it. */
   .rec-radar{display:none}
   .radar-wrap{width:min(70vw,268px);height:min(70vw,268px);position:relative;transition:filter .35s}
-  #g-radar.state-smooth{filter:drop-shadow(0 0 28px rgba(90,158,82,.45))}
-  #g-radar.state-accel {filter:drop-shadow(0 0 28px rgba(232,160,58,.45))}
+  #g-radar.state-smooth{filter:drop-shadow(0 0 28px rgba(63,196,106,.45))}
+  #g-radar.state-accel {filter:drop-shadow(0 0 28px rgba(232,184,58,.45))}
   #g-radar.state-brake {filter:drop-shadow(0 0 32px rgba(201,56,40,.55))}
   /* Event blast — snaps in fast, fades out slowly via .35s transition on .radar-wrap */
   #g-radar.radar-blast-brake  {filter:drop-shadow(0 0 14px rgba(224,59,47,1)) drop-shadow(0 0 44px rgba(224,59,47,.8)) drop-shadow(0 0 90px rgba(224,59,47,.5));transition:filter .07s}
-  #g-radar.radar-blast-accel  {filter:drop-shadow(0 0 14px rgba(232,160,58,1)) drop-shadow(0 0 44px rgba(232,160,58,.8)) drop-shadow(0 0 80px rgba(232,160,58,.5));transition:filter .07s}
-  #g-radar.radar-blast-turn   {filter:drop-shadow(0 0 14px rgba(196,169,98,1)) drop-shadow(0 0 40px rgba(196,169,98,.8)) drop-shadow(0 0 75px rgba(196,169,98,.5));transition:filter .07s}
+  #g-radar.radar-blast-accel  {filter:drop-shadow(0 0 14px rgba(232,184,58,1)) drop-shadow(0 0 44px rgba(232,184,58,.8)) drop-shadow(0 0 80px rgba(232,184,58,.5));transition:filter .07s}
+  #g-radar.radar-blast-turn   {filter:drop-shadow(0 0 14px rgba(255,178,61,1)) drop-shadow(0 0 40px rgba(255,178,61,.8)) drop-shadow(0 0 75px rgba(255,178,61,.5));transition:filter .07s}
   #g-radar.radar-blast-brake-x{filter:drop-shadow(0 0 20px rgba(224,59,47,1)) drop-shadow(0 0 65px rgba(224,59,47,.9)) drop-shadow(0 0 120px rgba(224,59,47,.65));transition:filter .04s}
-  #g-radar.radar-blast-accel-x{filter:drop-shadow(0 0 20px rgba(232,160,58,1)) drop-shadow(0 0 65px rgba(232,160,58,.9)) drop-shadow(0 0 110px rgba(232,160,58,.65));transition:filter .04s}
-  #g-radar.radar-blast-turn-x {filter:drop-shadow(0 0 20px rgba(196,169,98,1)) drop-shadow(0 0 60px rgba(196,169,98,.9)) drop-shadow(0 0 100px rgba(196,169,98,.65));transition:filter .04s}
-  .g-radar-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(244,235,217,.95);top:50%;left:50%;transform:translate(-50%,-50%);transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s;box-shadow:0 0 12px rgba(244,235,217,.65);z-index:15}
+  #g-radar.radar-blast-accel-x{filter:drop-shadow(0 0 20px rgba(232,184,58,1)) drop-shadow(0 0 65px rgba(232,184,58,.9)) drop-shadow(0 0 110px rgba(232,184,58,.65));transition:filter .04s}
+  #g-radar.radar-blast-turn-x {filter:drop-shadow(0 0 20px rgba(255,178,61,1)) drop-shadow(0 0 60px rgba(255,178,61,.9)) drop-shadow(0 0 100px rgba(255,178,61,.65));transition:filter .04s}
+  .g-radar-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(242,241,238,.95);top:50%;left:50%;transform:translate(-50%,-50%);transition:top .1s ease-out,left .1s ease-out,background .18s,box-shadow .18s;box-shadow:0 0 12px rgba(242,241,238,.65);z-index:15}
 
   /* bottom stats */
-  .rec-bottom{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:flex-end;padding:0 24px}
+  .rec-bottom{position:relative;z-index:10;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.4fr);gap:1px;margin:0 24px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   /* "rolled N" hangs under Stops — reserve its room only when it has something to say */
-  .rec-bottom:has(.bot-sub:not(:empty)){padding-bottom:18px}
-  .bot-stat{display:flex;flex-direction:column;flex:1}
-  .bot-stat--center{align-items:center}  .bot-lbl{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:rgba(244,235,217,.86);text-transform:uppercase;margin-bottom:4px}
-  .bot-val{font-family:var(--serif);font-style:italic;font-weight:700;font-size:28px;color:var(--cream);letter-spacing:-.02em;line-height:1;white-space:nowrap}
+  .bot-stat{display:flex;flex-direction:column;gap:6px;padding:12px 10px;background:var(--panel);min-width:0}
+  .bot-stat--center{align-items:flex-start}  .bot-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;order:2}
+  .bot-val{font-family:var(--serif);font-weight:700;font-size:24px;color:var(--cream);letter-spacing:0;line-height:.9;white-space:nowrap}
   .bot-val--time{font-variant-numeric:tabular-nums}
-  .bot-unit{font-family:var(--sans);font-style:normal;font-size:13px;color:rgba(244,235,217,.86)}
+  .bot-unit{font-family:var(--mono);font-style:normal;font-size:10px;color:var(--muted);margin-left:2px}
 
   /* Live OBD strip — the few car channels worth a glance mid-drive. Sits in the
      gap between the Stops|Miles|Time row and the End Drive button; only shown
@@ -176,11 +178,11 @@
   .obd-live{position:relative;z-index:11;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 20px;padding:0 20px;pointer-events:none}
   .obd-live.hidden{display:none}
   .obdl-cell{display:inline-flex;align-items:baseline;gap:5px}
-  .obdl-cell b{font-family:var(--serif);font-style:italic;font-weight:700;font-size:19px;color:var(--cream);line-height:1;letter-spacing:-.02em}
-  .obdl-cell i{font-family:var(--sans);font-style:normal;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(244,235,217,.6)}
+  .obdl-cell b{font-family:var(--serif);font-weight:700;font-size:19px;color:var(--cream);line-height:1;letter-spacing:-.02em}
+  .obdl-cell i{font-family:var(--mono);font-style:normal;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.6)}
 
-  /* event ticker + stop button */  .stop-btn{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);height:62px;border-radius:999px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;background:var(--cream);color:#080808;font-weight:600;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
-  .stop-btn:active{background:rgba(244,235,217,.88);transform:scale(.98)}
+  /* event ticker + stop button */  .stop-btn{position:absolute;left:24px;right:24px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);height:64px;border-radius:999px;font-family:var(--serif);font-style:normal;font-size:20px;letter-spacing:.14em;text-transform:uppercase;background:var(--cream);color:#0B0B0C;font-weight:700;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+  .stop-btn:active{background:rgba(242,241,238,.88);transform:scale(.98)}
 
   /* ── Live insights: clean streak · inputs ribbon · one-line insight ── */
   .rec-mid{justify-content:center;position:absolute;left:0;right:0;z-index:10;top:calc(env(safe-area-inset-top,0px) + 256px);bottom:calc(env(safe-area-inset-bottom,0px) + 256px);padding:0 22px;display:flex;flex-direction:column;gap:14px;transition:top .3s cubic-bezier(.4,0,.2,1)}
@@ -192,21 +194,21 @@
   #screen-record.has-target .rec-mid{top:calc(env(safe-area-inset-top,0px) + 330px)}
   .streak-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
   .streak-main{display:flex;align-items:baseline;gap:9px;min-width:0}
-  .streak-num{font-family:var(--serif);font-style:italic;font-weight:700;font-size:46px;line-height:.9;letter-spacing:-.03em;color:var(--cream);font-variant-numeric:tabular-nums;transition:color .25s}
-  .streak-unit{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,235,217,.72)}
-  .streak-best{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,235,217,.66);white-space:nowrap}
-  .streak-bar{height:4px;margin-top:9px;border-radius:2px;background:rgba(244,235,217,.09);overflow:hidden}
-  .streak-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,rgba(111,182,105,.55),rgba(125,196,118,.95));transition:width .6s ease-out,background .3s}
-  .streak-fill.is-best{background:linear-gradient(90deg,rgba(196,169,98,.7),rgba(222,196,120,1));box-shadow:0 0 10px rgba(196,169,98,.55)}
+  .streak-num{font-family:var(--serif);font-weight:700;font-size:46px;line-height:.9;letter-spacing:0;color:var(--good);font-variant-numeric:tabular-nums;transition:color .25s}
+  .streak-unit{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--good)}
+  .streak-best{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,241,238,.66);white-space:nowrap}
+  .streak-bar{height:4px;margin-top:9px;border-radius:2px;background:rgba(242,241,238,.09);overflow:hidden}
+  .streak-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,rgba(63,196,106,.55),rgba(63,196,106,.95));transition:width .6s ease-out,background .3s}
+  .streak-fill.is-best{background:linear-gradient(90deg,rgba(255,178,61,.7),rgba(255,178,61,1));box-shadow:0 0 10px rgba(255,178,61,.55)}
   .rec-streak.reset .streak-num{animation:streak-reset .7s ease-out}
-  @keyframes streak-reset{0%{color:rgba(224,96,80,1);transform:scale(1.06)}100%{color:var(--cream);transform:none}}
+  @keyframes streak-reset{0%{color:rgba(224,96,80,1);transform:scale(1.06)}100%{color:var(--good);transform:none}}
   .rec-ribbon{position:relative;flex:1 1 auto;min-height:84px;max-height:240px;display:flex;flex-direction:column}
-  .ribbon-lbl{display:flex;justify-content:space-between;margin-bottom:7px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,235,217,.64)}
-  .ribbon-hint{letter-spacing:.14em;color:rgba(125,196,118,.8)}
-  .ribbon-canvas{display:block;width:100%;flex:1 1 auto;min-height:0;border-radius:14px;border:1px solid rgba(244,235,217,.08);background:linear-gradient(180deg,rgba(244,235,217,.03),rgba(244,235,217,.01))}
-  .rec-insight{min-height:24px;display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:.01em;color:rgba(244,235,217,.96);opacity:0;transform:translateY(5px);transition:opacity .3s ease,transform .3s ease}
-  .rec-insight::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:rgba(244,235,217,.7)}
-  .rec-insight.good::before{background:var(--good);box-shadow:0 0 8px rgba(111,182,105,.7)}
+  .ribbon-lbl{display:flex;justify-content:space-between;margin-bottom:7px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.64)}
+  .ribbon-hint{letter-spacing:.14em;color:rgba(63,196,106,.8)}
+  .ribbon-canvas{display:block;width:100%;flex:1 1 auto;min-height:0;border-radius:18px;border:0;background:var(--panel)}
+  .rec-insight{min-height:24px;display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:.01em;color:rgba(242,241,238,.96);opacity:0;transform:translateY(5px);transition:opacity .3s ease,transform .3s ease}
+  .rec-insight::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:rgba(242,241,238,.7)}
+  .rec-insight.good::before{background:var(--good);box-shadow:0 0 8px rgba(63,196,106,.7)}
   .rec-insight.bad::before{background:var(--danger);box-shadow:0 0 8px rgba(224,59,47,.7)}
   .rec-insight.show{opacity:1;transform:none}
 
@@ -216,15 +218,15 @@
   .rec-linetext{position:relative;flex:1;min-width:0;min-height:24px;display:flex;align-items:center}
   .mu-art,.mu-ctl,.mu-text{display:none}
   .rec-line.has-music{min-height:44px}
-  .rec-line.has-music .mu-art{display:block;flex:none;width:40px;height:40px;border-radius:8px;background:rgba(244,235,217,.08) center/cover no-repeat}
+  .rec-line.has-music .mu-art{display:block;flex:none;width:40px;height:40px;border-radius:8px;background:rgba(242,241,238,.08) center/cover no-repeat}
   .rec-line.has-music .mu-ctl{display:flex;flex:none;align-items:center}
   .rec-line.has-music .mu-text{display:flex;flex-direction:column;min-width:0;gap:2px;transition:opacity .3s ease}
-  .mu-text b{font:700 14px/1.15 var(--sans);color:rgba(244,235,217,.96);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mu-text span{font:500 12px/1.15 var(--sans);color:rgba(244,235,217,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mu-text b{font:700 14px/1.15 var(--sans);color:rgba(242,241,238,.96);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mu-text span{font:500 12px/1.15 var(--sans);color:rgba(242,241,238,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .rec-line.has-music .rec-insight{position:absolute;inset:0;pointer-events:none;font-size:13.5px;line-height:1.15;align-items:center}
   .rec-line.has-music .rec-insight span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-width:0}
   .rec-line.has-music.has-insight .mu-text{opacity:0;visibility:hidden;transition:opacity .3s ease,visibility 0s .3s}
-  .mu-btn{width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;color:rgba(244,235,217,.85);-webkit-tap-highlight-color:transparent}
+  .mu-btn{width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;color:rgba(242,241,238,.85);-webkit-tap-highlight-color:transparent}
   .mu-btn svg{width:22px;height:22px;fill:currentColor}
   .mu-btn:active{opacity:.55}.mu-btn:disabled{opacity:.3}
   .mu-heart svg{fill:none;stroke:currentColor;stroke-width:1.8}
@@ -241,7 +243,8 @@
     #screen-record.has-target .rec-ribbon{display:none}
   }
   .bot-stat{position:relative}
-  .bot-sub{position:absolute;top:100%;left:0;right:0;margin-top:5px;text-align:center;height:14px;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--good)}
+  .bot-sub{order:3;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--good)}
+  .bot-sub:empty{display:none}
   @media(prefers-reduced-motion:reduce){.rec-insight,.streak-fill,.rec-mid{transition:none}.rec-streak.reset .streak-num{animation:none}}
 
   /* ── Calibration ── */
@@ -254,14 +257,14 @@
   .debug-handle{
     position:relative;align-self:center;
     display:flex;align-items:center;gap:6px;
-    appearance:none;border:1px solid rgba(244,235,217,.22);
-    background:rgba(244,235,217,.08);color:rgba(244,235,217,.82);
+    appearance:none;border:1px solid rgba(242,241,238,.22);
+    background:rgba(242,241,238,.08);color:rgba(242,241,238,.82);
     padding:7px 15px;border-radius:999px;
-    font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+    font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
     cursor:pointer;z-index:40;transition:background .15s,border-color .15s,bottom .28s cubic-bezier(.4,0,.2,1);
     -webkit-tap-highlight-color:transparent;
   }
-  .debug-handle:active{background:rgba(244,235,217,.18);border-color:rgba(244,235,217,.4)}
+  .debug-handle:active{background:rgba(242,241,238,.18);border-color:rgba(242,241,238,.4)}
   /* When the sensor panel (height:45%) is open, the handle rides up to sit on its
      top lip — matching the panel's .28s slide — so it reads as the panel's grab bar. */
   .debug-handle.open{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(45% + 6px)}
@@ -272,9 +275,9 @@
        to black out the whole lower half of the drive; now the road, the map and
        the edge-glow feedback stay visible through the panel while the readout
        text keeps a dark, legible backing. */
-    background:rgba(10,8,8,.60);
+    background:rgba(11,11,12,.60);
     -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-    border-top:1px solid rgba(244,235,217,.1);
+    border-top:1px solid rgba(242,241,238,.1);
     display:flex;flex-direction:column;
     padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 8px);
     transform:translateY(100%);
@@ -299,16 +302,16 @@
   /* The drawer itself has no inline padding, so without this the button sits
      hard against the bezel — and on a rounded/notched screen, partly under it. */
   padding-inline:14px;
-  border-top:1px solid rgba(242,232,213,.10);
+  border-top:1px solid rgba(242,241,238,.10);
 }
 .obd-btn{
   flex:0 0 auto; min-height:44px; padding:0 14px;   /* 44px = Apple's tap min */
-  background:rgba(232,93,58,.16); color:var(--tang, #E85D3A);
-  border:1px solid rgba(232,93,58,.35); border-radius:10px;
+  background:rgba(255,106,61,.16); color:var(--tang, #FF6A3D);
+  border:1px solid rgba(255,106,61,.35); border-radius:10px;
   font-size:13px; font-weight:600; cursor:pointer;
 }
 .obd-btn:disabled{ opacity:.55; cursor:default; }
-.obd-status{ font-size:12px; color:var(--dim, #A99F8C); line-height:1.35; min-width:0; }
+.obd-status{ font-size:12px; color:var(--dim, #A5A4A0); line-height:1.35; min-width:0; }
 /* Fixed 4-column grid, NOT flex-wrap. With wrapping, a metric growing a digit
    (RPM 900 → 3500) widened its cell, pushed the row past the screen edge, and
    bumped the last cell onto a new line — then back when it shrank. The readout
@@ -318,10 +321,10 @@
   display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
   gap:12px 10px; margin-top:10px; padding-inline:14px; padding-bottom:12px;
 }
-.obd-cell{ display:flex; align-items:baseline; gap:3px; font-size:12px; color:var(--dim, #A99F8C); min-width:0; white-space:nowrap; }
+.obd-cell{ display:flex; align-items:baseline; gap:3px; font-size:12px; color:var(--dim, #A5A4A0); min-width:0; white-space:nowrap; }
 /* Reserve the width of the widest reading so the baseline row can't shift as
    digits come and go; tabular-nums keeps the glyphs from dancing too. */
-.obd-cell b{ font-size:17px; color:var(--cream, #F2E8D5); font-variant-numeric:tabular-nums; }
+.obd-cell b{ font-size:17px; color:var(--cream, #F2F1EE); font-variant-numeric:tabular-nums; }
 .obd-cell i{ font-style:normal; margin-left:4px; opacity:.7; }
 
 /* ── In-app adapter scanner ──────────────────────────────────────────────────
@@ -331,29 +334,29 @@
 .obd-scan{ margin-top:10px; padding-inline:14px; padding-bottom:12px; }
 .obd-scan.hidden{ display:none; }
 .obd-scan-list{ display:flex; flex-direction:column; gap:8px; }
-.obd-scan-empty{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--dim, #A99F8C); line-height:1.4; padding:6px 0; }
+.obd-scan-empty{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--dim, #A5A4A0); line-height:1.4; padding:6px 0; }
 .obd-scan-pulse{
   flex:0 0 auto; width:8px; height:8px; border-radius:50%;
-  background:var(--tang, #E85D3A); animation:obd-pulse 1.1s ease-in-out infinite;
+  background:var(--tang, #FF6A3D); animation:obd-pulse 1.1s ease-in-out infinite;
 }
 @keyframes obd-pulse{ 0%,100%{ opacity:.3; transform:scale(.8); } 50%{ opacity:1; transform:scale(1); } }
 @media(prefers-reduced-motion:reduce){ .obd-scan-pulse{ animation:none; opacity:.7; } }
 .obd-device{
   display:flex; align-items:center; gap:10px; width:100%;
   min-height:48px; padding:10px 12px;      /* comfortably over the 44px tap min */
-  background:rgba(242,232,213,.05);
-  border:1px solid rgba(242,232,213,.14);
+  background:rgba(242,241,238,.05);
+  border:1px solid rgba(242,241,238,.14);
   border-radius:11px; cursor:pointer; text-align:left;
 }
-.obd-device:active{ background:rgba(242,232,213,.10); }
+.obd-device:active{ background:rgba(242,241,238,.10); }
 .obd-device-name{
-  flex:1 1 auto; min-width:0; font-size:14px; color:var(--cream, #F2E8D5);
+  flex:1 1 auto; min-width:0; font-size:14px; color:var(--cream, #F2F1EE);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 /* Signal strength as a 3-bar glyph — an actual scale, not an on/off light.
    Inactive bars stay dim-visible so a weak signal reads as "far", not "dead". */
 .obd-device-sig{ flex:0 0 auto; display:flex; align-items:flex-end; gap:2px; height:12px; }
-.obd-device-sig i{ width:3px; border-radius:1px; background:var(--tang, #E85D3A); opacity:.25; }
+.obd-device-sig i{ width:3px; border-radius:1px; background:var(--tang, #FF6A3D); opacity:.25; }
 .obd-device-sig i:nth-child(1){ height:5px; }
 .obd-device-sig i:nth-child(2){ height:8px; }
 .obd-device-sig i:nth-child(3){ height:12px; }
@@ -362,19 +365,18 @@
 .obd-device-sig.sig3 i:nth-child(-n+3){ opacity:1; }
 .obd-device-tag{
   flex:0 0 auto; font-size:9.5px; font-weight:700; letter-spacing:.08em;
-  text-transform:uppercase; color:var(--tang, #E85D3A);
-  background:rgba(232,93,58,.14); border-radius:5px; padding:3px 6px;
-}
+  text-transform:uppercase; color:var(--tang, #FF6A3D);
+  background:rgba(255,106,61,.14); border-radius:5px; padding:3px 6px;font-family:var(--mono)}
 .obd-scan-fallback{
   display:block; width:100%; margin-top:10px; padding:12px 0;
   background:none; border:none; cursor:pointer;
-  font-size:12px; color:#8E8478; text-decoration:underline; text-underline-offset:2px;
+  font-size:12px; color:#8A8986; text-decoration:underline; text-underline-offset:2px;
 }
-.obd-scan-fallback:active{ color:var(--cream-dim, #C9BFAC); }
+.obd-scan-fallback:active{ color:var(--cream-dim, #A5A4A0); }
 
 /* Sensors pill gains an OBD badge while an adapter is live. The drawer is shut
    during a drive, so this is the only on-screen proof the car is talking. */
-.debug-handle.has-obd{ border-color:rgba(111,182,105,.45); }
+.debug-handle.has-obd{ border-color:rgba(63,196,106,.45); }
 
 /* Auto-start nudge — the banner that offers to begin a drive the moment the
    dongle links up while the app is open. Bottom-anchored, out of the way. */
@@ -384,28 +386,28 @@
   display:flex; align-items:center; gap:10px;
   max-width:calc(100vw - 28px);
   padding:10px 10px 10px 16px; border-radius:14px;
-  background:rgba(20,17,16,.96); border:1px solid rgba(111,182,105,.32);
+  background:rgba(22,22,24,.96); border:1px solid rgba(63,196,106,.32);
   box-shadow:0 16px 40px rgba(0,0,0,.5);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
   transition:transform .26s cubic-bezier(.4,0,.2,1);
 }
 .obd-nudge.in{transform:translate(-50%, 0)}
-.obd-nudge-txt{font:600 14px/1.2 var(--sans, -apple-system); color:var(--cream, #F2E8D5); white-space:nowrap}
+.obd-nudge-txt{font:600 14px/1.2 var(--sans, -apple-system); color:var(--cream, #F2F1EE); white-space:nowrap}
 .obd-nudge-go{
   flex:0 0 auto; min-height:38px; padding:0 16px; border:0; border-radius:10px;
-  background:var(--tang, #E85D3A); color:#160b08; font:700 14px/1 var(--sans, -apple-system);
+  background:var(--tang, #FF6A3D); color:#161618; font:700 14px/1 var(--sans, -apple-system);
   cursor:pointer; -webkit-tap-highlight-color:transparent;
 }
 .obd-nudge-go:active{filter:brightness(.94)}
 .obd-nudge-x{
   flex:0 0 auto; width:34px; height:38px; border:0; background:none;
-  color:var(--muted, #7A7060); font-size:22px; line-height:1; cursor:pointer;
+  color:var(--muted, #8A8986); font-size:22px; line-height:1; cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
 @media(prefers-reduced-motion:reduce){.obd-nudge{transition:none}}
 .pill-obd{
   display:inline-block; margin-left:6px; padding:1px 6px; border-radius:5px;
-  background:rgba(111,182,105,.18); color:var(--good, #6FB669);
+  background:rgba(63,196,106,.18); color:var(--good, #3FC46A);
   font-size:10px; font-weight:700; letter-spacing:.06em;
   font-variant-numeric:tabular-nums;
 }

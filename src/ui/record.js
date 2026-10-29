@@ -83,8 +83,8 @@ export function flashEvent(type, latAccel, tier){
   const arcSvgEl = document.getElementById('arc-svg');
   if (arcProg && arcSvgEl){
     arcProg._eventLock = true;
-    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(232,160,58,.95)' : 'rgba(196,169,98,.95)';
-    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(232,160,58,.65)' : 'rgba(196,169,98,.55)';
+    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(232,184,58,.95)' : 'rgba(255,178,61,.95)';
+    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(232,184,58,.65)' : 'rgba(255,178,61,.55)';
     arcProg.setAttribute('stroke', eColor);
     arcSvgEl.style.filter = `drop-shadow(0 0 16px ${eGlow})`;
     setTimeout(() => { arcProg._eventLock = false; }, 1200);
@@ -299,8 +299,8 @@ export function updateLiveUI(){
   const arcSvg      = document.getElementById('arc-svg');
   if (arcProgress && arcSvg && !arcProgress._eventLock){
     arcProgress.style.strokeDashoffset = String(499.2 * (1 - state.liveScore / 100));
-    const arcColor = isBrake ? 'rgba(224,59,47,.92)' : isAccel ? 'rgba(111,182,105,.92)' : 'rgba(244,235,217,.9)';
-    const glowCol  = isBrake ? 'rgba(224,59,47,.5)'  : isAccel ? 'rgba(111,182,105,.5)'  : 'rgba(244,235,217,.28)';
+    const arcColor = isBrake ? 'rgba(224,59,47,.92)' : isAccel ? 'rgba(63,196,106,.92)' : 'rgba(242,241,238,.9)';
+    const glowCol  = isBrake ? 'rgba(224,59,47,.5)'  : isAccel ? 'rgba(63,196,106,.5)'  : 'rgba(242,241,238,.28)';
     arcProgress.setAttribute('stroke', arcColor);
     arcSvg.style.filter = `drop-shadow(0 0 10px ${glowCol})`;
   }
@@ -313,8 +313,8 @@ export function updateLiveUI(){
     const yPct = 50 - clamp(la / maxG, -1, 1) * 36;
     radarDot.style.left       = xPct + '%';
     radarDot.style.top        = yPct + '%';
-    radarDot.style.background = isBrake ? 'rgba(224,59,47,.95)' : isAccel ? 'rgba(111,182,105,.95)' : 'rgba(244,235,217,.95)';
-    radarDot.style.boxShadow  = isBrake ? '0 0 8px rgba(224,59,47,.7)' : isAccel ? '0 0 8px rgba(111,182,105,.7)' : '0 0 8px rgba(244,235,217,.5)';
+    radarDot.style.background = isBrake ? 'rgba(224,59,47,.95)' : isAccel ? 'rgba(63,196,106,.95)' : 'rgba(242,241,238,.95)';
+    radarDot.style.boxShadow  = isBrake ? '0 0 8px rgba(224,59,47,.7)' : isAccel ? '0 0 8px rgba(63,196,106,.7)' : '0 0 8px rgba(242,241,238,.5)';
   }
 
   // G-force radar container state glow

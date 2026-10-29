@@ -1,17 +1,25 @@
   :root{
-    --bg:#0A0A0A;
-    --bg2:#151212;
-    --ink:#1A1414;
-    --cream:#F2E8D5;
-    --cream-dim:#C9BFAC;
-    --muted:#6B6258;
-    --tang:#E85D3A;
-    --ox:#4A1E2F;
+    /* Night Circuit (Oct 2026): near-black, neutral white, tangerine, green */
+    --bg:#0B0B0C;
+    --bg2:#161618;
+    --panel:#161618;
+    --panel-2:#1F1F21;
+    --line:#232325;
+    --ink:#161618;
+    --cream:#F2F1EE;
+    --cream-dim:#A5A4A0;
+    --muted:#8A8986;
+    --tang:#FF6A3D;
+    --ox:#2A1A14;
     --sage:#7D8F6F;
-    --gold:#C4A962;
-    --danger:#E03B2F;
-    --warn:#E8A03A;
-    --good:#6FB669;
-    --serif:'Playfair Display',"Georgia","Times New Roman",serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+    --gold:#FFB23D;
+    --danger:#E5484D;
+    --warn:#E8B83A;
+    --good:#3FC46A;
+    /* The score: tangerine through gold */
+    --grad:linear-gradient(160deg,#FF6A3D 10%,#FFB23D 55%,#FFD93D 95%);
+    /* --serif keeps its name (it's everywhere) but is now the condensed display face */
+    --serif:'Barlow Condensed','Arial Narrow',-apple-system,sans-serif;
+    --sans:'DM Sans',-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
   }

@@ -218,7 +218,7 @@ function renderLifetimeSheet(all){
           <div class="as-dim-label">${label}</div>
         </div>`).join('');
     } else {
-      dimsEl.innerHTML = '<div style="color:rgba(242,232,213,.35);font-size:13px;padding:8px 0">Drive more to unlock dimension data</div>';
+      dimsEl.innerHTML = '<div style="color:rgba(242,241,238,.35);font-size:13px;padding:8px 0">Drive more to unlock dimension data</div>';
     }
   }
 

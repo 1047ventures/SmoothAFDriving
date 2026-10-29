@@ -32,9 +32,9 @@ export function pushDebugSample(state) {
 // baseline. A flat trace = steady input; a wiggly trace = varying input —
 // readable per-axis, instead of 7 signals tangled on one shared axis.
 const ACCEL = [
-  { key: 'ax',     color: '#E8501A', label: 'aX'    },
+  { key: 'ax',     color: '#FF6A3D', label: 'aX'    },
   { key: 'ay',     color: '#4A9EE8', label: 'aY'    },
-  { key: 'az',     color: '#C49A28', label: 'aZ'    },
+  { key: 'az',     color: '#FFB23D', label: 'aZ'    },
 ];
 const GYRO = [
   { key: 'gAlpha', color: '#5DBF7A', label: 'yaw'   },
@@ -60,7 +60,7 @@ export function renderDebugChart(canvas) {
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, W, H);
 
-  ctx.fillStyle = 'rgba(10,8,8,0.92)';
+  ctx.fillStyle = 'rgba(11,11,12,0.92)';
   ctx.fillRect(0, 0, W, H);
 
   const pts   = bufs.ax.length;
@@ -72,11 +72,11 @@ export function renderDebugChart(canvas) {
 
     // lane divider (between lanes) + faint zero baseline
     if (li > 0) {
-      ctx.strokeStyle = 'rgba(244,235,217,0.10)';
+      ctx.strokeStyle = 'rgba(242,241,238,0.10)';
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, top); ctx.lineTo(W, top); ctx.stroke();
     }
-    ctx.strokeStyle = 'rgba(244,235,217,0.14)';
+    ctx.strokeStyle = 'rgba(242,241,238,0.14)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
 

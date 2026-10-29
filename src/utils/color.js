@@ -1,8 +1,8 @@
 export function harshnessToColor(h){
-  if (h < 1.4) return '#6FB669';
+  if (h < 1.4) return '#3FC46A';
   if (h < 2.4) return '#B6B85A';
   if (h < 3.2) return '#C48B3A';
-  if (h < 4.0) return '#E8A03A';
+  if (h < 4.0) return '#E8B83A';
   return '#E03B2F';
 }
 
@@ -14,7 +14,7 @@ export function forceSegmentColor(la, ra){
   const aMag  = la >  DEAD ? la : 0;
   const tMag  = Math.abs(ra || 0) > DEAD ? Math.abs(ra) : 0;
   const dom   = Math.max(bMag, aMag, tMag);
-  if (dom < DEAD) return '#6FB669'; // coasting — green
+  if (dom < DEAD) return '#3FC46A'; // coasting — green
   if (bMag >= aMag && bMag >= tMag){
     if (bMag > 3.0) return '#E03B2F';
     if (bMag > 1.5) return '#D86040';
@@ -22,13 +22,13 @@ export function forceSegmentColor(la, ra){
     return '#A89080';
   }
   if (aMag >= bMag && aMag >= tMag){
-    if (aMag > 2.5) return '#E8A03A';
+    if (aMag > 2.5) return '#E8B83A';
     if (aMag > 1.2) return '#C8B040';
     if (aMag > 0.5) return '#A8B858';
     return '#88B870';
   }
   // Turning dominant
-  if (tMag > 3.0) return '#C4A962';
+  if (tMag > 3.0) return '#FFB23D';
   if (tMag > 1.5) return '#A8A870';
   return '#8AAE78';
 }
@@ -36,8 +36,8 @@ export function forceSegmentColor(la, ra){
 export function dimColor(n){ return n >= 80 ? 'var(--good)' : n >= 55 ? 'var(--warn)' : 'var(--danger)'; }
 
 export function scoreColor(n){
-  if (n >= 85) return '#6FB669';
-  if (n >= 65) return '#C4A962';
-  if (n >= 45) return '#E8A03A';
+  if (n >= 85) return '#3FC46A';
+  if (n >= 65) return '#FFB23D';
+  if (n >= 45) return '#E8B83A';
   return '#E03B2F';
 }
