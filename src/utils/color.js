@@ -28,9 +28,9 @@ export function forceSegmentColor(la, ra){
     return '#88B870';
   }
   // Turning dominant
-  if (tMag > 3.0) return '#FFB23D';
-  if (tMag > 1.5) return '#A8A870';
-  return '#8AAE78';
+  if (tMag > 3.0) return '#5AB4F0';
+  if (tMag > 1.5) return '#7FB6C8';
+  return '#8AAE98';
 }
 
 export function dimColor(n){ return n >= 80 ? 'var(--good)' : n >= 55 ? 'var(--warn)' : 'var(--danger)'; }

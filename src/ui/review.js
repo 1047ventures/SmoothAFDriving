@@ -65,7 +65,7 @@ async function annotateStopCauses(drive, analysis){
     const m = reviewEventMarkers.stop[i], s = markers[i];
     if (!m || !s) return;
     const secs = (s.durationMs / 1000).toFixed(s.durationMs < 10000 ? 1 : 0);
-    m.setPopupContent(`<b>${escapeHtml(describeCause(k))}</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
+    m.setPopupContent(`<b>${escapeHtml(describeCause(k))}</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A8986">t+${fmtDuration(s.t)}</span>`);
   });
 
   // One line under the fact chips.
@@ -480,7 +480,7 @@ export function renderReview(drive){
     const m = L.marker([s.lat, s.lon], {
       icon: L.divIcon({ className:'', html:`<div class="ev-marker stop-pill">${secs}s</div>`, iconSize:[52,24], iconAnchor:[26,12] })
     }).addTo(mapInstance);
-    m.bindPopup(`<b>Full stop</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A7B72">t+${fmtDuration(s.t)}</span>`);
+    m.bindPopup(`<b>Full stop</b><br>${secs}s · approach ${s.speedMph} mph<br><span style="color:#8A8986">t+${fmtDuration(s.t)}</span>`);
     mapLayers.push(m);
     reviewEventMarkers.stop.push(m);
   }
@@ -811,7 +811,7 @@ export function renderForceTimeline(drive){
       const x       = tx(e.t);
       const opacity = isExtreme ? 1.0 : 0.6;
       const tickH   = isExtreme ? H * 0.30 : H * 0.18;
-      const color   = e.type === 'brake' ? `rgba(224,59,47,${opacity})` : e.type === 'accel' ? `rgba(232,184,58,${opacity})` : `rgba(255,178,61,${opacity})`;
+      const color   = e.type === 'brake' ? `rgba(224,59,47,${opacity})` : e.type === 'accel' ? `rgba(232,184,58,${opacity})` : `rgba(90,180,240,${opacity})`;
       ctx.strokeStyle = color;
       ctx.lineWidth   = isExtreme ? 1.5 : 1;
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, tickH); ctx.stroke();

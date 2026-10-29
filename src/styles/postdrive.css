@@ -28,7 +28,7 @@
   font-family:var(--serif);  font-weight:800; font-size:66px; line-height:.9;
   color:var(--cream); font-variant-numeric:tabular-nums;
 }
-.pdcta-score i{font-family:var(--serif);  font-size:20px; color:var(--gold)}
+.pdcta-score i{font-family:var(--serif);font-style:normal;font-size:20px;color:var(--gold)}
 
 .pdcta-h{
   font-family:var(--serif);  font-weight:700; font-size:28px;

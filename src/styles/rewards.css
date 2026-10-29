@@ -1,19 +1,17 @@
   /* ============ REWARDS ============ */
   #screen-rewards{background:#0B0B0C;overflow:hidden}
   .rw-topbar{height:52px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-left:24px;padding-right:24px;display:flex;align-items:flex-end;justify-content:center;position:relative;flex-shrink:0}
-  .rw-back{position:absolute;left:24px;bottom:2px;appearance:none;border:0;background:transparent;font-size:22px;color:rgba(242,241,238,.86);cursor:pointer;padding:0;line-height:1}
+  .rw-back{position:absolute;left:12px;bottom:-10px;appearance:none;border:0;background:transparent;font-size:22px;color:rgba(242,241,238,.86);cursor:pointer;padding:0;line-height:1;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
   .rw-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.86)}
   .rw-wallet{padding:20px 24px 0;flex-shrink:0}
   .rw-wallet-label{margin-bottom:12px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.86)}
-  .rw-wallet-stats{display:flex;border-top:1px solid rgba(242,241,238,.1);border-bottom:1px solid rgba(242,241,238,.1);height:80px}
-  .rw-wallet-col{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-left:4px}
-  .rw-wallet-col:not(:first-child){border-left:1px solid rgba(242,241,238,.1);padding-left:16px}
-  .rw-wallet-col:first-child{padding-left:0;flex:1.35}
-  .rw-wallet-num{font-family:var(--serif);font-weight:700;font-size:clamp(24px,8vw,34px);color:var(--cream);line-height:1;white-space:nowrap}
-  .rw-wallet-num.rw-spent{color:rgba(242,241,238,.86)}
-  .rw-wallet-num.rw-balance{font-size:clamp(26px,9vw,38px);background:linear-gradient(135deg,#FF6A3D,#FFB23D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .rw-wallet-col-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.86);margin-top:4px}
-  .rw-closest{margin:16px 24px 0;border-left:3px solid #FF6A3D;background:rgba(255,106,61,.06);padding:16px 20px;flex-shrink:0}
+  .rw-wallet-stats{display:grid;grid-template-columns:1.2fr 1fr 1.15fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .rw-wallet-col{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:8px;padding:14px 10px;background:var(--panel)}
+  .rw-wallet-num{font-family:var(--serif);font-weight:700;font-size:clamp(24px,8vw,34px);color:var(--cream);line-height:1;white-space:nowrap;letter-spacing:.08em}
+  .rw-wallet-num.rw-spent{color:var(--cream)}
+  .rw-wallet-num.rw-balance{font-size:clamp(26px,9vw,38px);background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .rw-wallet-col-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,241,238,.86);margin-top:4px;white-space:nowrap}
+  .rw-closest{margin:16px 24px 0;border-left:3px solid var(--tang);background:var(--panel);border-radius:0 14px 14px 0;padding:16px 20px;flex-shrink:0}
   .rw-closest-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#FF6A3D;margin-bottom:6px}
   .rw-closest-reward{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--cream);margin-bottom:10px}
   .rw-progress-track{height:4px;background:rgba(242,241,238,.16);position:relative}
@@ -23,9 +21,9 @@
   .rw-activity-list{border-top:1px solid rgba(242,241,238,.07);margin:0 24px}
   .rw-activity-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;border-bottom:1px solid rgba(242,241,238,.07);padding:8px 0}
   .rw-activity-main{font-family:var(--sans);font-size:13px;color:var(--cream);margin-bottom:2px}
-  .rw-activity-sub{font-family:var(--sans);font-size:10px;font-style:italic;color:rgba(242,241,238,.86)}
+  .rw-activity-sub{font-family:var(--sans);font-size:11px;font-style:normal;color:rgba(242,241,238,.86)}
   .rw-activity-pts{flex-shrink:0;font-family:var(--serif);font-weight:700;font-size:18px}
   .rw-activity-pts.rw-earned{color:#3FC46A}
-  .rw-activity-pts.rw-spent{color:rgba(242,241,238,.86)}  .rw-cta{background:#111010;border-top:1px solid rgba(242,241,238,.08);height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;appearance:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;width:100%;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .rw-activity-pts.rw-spent{color:rgba(242,241,238,.86)}  .rw-cta{background:var(--panel);border-top:1px solid rgba(242,241,238,.08);height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;appearance:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;width:100%;padding-bottom:env(safe-area-inset-bottom,0px)}
   .rw-cta-main{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6A3D;margin-bottom:4px}
   .rw-cta-sub{font-family:var(--sans);font-size:10px;color:rgba(242,241,238,.86)}

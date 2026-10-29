@@ -13,7 +13,8 @@
     padding:20px 20px 12px;
   }
   .gs-title{font-family:var(--serif);font-weight:700;font-size:32px;color:var(--cream);line-height:1;flex:1}
-  .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
+  .gs-close,.gs-back{appearance:none;border:none;background:none;color:var(--cream-dim);font-size:26px;cursor:pointer;line-height:1;padding:9px 12px;min-width:44px;min-height:44px;flex-shrink:0}
+  .gs-back[hidden],.gs-back.hidden{display:none}
   #garage-list-view{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(env(safe-area-inset-bottom,0px) + 24px)}
   .gs-empty{font-family:var(--sans);color:var(--cream-dim);font-size:14px;padding:28px 0 8px;text-align:center}
   .gs-card{
@@ -42,7 +43,7 @@
   .gs-reader.is-connected .gs-reader-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#3FC46A;flex-shrink:0}
   .gs-reader-btn{appearance:none;cursor:pointer;flex-shrink:0;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,106,61,.55);background:rgba(255,106,61,.12);color:var(--tang);font-family:var(--sans);font-size:13px;font-weight:600}
   .gs-reader.is-connected .gs-reader-btn{border-color:rgba(242,241,238,.2);background:none;color:var(--cream-dim)}
-  .gs-reader-btn:disabled{opacity:.45;cursor:default}
+  .gs-reader-btn:disabled{opacity:1;color:var(--muted);border-color:#3A3A3D;background:none;cursor:default}
   .gs-reader-help{font-family:var(--sans);font-size:12.5px;line-height:1.5;color:rgba(242,241,238,.7);margin:8px 0 0}
   .gs-reader-help.hidden{display:none}
   .gs-reader .obd-scan{padding-inline:0;padding-bottom:0}
@@ -180,7 +181,7 @@
   .gs-type-icon{font-size:26px;line-height:1}
   .gs-type-label{font-size:8px;font-weight:700;color:var(--cream-dim);letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono)}
   .gs-find-icon-btn{
-    appearance:none;border:1px solid rgba(255,106,61,.32);background:rgba(255,106,61,.05);
+    appearance:none;border:1px solid rgba(255,106,61,.32);background:var(--panel);
     cursor:pointer;width:100%;padding:13px;border-radius:14px;margin-bottom:8px;
     color:var(--tang);font-family:var(--mono);font-size:12px;letter-spacing:.14em;
     text-transform:uppercase;font-weight:600;transition:background .15s;

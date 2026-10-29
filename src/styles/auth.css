@@ -15,7 +15,8 @@
 .home-account-btn{
   flex:0 0 auto;
   /* Let the 34px pill sit on the 21px brand line without growing the bar. */
-  margin:-7px 0;
+  margin:-12px 0;
+  min-height:44px;
   background:rgba(242,241,238,.07);
   border:1px solid rgba(242,241,238,.16);
   color:var(--cream-dim);
@@ -187,7 +188,7 @@
   /* Lift the fill a step off the card (bg2 #161618) so the field reads as an
      input at a glance, not a flat panel — it sits below a loud Apple button and
      was too easy to miss. */
-  background:#1C1818;
+  background:#1F1F21;
   border:1px solid rgba(242,241,238,.22);
   border-radius:11px;
   color:var(--cream);

@@ -259,7 +259,7 @@
     display:flex;align-items:center;gap:6px;
     appearance:none;border:1px solid rgba(242,241,238,.22);
     background:rgba(242,241,238,.08);color:rgba(242,241,238,.82);
-    padding:7px 15px;border-radius:999px;
+    padding:7px 15px;min-height:44px;border-radius:999px;
     font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
     cursor:pointer;z-index:40;transition:background .15s,border-color .15s,bottom .28s cubic-bezier(.4,0,.2,1);
     -webkit-tap-highlight-color:transparent;

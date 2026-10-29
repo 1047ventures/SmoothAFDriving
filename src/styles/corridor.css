@@ -61,6 +61,7 @@
   appearance: none; border: none; background: none;
   color: rgba(242,241,238,.86); font-size: 26px; cursor: pointer;
   padding: 4px 8px 4px 0; flex-shrink: 0; line-height: 1;
+  min-width: 44px; min-height: 44px;
 }
 .corridor-road-name {
   font-family: var(--serif);  font-weight: 700;

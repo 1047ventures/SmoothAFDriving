@@ -1,5 +1,7 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#0B0B0C;color:var(--cream);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  /* Form controls don't inherit fonts by default: they fell back to Arial */
+  button,input,select,textarea{font-family:inherit}
   body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
   #app{position:fixed;inset:0;overflow:hidden}
 

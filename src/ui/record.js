@@ -83,8 +83,8 @@ export function flashEvent(type, latAccel, tier){
   const arcSvgEl = document.getElementById('arc-svg');
   if (arcProg && arcSvgEl){
     arcProg._eventLock = true;
-    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(232,184,58,.95)' : 'rgba(255,178,61,.95)';
-    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(232,184,58,.65)' : 'rgba(255,178,61,.55)';
+    const eColor = type === 'brake' ? 'rgba(224,59,47,.95)' : type === 'accel' ? 'rgba(232,184,58,.95)' : 'rgba(90,180,240,.95)';
+    const eGlow  = type === 'brake' ? 'rgba(224,59,47,.65)' : type === 'accel' ? 'rgba(232,184,58,.65)' : 'rgba(90,180,240,.55)';
     arcProg.setAttribute('stroke', eColor);
     arcSvgEl.style.filter = `drop-shadow(0 0 16px ${eGlow})`;
     setTimeout(() => { arcProg._eventLock = false; }, 1200);

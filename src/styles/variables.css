@@ -16,6 +16,7 @@
     --danger:#E5484D;
     --warn:#E8B83A;
     --good:#3FC46A;
+    --turn:#5AB4F0;   /* turns get their own hue: gold read the same as accel */
     /* The score: tangerine through gold */
     --grad:linear-gradient(160deg,#FF6A3D 10%,#FFB23D 55%,#FFD93D 95%);
     /* --serif keeps its name (it's everywhere) but is now the condensed display face */
