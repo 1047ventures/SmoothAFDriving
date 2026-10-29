@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 237</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 3:03 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 10:12 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -183,19 +183,19 @@
     <div class="brief-row">
       <span class="brief-k">Now</span>
       <div class="brief-v">
-        <b>Car Concierge</b> &mdash; first version complete
+        <b>Night Circuit look</b> shipped &middot; <b>Car Concierge</b> next: AI line + Trevor
         <ol class="pips">
-          <li class="done">X-ray car</li><li class="done">Battery</li><li class="done">Wear from driving</li><li class="done">Recalls</li><li class="done">Maintenance timeline</li><li class="done">Learn &middot; Ask &middot; Book</li><li>AI by phone &middot; partner mechanics</li>
+          <li class="done">X-ray car</li><li class="done">Battery</li><li class="done">Wear from driving</li><li class="done">Recalls</li><li class="done">Maintenance timeline</li><li class="done">Learn &middot; Ask &middot; Book</li><li class="next">Vapi voice agent &middot; Lotus Mobile</li>
         </ol>
       </div>
     </div>
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
+        <li data-at="2026-10-28T16:30"><a href="#trk-nc"><span class="tag t-ship tn">T416</span><span class="bl-t">Night Circuit: the new look, live</span></a><span class="bl-d">Oct 28</span></li>
         <li data-at="2026-10-28T15:40"><a href="#trk-care"><span class="tag t-ship tn">T414</span><span class="bl-t">Car care: wear from driving, maintenance, recalls</span></a><span class="bl-d">Oct 28</span></li>
         <li data-at="2026-10-28T15:20"><a href="#bug-plist"><span class="tag t-ship tn">T413</span><span class="bl-t">Fix: iPhone background-location text was missing</span></a><span class="bl-d">Oct 28</span></li>
         <li data-at="2026-10-28T14:29"><a href="#trk-battery"><span class="tag t-ship tn">T410</span><span class="bl-t">Battery check: resting, starting dip, charging</span></a><span class="bl-d">Oct 28</span></li>
-        <li data-at="2026-10-28T14:05"><a href="#trk-xray"><span class="tag t-ship tn">T409</span><span class="bl-t">X-ray car: every part&rsquo;s health at a glance</span></a><span class="bl-d">Oct 28</span></li>
       </ul>
     </div>
     <div class="brief-row">
@@ -208,6 +208,7 @@
     <div class="brief-row brief-you">
       <span class="brief-k">Needs you</span>
       <ul class="brief-v brief-list">
+        <li><a href="#need-vapi"><span class="tag t-wait">Next</span><span class="bl-t">Send the Vapi + Lotus details</span></a></li>
         <li><a href="#need-admin"><span class="tag t-wait">Soon</span><span class="bl-t">Rotate the admin password</span></a></li>
       </ul>
     </div>
@@ -215,8 +216,12 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">1 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="need-vapi">
+        <summary><span class="tag t-wait">Next</span><span class="ent-t">Send the Vapi + Lotus details to wire up Ask and Book</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Your Vapi <b>public</b> key and assistant ID (never the private key), the agent&rsquo;s phone number if it has one, and Trevor&rsquo;s booking text/call number and service area. The repo is public, so say if his number is a personal cell. Then paste the context block into the Vapi assistant&rsquo;s prompt.</div>
+      </details>
       <details class="ent" id="need-admin">
         <summary><span class="tag t-wait">Soon</span><span class="ent-t">Rotate the admin password</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">It&rsquo;s in this chat. Cloudflare &rarr; <code>ADMIN_PASSWORD</code> &rarr; Retry deployment.<br><a class="ent-go" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank" rel="noopener">Open Cloudflare &#8599;</a></div>
@@ -285,6 +290,10 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="trk-nc">
+        <summary><span class="tag t-ship tn">T416</span><span class="ent-t">Night Circuit &mdash; the new look, live</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The whole app now wears the design you signed off on in the mockups. Near-black with neutral white, tangerine and green. Condensed numbers, small mono labels, a clean body font. Scores in the tangerine-to-gold gradient. Home has the big gradient score, the car name with a status pill, panel stats, tile buttons and a dashed Set destination. The Drive screen&rsquo;s edge glows <b>green when you&rsquo;re smooth</b>, red when braking and amber on the throttle, with green clean miles. Recap, Garage, Rewards, the leaderboard, sheets and forms all match. Turns now have their own sky blue on the map and charts; they used to read the same as accel. A reviewer checked 23 screens at 320 and 390&nbsp;px wide (T416&ndash;417).</div>
+      </details>
       <details class="ent" id="trk-care">
         <summary><span class="tag t-ship tn">T414</span><span class="ent-t">Car care &mdash; the Concierge&rsquo;s first full version</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">A <b>Car care</b> section in the Garage, below the x-ray car:

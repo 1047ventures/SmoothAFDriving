@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**415 tasks shipped** as of 2026-10-28.
+**417 tasks shipped** as of 2026-10-28.
 
 
 ## 2026-04
@@ -435,3 +435,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T413** · iOS: background-location purpose string was silently dropped (ITMS-90683)  _( 2026-10-28 )_
 - **T414** · Car Concierge: wear from driving, maintenance timeline, recalls, Learn/Ask/Book (wip)  _( 2026-10-28 )_
 - **T415** · Car Concierge: review fixes (evidence-only miles, sim drives, recall names, zone honesty, UI)  _( 2026-10-28 )_
+- **T416** · Night Circuit restyle (wip): tokens, fonts, Home, Drive, Recap  _( 2026-10-28 )_
+- **T417** · Night Circuit restyle: review fixes across all screens  _( 2026-10-28 )_
