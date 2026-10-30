@@ -292,10 +292,6 @@ export function bookUrl(query){
 export const RECALL_VIN_URL = 'https://www.nhtsa.gov/recalls';
 
 /** The car's context, written so any AI assistant can pick it up cold. */
-/** The Smooth AF concierge: a Vapi voice agent that answers car questions by phone. */
-export const CONCIERGE_PHONE = '(720) 634-1657';
-export const CONCIERGE_TEL = 'tel:+17206341657';
-
 export function askText(car, finding, odoNow = null){
   const who = carName(car) || 'my car';
   const miles = odoNow ? ` with about ${odoNow.toLocaleString('en-US')} miles` : '';

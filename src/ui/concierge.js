@@ -1,19 +1,21 @@
 /**
  * The in-app concierge call: a Vapi voice call that starts already knowing the
  * car (conciergeReadout). Tapping Ask or the call card opens this sheet; if
- * the call can't start (no mic, no network, Vapi down) it offers the phone line.
+ * the call can't start (no mic, no network, Vapi down) it says so.
  *
  * The Vapi key here is the PUBLIC one, made to ship in client code. The
  * assistant keeps the voice set in the Vapi dashboard; the prompt is ours, so
  * the readout rides along with it.
  */
 import { conciergeReadout, CONCIERGE_PROMPT } from '../services/concierge.js';
-import { CONCIERGE_TEL, CONCIERGE_PHONE } from '../services/carCare.js';
 import { loadHealthReport } from '../services/carHealth.js';
 import { batterySummary, loadBattery } from '../services/battery.js';
 
 const VAPI_PUBLIC_KEY = 'c037e1db-eb1f-4f35-939d-39656df96336';
 const VAPI_ASSISTANT_ID = '97cf071d-e633-414a-9b7d-6dc3b86acf9b';
+
+// About $1 a call at Vapi's all-in per-minute rate; the agent is cut off after this.
+const MAX_CALL_SECONDS = 10 * 60;
 
 let vapi = null;      // one client, set once the SDK has loaded
 let vapiP = null;     // the load, shared so two taps never build two clients
@@ -43,7 +45,6 @@ function el(){
         <button type="button" class="cg-mute" data-cg-mute aria-pressed="false">Mute</button>
         <button type="button" class="cg-end" data-cg-end>End</button>
       </div>
-      <a class="cg-phone hidden" href="${CONCIERGE_TEL}">Call ${CONCIERGE_PHONE} instead</a>
     </div>`;
   document.body.appendChild(sheet);
   sheet.addEventListener('click', e => {
@@ -62,7 +63,7 @@ function el(){
 const setStatus = t => { el().querySelector('.cg-status').textContent = t; };
 const setLevel = v => el().style.setProperty('--lvl', Math.min(1, v * 2.5).toFixed(2));
 
-const MIC_MSG = 'The concierge needs your microphone. Allow it in Settings, or call instead.';
+const MIC_MSG = 'The concierge needs your microphone. Allow it in Settings, then try again.';
 const micDenied = err => {
   try { return /notallowed|permission|denied/i.test(`${err?.name} ${err?.message} ${JSON.stringify(err)}`); }
   catch { return false; }
@@ -73,7 +74,6 @@ function failed(msg){
   el().querySelector('.cg-car').textContent = '';
   el().classList.add('cg--failed');
   setStatus(msg);
-  el().querySelector('.cg-phone').classList.remove('hidden');
   el().querySelector('[data-cg-end]').textContent = 'Close';
   el().querySelector('[data-cg-mute]').classList.add('hidden');
 }
@@ -110,7 +110,7 @@ function loadVapi(){
       if (!live || !FATAL.test(type)) return;
       failed(/^microphone-preflight-(NotAllowed|Security|Permission)/.test(type) || micDenied(e)
         ? MIC_MSG
-        : type === 'start-method-error' || type.startsWith('microphone-preflight') ? 'Couldn’t start the call.' : 'The call dropped.');
+        : type === 'start-method-error' || type.startsWith('microphone-preflight') ? 'Couldn’t start the call. Try again in a minute.' : 'The call dropped.');
       vapi.stop().catch(() => {});
     });
     return vapi;
@@ -128,7 +128,6 @@ export async function startConciergeCall(care, asked = null){
   const my = ++gen;
   const s = el();
   s.classList.remove('hidden', 'cg--failed', 'cg--talking');
-  s.querySelector('.cg-phone').classList.add('hidden');
   s.querySelector('[data-cg-end]').textContent = 'End';
   const mute = s.querySelector('[data-cg-mute]');
   mute.classList.remove('hidden'); mute.textContent = 'Mute'; mute.setAttribute('aria-pressed', 'false');
@@ -156,6 +155,7 @@ export async function startConciergeCall(care, asked = null){
     await loadVapi();
     if (my !== gen) return;   // ended (or restarted) while the SDK loaded
     const call = await vapi.start(VAPI_ASSISTANT_ID, {
+      maxDurationSeconds: MAX_CALL_SECONDS,
       firstMessage: name
         ? `Hey, it's the Smooth AF concierge. I've got your ${name} pulled up. What's going on?`
         : `Hey, it's the Smooth AF concierge. What's going on with your car?`,
@@ -166,9 +166,9 @@ export async function startConciergeCall(care, asked = null){
       },
     });
     if (my !== gen){ if (call) await vapi.stop().catch(() => {}); return; }   // ended while connecting
-    if (!call && live) failed('Couldn’t start the call.');   // the error event usually got there first
+    if (!call && live) failed('Couldn’t start the call. Try again in a minute.');   // the error event usually got there first
   } catch (err){
-    if (my === gen) failed(micDenied(err) ? MIC_MSG : 'Couldn’t start the call.');
+    if (my === gen) failed(micDenied(err) ? MIC_MSG : 'Couldn’t start the call. Try again in a minute.');
   } finally {
     settled();
   }

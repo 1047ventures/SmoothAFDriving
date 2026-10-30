@@ -5,7 +5,7 @@
  */
 import {
   loadCare, setOdometer, logService, markRecallsChecked, backfillLogMiles, odometerNow, drivingContext, findings, wearZones,
-  maintenance, cachedRecalls, fetchRecalls, learnUrl, bookUrl, RECALL_VIN_URL, CONCIERGE_PHONE, CONCIERGE_TEL,
+  maintenance, cachedRecalls, fetchRecalls, learnUrl, bookUrl, RECALL_VIN_URL,
 } from '../services/carCare.js';
 import { wearWindow } from '../services/carWear.js';
 import { openUrl } from '../utils/openUrl.js';
@@ -113,7 +113,6 @@ export function careHtml(c){
       <ul class="cc-tl">${tl}</ul>
       <div class="cc-call">
         <button type="button" class="cc-call-go" data-cc-call><span>Car questions?</span><b>Talk to the concierge</b></button>
-        <a class="cc-call-tel" href="${CONCIERGE_TEL}">or call ${CONCIERGE_PHONE}</a>
       </div>
     </section>`;
 }

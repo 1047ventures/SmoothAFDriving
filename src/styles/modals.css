@@ -115,6 +115,4 @@
 .cg-mute[aria-pressed="true"]{border-color:#E8B83A;color:#E8B83A}
 .cg-mute.hidden{display:none}
 .cg-end{border:0;background:#FF6A3D;color:#0B0B0C}
-.cg-phone{padding:10px;color:#FF6A3D;font:600 14px var(--sans);text-decoration:none}
-.cg-phone.hidden{display:none}
 @media (prefers-reduced-motion:reduce){.cg-orb span{animation:none!important;transition:none}}
