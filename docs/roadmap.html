@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 237</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 28, 2026 · 10:12 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 29, 2026 · 11:19 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -192,10 +192,10 @@
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
+        <li data-at="2026-10-29T23:30"><a href="#trk-wake"><span class="tag t-ship tn">T418</span><span class="bl-t">Car Wake: start the car, tap once, recording</span></a><span class="bl-d">Oct 29</span></li>
         <li data-at="2026-10-28T16:30"><a href="#trk-nc"><span class="tag t-ship tn">T416</span><span class="bl-t">Night Circuit: the new look, live</span></a><span class="bl-d">Oct 28</span></li>
         <li data-at="2026-10-28T15:40"><a href="#trk-care"><span class="tag t-ship tn">T414</span><span class="bl-t">Car care: wear from driving, maintenance, recalls</span></a><span class="bl-d">Oct 28</span></li>
         <li data-at="2026-10-28T15:20"><a href="#bug-plist"><span class="tag t-ship tn">T413</span><span class="bl-t">Fix: iPhone background-location text was missing</span></a><span class="bl-d">Oct 28</span></li>
-        <li data-at="2026-10-28T14:29"><a href="#trk-battery"><span class="tag t-ship tn">T410</span><span class="bl-t">Battery check: resting, starting dip, charging</span></a><span class="bl-d">Oct 28</span></li>
       </ul>
     </div>
     <div class="brief-row">
@@ -250,18 +250,18 @@
       </details>
 
       <details class="ent" id="trk-always">
-        <summary><span class="tag t-next tn">Q3&ndash;5</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q3)</span><br>&bull; a drive starts without you opening the app <span class="tn">(Q4)</span><br>&bull; a drive starts the moment the dongle powers up <span class="tn">(Q5)</span></div>
+        <summary><span class="tag t-next tn">Q3&ndash;4</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q3)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q4)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) is shipped.</div>
       </details>
 
       <details class="ent" id="trk-motiv">
-        <summary><span class="tag t-wait tn">Q6</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-wait tn">Q5</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Turning points into gas, car care or coaching &mdash; a partnership step, not just code. Waits until points (shipped T371) have run for a while.</div>
       </details>
 
       <details class="ent" id="trk-polish">
-        <summary><span class="tag t-wait tn">Q7&ndash;8</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q7)</span> and a better set of car icons <span class="tn">(Q8)</span>.</div>
+        <summary><span class="tag t-wait tn">Q6&ndash;7</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q6)</span> and a better set of car icons <span class="tn">(Q7)</span>.</div>
       </details>
     </div>
   </details>
@@ -290,6 +290,10 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="trk-wake">
+        <summary><span class="tag t-ship tn">T418</span><span class="ent-t">Car Wake &mdash; start the car, tap once, you&rsquo;re recording</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Starting the car powers the dongle, the phone connects, and iOS wakes Smooth AF even when it isn&rsquo;t open. A lock-screen notification says <b>&ldquo;Car connected &middot; Tap to start your drive.&rdquo;</b> One tap opens the app already reconnecting and recording. It stays quiet while you&rsquo;re in the app or mid-drive, for 10 minutes after a drive ends, and never more than once every 10 minutes. It asks for notification permission once, right after the dongle first links. iOS won&rsquo;t wake an app you swiped away, so leave it in the app switcher. New native code: built and compiled, reviewed for Bluetooth edge cases, but your car is the first real test (T418&ndash;419).</div>
+      </details>
       <details class="ent" id="trk-nc">
         <summary><span class="tag t-ship tn">T416</span><span class="ent-t">Night Circuit &mdash; the new look, live</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The whole app now wears the design you signed off on in the mockups. Near-black with neutral white, tangerine and green. Condensed numbers, small mono labels, a clean body font. Scores in the tangerine-to-gold gradient. Home has the big gradient score, the car name with a status pill, panel stats, tile buttons and a dashed Set destination. The Drive screen&rsquo;s edge glows <b>green when you&rsquo;re smooth</b>, red when braking and amber on the throttle, with green clean miles. Recap, Garage, Rewards, the leaderboard, sheets and forms all match. Turns now have their own sky blue on the map and charts; they used to read the same as accel. A reviewer checked 23 screens at 320 and 390&nbsp;px wide (T416&ndash;417).</div>
