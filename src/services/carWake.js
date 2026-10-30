@@ -15,6 +15,18 @@ export async function watchDongle(deviceId){
   try { await Native.watch({ deviceId: deviceId || '' }); } catch {}
 }
 
+/**
+ * Ask for notification permission once, right after a dongle connects, so the
+ * prompt arrives in context. Without it the wake still happens but there's
+ * nothing to tap, so a "no" gets a one-line explanation.
+ */
+const ASKED_KEY = 'smoothaf.carwake.asked';
+export async function askForNudgesOnce(onDenied){
+  if (!supported()) return;
+  try { if (localStorage.getItem(ASKED_KEY)) return; localStorage.setItem(ASKED_KEY, '1'); } catch { return; }
+  try { const r = await Native.requestNotifications(); if (r && r.granted === false) onDenied?.(); } catch {}
+}
+
 /** No nudge while a drive is already recording. */
 export async function setRecording(recording){
   if (!supported()) return;

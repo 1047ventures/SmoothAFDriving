@@ -32,7 +32,12 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
 
     private var central: CBCentralManager?
     private var peripheral: CBPeripheral?
-    var recording = false   // set from JS; no nudge mid-drive
+    /** Set from JS. No nudge mid-drive, and ending a drive counts as a nudge:
+     *  the car is often still on, and a link blip would otherwise say "tap to
+     *  start" right after you finished. */
+    var recording = false {
+        didSet { if oldValue && !recording { UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: kLastNotified) } }
+    }
 
     private var deviceId: UUID? {
         UserDefaults.standard.string(forKey: kDevice).flatMap(UUID.init(uuidString:))
@@ -50,6 +55,8 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
     /** JS saved (or forgot) the dongle. nil stops watching. */
     func watch(_ id: String?) {
         let old = UserDefaults.standard.string(forKey: kDevice)
+        // Called on every reconnect from JS: nothing to do if it's the same dongle.
+        if old == id, id != nil, peripheral != nil { arm(); return }
         if let id = id, UUID(uuidString: id) != nil {
             UserDefaults.standard.set(id, forKey: kDevice)
         } else {
@@ -74,7 +81,12 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
     // MARK: CBCentralManagerDelegate
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state == .poweredOn { arm() }
+        guard central.state == .poweredOn else { return }
+        // A background relaunch can hand back the dongle already connected, and
+        // then didConnect never fires — nudge for it here (the quiet window
+        // stops a duplicate).
+        if peripheral?.state == .connected { nudge() }
+        arm()
     }
 
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String: Any]) {
@@ -91,7 +103,9 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect p: CBPeripheral, error: Error?) {
-        arm()
+        // A connect that fails instantly every time (pairing, encryption) would
+        // otherwise spin; give it a breather.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in self?.arm() }
     }
 
     // MARK: The notification
@@ -124,18 +138,23 @@ public class CarWakePlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "watch", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setRecording", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "requestNotifications", returnType: CAPPluginReturnPromise),
     ]
 
-    /** watch({ deviceId }) — remember the dongle to wake on; asks for notification
-     *  permission the first time. deviceId null/empty stops watching. */
+    /** watch({ deviceId }) — remember the dongle to wake on. Empty stops watching. */
     @objc func watch(_ call: CAPPluginCall) {
         let id = call.getString("deviceId")
         DispatchQueue.main.async {
             CarWake.shared.watch((id?.isEmpty ?? true) ? nil : id)
-            guard id?.isEmpty == false else { call.resolve(["ok": true]); return }
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
-                call.resolve(["ok": true, "notifications": granted])
-            }
+            call.resolve(["ok": true])
+        }
+    }
+
+    /** Ask once, from JS, right after the dongle connects — so the prompt comes
+     *  with context. Resolves { granted }; the system only shows it once. */
+    @objc func requestNotifications(_ call: CAPPluginCall) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
+            call.resolve(["granted": granted])
         }
     }
 

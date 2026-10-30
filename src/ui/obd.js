@@ -15,7 +15,8 @@ import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendin
 import { state } from '../state.js';
 import { Capacitor } from '@capacitor/core';
 import { OBD_DEVICE_KEY } from '../constants.js';
-import { watchDongle } from '../services/carWake.js';
+import { watchDongle, askForNudgesOnce } from '../services/carWake.js';
+import { showToast } from '../utils/toast.js';
 
 /**
  * Remember the last adapter we connected to, so the next drive can reconnect on
@@ -95,6 +96,8 @@ async function checkCarHealth(key){
 
 /** Everything that runs once when the dongle links up, in order. */
 async function onCarLinked(){
+  // First link: ask to send the "Car connected · tap to start your drive" nudge.
+  askForNudgesOnce(() => showToast('Notifications are off, so starting the car can’t prompt you. Turn them on in Settings › Smooth AF.'));
   let key;
   try { key = await identifyCar(); } catch { key = getActiveVehicle()?.id; }
   setBatteryKey(key);
