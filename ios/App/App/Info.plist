@@ -43,6 +43,8 @@
 	<string>Smooth AF keeps tracking your drive in the background so your route and score stay accurate even with the screen off or while you're navigating in Maps.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Smooth AF uses your location to score your drive and track your route.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Smooth AF uses the microphone when you call the concierge about your car.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Smooth AF uses motion sensors to measure how smoothly you accelerate, brake, and corner.</string>
 	<key>NSSupportsLiveActivities</key>

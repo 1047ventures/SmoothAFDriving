@@ -26,7 +26,8 @@
     "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
-    "@google/genai": "^1.51.0"
+    "@google/genai": "^1.51.0",
+    "@vapi-ai/web": "^3.0.1"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",

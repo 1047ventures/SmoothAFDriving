@@ -95,3 +95,26 @@
   .share-save-btn{appearance:none;border:0;cursor:pointer;width:100%;background:var(--tang);color:var(--bg);font-family:var(--serif);font-weight:700;font-size:20px;padding:14px;border-radius:12px;margin-top:12px;margin-bottom:10px}
   .share-save-btn:active{filter:brightness(.88)}
   .share-skip-btn{appearance:none;border:0;background:transparent;color:var(--cream-dim);font-size:14px;width:100%;padding:8px;cursor:pointer}
+
+/* ── Concierge call (src/ui/concierge.js) ── */
+.cg{position:fixed;inset:0;z-index:400;display:flex;align-items:flex-end;justify-content:center;background:rgba(11,11,12,.72);padding:0 12px calc(12px + env(safe-area-inset-bottom))}
+.cg.hidden{display:none}
+.cg-card{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 18px 18px;border-radius:24px;background:#161618;border:1px solid #232325;text-align:center}
+.cg-k{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#A5A4A0}
+.cg-orb{--lvl:0;width:112px;height:112px;margin:8px 0;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(255,106,61,.22),transparent 70%)}
+.cg-orb span{width:64px;height:64px;border-radius:50%;background:var(--grad);transform:scale(calc(.85 + var(--lvl) * .35));transition:transform .12s ease-out;box-shadow:0 0 28px rgba(255,106,61,.45)}
+.cg:not(.cg--talking) .cg-orb span{animation:cg-breathe 2.4s ease-in-out infinite}
+.cg--failed .cg-orb span{animation:none;background:#2a2a2d;box-shadow:none}
+@keyframes cg-breathe{50%{transform:scale(.92)}}
+.cg-status{margin:0;font:600 17px var(--sans);color:#F2F1EE}
+.cg-car{margin:0;font:400 13px var(--sans);color:#A5A4A0}
+.cg-car:empty{display:none}
+.cg-btns{display:flex;gap:10px;width:100%;margin-top:8px}
+.cg-btns button{flex:1;min-height:48px;border-radius:999px;font:600 15px var(--sans);cursor:pointer;appearance:none}
+.cg-mute{border:1px solid rgba(242,241,238,.2);background:rgba(242,241,238,.05);color:#F2F1EE}
+.cg-mute[aria-pressed="true"]{border-color:#E8B83A;color:#E8B83A}
+.cg-mute.hidden{display:none}
+.cg-end{border:0;background:#FF6A3D;color:#0B0B0C}
+.cg-phone{padding:10px;color:#FF6A3D;font:600 14px var(--sans);text-decoration:none}
+.cg-phone.hidden{display:none}
+@media (prefers-reduced-motion:reduce){.cg-orb span{animation:none!important;transition:none}}

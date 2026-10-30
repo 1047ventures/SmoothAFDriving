@@ -5,16 +5,14 @@
  */
 import {
   loadCare, setOdometer, logService, markRecallsChecked, backfillLogMiles, odometerNow, drivingContext, findings, wearZones,
-  maintenance, cachedRecalls, fetchRecalls, learnUrl, bookUrl, askText, RECALL_VIN_URL, CONCIERGE_PHONE, CONCIERGE_TEL,
+  maintenance, cachedRecalls, fetchRecalls, learnUrl, bookUrl, RECALL_VIN_URL, CONCIERGE_PHONE, CONCIERGE_TEL,
 } from '../services/carCare.js';
 import { wearWindow } from '../services/carWear.js';
 import { openUrl } from '../utils/openUrl.js';
-import { Capacitor } from '@capacitor/core';
+import { startConciergeCall } from './concierge.js';
 import { showToast } from '../utils/toast.js';
 
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
-/** A phone can call the concierge; a computer gets the question to paste instead. */
-const canCall = () => Capacitor.isNativePlatform() || /iPhone|iPad|Android/i.test(navigator.userAgent);
 const STATUS_WORD = { overdue: 'Overdue', soon: 'Soon', ok: 'OK', unknown: '' };
 
 /**
@@ -113,7 +111,10 @@ export function careHtml(c){
       ${fs || '<p class="cc-calm">Nothing in your recent driving needs attention.</p>'}
       <div class="cc-sub">Maintenance</div>
       <ul class="cc-tl">${tl}</ul>
-      <a class="cc-call" href="${CONCIERGE_TEL}"><span>Car questions? Call the concierge</span><b>${CONCIERGE_PHONE}</b></a>
+      <div class="cc-call">
+        <button type="button" class="cc-call-go" data-cc-call><span>Car questions?</span><b>Talk to the concierge</b></button>
+        <a class="cc-call-tel" href="${CONCIERGE_TEL}">or call ${CONCIERGE_PHONE}</a>
+      </div>
     </section>`;
 }
 
@@ -134,6 +135,7 @@ export function bindCare(c, onChange){ current = c; rerender = onChange; }
 document.addEventListener('click', async e => {
   const jump = e.target.closest?.('[data-cc-jump]');
   if (jump) return document.querySelector('.cc')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (e.target.closest?.('[data-cc-call]')) return startConciergeCall(current);
   const el = e.target.closest?.('[data-cc-open],[data-cc-ask],[data-cc-done],[data-cc-learn],[data-cc-odo-edit],[data-cc-recalls-checked]');
   if (!el || !current) return;
   if (el.dataset.ccOpen) return openUrl(el.dataset.ccOpen);
@@ -157,17 +159,10 @@ document.addEventListener('click', async e => {
     return rerender();
   }
   if (el.dataset.ccAsk != null){
+    // The call starts with the car's readout and this finding, so the
+    // concierge already knows what they're asking about.
     const f = current.findings[+el.dataset.ccAsk];
-    if (!f) return;
-    // On a phone, Ask calls the concierge; tell it what the card says.
-    if (canCall()){ location.href = CONCIERGE_TEL; return; }
-    const text = askText(current.car, f, current.odo);
-    // Hand it to whatever assistant they use.
-    try {
-      if (navigator.share) return await navigator.share({ text });
-    } catch (err){ if (err?.name === 'AbortError') return; }
-    try { await navigator.clipboard.writeText(text); showToast('Copied: paste it into ChatGPT, Claude or any assistant.'); }
-    catch { showToast('Couldn’t copy. Try again.', 'error'); }
+    if (f) startConciergeCall(current, f);
   }
 });
 

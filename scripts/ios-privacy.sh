@@ -65,6 +65,10 @@ set_string NSBluetoothAlwaysUsageDescription \
 set_string NSBluetoothPeripheralUsageDescription \
   "Smooth AF connects to your OBD-II adapter to read throttle, RPM, and true vehicle speed from the car."
 
+# Microphone: the in-app concierge call (Vapi voice agent, src/ui/concierge.js).
+set_string NSMicrophoneUsageDescription \
+  "Smooth AF uses the microphone when you call the concierge about your car."
+
 # Export compliance. Without this App Store Connect asks "does your app use
 # encryption?" on EVERY upload and holds the build back from testers until it's
 # answered by hand — which would defund the whole point of automatic builds.
