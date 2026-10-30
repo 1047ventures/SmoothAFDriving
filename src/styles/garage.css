@@ -112,6 +112,8 @@
   .cc-f-adv{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:rgba(242,241,238,.72)}
   .cc-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
   .cc-act{appearance:none;cursor:pointer;flex:1 1 0;min-width:0;min-height:44px;padding:0 8px;border-radius:999px;border:1px solid rgba(242,241,238,.2);background:rgba(242,241,238,.05);color:var(--cream);font:600 13px var(--sans)}
+  .cc-call{display:flex;flex-direction:column;gap:2px;margin-top:14px;padding:12px 14px;min-height:44px;border-radius:14px;border:1px solid rgba(255,106,61,.35);background:rgba(255,106,61,.08);color:var(--cream);text-decoration:none;font:500 13px var(--sans)}
+  .cc-call b{color:var(--tang);font:600 15px var(--mono)}
   .cc-act--go{flex:0 0 auto;border-color:rgba(255,106,61,.55);background:rgba(255,106,61,.14);color:var(--tang)}
   .cc-rc{list-style:none;margin:8px 0 0;padding:0}
   .cc-rc li{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px;color:var(--cream);border-top:1px solid rgba(242,241,238,.08)}
