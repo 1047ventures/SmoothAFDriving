@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { harshnessToColor, forceSegmentColor, scoreColor, dimColor } from '../utils/color.js';
 
 describe('harshnessToColor', () => {
-  it('returns green for low harshness', () => expect(harshnessToColor(0.5)).toBe('#6FB669'));
+  it('returns green for low harshness', () => expect(harshnessToColor(0.5)).toBe('#3FC46A'));
   it('returns yellow for moderate', () => expect(harshnessToColor(2.0)).toBe('#B6B85A'));
   it('returns red for high', () => expect(harshnessToColor(5.0)).toBe('#E03B2F'));
 });
 
 describe('forceSegmentColor', () => {
   it('returns green when coasting (near-zero forces)', () => {
-    expect(forceSegmentColor(0, 0)).toBe('#6FB669');
+    expect(forceSegmentColor(0, 0)).toBe('#3FC46A');
   });
   it('returns brake color for negative la', () => {
     const color = forceSegmentColor(-3.5, 0);
@@ -17,14 +17,14 @@ describe('forceSegmentColor', () => {
   });
   it('returns accel color for positive la', () => {
     const color = forceSegmentColor(3.0, 0);
-    expect(color).toBe('#E8A03A');
+    expect(color).toBe('#E8B83A');
   });
 });
 
 describe('scoreColor', () => {
-  it('green for 90', () => expect(scoreColor(90)).toBe('#6FB669'));
-  it('gold for 70', () => expect(scoreColor(70)).toBe('#C4A962'));
-  it('orange for 50', () => expect(scoreColor(50)).toBe('#E8A03A'));
+  it('green for 90', () => expect(scoreColor(90)).toBe('#3FC46A'));
+  it('gold for 70', () => expect(scoreColor(70)).toBe('#FFB23D'));
+  it('orange for 50', () => expect(scoreColor(50)).toBe('#E8B83A'));
   it('red for 30', () => expect(scoreColor(30)).toBe('#E03B2F'));
 });
 
