@@ -8,7 +8,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        window?.rootViewController = AppBridgeViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
@@ -20,5 +20,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
+    }
+}
+
+// Capacitor only auto-registers the npm plugins listed in capacitor.config.json
+// (packageClassList, rewritten by every `cap sync`). Plugins that live in this
+// app target have to be registered by hand, or JS calls to them fail and
+// motion silently falls back to the web API (all sensor axes read 0).
+class AppBridgeViewController: CAPBridgeViewController {
+    override open func capacitorDidLoad() {
+        bridge?.registerPluginInstance(SmoothMotionPlugin())
+        bridge?.registerPluginInstance(SmoothLiveActivityPlugin())
+        bridge?.registerPluginInstance(CarWakePlugin())
     }
 }
