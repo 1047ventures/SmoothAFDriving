@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**419 tasks shipped** as of 2026-10-29.
+**420 tasks shipped** as of 2026-10-30.
 
 
 ## 2026-04
@@ -439,3 +439,4 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T417** · Night Circuit restyle: review fixes across all screens  _( 2026-10-28 )_
 - **T418** · Car Wake: dongle connects -> app wakes -> 'tap to start your drive' (wip)  _( 2026-10-29 )_
 - **T419** · Car Wake: review fixes  _( 2026-10-29 )_
+- **T420** · iOS: register app-target plugins (SmoothMotion, LiveActivity, CarWake)  _( 2026-10-30 )_

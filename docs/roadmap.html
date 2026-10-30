@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 237</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Oct 29, 2026 · 11:19 PM MDT</b>
+      <span class="lbl">Updated</span> <b>Oct 30, 2026 · 12:44 PM MDT</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -192,10 +192,10 @@
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
+        <li data-at="2026-10-30T12:44"><a href="#bug-sensors"><span class="tag t-ship tn">T420</span><span class="bl-t">Fix: iPhone sensors read 0 (motion, Live Activity, Car Wake never loaded)</span></a><span class="bl-d">Oct 30</span></li>
         <li data-at="2026-10-29T23:30"><a href="#trk-wake"><span class="tag t-ship tn">T418</span><span class="bl-t">Car Wake: start the car, tap once, recording</span></a><span class="bl-d">Oct 29</span></li>
         <li data-at="2026-10-28T16:30"><a href="#trk-nc"><span class="tag t-ship tn">T416</span><span class="bl-t">Night Circuit: the new look, live</span></a><span class="bl-d">Oct 28</span></li>
         <li data-at="2026-10-28T15:40"><a href="#trk-care"><span class="tag t-ship tn">T414</span><span class="bl-t">Car care: wear from driving, maintenance, recalls</span></a><span class="bl-d">Oct 28</span></li>
-        <li data-at="2026-10-28T15:20"><a href="#bug-plist"><span class="tag t-ship tn">T413</span><span class="bl-t">Fix: iPhone background-location text was missing</span></a><span class="bl-d">Oct 28</span></li>
       </ul>
     </div>
     <div class="brief-row">
@@ -431,6 +431,10 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="bug-sensors">
+        <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">iPhone sensors panel showed 0 on all six axes</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Capacitor 8 only loads the plugins listed in its generated config, which covers the npm ones but not the three that live in the app itself: motion, Live Activity and Car Wake. None of them had loaded since Oct 15, so motion fell back to the browser API, which stays silent on iPhone. The app now registers all three at launch. Fixed from the next TestFlight build (T420).</div>
+      </details>
       <details class="ent" id="bug-plist">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">Apple warning ITMS-90683: background-location text missing</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The build script removed the text and then failed to add it back, because of the apostrophe in &ldquo;you&rsquo;re&rdquo;, yet still printed &ldquo;set&rdquo;. Build 236 shipped without it, and iOS can refuse to offer &ldquo;Always allow location&rdquo; without it, which breaks background recording. The script now escapes the text and reads every key back, failing the build if one is missing. Fixed from build 237 (T413).</div>
