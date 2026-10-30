@@ -1,4 +1,5 @@
 import { $, $$ } from '../utils/dom.js';
+import { setRecording as setCarWakeRecording } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
 import { CFG, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
@@ -400,6 +401,7 @@ export function startRecording(){
   }
 
   state.recording = true;
+  setCarWakeRecording(true);   // no "tap to start" nudge mid-drive
   state.simulated = false;
   state.startTime = Date.now();
   // Fix 1: show an explicit "acquiring" state instead of a silent 0/--/ticking
@@ -564,6 +566,7 @@ export function stopRecording(opts){
   // an Event (or nothing), which has no such field and is ignored.
   const trimTo = opts && typeof opts.trimToMs === 'number' ? opts.trimToMs : null;
   state.recording = false;   // set immediately so persistActiveDrive can't re-save
+  setCarWakeRecording(false);
   stopAutoEndWatch();
   hudStop();                 // persists a new personal-best streak
   musicStop();
@@ -583,6 +586,7 @@ export function stopRecording(opts){
   if (state.tickInterval){ clearInterval(state.tickInterval); state.tickInterval = null; }
   if (state.wakeLock){ state.wakeLock.release().catch(() => {}); state.wakeLock = null; }
   state.recording = false;
+  setCarWakeRecording(false);
   if (trimTo != null) trimDriveTail(state, trimTo);   // drop the parked tail before scoring
   finalizeAndReview({
     onReview: renderReview,
@@ -604,6 +608,7 @@ export function stopRecording(opts){
 export function startSimulatedDrive(){
   resetState();
   state.recording = true;
+  setCarWakeRecording(true);   // no "tap to start" nudge mid-drive
   state.simulated = true;
   state.startTime = Date.now();
   $('#rec-source').textContent = 'Demo drive';

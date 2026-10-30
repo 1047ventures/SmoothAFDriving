@@ -53,7 +53,10 @@ set_string NSMotionUsageDescription \
 "$PB" -c "Delete :UIBackgroundModes" "$PLIST" >/dev/null 2>&1 || true
 "$PB" -c "Add :UIBackgroundModes array" "$PLIST"
 "$PB" -c "Add :UIBackgroundModes:0 string location" "$PLIST"
-echo "[ios-privacy] set UIBackgroundModes=[location]"
+# bluetooth-central: lets iOS relaunch the app when the saved OBD dongle
+# connects (car started) — the Car Wake nudge (CarWakePlugin.swift).
+"$PB" -c "Add :UIBackgroundModes:1 string bluetooth-central" "$PLIST"
+echo "[ios-privacy] set UIBackgroundModes=[location, bluetooth-central]"
 
 # Bluetooth: the OBD-II dongle. iOS kills the app on first CoreBluetooth call
 # without this string, exactly like location and motion above.

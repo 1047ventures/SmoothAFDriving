@@ -11,6 +11,7 @@
 		36C33FB09051CE7C86560EB3 /* SmoothAFWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CCD09D26CBD2EA0AD342CC24 /* SmoothAFWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		36D3BDC625144FAE643B97A9 /* DriveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABA3BA5141736B06FE1F58B /* DriveActivityAttributes.swift */; };
 		4CEC0546AEBBBEE387344F3D /* SmoothMotionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E7D12CEA79AD52CDC89033 /* SmoothMotionPlugin.swift */; };
+		BD4D6053527706ADC2E69CDA /* CarWakePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC729BE50EEE552426D1084 /* CarWakePlugin.swift */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -54,6 +55,7 @@
 		12019643E5EE5F9B3805DDCB /* SmoothAFWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmoothAFWidgetBundle.swift; sourceTree = "<group>"; };
 		1745927234C1594D0D6FDAD0 /* SmoothAFWidget-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SmoothAFWidget-Info.plist"; sourceTree = "<group>"; };
 		23E7D12CEA79AD52CDC89033 /* SmoothMotionPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmoothMotionPlugin.swift; sourceTree = "<group>"; };
+		4AC729BE50EEE552426D1084 /* CarWakePlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CarWakePlugin.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		46878E7D303662A4007E4F64 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				CA9FCDE1FFC75FBF6FB49C96 /* SmoothLiveActivityPlugin.swift */,
 				23E7D12CEA79AD52CDC89033 /* SmoothMotionPlugin.swift */,
+				4AC729BE50EEE552426D1084 /* CarWakePlugin.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -273,6 +276,7 @@
 				9A62BCA9A7A29412AEE4B73A /* SmoothLiveActivityPlugin.swift in Sources */,
 				36D3BDC625144FAE643B97A9 /* DriveActivityAttributes.swift in Sources */,
 				4CEC0546AEBBBEE387344F3D /* SmoothMotionPlugin.swift in Sources */,
+				BD4D6053527706ADC2E69CDA /* CarWakePlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

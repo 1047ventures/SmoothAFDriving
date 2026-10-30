@@ -15,6 +15,7 @@ import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendin
 import { state } from '../state.js';
 import { Capacitor } from '@capacitor/core';
 import { OBD_DEVICE_KEY } from '../constants.js';
+import { watchDongle } from '../services/carWake.js';
 
 /**
  * Remember the last adapter we connected to, so the next drive can reconnect on
@@ -24,12 +25,14 @@ import { OBD_DEVICE_KEY } from '../constants.js';
 function rememberDevice(deviceId, name){
   if (!deviceId) return;
   try { localStorage.setItem(OBD_DEVICE_KEY, JSON.stringify({ deviceId, name: name || '' })); } catch {}
+  watchDongle(deviceId);   // let the phone wake the app when this dongle next connects
 }
 function loadDevice(){
   try { return JSON.parse(localStorage.getItem(OBD_DEVICE_KEY)) || null; } catch { return null; }
 }
 function forgetDevice(){
   try { localStorage.removeItem(OBD_DEVICE_KEY); } catch {}
+  watchDongle(null);
 }
 
 /**
@@ -678,6 +681,8 @@ export function wireObdPanel(){
   // dongle is usually unpowered until the ignition comes on, which happens AFTER
   // the app opens. So keep trying — on every return to the app, and on a slow
   // timer for a few minutes — and stop the moment it connects.
+  // Drivers who saved a dongle before Car Wake existed: hand it to the watcher.
+  watchDongle(loadDevice()?.deviceId || null);
   autoReconnect();
   let tries = 0;
   const retry = setInterval(() => {

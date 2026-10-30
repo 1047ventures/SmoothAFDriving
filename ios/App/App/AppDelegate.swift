@@ -7,7 +7,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Car Wake: re-arm the dongle watch on every launch — including the
+        // background relaunch iOS does for a Bluetooth event (CarWakePlugin.swift).
+        CarWake.shared.startIfWatching()
         return true
     }
 
