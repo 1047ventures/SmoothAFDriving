@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**421 tasks shipped** as of 2026-10-30.
+**422 tasks shipped** as of 2026-10-30.
 
 
 ## 2026-04
@@ -441,3 +441,4 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T419** · Car Wake: review fixes  _( 2026-10-29 )_
 - **T420** · iOS: register app-target plugins (SmoothMotion, LiveActivity, CarWake)  _( 2026-10-30 )_
 - **T421** · Concierge: Ask calls the Vapi voice agent on a phone; call card in Car care  _( 2026-10-30 )_
+- **T422** · Concierge: in-app Vapi voice call that starts with the car's readout  _( 2026-10-30 )_
