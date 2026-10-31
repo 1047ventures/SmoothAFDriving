@@ -157,7 +157,7 @@ function paintScoreTrend(st, now){
 
 // ── The inputs ribbon ────────────────────────────────────────────────────────
 
-const GREEN = '125,196,118', AMBER = '232,160,58', RED = '224,96,80', CREAM = '244,235,217';
+const GREEN = '63,196,106', AMBER = '232,184,58', RED = '224,59,47', CREAM = '242,241,238';   // Night Circuit
 const colorFor = (la) => { const a = Math.abs(la); return a < 1.5 ? GREEN : a < 3.0 ? AMBER : RED; };
 
 /**
@@ -183,15 +183,23 @@ export function drawRibbon(canvas, series, st, now){
   const yOf = (la) => mid - clamp(la / LA_RANGE, -1, 1) * (h / 2) * 0.92;
   const xOf = (x) => padX + x * w;
 
-  // The "smooth zone" — stay inside it and you're doing it right.
   const bandHalf = (1.5 / LA_RANGE) * (h / 2) * 0.92;
-  ctx.fillStyle = `rgba(${GREEN},.07)`;
-  ctx.fillRect(padX, mid - bandHalf, w, bandHalf * 2);
-  ctx.strokeStyle = `rgba(${CREAM},.10)`; ctx.lineWidth = 1; ctx.setLineDash([3, 5]);
-  ctx.beginPath(); ctx.moveTo(padX, mid); ctx.lineTo(padX + w, mid); ctx.stroke();
-  ctx.setLineDash([]);
+  // The "smooth zone" — stay inside it and you're doing it right. Drawn last,
+  // behind everything (destination-over), so the left-edge fade below only
+  // ages out the data, never the zone itself.
+  const drawZone = () => {
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.strokeStyle = `rgba(${CREAM},.10)`; ctx.lineWidth = 1; ctx.setLineDash([3, 5]);
+    ctx.beginPath(); ctx.moveTo(padX, mid); ctx.lineTo(padX + w, mid); ctx.stroke();
+    ctx.setLineDash([]);
+    // Soft top and bottom: a glow to stay inside, not a slab.
+    const v = ctx.createLinearGradient(0, mid - bandHalf, 0, mid + bandHalf);
+    v.addColorStop(0, `rgba(${GREEN},0)`); v.addColorStop(.5, `rgba(${GREEN},.06)`); v.addColorStop(1, `rgba(${GREEN},0)`);
+    ctx.fillStyle = v; ctx.fillRect(0, mid - bandHalf, cssW, bandHalf * 2);   // edge to edge: no side seams
+    ctx.globalCompositeOperation = 'source-over';
+  };
 
-  if (!series.length){ return; }
+  if (!series.length){ drawZone(); return; }
 
   // Speed silhouette (bottom-anchored), smoothed. Stops are where it touches the floor.
   const vMax = Math.max(14, ...series.map(p => p.speed));
@@ -207,7 +215,6 @@ export function drawRibbon(canvas, series, st, now){
   ctx.beginPath(); trace(); ctx.lineTo(xOf(series[series.length - 1].x), padY + h); ctx.lineTo(xOf(series[0].x), padY + h); ctx.closePath();
   ctx.fillStyle = `rgba(${CREAM},.05)`; ctx.fill();
   ctx.beginPath(); trace(); ctx.strokeStyle = `rgba(${CREAM},.10)`; ctx.lineWidth = 1; ctx.stroke();
-  if (teaching){ ctx.fillStyle = `rgba(${CREAM},.38)`; ctx.font = '600 10px system-ui, sans-serif'; ctx.textBaseline = 'bottom'; ctx.fillText('SPEED', padX + 2, padY + h - 2); }
 
   // Harsh inputs and full stops within the window, drawn as markers.
   const from = now - WINDOW_MS;
@@ -242,6 +249,8 @@ export function drawRibbon(canvas, series, st, now){
   fade.addColorStop(0, 'rgba(0,0,0,1)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = fade; ctx.fillRect(padX, 0, w * 0.28, cssH);
   ctx.globalCompositeOperation = 'source-over';
+  drawZone();
+  if (teaching){ ctx.fillStyle = `rgba(${CREAM},.38)`; ctx.font = '600 10px system-ui, sans-serif'; ctx.textBaseline = 'bottom'; ctx.fillText('SPEED', padX + 2, padY + h - 2); }
 
   // "Now".
   const last = series[series.length - 1];
