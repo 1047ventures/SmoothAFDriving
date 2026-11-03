@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**427 tasks shipped** as of 2026-11-02.
+**429 tasks shipped** as of 2026-11-02.
 
 
 ## 2026-04
@@ -449,3 +449,5 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 
 ## 2026-11
 - **T427** · Car Wake: hold the dongle only in the background, so the app can find it  _( 2026-11-02 )_
+- **T428** · Scoring groundwork: fix Ride window, credit stops before upload, settle the live score, capture raw motion  _( 2026-11-02 )_
+- **T429** · Docs: say plainly that the score is mostly GPS, motion only reaches it through Ride  _( 2026-11-02 )_
