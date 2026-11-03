@@ -270,14 +270,23 @@ One file per screen. Never add a new override block at the bottom — edit the e
 
 ### Scoring pipeline
 ```
-GPS 1Hz → processSample() → detectEvent() → events[]
-Motion 60Hz → createMotionHandler() → peak-hold 500ms → detectEventWithThresh()
-Stop → finalizeAndReview() → analyzeDrive() (7-dim) → score
+GPS 1Hz → processSample() → speed, longAccel (from speed change) ─┐
+Motion 60Hz → roadRoughness (vertical + pitch, 6s window) ────────┼→ analyzeDrive() → score
+OBD (when connected) → throttle ──────────────────────────────────┘
+Motion 60Hz → peak-hold 500ms → detectEventWithThresh() → events[] (never scored)
 ```
 
-`scoreFromEvents` handles the event-penalty model with confidence blending (short drives blend toward 100 to prevent 30-second perfect scores).
+`analyzeDrive` scores three things: smoothness 50%, momentum 30%, braking 20%,
+plus a speed bonus and a traffic stretch. **The accelerometer and gyro reach the
+score only through road roughness (ride composure).** Pedal smoothness and braking
+come from GPS speed changes. Events feed the recap's counts, coaching and car wear,
+not the score. Motion calibration gets one 10-second try that starts with the
+drive, so a driver who waits 10+ seconds to pull away usually fails it, and each
+drive records the outcome in `drive.sensor`. `docs/values.html` holds the live rubric.
 
-`analyzeDrive` runs 7 independent dimensions (peakHarshness, throttle, steering, braking, cornering, transitions, momentum) and produces a weighted composite.
+Raw 60 Hz motion is saved for the owner's account only (`services/sensors/rawCapture.js`,
+private `raw-motion` bucket); read it back with `scripts/pull-raw.sh` and
+`scripts/raw-decode.py`.
 
 ### Drive recovery (iOS background eviction)
 Every 30s during a live drive, `persistActiveDrive()` snapshots state to `localStorage`. On startup, `checkRecoveredDrive()` checks for a saved snapshot and restores it as a completed drive if it's <4h old and has ≥20 samples.

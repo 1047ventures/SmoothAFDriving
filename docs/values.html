@@ -142,7 +142,7 @@
 <div class="wrap">
 
   <header>
-    <p class="brand">Smooth AF · Values &amp; Vision · Updated Oct 27, 2026</p>
+    <p class="brand">Smooth AF · Values &amp; Vision · Updated Nov 2, 2026</p>
     <h1>What you need <span class="grad">to know</span></h1>
     <p class="intro">Everything about Smooth AF on one page: what it is, how we make calls, how we grade your driving, what's shipped, and a cheat sheet for whatever seat you're in. Read it once, then go drive like you mean it.</p>
     <ul class="toc" aria-label="Contents">
@@ -167,7 +167,7 @@
     <span class="lbl">The product</span>
     <h2>So what is Smooth AF?</h2>
     <div class="facts">
-      <div class="k">What it does</div><div class="v">Grades how smoothly you drive and coaches you to get better. It uses the phone's motion sensors and GPS, plus the car's own computer when an OBD-II plug-in reader is connected.</div>
+      <div class="k">What it does</div><div class="v">Grades how smoothly you drive and coaches you to get better. Today the score comes mostly from GPS, with the phone's motion sensors measuring how calm the ride was, plus the car's own computer when an OBD-II plug-in reader is connected. A motion-based score is in the works.</div>
       <div class="k">Mission</div><div class="v">Make people better drivers. Smooth, efficient, reading the road three cars ahead instead of stomping the brakes when it surprises them.</div>
       <div class="k">North Star</div><div class="v">Getting measurably better over time. The score, points and leaderboard are the bait. Improvement is the catch.</div>
       <div class="k">Platforms</div><div class="v">Native iOS app via TestFlight, and a web app. No Android app.</div>
@@ -222,7 +222,7 @@
       <table>
         <thead><tr><th>Measure</th><th>Weight</th><th>What it measures</th><th>Scores 100 → 0</th></tr></thead>
         <tbody>
-          <tr><td class="nm">Smoothness</td><td><span class="num">0.50</span></td><td>Typical forward/back g (85th percentile), pedal jerk, cabin calm (when the phone is mounted), and throttle changes (when a reader is connected). Missing inputs hand their weight to the others.</td><td><span class="num">0.30 → 2.5 m/s²</span><br><span class="num">0.05 → 0.6 m/s³</span><br><span class="num">2 → 15 %/s throttle</span></td></tr>
+          <tr><td class="nm">Smoothness</td><td><span class="num">0.50</span></td><td>Typical forward/back g and pedal jerk (both from GPS speed changes), cabin calm (the only part from the motion sensors), and throttle changes (when a reader is connected). Missing inputs hand their weight to the others.</td><td><span class="num">0.30 → 2.5 m/s²</span><br><span class="num">0.05 → 0.6 m/s³</span><br><span class="num">2 → 15 %/s throttle</span></td></tr>
           <tr><td class="nm">Momentum</td><td><span class="num">0.30</span></td><td>Full stops per mile. Forced stops (lights, queues, signs) count 0.25.</td><td><span class="num">0 → 4.5 stops/mi</span></td></tr>
           <tr><td class="nm">Braking</td><td><span class="num">0.20</span></td><td>Average deceleration over the 30 seconds before each stop.</td><td><span class="num">0.5 → 2.0 m/s²</span></td></tr>
         </tbody>
