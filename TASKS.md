@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**422 tasks shipped** as of 2026-10-30.
+**427 tasks shipped** as of 2026-11-02.
 
 
 ## 2026-04
@@ -442,3 +442,10 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T420** · iOS: register app-target plugins (SmoothMotion, LiveActivity, CarWake)  _( 2026-10-30 )_
 - **T421** · Concierge: Ask calls the Vapi voice agent on a phone; call card in Car care  _( 2026-10-30 )_
 - **T422** · Concierge: in-app Vapi voice call that starts with the car's readout  _( 2026-10-30 )_
+- **T423** · Concierge: remove the phone number fallback; cap calls at 10 min (~$1)  _( 2026-10-30 )_
+- **T424** · Tests: colour expectations for the Night Circuit palette (unblocks iOS CI)  _( 2026-10-30 )_
+- **T425** · Drive screen: inputs graph without the blotchy slab (soft zone, fade only ages the data), Night Circuit colours  _( 2026-10-30 )_
+- **T426** · Drive screen: drop the grey panel behind the inputs graph  _( 2026-10-30 )_
+
+## 2026-11
+- **T427** · Car Wake: hold the dongle only in the background, so the app can find it  _( 2026-11-02 )_
