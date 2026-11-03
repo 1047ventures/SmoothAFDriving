@@ -279,7 +279,7 @@
     <div class="legend"><span><i style="background:#E8501A"></i>Accelerator pedal (OBD)</span><span><i style="background:#C49A28"></i>Sideways g (phone)</span><span><i style="background:#C9BFAC;height:2px"></i>Speed (OBD)</span></div>
     <div class="facts" style="margin-top:18px">
       <div class="k">From the reader</div><div class="v">Throttle and pedal (scored). Wheel speed, RPM, load, gear, torque and horsepower, temperatures, fuel level, voltage (recorded). VIN and trouble codes (read on connect).</div>
-      <div class="k">From the phone</div><div class="v">Forward/back g and jerk, cabin vibration (scored). GPS route, used to compare the same road over time. Sideways g per corner (planned).</div>
+      <div class="k">From the phone</div><div class="v">From GPS: forward/back g and jerk (scored), and the route, used to compare the same road over time. From the motion sensors: cabin vibration (scored), and harsh-moment detection for the recap (not scored). A score built on the motion sensors, including sideways g per corner, is in the works.</div>
       <div class="k">Not available</div><div class="v">Brake pedal and steering angle are on the car's private network. Braking is reconstructed from pedal at zero, falling speed and backward g.</div>
     </div>
   </section>
@@ -387,8 +387,7 @@
         </ul></div>
         <div><h4>Open items</h4><ul>
           <li>Scores are computed on the phone and uploaded; server-side scoring is needed before the leaderboard matters.</li>
-          <li>Database lockdown for three ID-trusting functions is built; it goes live when the migration is applied.</li>
-          <li>The auto-migrate job's secret is broken; migrations are applied by hand.</li>
+                    <li>The auto-migrate job's secret is broken; migrations run through the Supabase Setup workflow instead.</li>
           <li>OBD trouble codes and VIN reading are untested on a real car.</li>
           <li>No Android app.</li>
           <li>Full tech-debt list is on the roadmap.</li>
@@ -465,7 +464,7 @@
     <div class="facts">
       <div class="k">Calibration</div><div class="v">Scoring thresholds are fitted to a few drivers' drives and will shift with more. Ride-composure thresholds are provisional.</div>
       <div class="k">Untested</div><div class="v">Car Health and VIN reading are tested against reader reply formats, not a real car.</div>
-      <div class="k">Security</div><div class="v">Three database functions trusted a bare device or account ID. The fix is built and goes live with one database update: developer read functions are removed, and deleting, claiming or restoring a drive requires proof of ownership. Drives uploaded before Oct 17, 2026 stay reachable by device ID until claimed.</div>
+      <div class="k">Security</div><div class="v">Drives uploaded before Oct 17, 2026 stay reachable by device ID until claimed. Newer ones need proof of ownership to delete, claim or restore.</div>
       <div class="k">Integrity</div><div class="v">Scores are computed on the phone, so a determined user could upload a score they didn't earn.</div>
       <div class="k">Braking</div><div class="v">The approach-length half of the braking score doesn't vary between stops; only deceleration counts.</div>
       <div class="k">Portability</div><div class="v">On a new phone, points for older drives are estimated because the cloud doesn't store them.</div>
