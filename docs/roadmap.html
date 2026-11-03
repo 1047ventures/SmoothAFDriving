@@ -165,9 +165,9 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 252</b>
+      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 253</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 3, 2026 · 2:48 PM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 3, 2026 · 3:15 PM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -192,10 +192,10 @@
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
+        <li data-at="2026-11-03T15:09"><a href="#ship-notes"><span class="tag t-ship tn">T433</span><span class="bl-t">Every TestFlight build now says what changed</span></a></li>
         <li data-at="2026-11-03T14:43"><a href="#bug-seat"><span class="tag t-ship tn">T432</span><span class="bl-t">Fix: the start prompt fired walking past the car</span></a></li>
         <li data-at="2026-11-02T22:11"><a href="#ship-store"><span class="tag t-ship tn">T430</span><span class="bl-t">Security holes closed; App Store requirements built</span></a></li>
         <li data-at="2026-11-02T20:39"><a href="#bug-ride"><span class="tag t-ship tn">T428</span><span class="bl-t">Fix: one jolt could wreck the Ride score; raw sensor capture started</span></a></li>
-        <li data-at="2026-11-02T17:04"><a href="#bug-ancel"><span class="tag t-ship tn">T427</span><span class="bl-t">Fix: the app couldn&rsquo;t find the Ancel dongle</span></a><span class="bl-d">Nov 2</span></li>
       </ul>
     </div>
     <div class="brief-row">
@@ -299,6 +299,10 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="ship-notes">
+        <summary><span class="tag t-ship tn">T433</span><span class="ent-t">Every TestFlight build now says what changed</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">After each upload, the build&rsquo;s &ldquo;What to Test&rdquo; fills in on its own from the commits since the last good build, in plain language. The same list drafts the App Store &ldquo;What&rsquo;s New&rdquo; for each release. Build 253 is the first with notes.</div>
+      </details>
       <details class="ent" id="bug-seat">
         <summary><span class="tag t-ship tn">T432</span><span class="ent-t">Fix: the start prompt fired walking past the car</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The prompt fired as soon as the phone linked to the dongle, and the dongle stays powered while the car is parked, so 20 feet away was enough. Now it needs a strong signal for several reads in a row. With the app open, a drive starts the same way, or when the car moves. The strength needed starts at a default and adjusts to your phone and car from readings taken while driving. The default is a best estimate, not yet checked in a real car.</div>
