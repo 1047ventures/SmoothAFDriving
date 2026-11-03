@@ -389,6 +389,9 @@ dashboard and signup capture all run on Cloudflare.
 - Shared pure logic used by functions + tests lives in `src/shared/`.
 - Redirects (`/tracker`, etc.) live in `public/_redirects`.
 
+## Migrations
+New files in `supabase/migrations/` don't apply themselves. Run the Supabase Setup workflow with `dry_run=true`, read what it would apply, then run it with `dry_run=false`.
+
 ## Branches
 - `main` — production, and the only branch in use
 

@@ -165,9 +165,9 @@
     <p class="kicker">Smooth AF · Driving</p>
     <h1>Build Log <span class="light">&amp;</span> Roadmap</h1>
     <div class="meta">
-      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 249</b>
+      <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 251</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 2, 2026 · 8:43 PM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 2, 2026 · 10:16 PM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -183,7 +183,7 @@
     <div class="brief-row">
       <span class="brief-k">Now</span>
       <div class="brief-v">
-        <b>Motion-based score</b> started: fixes in, raw data collecting &middot; <b>Car Concierge</b> waits on Trevor
+        <b>App Store</b> submission: built, waiting on your items &middot; <b>Motion-based score</b> collecting raw data
         <ol class="pips">
           <li class="done">X-ray car</li><li class="done">Battery</li><li class="done">Wear from driving</li><li class="done">Recalls</li><li class="done">Maintenance timeline</li><li class="done">Learn &middot; Ask &middot; Book</li><li class="next">Vapi voice agent &middot; Lotus Mobile</li>
         </ol>
@@ -192,10 +192,10 @@
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
+        <li data-at="2026-11-02T22:11"><a href="#ship-store"><span class="tag t-ship tn">T430</span><span class="bl-t">Security holes closed; App Store requirements built</span></a></li>
         <li data-at="2026-11-02T20:39"><a href="#bug-ride"><span class="tag t-ship tn">T428</span><span class="bl-t">Fix: one jolt could wreck the Ride score; raw sensor capture started</span></a></li>
         <li data-at="2026-11-02T17:04"><a href="#bug-ancel"><span class="tag t-ship tn">T427</span><span class="bl-t">Fix: the app couldn&rsquo;t find the Ancel dongle</span></a><span class="bl-d">Nov 2</span></li>
         <li data-at="2026-10-30T13:39"><a href="#trk-care"><span class="tag t-ship tn">T422</span><span class="bl-t">Concierge: talk to it in the app, it already knows your car</span></a><span class="bl-d">Oct 30</span></li>
-        <li data-at="2026-10-30T13:09"><a href="#need-vapi"><span class="tag t-ship tn">T421</span><span class="bl-t">Concierge: Ask calls the AI voice agent</span></a><span class="bl-d">Oct 30</span></li>
       </ul>
     </div>
     <div class="brief-row">
@@ -208,6 +208,7 @@
     <div class="brief-row brief-you">
       <span class="brief-k">Needs you</span>
       <ul class="brief-v brief-list">
+        <li><a href="#need-store"><span class="tag t-wait">Now</span><span class="bl-t">Finish the App Store submission</span></a></li>
         <li><a href="#need-vapi"><span class="tag t-wait">Next</span><span class="bl-t">Send Trevor&rsquo;s booking details</span></a></li>
         <li><a href="#need-admin"><span class="tag t-wait">Soon</span><span class="bl-t">Rotate the admin password</span></a></li>
       </ul>
@@ -216,8 +217,12 @@
 
   <!-- ══ NEEDS YOU ══ -->
   <details class="sec sec--alert" open>
-    <summary><h2>Needs you</h2><span class="count">2 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
+    <summary><h2>Needs you</h2><span class="count">3 open</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="need-store">
+        <summary><span class="tag t-wait">Now</span><span class="ent-t">Finish the App Store submission</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Give me a support email. Set a Vapi spend limit and restrict origins. Create a Sign in with Apple key, or decide to turn Apple sign-in off. Record a short real drive for the reviewer. Have someone read the privacy policy. Then paste the listing from docs/app-store.md into App Store Connect. Separately, ask GitHub Support to remove the ReverseThrift commits still reachable through closed PRs 1 and 18, and rotate that project&rsquo;s anon key if it&rsquo;s still in use.</div>
+      </details>
       <details class="ent" id="need-vapi">
         <summary><span class="tag t-wait">Next</span><span class="ent-t">Send Trevor&rsquo;s booking number + service area to wire up Book</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Ask now opens an in-app call with the Vapi agent, and it starts with the car&rsquo;s readout (codes, battery, due service, last 5 drives). Book still searches Google Maps. Send Trevor&rsquo;s booking text/call number and the area he covers; the repo is public, so say if it&rsquo;s a personal cell. The pasted prompt only matters for people who dial the number; in-app calls bring their own.</div>
@@ -435,6 +440,10 @@
   <details class="sec">
     <summary><h2>Bugs</h2><span class="count">fixed</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="ship-store">
+        <summary><span class="tag t-ship">Shipped</span><span class="ent-t">Security holes closed; App Store requirements built</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">An audit found 66 old drives readable by anyone, and a database rule letting anonymous users file drives under any account. Both are closed and checked live. Code injection paths in the admin page, leaderboard, routes and garage are escaped, and Capacitor is on 8.6.0. For the App Store (T430, build 251): account deletion, privacy and support pages, consent before the first AI call, a privacy manifest, iPhone only, a demo drive, and a bundled map library. Beating the ETA no longer moves the score or points, since that rewards speeding. The leaderboard is hidden because nothing can fill it yet. The listing and screenshots are in docs/app-store.md.</div>
+      </details>
       <details class="ent" id="bug-ride">
         <summary><span class="tag t-fixed">Fixed</span><span class="ent-t">One jolt could wreck the Ride score</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The roughness reading was meant to cover 6 seconds but grew to cover about the last half of the drive, so one jolt could zero Ride for many minutes. That took the Apex drive out to 71, when about 86 was fair (an estimate). Now a true 6 seconds. Same release (T428, build 249): traffic-light credit reaches the uploaded score, the live score says Settling for the first 5 moving minutes, each drive records whether calibration worked, and raw 60 Hz accel and gyro save for the owner&rsquo;s drives.</div>
