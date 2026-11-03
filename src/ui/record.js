@@ -2,7 +2,7 @@ import { $, $$ } from '../utils/dom.js';
 import { setRecording as setCarWakeRecording } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
+import { CFG, LIVE_ETA_REFRESH_MS, LIVE_SCORE_SETTLE_SEC, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, fmtClock, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -10,10 +10,11 @@ import { renderReview } from './review.js';
 import { renderRecAvatar } from './garage.js';
 import { finalizeAndReview, buildDriveFromState } from '../services/drive.js';
 import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
-import { analyzeDrive, computePitStopMs } from '../services/scoring.js';
+import { analyzeDrive, computePitStopMs, movingSecondsSoFar } from '../services/scoring.js';
 import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
+import { beginRawCapture, finishRawCapture, discardRawCapture, uploadPendingRaw } from '../services/sensors/rawCapture.js';
 import { nativeMotionAvailable, startNativeMotion, stopNativeMotion } from '../services/sensors/nativeMotion.js';
 import { startLocationWatch, stopLocationWatch, getCurrentPositionOnce } from '../services/sensors/location.js';
 import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
@@ -282,24 +283,27 @@ export function updateLiveUI(){
       if (state.samples.length >= 3){
         const a = analyzeDrive(buildDriveFromState());
         state.liveScore = a.score;
+        if (!state.liveSettled) state.liveSettled = movingSecondsSoFar(state.samples) >= LIVE_SCORE_SETTLE_SEC;
         // Same analysis feeds the Stops stat and the stop markers on the inputs ribbon.
         state.liveStops = a.fullStops;
         // analyzeDrive works on start-relative times; the ribbon draws on the wall clock.
         state.liveStopMarkers = a.stopMarkers.map(m => ({ ...m, t: m.t + state.startTime }));
       }
     }
-    if (scoreEl) scoreEl.textContent = state.liveScore;
+    if (scoreEl) scoreEl.textContent = state.liveSettled ? state.liveScore : '--';
   }
 
   // Push the live score + speed to the Lock Screen / Dynamic Island (throttled
   // inside the service; no-op off native iOS).
-  updateDriveActivity({ score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) });
+  updateDriveActivity(state.liveSettled
+    ? { score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) }
+    : { score: 0, status: 'smooth', speedMph: Math.round(mpsToMph(speedMps)) });
 
   // Arc gauge: fill dashoffset from score, color + glow from driving state
   const arcProgress = document.getElementById('arc-progress');
   const arcSvg      = document.getElementById('arc-svg');
   if (arcProgress && arcSvg && !arcProgress._eventLock){
-    arcProgress.style.strokeDashoffset = String(499.2 * (1 - state.liveScore / 100));
+    arcProgress.style.strokeDashoffset = String(499.2 * (1 - (state.liveSettled ? state.liveScore : 0) / 100));
     const arcColor = isBrake ? 'rgba(224,59,47,.92)' : isAccel ? 'rgba(63,196,106,.92)' : 'rgba(242,241,238,.9)';
     const glowCol  = isBrake ? 'rgba(224,59,47,.5)'  : isAccel ? 'rgba(63,196,106,.5)'  : 'rgba(242,241,238,.28)';
     arcProgress.setAttribute('stroke', arcColor);
@@ -428,7 +432,7 @@ export function startRecording(){
   state.liveStops = 0; state.liveStopMarkers = [];
   hudStart();
   musicStart();
-  startDriveActivity({ score: state.liveScore || 100, speedMph: 0 }); // Lock Screen / Dynamic Island (iOS 16.1+ native only)
+  startDriveActivity({ score: 0, speedMph: 0 }); // Lock Screen / Dynamic Island (iOS 16.1+ native only)
 
   if ('wakeLock' in navigator){
     navigator.wakeLock.request('screen')
@@ -469,6 +473,7 @@ export function startRecording(){
   calib.startTime = Date.now();
   setCalibUI('calibrating');
 
+  beginRawCapture(state.startTime);
   state.motionHandler = createMotionHandler({ flashEvent });
   // Prefer native Core Motion on iOS (zero permission prompts); fall back to the
   // web devicemotion stream everywhere else, or if the native plugin is missing.
@@ -588,12 +593,15 @@ export function stopRecording(opts){
   state.recording = false;
   setCarWakeRecording(false);
   if (trimTo != null) trimDriveTail(state, trimTo);   // drop the parked tail before scoring
+  const driveStart = state.startTime;
+  const rawSaved = finishRawCapture();
   finalizeAndReview({
-    onReview: renderReview,
+    onReview: (d) => { rawSaved.then(() => uploadPendingRaw()); renderReview(d); },
     onListUpdate: renderDriveList,
     // Fix 2: too-short drives used to strand the user on the record screen
     // with no feedback (finalizeAndReview returned early, silently).
     onTooShort: () => {
+      rawSaved.then(() => discardRawCapture(driveStart));
       showScreen('home');
       showToast('Drive too short to save — under 0.3 mi', 'error');
     },

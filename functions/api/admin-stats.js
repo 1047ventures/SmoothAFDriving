@@ -168,6 +168,31 @@ export async function onRequestPost(context) {
       return json(200, { ok: true, drives: rows });
     }
 
+    if (view === 'raw_files') {
+      // The owner's raw motion chunks (scripts/pull-raw.sh). No start_time lists the
+      // drives that have any; with one, returns short-lived download links.
+      const uid = String(body.user_id || '');
+      if (!/^[0-9a-f-]{36}$/i.test(uid)) return json(400, { ok: false, error: 'missing user_id' });
+      const start = String(body.start_time || '');
+      if (start && !/^\d+$/.test(start)) return json(400, { ok: false, error: 'bad start_time' });
+      const sbStorage = (path, payload) => fetch(`${SB_URL}/storage/v1/${path}`, {
+        method: 'POST',
+        headers: { apikey: SB_SERVICE_KEY, Authorization: `Bearer ${SB_SERVICE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const prefix = start ? `${uid}/${start}` : uid;
+      const listed = await sbStorage('object/list/raw-motion', { prefix, limit: 1000, sortBy: { column: 'name', order: 'asc' } });
+      if (!listed.ok) return json(502, { ok: false, error: `storage list ${listed.status}` });
+      const items = await listed.json();
+      if (!start) return json(200, { ok: true, drives: items.map(i => i.name) });
+      const paths = items.map(i => `${prefix}/${i.name}`);
+      if (!paths.length) return json(200, { ok: true, files: [] });
+      const signed = await sbStorage('object/sign/raw-motion', { expiresIn: 600, paths });
+      if (!signed.ok) return json(502, { ok: false, error: `storage sign ${signed.status}` });
+      const links = await signed.json();
+      return json(200, { ok: true, files: links.map((l, i) => ({ name: items[i].name, url: `${SB_URL}/storage/v1${l.signedURL}` })) });
+    }
+
     if (view === 'user') {
       // Accept a whole identity's device-id list (merged person), or a single id.
       const ids = (Array.isArray(body.device_ids) && body.device_ids.length ? body.device_ids

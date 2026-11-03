@@ -337,6 +337,15 @@ export function analyzeDrive(drive){
   };
 }
 
+/** Seconds spent moving, for the live score's settling period. */
+export function movingSecondsSoFar(samples){
+  let ms = 0;
+  for (let i = 1; i < samples.length; i++){
+    if ((samples[i].speed || 0) > 2) ms += samples[i].t - samples[i-1].t;
+  }
+  return ms / 1000;
+}
+
 export function driveCoaching(analysis){
   const { dims, stopsPerMile, fullStops } = analysis;
   const cards = [];

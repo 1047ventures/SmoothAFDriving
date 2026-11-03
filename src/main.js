@@ -21,6 +21,7 @@ import { state } from './state.js';
 import { syncUserProfile } from './services/supabase.js';
 import { initAuthUI } from './ui/auth.js';
 import { refreshIfNeeded, isSignedIn } from './services/auth.js';
+import { uploadPendingRaw } from './services/sensors/rawCapture.js';
 import { restoreDrivesForUser } from './services/drive.js';
 import { Capacitor } from '@capacitor/core';
 import { wireObdPanel } from './ui/obd.js';
@@ -73,6 +74,7 @@ function boot(){
   safeInit('resumeSession',        () => {
     refreshIfNeeded().then(() => {
       if (!isSignedIn()) return;
+      uploadPendingRaw();   // raw motion from a drive that never got to upload
       return restoreDrivesForUser().then(r => { if (r?.added > 0) renderDriveList(); });
     }).catch(() => {});
   });

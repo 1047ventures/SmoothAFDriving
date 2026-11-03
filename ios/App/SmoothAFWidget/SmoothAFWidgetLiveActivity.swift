@@ -29,7 +29,7 @@ struct SmoothAFWidgetLiveActivity: Widget {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("SMOOTH AF").font(.system(size: 10, weight: .bold)).kerning(2).foregroundStyle(.secondary)
-                    Text("\(context.state.score)")
+                    Text(context.state.score > 0 ? "\(context.state.score)" : "--")
                         .font(.system(size: 42, weight: .bold, design: .serif)).italic()
                         .foregroundStyle(scoreColor(context.state.status))
                 }
@@ -49,16 +49,16 @@ struct SmoothAFWidgetLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 1) {
                         Text("Smooth").font(.system(size: 11)).foregroundStyle(.secondary)
-                        Text("\(context.state.score)").font(.system(size: 24, weight: .bold, design: .serif)).italic()
+                        Text(context.state.score > 0 ? "\(context.state.score)" : "--").font(.system(size: 24, weight: .bold, design: .serif)).italic()
                             .foregroundStyle(scoreColor(context.state.status))
                     }
                 }
             } compactLeading: {
                 Text("\(context.state.speedMph)").font(.system(size: 15, weight: .bold)).foregroundStyle(cream)
             } compactTrailing: {
-                Text("\(context.state.score)").font(.system(size: 15, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
+                Text(context.state.score > 0 ? "\(context.state.score)" : "--").font(.system(size: 15, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
             } minimal: {
-                Text("\(context.state.score)").font(.system(size: 13, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
+                Text(context.state.score > 0 ? "\(context.state.score)" : "--").font(.system(size: 13, weight: .bold)).foregroundStyle(scoreColor(context.state.status))
             }
             .widgetURL(URL(string: "smoothaf://drive"))
             .keylineTint(scoreColor(context.state.status))

@@ -1,7 +1,7 @@
 import { $, $$ } from '../utils/dom.js';
 import { showScreen } from './router.js';
 import { improvementVerdict } from '../services/improvement.js';
-import { applyAnalysis } from '../services/drive.js';
+import { applyAnalysis, creditForcedStops } from '../services/drive.js';
 import { openTrends } from './trends.js';
 import { analyzeDrive, drivingStyleVerdict, driveCoaching, destinationTier, momentumSeries, driveNarrative, driveFacts } from '../services/scoring.js';
 import { mpsToMph, metersToMiles, fmtDuration, clamp, haversine } from '../utils/math.js';
@@ -9,7 +9,7 @@ import { forceSegmentColor, dimColor, scoreColor } from '../utils/color.js';
 import { DIM_DISPLAY, APP_VERSION, ETA_BUFFER, TRAFFIC_FRESH_MS, TRAFFIC_MIN_TRIP_M, TRAFFIC_MIN_FREE_SEC } from '../constants.js';
 import { loadDrives, loadDriverName, updateStoredDrive, recomputeLifetimeScore } from '../services/storage.js';
 import { baseTiles } from '../utils/maptiles.js';
-import { classifyStops, countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
+import { countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
 import { showToast } from '../utils/toast.js';
 import { engineerNotes } from '../services/engineerNotes.js';
 import { fetchTrafficRatio } from '../services/routing.js';
@@ -42,22 +42,18 @@ async function annotateStopCauses(drive, analysis){
   const markers = analysis.stopMarkers || [];
   if (!markers.length || !drive.samples?.length) return;
 
-  const features = await fetchStopFeatures(drive.startTime ?? drive.id ?? drive.ts, markers);
-  if (token !== _causeToken || features == null) return;          // a newer recap opened, or no data
-  const causes = classifyStops(markers, drive.samples, features);
-
-  // ── Feed the causes into the score (only when they're newly learned) ────────
-  const kinds = causes.map(c => ({ kind: c.kind }));
-  if (JSON.stringify(kinds) !== JSON.stringify(drive.stopCauses || null)){
-    const before = Math.round(drive.score ?? analysis.score ?? 0);
-    drive.stopCauses = kinds;
-    applyAnalysis(drive, analyzeDrive(drive));  // now cause-aware: forced stops discounted; keeps the clock
-    updateStoredDrive(drive);                   // make it stick…
-    recomputeLifetimeScore();                   // …and follow through to the home/lifetime number
-    if (drive.score !== before){
-      renderReview(drive);                      // repaint with the credited score; the re-run
-      return;                                   // finds causes already set, so it settles here
-    }
+  // Also runs from the drive's upload (one shared lookup), so this always hears
+  // whether the credit moved the score, whichever of the two started it.
+  const credit = await creditForcedStops(drive, markers);
+  if (token !== _causeToken || !credit) return;                   // a newer recap opened, or no data
+  const { causes, scoreChanged } = credit;
+  if (scoreChanged){
+    // Repaint with the credited score (the re-run finds causes already set, so it
+    // settles there), but never pull someone back from wherever they've gone since.
+    const onScreen = document.getElementById('screen-review')?.classList.contains('active')
+      && reviewDrive?.startTime === drive.startTime;
+    if (onScreen) renderReview(drive);
+    return;
   }
 
   // Per-stop wording on the map markers.

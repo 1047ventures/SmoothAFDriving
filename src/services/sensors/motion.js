@@ -8,6 +8,7 @@ import {
 import { dot3, normalise3, solveLS3 } from '../../utils/linalg.js';
 import { mpsToMph } from '../../utils/math.js';
 import { detectEventWithThresh } from './gps.js';
+import { captureRaw } from './rawCapture.js';
 
 // Run at end of calibration window — returns true on success
 export function calibrateAxes(){
@@ -37,6 +38,8 @@ export function createMotionHandler(callbacks = {}){
   const { flashEvent } = callbacks;
   return function motionHandler(ev){
     if (!state.recording) return;
+    state.motionEvents++;
+    captureRaw(ev);
 
     // gravity-included for orientation; pure accel for motion
     const ag = ev.accelerationIncludingGravity;
@@ -79,12 +82,17 @@ export function createMotionHandler(callbacks = {}){
     if (calib.up) {
       const vertAccel = dot3(calib.up, [mx, my, mz]);
       state.roughnessBuf.push(vertAccel);
+      let pushed = 1;
       // Pitch rate × speed gives fore-aft rocking m/s² — catches bumps on upright-mounted phones
       if (calib.gyroAvail && rr && state.lastGpsPos) {
         const pitchContrib = Math.abs(rr.beta || 0) * (Math.PI / 180) * (state.lastGpsPos.speed || 0) * 0.5;
         state.roughnessBuf.push(pitchContrib);
+        pushed = 2;
       }
-      if (state.roughnessBuf.length > 360) state.roughnessBuf.shift(); // 6s
+      // 6s at 60 Hz. A motion event can add two readings, so trim by what it added:
+      // removing just one let the buffer grow all drive, and a single jolt then
+      // held this reading up for minutes instead of seconds.
+      state.roughnessBuf.splice(0, Math.max(0, state.roughnessBuf.length - 360 * pushed));
       if (state.roughnessBuf.length >= 60) {
         const mean = state.roughnessBuf.reduce((s,v)=>s+v,0)/state.roughnessBuf.length;
         state.currentRoughness = Math.sqrt(

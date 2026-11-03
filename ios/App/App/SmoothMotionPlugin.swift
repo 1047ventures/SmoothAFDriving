@@ -52,6 +52,7 @@ public class SmoothMotionPlugin: CAPPlugin, CAPBridgedPlugin {
                     "ax": ua.x * g,          "ay": ua.y * g,          "az": ua.z * g,
                     "gx": (ua.x + gr.x) * g, "gy": (ua.y + gr.y) * g, "gz": (ua.z + gr.z) * g,
                     "ra": rr.z * deg,        "rb": rr.x * deg,        "rg": rr.y * deg,
+                    "ts": m.timestamp,
                 ])
             }
             call.resolve(["ok": true])

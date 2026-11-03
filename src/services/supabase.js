@@ -82,7 +82,13 @@ export async function pushDriveToSupabase(drive){
       obd:             drive.obd ?? null,
       event_count:     drive.eventCount,
       simulated:       !!drive.simulated,
-      settings:        drive.settingsSnapshot || null,
+      // Sensor status and stop causes ride along in the settings JSON: they say what
+      // the score was based on, and need no column of their own.
+      settings: drive.settingsSnapshot ? {
+        ...drive.settingsSnapshot,
+        ...(drive.sensor ? { sensor: drive.sensor } : {}),
+        ...(drive.stopCauses ? { stopCauses: drive.stopCauses } : {}),
+      } : null,
       samples:         drive.samples,
       events:          drive.events,
       dest_label:       drive.destination?.label ?? null,

@@ -270,6 +270,7 @@ export function onGpsUpdate(pos, callbacks = {}){
       const ok = calibrateAxes ? calibrateAxes() : false;
       calib.done   = ok;
       calib.failed = !ok;
+      calib.endedAt = Date.now();
       if (setCalibUI) setCalibUI(ok ? 'done' : 'failed');
     }
   }

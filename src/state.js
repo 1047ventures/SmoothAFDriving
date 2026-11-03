@@ -19,7 +19,7 @@ export let calib = {
 export function resetCalib(){
   calib = { active:false, done:false, failed:false, pairs:[],
             fwd:null, lat:null, up:null, motionBuf:[], gravBuf:[], startTime:0,
-            gyroAvail:null, gyroZeroTs:0 };
+            gyroAvail:null, gyroZeroTs:0, endedAt:0 };
 }
 
 export const state = {
@@ -43,6 +43,7 @@ export const state = {
   lastMotionEventT: -Infinity,
   lastGpsPos: null,
   // Road roughness
+  motionEvents: 0,      // motion readings received this drive (recorded with the drive)
   roughnessBuf: [],     // rolling buffer of vertical accel samples
   currentRoughness: 0,  // RMS noise of vertical axis (m/s²) — ambient road texture (baseline)
   peakVertJolt: 0,      // peak vertical jolt since the last GPS sample consumed it —
@@ -55,6 +56,7 @@ export const state = {
   motionHandler: null,
   simTimer: null,
   liveScore: 100,
+  liveSettled: false,   // enough moving time for the live score to mean something
   tickInterval: null,
   wakeLock: null,
   driveStartScore: 100,
@@ -89,6 +91,8 @@ export function resetState(){
   state.peakWindowMs = 0;
   state.lastMotionEventT = -Infinity;
   state.lastGpsPos = null;
+  state.motionEvents = 0;
+  state.liveSettled = false;
   state.roughnessBuf = [];
   state.currentRoughness = 0;
   state.peakVertJolt = 0;

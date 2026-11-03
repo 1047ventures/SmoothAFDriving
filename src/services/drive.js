@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state, calib } from '../state.js';
 import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, CFG, RESCORE_VERSION, RESCORE_DONE_KEY } from '../constants.js';
 import {
   loadDrives,
@@ -6,9 +6,12 @@ import {
   saveLifetimeScore,
   saveDrives,
   recomputeLifetimeScore,
+  updateStoredDrive,
   loadDriverName,
   getSyncedIds,
 } from './storage.js';
+import { classifyStops, fetchStopFeatures } from './signals.js';
+import { rawCaptureStats } from './sensors/rawCapture.js';
 import { analyzeDrive, effectivenessScore, compositeScore, computePitStopMs, movingSeconds } from './scoring.js';
 import { isTrafficAware, etaBuffer } from './routing.js';
 import {
@@ -242,6 +245,15 @@ export function buildDriveFromState(){
     endedBy: state.endedBy || null,
     simulated: state.simulated,
     settingsSnapshot: { ...CFG },
+    // How the motion sensors did this drive, so a score can be judged by its inputs.
+    sensor: {
+      calib: calib.done ? 'done' : calib.failed ? 'failed' : 'never',
+      calibAtMs: calib.endedAt ? calib.endedAt - state.startTime : null,
+      calibPairs: calib.pairs.length,
+      gyro: calib.gyroAvail ?? null,
+      motionEvents: state.motionEvents,
+      raw: rawCaptureStats(),
+    },
     destination:    state.destination || null,
     targetEtaSec:   state.targetEtaSec || null,
     routeDistanceM: state.routeDistanceM || null,
@@ -314,7 +326,7 @@ export function finalizeAndReview(callbacks = {}){
   drive.vehicleId = activeVehicleId();
   drive.wear = driveWear(drive, drive.vehicleId);
   saveDrive(drive);
-  pushDriveToSupabase(drive);
+  uploadAfterStopCredit(drive, analysis.stopMarkers);
   // Non-blocking — corridor detection runs after review renders
   detectCorridors(drive).catch(() => {});
 
@@ -394,6 +406,60 @@ export async function restoreDrivesForUser(){
   const result = mergeCloudDrives(rows);
   if (result.added > 0) recomputeLifetimeScore();
   return { ...result, fetched: rows.length };
+}
+
+const stopCredits = new Map();
+
+/**
+ * Look up why each stop happened and, when it moves the score, credit the forced
+ * ones (Q4: a light, its queue or a stop sign barely counts against momentum).
+ * Saves the result. Shared by the drive's upload and its recap, so they get the
+ * same answer from one lookup. Resolves to null when the map data isn't available.
+ */
+export function creditForcedStops(drive, markers){
+  const key = drive.startTime ?? drive.id ?? drive.ts;
+  if (stopCredits.has(key)) return stopCredits.get(key);
+  const run = (async () => {
+    if (!markers?.length || !drive.samples?.length) return null;
+    const features = await fetchStopFeatures(drive.startTime ?? drive.id ?? drive.ts, markers);
+    if (features == null) return null;
+    const causes = classifyStops(markers, drive.samples, features);
+    const kinds = causes.map(c => ({ kind: c.kind }));
+    if (JSON.stringify(kinds) === JSON.stringify(drive.stopCauses || null)) return { causes, scoreChanged: false };
+    const before = Math.round(drive.score ?? 0);
+    drive.stopCauses = kinds;
+    applyAnalysis(drive, analyzeDrive(drive));
+    updateStoredDrive(drive);
+    recomputeLifetimeScore();
+    return { causes, scoreChanged: drive.score !== before };
+  })().finally(() => stopCredits.delete(key));
+  stopCredits.set(key, run);
+  return run;
+}
+
+// How long a finished drive's upload waits for that credit: past one map mirror's
+// 15s timeout. Later than this it goes without (the phone still applies it), so a
+// slow map server can't hold up a drive.
+const STOP_CREDIT_WAIT_MS = 20000;
+
+function uploadAfterStopCredit(drive, markers){
+  // In the background (an engine-off auto-end) iOS may suspend the app mid-wait, so
+  // upload now rather than risk the drive sitting until the next launch.
+  if (typeof document !== 'undefined' && document.visibilityState === 'hidden'){
+    pushDriveToSupabase(drive);
+    return;
+  }
+  const isStored = () => loadDrives().some(d => d.startTime === drive.startTime);
+  const wasStored = isStored();
+  let timer;
+  const waited = new Promise(resolve => { timer = setTimeout(resolve, STOP_CREDIT_WAIT_MS); });
+  Promise.race([creditForcedStops(drive, markers).catch(() => null), waited])
+    .finally(() => {
+      clearTimeout(timer);
+      // Deleted during the wait: uploading now would bring it back on the next restore.
+      if (wasStored && !isStored()) return;
+      pushDriveToSupabase(drive);
+    });
 }
 
 /**

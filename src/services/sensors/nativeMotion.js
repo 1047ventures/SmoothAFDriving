@@ -32,6 +32,7 @@ export async function startNativeMotion(handler){
         acceleration:                 { x: d.ax, y: d.ay, z: d.az },
         accelerationIncludingGravity: { x: d.gx, y: d.gy, z: d.gz },
         rotationRate:                 { alpha: d.ra, beta: d.rb, gamma: d.rg },
+        sensorTs:                     d.ts,   // Core Motion's own clock (s), for raw capture
       });
     });
     await SmoothMotion.start();

@@ -153,6 +153,10 @@ export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
 // drive actually carried throttle data — GPS-only drives are untouched.
 export const SMOOTH_THR_LO   = 2;    // p85 |Δthrottle/dt| (%/s) scoring 100
 export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
+// The live score hides until the drive has this much moving time. Scored on the
+// drive so far, its first minutes swing wildly: one quick move reads 25 points low
+// at minute one and about 1 point low by the end.
+export const LIVE_SCORE_SETTLE_SEC = 300;
 export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
 // Road's-fault vs yours: a stop forced by a red light, its queue, or a stop sign
 // is far less avoidable than one with no signal nearby (a jam you didn't read, a
