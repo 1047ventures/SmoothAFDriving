@@ -58,6 +58,8 @@ driving,coach,score,smooth,driver,OBD,OBD2,car,check engine,trouble codes,commut
 
 First release.
 
+For later versions, draft this from `scripts/whats-new.sh appstore-<last version>`. Tag each submitted build `appstore-<version>`.
+
 ## App Review notes
 
 Paste into App Review Information > Notes:

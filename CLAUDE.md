@@ -363,6 +363,18 @@ other host's build fails — silently freezing the web app and `/admin` on old c
 This happened once (a plugin was added to npm only; every deploy failed for a day).
 After pushing, check the Cloudflare Pages + iOS checks actually went green.
 
+## ⚠️ What changed — every build says so (operating rule)
+
+Any commit that changes what someone using the app sees or feels ends with a
+`What-changed:` line next to `Co-Authored-By:`, written for them: one plain
+sentence, no internals. Skip it for internal-only commits. No file to maintain:
+
+- **TestFlight:** after each upload, CI collects the lines since the last successful
+  build and sets that build's "What to Test" (`scripts/whats-new.sh`,
+  `scripts/testflight-notes.mjs`). A build with none says "Behind-the-scenes fixes."
+- **App Store:** tag each release `appstore-<version>`, and draft the next "What's
+  New" from `scripts/whats-new.sh appstore-<last version>`.
+
 ## Commands
 
 ```bash

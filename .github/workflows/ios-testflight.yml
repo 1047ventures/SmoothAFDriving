@@ -237,3 +237,34 @@ jobs:
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: ignore
           retention-days: 1   # the repo is public; signed builds shouldn't sit downloadable
+
+  # Separate from the build so a problem here can't turn a good upload red, and
+  # the wait for Apple to see the build doesn't hold a macOS runner.
+  release-notes:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the What-changed lines since the last good build
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Since the last SUCCESSFUL build, so a failed run's changes carry over.
+      - name: Set the TestFlight notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEY_ID:      ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID:   ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          PREV=$(gh run list --workflow ios-testflight.yml --branch main --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
+          NOTES=$(sh scripts/whats-new.sh "$PREV")
+          export NOTES BUILD_NUMBER=$(( RUN_NUMBER + 100 ))
+          node scripts/testflight-notes.mjs
