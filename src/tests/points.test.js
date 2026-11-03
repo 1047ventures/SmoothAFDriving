@@ -31,8 +31,8 @@ describe('smoothMiles', () => {
 
 describe('paceBonusFrac', () => {
   const base = { arrived: true, targetEtaSec: 600, etaBuffer: 1.2 };
-  it('pays the full bonus for a smooth drive that beat the ETA by 20%', () => {
-    expect(paceBonusFrac({ ...base, movingSec: 576, efficiency: 90 })).toBeCloseTo(0.5, 5);
+  it('pays nothing for beating the ETA, which would reward speeding', () => {
+    expect(paceBonusFrac({ ...base, movingSec: 500, efficiency: 95 })).toBe(0);
   });
   it('pays nothing for rough-but-fast', () => {
     expect(paceBonusFrac({ ...base, movingSec: 500, efficiency: 70 })).toBe(0);
@@ -50,12 +50,6 @@ describe('drivePoints', () => {
     const long  = drivePoints({ distanceMeters: 20 * MI, efficiency: 95 });
     expect(short.total).toBe(5);
     expect(long.total).toBe(200);
-  });
-  it('stacks the pace bonus on the base', () => {
-    const p = drivePoints({ distanceMeters: 10 * MI, efficiency: 90, arrived: true, targetEtaSec: 600, etaBuffer: 1.2, movingSec: 576 });
-    expect(p.base).toBe(100);
-    expect(p.bonus).toBe(50);
-    expect(p.total).toBe(150);
   });
   it('lifetimePoints prefers stamped points', () => {
     expect(lifetimePoints([{ points: { total: 42 } }, { distanceMeters: 1 * MI, efficiency: 95 }])).toBe(52);
