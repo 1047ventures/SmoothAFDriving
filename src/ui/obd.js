@@ -630,10 +630,12 @@ async function onConnectClick(){
  * effort: if the adapter is off, out of range, or Bluetooth isn't ready, it
  * fails quietly and leaves the manual Connect button exactly as before.
  */
+let reconnecting = false;   // two at once: the second scan replaces the first's listener
 async function autoReconnect(){
-  if (isConnected() || scanning || connecting) return;
+  if (isConnected() || scanning || connecting || reconnecting) return;
   const saved = loadDevice();
   if (!saved?.deviceId) return;
+  reconnecting = true;
 
   const btn = BTN;
   const label = saved.name || 'last adapter';
@@ -654,6 +656,7 @@ async function autoReconnect(){
     setStatus('Not connected');
     if (btn) btn.textContent = CONNECT_LABEL;
   } finally {
+    reconnecting = false;
     if (btn) btn.disabled = false;
   }
 }
@@ -688,8 +691,11 @@ export function wireObdPanel(){
   watchDongle(loadDevice()?.deviceId || null);
   autoReconnect();
   let tries = 0;
-  const retry = setInterval(() => {
-    if (isConnected() || !loadDevice() || ++tries > 10){ clearInterval(retry); return; }
+  // Keeps going while the app is on screen: the car can start at any time, and
+  // the link can drop and come back. In the background it gives up after 5 min.
+  setInterval(() => {
+    if (isConnected() || !loadDevice()) return;
+    if (++tries > 10 && document.visibilityState !== 'visible') return;
     autoReconnect();
   }, 30000);
   document.addEventListener('visibilitychange', () => {

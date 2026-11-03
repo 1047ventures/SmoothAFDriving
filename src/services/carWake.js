@@ -32,3 +32,9 @@ export async function setRecording(recording){
   if (!supported()) return;
   try { await Native.setRecording({ recording: Boolean(recording) }); } catch {}
 }
+
+/** The app itself holds the dongle (or just let go), so Car Wake stays out of the way. */
+export async function setLinked(linked){
+  if (!supported()) return;
+  try { await Native.setLinked({ linked: Boolean(linked) }); } catch {}
+}

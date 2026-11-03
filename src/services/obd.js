@@ -26,6 +26,7 @@
 import { BleClient } from '@capacitor-community/bluetooth-le';
 import { derive as deriveMetrics, decodeGearA4 } from './obdDerived.js';
 import { parseAtrv } from './battery.js';
+import { setLinked as setCarWakeLinked } from './carWake.js';
 
 // ── Pure decoding ─────────────────────────────────────────────────────────────
 // Everything below this heading is deterministic string→number work, which is
@@ -358,6 +359,7 @@ async function negotiate(deviceId, name, onStatus){
   state.gearSupported = gearProbe.supported;
 
   onStatus('Connected');
+  setCarWakeLinked(true);
   return { deviceId, name: name || 'OBD adapter', supported: state.supported };
 }
 
@@ -458,7 +460,7 @@ function scanUntilFound(deviceId, timeoutMs){
  * the exact saved id before connecting. Throws if the adapter never turns up
  * (powered off / out of range) — the caller leaves the manual button in place.
  */
-export async function reconnectSaved(deviceId, name, { onStatus = () => {}, scanMs = 6000 } = {}){
+export async function reconnectSaved(deviceId, name, { onStatus = () => {}, scanMs = 10000 } = {}){
   await BleClient.initialize();
   // Fast path: still retrievable — just connect (fewer retries, fail fast to the scan).
   try {
@@ -492,6 +494,7 @@ export async function connect({ onStatus = () => {} } = {}){
 
 export async function disconnect(){
   const id = state.deviceId;
+  setCarWakeLinked(false);
   state.deviceId = null;
   state.pending  = null;
   state.buffer   = '';

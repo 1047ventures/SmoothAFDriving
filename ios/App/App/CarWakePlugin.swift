@@ -15,10 +15,11 @@ import UserNotifications
 // relaunches the app in the background when that connection completes. It
 // won't relaunch an app the user swiped away (force-quit) — that's iOS policy.
 //
-// This manager is separate from the JS Bluetooth plugin's. Both can hold the
-// same link: when the JS side connects, it rides on the connection this one
-// already made. It's only created once a dongle has been saved, so a driver
-// without one never sees a Bluetooth prompt from it.
+// This manager is separate from the JS Bluetooth plugin's, and only holds the
+// link while the app is in the background. A connected dongle stops advertising,
+// so holding it in the foreground hides it from the app's own scan. It's only
+// created once a dongle has been saved, so a driver without one never sees a
+// Bluetooth prompt from it.
 //
 // JS: src/services/carWake.js. Add this file to the App target.
 
@@ -32,11 +33,31 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
 
     private var central: CBCentralManager?
     private var peripheral: CBPeripheral?
+    private var isActive = false   // set only by the two notifications below
+    /** Set from JS while the app itself holds the dongle: that link is never ours
+     *  to drop, and connecting alongside it isn't the car starting. Cleared here
+     *  too when the link drops, since JS may be suspended and never say so. */
+    var jsLinked = false {
+        didSet { if oldValue && !jsLinked { isActive ? release() : arm() } }
+    }
     /** Set from JS. No nudge mid-drive, and ending a drive counts as a nudge:
      *  the car is often still on, and a link blip would otherwise say "tap to
      *  start" right after you finished. */
     var recording = false {
         didSet { if oldValue && !recording { UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: kLastNotified) } }
+    }
+
+    private override init() {
+        super.init()
+        let nc = NotificationCenter.default
+        nc.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.isActive = true
+            self?.release()
+        }
+        nc.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.isActive = false
+            self?.arm()
+        }
     }
 
     private var deviceId: UUID? {
@@ -68,14 +89,20 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
     }
 
     /** Leave a connect request pending; it never times out, so it completes
-     *  whenever the dongle next powers up in range. */
+     *  whenever the dongle next powers up in range. Background only. */
     private func arm() {
-        guard let central = central, central.state == .poweredOn, let id = deviceId else { return }
+        guard !isActive, let central = central, central.state == .poweredOn, let id = deviceId else { return }
         if peripheral?.identifier != id {
             peripheral = central.retrievePeripherals(withIdentifiers: [id]).first
         }
         guard let p = peripheral else { return }
         if p.state == .disconnected { central.connect(p, options: nil) }
+    }
+
+    /** Back in the app: let go so the dongle advertises and the app can find it. */
+    private func release() {
+        guard !jsLinked, let central = central, let p = peripheral, p.state != .disconnected else { return }
+        central.cancelPeripheralConnection(p)
     }
 
     // MARK: CBCentralManagerDelegate
@@ -85,6 +112,7 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
         // A background relaunch can hand back the dongle already connected, and
         // then didConnect never fires — nudge for it here (the quiet window
         // stops a duplicate).
+        guard !isActive else { release(); return }
         if peripheral?.state == .connected { nudge() }
         arm()
     }
@@ -95,10 +123,11 @@ final class CarWake: NSObject, CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didConnect p: CBPeripheral) {
-        nudge()
+        if !jsLinked { nudge() }
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral p: CBPeripheral, error: Error?) {
+        jsLinked = false
         arm()   // car off: wait for the next start
     }
 
@@ -138,6 +167,7 @@ public class CarWakePlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "watch", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setRecording", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setLinked", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestNotifications", returnType: CAPPluginReturnPromise),
     ]
 
@@ -156,6 +186,11 @@ public class CarWakePlugin: CAPPlugin, CAPBridgedPlugin {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
             call.resolve(["granted": granted])
         }
+    }
+
+    @objc func setLinked(_ call: CAPPluginCall) {
+        let on = call.getBool("linked") ?? false
+        DispatchQueue.main.async { CarWake.shared.jsLinked = on; call.resolve() }
     }
 
     @objc func setRecording(_ call: CAPPluginCall) {
