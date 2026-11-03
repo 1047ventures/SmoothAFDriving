@@ -66,7 +66,7 @@ Paste into App Review Information > Notes:
 >
 > Background location: during a real drive the app records a GPS route in the background, so the drive keeps recording while the screen is off or the driver is in a navigation app. The route and score are the app's main function. Recording stops when the drive ends.
 >
-> Bluetooth: an optional OBD-II reader adds engine data and trouble codes. The bluetooth-central background mode lets the app notice the saved reader powering on when the car starts, and send a notification to start the drive. No reader is needed to use the app.
+> Bluetooth: an optional OBD-II reader adds engine data and trouble codes. The bluetooth-central background mode lets the app notice the driver sitting in the car, from the saved reader's signal strength, and send a notification to start the drive. No reader is needed to use the app.
 >
 > Microphone: used only for the optional AI concierge call in Garage > car care. The first call explains what's sent to the AI providers and asks for consent.
 >

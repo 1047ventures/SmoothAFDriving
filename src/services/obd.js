@@ -233,6 +233,11 @@ const state = {
 
 export function getLatest(){ return { ...state.latest }; }
 export function isConnected(){ return Boolean(state.deviceId); }
+/** Signal strength of the live link in dBm, or null if it can't be read. */
+export async function readLinkRssi(){
+  if (!state.deviceId) return null;
+  try { return await BleClient.readRssi(state.deviceId); } catch { return null; }
+}
 
 /**
  * Find a usable write/notify pair on the connected device.

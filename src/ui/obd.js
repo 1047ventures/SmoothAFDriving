@@ -7,7 +7,7 @@
  * this panel exists to answer.
  */
 
-import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes, readVin, readVoltage, readRpm, readSpeed, ecuAnswering, refreshSupported } from '../services/obd.js';
+import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, stopScan, disconnect, poll, isConnected, getLatest, kmhToMps, readTroubleCodes, readVin, readVoltage, readRpm, readSpeed, ecuAnswering, refreshSupported, readLinkRssi } from '../services/obd.js';
 import { createBatteryWatch, saveBatteryReading, saveLastRun, loadBattery, keepResting } from '../services/battery.js';
 import { buildReport, saveHealthReport } from '../services/carHealth.js';
 import { getActiveVehicle, findVehicleByVin, activateVehicle } from './garage.js';
@@ -15,7 +15,7 @@ import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendin
 import { state } from '../state.js';
 import { Capacitor } from '@capacitor/core';
 import { OBD_DEVICE_KEY } from '../constants.js';
-import { watchDongle, askForNudgesOnce } from '../services/carWake.js';
+import { watchDongle, askForNudgesOnce, currentSeatThreshold, learnSeatRssi, syncSeatThreshold } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 
 /**
@@ -37,10 +37,11 @@ function forgetDevice(){
 }
 
 /**
- * Auto-start: when the car's dongle links up (silent reconnect, or a manual
- * connect) while the app is open and no drive is running, just START the drive —
- * the dongle is only powered when the car is, so a link is a strong "we're
- * driving" signal and the driver shouldn't have to remember to tap.
+ * Auto-start: when the driver is in the car with the dongle linked and no drive
+ * is running, just START the drive, so they don't have to remember to tap. A
+ * manual connect starts straight away. A silent reconnect waits for startWhenSeated,
+ * because most dongles stay powered while parked and the link also comes up from
+ * 20 feet away.
  *
  * Safety net instead of a confirm: start first, then show a dismissable "Drive
  * started — Stop?" banner for a few seconds, so a false start (plugged in but
@@ -211,6 +212,27 @@ function autoStartDrive(){
   bar.querySelector('.obd-nudge-x').addEventListener('click', dismiss);
   // Auto-retire so it never lingers into the drive.
   setTimeout(() => { if (document.body.contains(bar)) dismiss(); }, 11000);
+}
+
+// In the seat = a strong signal for 4 reads in a row, or the car is moving.
+const SEAT_READ_MS = 2000, SEAT_READS_NEEDED = 4;
+let seatTimer = null;
+function stopSeatWatch(){ clearInterval(seatTimer); seatTimer = null; }
+function startWhenSeated(){
+  // The web build can't read signal strength.
+  if (!Capacitor.isNativePlatform()){ autoStartDrive(); return; }
+  stopSeatWatch();
+  let strong = 0;
+  seatTimer = setInterval(async () => {
+    if (!isConnected() || state.recording){ stopSeatWatch(); return; }
+    if (document.visibilityState !== 'visible'){ strong = 0; return; }   // the notification handles closed
+    const rssi = await readLinkRssi();
+    strong = rssi != null && rssi >= currentSeatThreshold() ? strong + 1 : 0;
+    const { speed, speedAt } = getLatest();
+    if (!seatTimer || (strong < SEAT_READS_NEEDED && !(fresh(speedAt, 5000) && speed > 0))) return;
+    stopSeatWatch();
+    autoStartDrive();
+  }, SEAT_READ_MS);
 }
 
 const POLL_MS = 250;   // ~4Hz, about what an ELM327 sustains across four PIDs
@@ -633,6 +655,9 @@ async function onConnectClick(){
 let reconnecting = false;   // two at once: the second scan replaces the first's listener
 async function autoReconnect(){
   if (isConnected() || scanning || connecting || reconnecting) return;
+  // Closed, Car Wake is watching the dongle, and taking the link would end its check.
+  // Mid-drive is different: the drive wants its reader back.
+  if (document.visibilityState !== 'visible' && !state.recording) return;
   const saved = loadDevice();
   if (!saved?.deviceId) return;
   reconnecting = true;
@@ -649,7 +674,7 @@ async function autoReconnect(){
     setPill(true);
     startPolling();
     onCarLinked();
-    autoStartDrive();
+    startWhenSeated();
   } catch {
     // Don't nag or forget — the dongle may just not be powered yet. Next launch
     // (or a manual tap) tries again.
@@ -684,18 +709,22 @@ export function wireObdPanel(){
   setPill(isConnected());
   // Try the remembered adapter in the background — the whole point is that the
   // driver doesn't have to think about it. One attempt at launch isn't enough: the
-  // dongle is usually unpowered until the ignition comes on, which happens AFTER
-  // the app opens. So keep trying — on every return to the app, and on a slow
-  // timer for a few minutes — and stop the moment it connects.
+  // dongle may be out of range or unpowered when the app opens. So keep trying —
+  // on every return to the app, and on a slow timer — and stop the moment it connects.
   // Drivers who saved a dongle before Car Wake existed: hand it to the watcher.
   watchDongle(loadDevice()?.deviceId || null);
+  syncSeatThreshold();
   autoReconnect();
-  let tries = 0;
-  // Keeps going while the app is on screen: the car can start at any time, and
-  // the link can drop and come back. In the background it gives up after 5 min.
+  // Moving with the dongle linked means the phone is in the car: learn what that
+  // signal looks like, so "in the seat" fits this phone and this car.
+  setInterval(async () => {
+    const { speed, speedAt } = getLatest();
+    if (state.recording && fresh(speedAt, 5000) && speed > 0) learnSeatRssi(await readLinkRssi());
+  }, 30000);
+  // Keeps going while the app is on screen or recording: the car can start at
+  // any time, and the link can drop and come back.
   setInterval(() => {
     if (isConnected() || !loadDevice()) return;
-    if (++tries > 10 && document.visibilityState !== 'visible') return;
     autoReconnect();
   }, 30000);
   document.addEventListener('visibilitychange', () => {
