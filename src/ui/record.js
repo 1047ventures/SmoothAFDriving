@@ -21,6 +21,8 @@ import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoE
 import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/autoEndLearn.js';
 import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
 import { hudStart, hudStop, hudTick } from './hud.js';
+
+const PACE_STRIP_ON = false;
 import { musicStart, musicStop } from './music.js';
 import { startDriveActivity, updateDriveActivity, endDriveActivity } from '../services/liveActivity.js';
 import { isConnected as isObdConnected } from '../services/obd.js';
@@ -164,7 +166,8 @@ function updatePaceStrip(last, now){
   const paceStrip = document.getElementById('pace-strip');
   const screen = document.getElementById('screen-record');
   screen?.classList.toggle('has-target', !!state.targetEtaSec);
-  if (!state.targetEtaSec){ paceStrip?.classList.add('hidden'); return; }
+  // Off with the clock bonus: a live ahead/behind readout pressures people to hurry.
+  if (!PACE_STRIP_ON || !state.targetEtaSec){ paceStrip?.classList.add('hidden'); return; }
   paceStrip?.classList.remove('hidden');
 
   // ── Pit-stop accounting ─────────────────────────────────────────────────
@@ -603,14 +606,14 @@ export function stopRecording(opts){
     onTooShort: () => {
       rawSaved.then(() => discardRawCapture(driveStart));
       showScreen('home');
-      showToast('Drive too short to save — under 0.3 mi', 'error');
+      showToast(state.simulated ? 'Demo ended early' : 'Drive too short to save — under 0.3 mi', 'error');
     },
   });
   showCarPromptIfNeeded();
   // Post-drive prompts (Q4): share & save for signed-out first drives, else a
   // light "what's your name?" capture. Delayed so the recap paints first and the
   // card lands on top of a real score.
-  setTimeout(() => runPostDrivePrompts(), 900);
+  if (!state.simulated) setTimeout(() => runPostDrivePrompts(), 900);
 }
 
 export function startSimulatedDrive(){
@@ -620,6 +623,8 @@ export function startSimulatedDrive(){
   state.simulated = true;
   state.startTime = Date.now();
   $('#rec-source').textContent = 'Demo drive';
+  state.liveSettled = true;    // too short to settle, and it's there to show the score
+  hudStart();
   document.getElementById('gps-acquiring')?.classList.add('hidden');
   showScreen('record');
 

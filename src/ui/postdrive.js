@@ -104,7 +104,7 @@ export function showNamePromptIfNeeded(){
   overlay.innerHTML = `
     <div class="pdcta-card">
       <h2 class="pdcta-h">What's your name, Driver?</h2>
-      <p class="pdcta-sub">So your smooth moves show up with a name, not a number.</p>
+      <p class="pdcta-sub">So we know who's driving. Other drivers never see it.</p>
       <div class="pdcta-fields">
         <input id="np-first" class="pdcta-input" type="text" autocomplete="given-name"
                autocapitalize="words" placeholder="First name" value="${esc(loadDriverFirst())}">

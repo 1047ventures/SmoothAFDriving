@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/dom.js';
 import { loadCorridors } from '../services/storage.js';
 import { showScreen } from './router.js';
 import { metersToMiles } from '../utils/math.js';
@@ -27,10 +28,10 @@ export function renderCorridorsList(){
   body.innerHTML = sorted.map(c => {
     const avg  = Math.round(c.drives.reduce((s, d) => s + d.score, 0) / c.drives.length);
     return `
-      <div class="cor-card" data-id="${c.corridorId}">
+      <div class="cor-card" data-id="${escapeHtml(c.corridorId)}">
         <div class="cor-card-left">
-          <div class="cor-card-name">${c.name}</div>
-          <div class="cor-card-meta">${c.city} · ${c.drives.length} drive${c.drives.length !== 1 ? 's' : ''}</div>
+          <div class="cor-card-name">${escapeHtml(c.name)}</div>
+          <div class="cor-card-meta">${escapeHtml(c.city)} · ${c.drives.length} drive${c.drives.length !== 1 ? 's' : ''}</div>
         </div>
         <div class="cor-card-right">
           <div class="cor-card-score">${avg}</div>

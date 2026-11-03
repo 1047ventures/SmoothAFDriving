@@ -265,7 +265,7 @@
         ['Ride composure', dims.rideComposure], ['Speed mult', dims.speedBonus],
         ['Efficiency', drive.efficiency], ['vs ETA', drive.effectiveness != null ? drive.effectiveness + '%' : null],
       ].filter(([, v]) => v != null && v !== '')
-       .map(([l, v]) => `<span class="chip">${l}: <b>${v}</b></span>`).join('') || '<span class="anon">No breakdown stored (older drive).</span>';
+       .map(([l, v]) => `<span class="chip">${l}: <b>${esc(v)}</b></span>`).join('') || '<span class="anon">No breakdown stored (older drive).</span>';
 
       const t = f.byType || {};
       const flagRow = f.total
@@ -280,7 +280,7 @@
         ? [['OBD coverage', o.coverage != null ? Math.round(o.coverage * 100) + '%' : null],
            ['Peak rpm', o.peakRpm], ['Avg throttle', o.avgThrottle != null ? o.avgThrottle + '%' : null],
            ['Peak hp', o.peakHp], ['Peak Nm', o.peakTorqueNm], ['Peak coolant', o.peakCoolant != null ? o.peakCoolant + '°' : null]]
-          .filter(([, v]) => v != null).map(([l, v]) => `<span class="chip">${l}: <b>${v}</b></span>`).join('')
+          .filter(([, v]) => v != null).map(([l, v]) => `<span class="chip">${l}: <b>${esc(v)}</b></span>`).join('')
         : '<span class="anon">No OBD (no dongle connected).</span>';
 
       const hasRoute = Array.isArray(drive.path) && drive.path.length >= 2;

@@ -209,6 +209,9 @@ export function renderReview(drive){
     renderFacts(drive, analysis);
   }
 
+  // A demo drive isn't a result to keep or pass around.
+  document.getElementById('btn-share-drive')?.classList.toggle('hidden', !!drive.simulated);
+  document.getElementById('rv-export-btn')?.classList.toggle('hidden', !!drive.simulated);
   const exportBtn = document.getElementById('rv-export-btn');
   if (exportBtn) {
     exportBtn.onclick = () => exportDrive(drive, analysis);
@@ -217,6 +220,7 @@ export function renderReview(drive){
   // ── Header ─────────────────────────────────────────────────────────────────
   const when = new Date(drive.startTime);
   $('#review-when').textContent =
+    drive.simulated ? 'Demo drive · not saved' :
     when.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'}) +
     ' · ' + when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
 
@@ -243,7 +247,7 @@ export function renderReview(drive){
       if (sub) {
         if (targetMs) {
           const diff = drive.durationMs - targetMs;   // + late, - early
-          sub.textContent = diff <= 0 ? `on time · ${fmtDuration(-diff)} to spare` : `${fmtDuration(diff)} late`;
+          sub.textContent = diff <= 0 ? 'on time' : `${fmtDuration(diff)} after the ETA`;
         } else {
           sub.textContent = '';
         }

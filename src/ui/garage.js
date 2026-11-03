@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/dom.js';
 import { VEHICLE_TYPES, VEHICLE_KEY, CAR_PHOTO_KEY, CAR_POS_KEY, REC_PHOTO_KEY, REC_POS_KEY, GARAGE_KEY, CAR_PROMPTED_KEY } from '../constants.js';
 import { loadDrives } from '../services/storage.js';
 import { pushProfile } from '../services/profile.js';
@@ -71,7 +72,7 @@ async function _doIconSearch(query){
     }
     grid.innerHTML = pages.map(p => {
       const ii = p.imageinfo[0];
-      return `<div class="ip-thumb" data-thumb="${ii.thumburl}"><img src="${ii.thumburl}" loading="lazy" alt=""></div>`;
+      return `<div class="ip-thumb" data-thumb="${escapeHtml(ii.thumburl)}"><img src="${escapeHtml(ii.thumburl)}" loading="lazy" alt=""></div>`;
     }).join('');
     grid.querySelectorAll('.ip-thumb').forEach(el => {
       el.addEventListener('click', async () => {
@@ -387,16 +388,16 @@ function renderGarageList(){
     const detail = [v.color, v.licensePlate].filter(Boolean).join(' · ');
     const yearStr = v.year || '';
     return `
-      <div class="gs-card${v.active ? ' active-vehicle' : ''}" data-id="${v.id}">
+      <div class="gs-card${v.active ? ' active-vehicle' : ''}" data-id="${escapeHtml(v.id)}">
         <div class="gs-card-header">
           <span class="gs-card-type-lbl">${vt.label}</span>
           ${v.active
             ? '<span class="gs-card-badge">Active</span>'
-            : (yearStr ? `<span class="gs-card-year">${yearStr}</span>` : '')}
+            : (yearStr ? `<span class="gs-card-year">${escapeHtml(yearStr)}</span>` : '')}
         </div>
         <div class="gs-card-silhouette">${loadVehicleIcon(v.id) ? `<img src="${loadVehicleIcon(v.id)}" class="gs-card-img" alt="${makeModel}">` : vehicleSvg(v.type)}</div>
-        <div class="gs-card-name">${makeModel}</div>
-        ${detail ? `<div class="gs-card-detail">${detail}</div>` : ''}
+        <div class="gs-card-name">${escapeHtml(makeModel)}</div>
+        ${detail ? `<div class="gs-card-detail">${escapeHtml(detail)}</div>` : ''}
         <div class="gs-card-footer">
           ${v.active ? `
             <div class="gs-card-stats">

@@ -44,11 +44,17 @@ function el(){
       <div class="cg-btns">
         <button type="button" class="cg-mute" data-cg-mute aria-pressed="false">Mute</button>
         <button type="button" class="cg-end" data-cg-end>End</button>
+        <button type="button" class="cg-end cg-agree hidden" data-cg-agree>Agree &amp; call</button>
       </div>
     </div>`;
   document.body.appendChild(sheet);
   sheet.addEventListener('click', e => {
     if (e.target.closest('[data-cg-end]')) return endCall();
+    if (e.target.closest('[data-cg-agree]')){
+      try { localStorage.setItem(CONSENT_KEY, '1'); } catch {}
+      const go = afterConsent; afterConsent = null;
+      return go?.();
+    }
     const m = e.target.closest('[data-cg-mute]');
     if (m && vapi && !m.disabled){
       const on = !vapi.isMuted();
@@ -62,6 +68,23 @@ function el(){
 
 const setStatus = t => { el().querySelector('.cg-status').textContent = t; };
 const setLevel = v => el().style.setProperty('--lvl', Math.min(1, v * 2.5).toFixed(2));
+
+// Apple guideline 5.1.2(i): say who gets the data, and ask, before the first call.
+const CONSENT_KEY = 'smoothaf.concierge_consent';
+const CONSENT_MSG = "The concierge is an AI voice agent, not a person. To run the call, your voice and your car's readout (car details, trouble codes, battery, maintenance and recent drive scores, never your locations) go to Vapi and its AI providers, including OpenAI.";
+let afterConsent = null;
+const consented = () => { try { return localStorage.getItem(CONSENT_KEY) === '1'; } catch { return false; } };
+
+function showConsent(){
+  const s = el();
+  s.classList.remove('hidden', 'cg--failed', 'cg--talking');
+  s.querySelector('.cg-car').textContent = CONSENT_MSG;
+  setStatus('Before your first call');
+  s.querySelector('[data-cg-mute]').classList.add('hidden');
+  s.querySelector('[data-cg-agree]').classList.remove('hidden');
+  s.querySelector('[data-cg-end]').textContent = 'Not now';
+  s.querySelector('[data-cg-agree]').focus();
+}
 
 const MIC_MSG = 'The concierge needs your microphone. Allow it in Settings, then try again.';
 const micDenied = err => {
@@ -124,6 +147,12 @@ function loadVapi(){
  */
 export async function startConciergeCall(care, asked = null){
   if (live) return;
+  if (!consented()){
+    afterConsent = () => startConciergeCall(care, asked);
+    showConsent();
+    return;
+  }
+  el().querySelector('[data-cg-agree]').classList.add('hidden');
   live = true;
   const my = ++gen;
   const s = el();

@@ -75,6 +75,7 @@
   .drive-del-btn.confirming{font-size:11px;letter-spacing:.05em;color:var(--danger);background:rgba(224,59,47,.12);padding:4px 8px}
   .drive-del-btn:active{color:var(--danger)}
   .empty-drives{font-family:var(--sans);color:var(--cream-dim);font-size:14px;padding:18px 4px}
+  .empty-demo{display:block;margin-top:10px;padding:10px 0;min-height:44px;background:none;border:0;color:var(--cream);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   /* ── Driver persona badge ── */
   .persona-badge{
     padding:12px 14px 10px;border-radius:14px;margin-bottom:14px;
@@ -161,7 +162,7 @@
 
   /* ── Explore row ── */  .drives-list{display:none;padding:0 20px 8px}
   .drives-list.open{display:block}
-  .home-nav-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 24px 0;flex-shrink:0}
+  .home-nav-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;padding:8px 24px 0;flex-shrink:0}
   .home-nav-btn{appearance:none;border:0;background:transparent;cursor:pointer;flex:1;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:rgba(242,241,238,.86);text-transform:uppercase;padding:0 4px;min-height:52px;transition:color .15s;display:flex;align-items:center;justify-content:center;background:var(--panel);border-radius:14px}
   .home-nav-btn:active{color:var(--cream-dim)}
   .nav-icon{display:none}

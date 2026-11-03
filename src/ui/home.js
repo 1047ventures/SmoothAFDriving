@@ -11,7 +11,6 @@ import { metersToMiles, fmtDuration } from '../utils/math.js';
 import { scoreColor, dimColor } from '../utils/color.js';
 import { DIM_DISPLAY } from '../constants.js';
 import { renderReview } from './review.js';
-import { restoreDrivesFromCloud } from '../services/drive.js';
 import { displayName } from '../services/auth.js';
 import { getActiveVehicle } from './garage.js';
 import { improvementVerdict } from '../services/improvement.js';
@@ -225,38 +224,23 @@ function renderLifetimeSheet(all){
   document.getElementById('lifetime-sheet')?.classList.remove('hidden');
 }
 
-/**
- * Markup for the cloud-restore control. Rendered in BOTH the empty state and
- * below an existing list — a returning driver may already have a drive or two
- * on the new install, which would otherwise hide the only way to get their
- * history back.
- */
-function restoreBoxHtml(){
-  return `
-    <details class="restore-box">
-      <summary class="restore-toggle">Driven before? Restore your history ›</summary>
-      <div class="restore-body">
-        <p class="restore-hint">Paste the device ID from a previous install to pull those drives down from the cloud.</p>
-        <input class="restore-input" id="restore-device-id" placeholder="xxxxxxxx-xxxx-…" autocapitalize="off" autocorrect="off" spellcheck="false">
-        <button class="restore-btn" id="restore-go">Restore</button>
-        <div class="restore-status" id="restore-status"></div>
-      </div>
-    </details>`;
-}
-
 export function renderDriveList(){
   const host = $('#drives-container');
   const all = loadDrives();
   renderHomeStats();
   if (!all.length){
+    // Open by default here: the list panel is what holds the first-run demo link.
+    document.getElementById('drives-list-panel')?.classList.add('open');
     // Empty history is also what a fresh install / new device looks like, so
     // offer the cloud restore right here rather than burying it in settings.
     host.innerHTML = `
       <div class="empty-drives">
         <div>No drives yet. Tap start.</div>
-${restoreBoxHtml()}
+        <button type="button" class="empty-demo" id="btn-demo-drive">Not in a car? Watch a demo drive</button>
       </div>`;
-    wireRestore();
+    host.querySelector('#btn-demo-drive')?.addEventListener('click', async () => {
+      (await import('./record.js')).startSimulatedDrive();
+    });
     return;
   }
   const sorted = all
@@ -277,8 +261,7 @@ ${restoreBoxHtml()}
           <button class="drive-del-btn" data-idx="${i}" aria-label="Delete">×</button>
         </div>
       </div>`;
-  }).join('') + `<div class="restore-after-list">${restoreBoxHtml()}</div>`;
-  wireRestore();
+  }).join('');
   $$('#drives-container .drive-row').forEach(row => {
     row.addEventListener('click', e => {
       if (e.target.closest('.drive-star-btn, .drive-del-btn')) return;
@@ -314,34 +297,3 @@ ${restoreBoxHtml()}
   });
 }
 
-/**
- * Wire the empty-state "restore from cloud" control. Transitional until real
- * accounts land — at that point the device-ID field goes away and sign-in
- * drives the same restoreDrivesFromCloud() path.
- */
-function wireRestore(){
-  const btn = document.getElementById('restore-go');
-  const input = document.getElementById('restore-device-id');
-  const status = document.getElementById('restore-status');
-  if (!btn || !input || !status) return;
-  btn.addEventListener('click', async () => {
-    const id = input.value.trim();
-    if (!id){ status.textContent = 'Enter a device ID first.'; return; }
-    btn.disabled = true;
-    status.textContent = 'Restoring…';
-    const result = await restoreDrivesFromCloud(id);
-    btn.disabled = false;
-    if (!result){
-      status.textContent = "Couldn't reach the cloud — check your connection and try again.";
-      return;
-    }
-    if (result.added === 0){
-      status.textContent = result.fetched === 0
-        ? 'No drives found for that device ID.'
-        : 'Already up to date.';
-      return;
-    }
-    status.textContent = `Restored ${result.added} drive${result.added === 1 ? '' : 's'}.`;
-    renderDriveList();
-  });
-}

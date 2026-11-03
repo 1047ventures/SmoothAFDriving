@@ -6,6 +6,8 @@ import { restoreDrivesForUser } from '../services/drive.js';
 import { registerUser } from '../services/supabase.js';
 import { getDeviceId } from '../services/storage.js';
 import { renderDriveList } from './home.js';
+import { deleteAccount } from '../services/account.js';
+import { openUrl } from '../utils/openUrl.js';
 
 /**
  * Account sheet: email one-time-code sign-in, with the Apple button appearing
@@ -230,6 +232,22 @@ export function initAuthUI(){
       ? `Restored ${result.added} drive${result.added === 1 ? '' : 's'}.`
       : 'Everything is up to date.');
     renderDriveList();
+  });
+
+  el('auth-privacy')?.addEventListener('click', () => openUrl('https://smoothafdriving.pages.dev/privacy'));
+
+  el('auth-delete')?.addEventListener('click', async () => {
+    const yes = confirm('Permanently delete your account, your drives and everything saved in the cloud and on this phone? This can\'t be undone.');
+    if (!yes) return;
+    const status = el('auth-status-in');
+    if (status) status.textContent = 'Deleting…';
+    let ok = false;
+    try { ok = await deleteAccount(); } catch { /* reported below */ }
+    if (!ok){
+      if (status) status.textContent = "Couldn't delete your account. Check your connection and try again.";
+      return;
+    }
+    window.location.reload();   // a fresh install's state, signed out
   });
 
   el('auth-signout')?.addEventListener('click', async () => {

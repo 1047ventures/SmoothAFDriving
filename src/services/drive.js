@@ -325,6 +325,11 @@ export function finalizeAndReview(callbacks = {}){
   drive.points = drivePoints(drive);
   drive.vehicleId = activeVehicleId();
   drive.wear = driveWear(drive, drive.vehicleId);
+  // A demo drive shows the recap and leaves no trace: not in history, points or score.
+  if (drive.simulated){
+    if (onReview) onReview(drive);
+    return;
+  }
   saveDrive(drive);
   uploadAfterStopCredit(drive, analysis.stopMarkers);
   // Non-blocking — corridor detection runs after review renders
@@ -420,7 +425,7 @@ export function creditForcedStops(drive, markers){
   const key = drive.startTime ?? drive.id ?? drive.ts;
   if (stopCredits.has(key)) return stopCredits.get(key);
   const run = (async () => {
-    if (!markers?.length || !drive.samples?.length) return null;
+    if (drive.simulated || !markers?.length || !drive.samples?.length) return null;
     const features = await fetchStopFeatures(drive.startTime ?? drive.id ?? drive.ts, markers);
     if (features == null) return null;
     const causes = classifyStops(markers, drive.samples, features);

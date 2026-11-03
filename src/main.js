@@ -1,3 +1,6 @@
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+window.L = L;   // the map code uses the global
 import { APP_VERSION, INSTALL_URL } from './constants.js';
 import { migrateLifetimeScore, getDeviceId } from './services/storage.js';
 import { checkRecoveredDrive, rescoreStoredDrives } from './services/drive.js';
@@ -99,15 +102,6 @@ function boot(){
     // from Supabase via get_device_drives — no more exporting a JSON and sharing
     // it by hand. The ID is an unguessable per-device UUID that appears nowhere
     // else in the UI, so surfacing it here is harmless.
-    verEl.style.cursor = 'pointer';
-    verEl.title = 'Tap to copy device ID';
-    verEl.addEventListener('click', async () => {
-      const id = getDeviceId();
-      try { await navigator.clipboard.writeText(id); } catch {}
-      const prev = verEl.textContent;
-      verEl.textContent = 'id copied ✓';
-      setTimeout(() => { verEl.textContent = prev; }, 1400);
-    });
   }
 
   // Re-acquire wake lock whenever app returns to foreground during a drive

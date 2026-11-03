@@ -4,6 +4,12 @@ import {
   SB_URL, SB_ANON,
 } from '../constants.js';
 import { authHeaders, currentUser } from './auth.js';
+import { Capacitor } from '@capacitor/core';
+
+// In the iOS app a relative /api path stays inside the WebView, which answers
+// every path with index.html and a 200. The endpoints live on the site.
+export const apiUrl = path =>
+  (Capacitor.isNativePlatform() ? 'https://smoothafdriving.pages.dev' : '') + path;
 
 /**
  * The local dev server (`npm run dev`, Vite mode "development") talks to the
@@ -196,9 +202,9 @@ export async function fetchLeaderboard(){
 export async function registerUser({ name, email, device_id }) {
   if (!CLOUD_WRITES) return;
   try {
-    const res = await fetch('/api/register-user', {
+    const res = await fetch(apiUrl('/api/register-user'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, device_id }),
     });
     if (res.ok) localStorage.setItem(PROFILE_SYNCED_KEY, '1');

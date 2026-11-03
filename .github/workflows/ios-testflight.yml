@@ -92,7 +92,10 @@ jobs:
         env:
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
           VITE_SPOTIFY_CLIENT_ID: ${{ secrets.VITE_SPOTIFY_CLIENT_ID }}
-        run: npm run build
+        # The operator and web-install pages have no place inside the app.
+        run: |
+          npm run build
+          rm -f dist/admin.html dist/install.html
 
       - name: Sync web build into the iOS project
         run: npx cap sync ios
@@ -233,3 +236,4 @@ jobs:
           name: ios-ipa
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: ignore
+          retention-days: 1   # the repo is public; signed builds shouldn't sit downloadable

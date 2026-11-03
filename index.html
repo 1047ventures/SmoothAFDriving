@@ -11,8 +11,6 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <title>Smooth AF — Driving</title>
 <link rel="stylesheet" href="/src/styles/index.css">
 <style></style>
@@ -102,7 +100,7 @@
         <span class="nav-icon">★</span>
         <span class="nav-label">Rewards</span>
       </button>
-      <button class="home-nav-btn" id="btn-leaderboard">
+      <button class="home-nav-btn hidden" id="btn-leaderboard"><!-- Off until usernames can be set and moderated. -->
         <span class="nav-icon">◈</span>
         <span class="nav-label">Board</span>
       </button>
@@ -760,8 +758,7 @@
 
     <button class="rw-cta" id="btn-rw-explore">
       <div class="rw-cta-main">Invite a driver &#8594;</div>
-      <div class="rw-cta-sub">Redeemable rewards are on the way</div>
-    </button>
+          </button>
 
   </section>
 
@@ -831,7 +828,9 @@
         <div class="auth-status" id="auth-status-in" aria-live="polite"></div>
         <button class="auth-submit" id="auth-sync-btn">Sync my drives</button>
         <button class="auth-link auth-link--center" id="auth-signout">Sign out</button>
+        <button class="auth-link auth-link--center" id="auth-delete">Delete account</button>
       </div>
+      <button class="auth-link auth-link--center" id="auth-privacy">Privacy Policy</button>
     </div>
   </div>
 
@@ -885,7 +884,7 @@
   <div id="perm-modal" class="permission-hint hidden">
     <div class="permission-card">
       <p class="permission-title">Let Smooth AF read motion</p>
-      <p class="permission-body">We need the phone's accelerometer and location to score your drive. Nothing leaves the device unless you share it.</p>
+      <p class="permission-body">We need the phone's accelerometer and location to score your drive. Your drives stay private to you, unless you share it.</p>
       <div class="perm-btn-row">
         <button class="perm-skip" id="perm-skip">Skip</button>
         <button class="perm-allow" id="perm-allow">Allow</button>
@@ -895,8 +894,6 @@
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>

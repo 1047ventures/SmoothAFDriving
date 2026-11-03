@@ -116,3 +116,5 @@
 .cg-mute.hidden{display:none}
 .cg-end{border:0;background:#FF6A3D;color:#0B0B0C}
 @media (prefers-reduced-motion:reduce){.cg-orb span{animation:none!important;transition:none}}
+.cg-agree.hidden{display:none}
+.cg:has(.cg-agree:not(.hidden)) .cg-end:not(.cg-agree){background:rgba(242,241,238,.05);border:1px solid rgba(242,241,238,.2);color:#F2F1EE}

@@ -7,6 +7,7 @@
  * that change when your driving changes, and a single message line that is blank
  * unless something is worth saying.
  */
+import { state } from '../state.js';
 import { createLiveInsights, createInsightFeed, ribbonSeries, longestCleanStreakMi } from '../services/liveInsights.js';
 import { loadDrives } from '../services/storage.js';
 import { clamp } from '../utils/math.js';
@@ -61,7 +62,7 @@ export function hudStart(){
   bestAtStart = loadBest(); bestNow = bestAtStart;
   ins  = createLiveInsights({ bestMi: bestAtStart });
   feed = createInsightFeed({ showMs: 5500 });
-  teaching = bumpRuns() <= HINT_RUNS;
+  teaching = state.simulated || bumpRuns() <= HINT_RUNS;
   const hint = $id('ribbon-hint'); if (hint) hint.textContent = teaching ? 'flat line = smooth' : 'last 90 s';
   lastDraw = 0; scoreHist = []; lastScore = null; lastShownText = null;
   paintStreak(0, bestAtStart, false);
@@ -71,7 +72,7 @@ export function hudStart(){
 }
 
 export function hudStop(){
-  if (ins && ins.bestMi > bestAtStart) saveBest(ins.bestMi);
+  if (ins && ins.bestMi > bestAtStart && !state.simulated) saveBest(ins.bestMi);
   ins = null; feed = null;
 }
 

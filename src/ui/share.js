@@ -1,5 +1,6 @@
+import { analyzeDrive } from '../services/scoring.js';
 import { loadSocialHandles, saveSocialHandles, loadDriverName } from '../services/storage.js';
-import { metersToMiles, mpsToMph, fmtDuration } from '../utils/math.js';
+import { metersToMiles, fmtDuration } from '../utils/math.js';
 import { drivingStyleVerdict } from '../services/scoring.js';
 import { SHARE_PROMPTED_KEY, INSTALL_URL } from '../constants.js';
 
@@ -128,11 +129,10 @@ export function buildShareCanvas(drive, analysis){
   // Stats row
   const distMi = metersToMiles(drive.distanceMeters || 0).toFixed(1);
   const durStr  = fmtDuration(drive.durationMs || 0);
-  const topMph  = Math.round(mpsToMph(drive.topSpeedMps || 0));
   const stats = [
     { val: distMi,       lbl: 'Miles'    },
     { val: durStr,       lbl: 'Duration' },
-    { val: String(topMph), lbl: 'Top MPH' },
+    { val: String(analyzeDrive(drive).fullStops), lbl: 'Stops' },
   ];
   const colW = 280;
   const x0   = (SIZE - colW * 3) / 2;

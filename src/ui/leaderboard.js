@@ -1,4 +1,5 @@
 import { showScreen } from './router.js';
+import { escapeHtml } from '../utils/dom.js';
 import { loadDriverName, saveDriverName, loadLifetimeScore } from '../services/storage.js';
 import { fetchLeaderboard, syncToLeaderboard } from '../services/supabase.js';
 import { getDeviceId } from '../services/storage.js';
@@ -58,8 +59,8 @@ export async function openLeaderboard(tab = 'overall'){
         if (isMe) myRank = '#' + (i + 1);
         return `<div class="lb-row${isMe ? ' lb-row--me' : ''}">
           <div class="lb-rank ${rankClass}">${i + 1}</div>
-          <div class="lb-row-name">${row.username}</div>
-          <div class="lb-row-score">${row.lifetime_score}</div>
+          <div class="lb-row-name">${escapeHtml(row.username)}</div>
+          <div class="lb-row-score">${escapeHtml(row.lifetime_score)}</div>
         </div>`;
       }).join('');
     }

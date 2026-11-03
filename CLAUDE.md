@@ -390,8 +390,7 @@ dashboard and signup capture all run on Cloudflare.
 - Redirects (`/tracker`, etc.) live in `public/_redirects`.
 
 ## Branches
-- `main` — production
-- `claude/step-1-avg-speed-*` — active dev branch
+- `main` — production, and the only branch in use
 
 ## What lives where
 Everything served lives in `public/` (copied to `dist/` as-is: `sw.js`, `manifest.json`,

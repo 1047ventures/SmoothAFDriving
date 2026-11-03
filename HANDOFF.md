@@ -53,7 +53,7 @@ Independently confirmed against the live API, not just read from a log.
 | `20260814000000_accounts.sql` | **Applied & tracked** | recorded in `public.schema_migrations` |
 | "Confirm signup" email | **Prints the code** | `{{ .Token }}` present on re-read |
 | "Magic Link" email | **Prints the code** | same |
-| The 122 existing drives | **All claimable** | every row `user_id: null`, `device_id` = `41226b7c-e747-44e3-be3e-73e9fb8ba4eb` |
+| The 122 existing drives | **All claimable** | every row `user_id: null`, `device_id` = `<old device id>` |
 | Sign in with Apple | **Off** — optional | `external.apple: false` |
 
 Existing custom email-template content was **preserved** — the code block was

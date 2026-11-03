@@ -29,7 +29,7 @@ export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 // Bumped when the scoring engine changes enough to warrant rescoring stored
 // drives in place. rescoreStoredDrives() runs once per new value.
-export const RESCORE_VERSION     = 5;
+export const RESCORE_VERSION     = 6;
 export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
@@ -225,7 +225,10 @@ export const ARRIVAL_RADIUS_M = 200;      // must end within this of the destina
 // and back shouldn't land in your history. 0.3 mi is the floor.
 export const MIN_DRIVE_MILES  = 0.3;
 export const MIN_DRIVE_METERS = MIN_DRIVE_MILES * 1609.34;   // ≈ 483 m
-export const CLOCK_MAX_SWING = 15;   // max ± points the clock can move the score
+// Off (was 15): a score that rewards beating the ETA rewards speeding, which is
+// against the mission, and App Store guideline 1.4.3. Destination drives still show
+// the ETA; it just doesn't move the score or points.
+export const CLOCK_MAX_SWING = 0;    // max ± points the clock can move the score
 export const CLOCK_BEAT_FULL = 0.20; // beating the (buffered) ETA by 20% = full +bonus
 export const CLOCK_LATE_FULL = 0.20; // 20% over the (buffered) ETA = full -penalty
 export const SCORE_MAX        = 100 + CLOCK_MAX_SWING; // drives can break 100 (rare)
@@ -237,7 +240,7 @@ export const SCORE_MAX        = 100 + CLOCK_MAX_SWING; // drives can break 100 (
 export const POINTS_PER_SMOOTH_MILE = 10;
 export const POINTS_EVENT_WINDOW_MS = 8000;  // road within ±8s of a harsh event isn't "smooth"
 export const POINTS_SMOOTH_GATE     = 80;    // efficiency needed to earn any clock reward
-export const POINTS_PACE_BONUS_MAX  = 0.5;   // beating the ETA fully = +50% on the base
+export const POINTS_PACE_BONUS_MAX  = 0;     // off, see CLOCK_MAX_SWING
 // Traffic: the same smooth mile is harder in rush hour, so it earns more.
 // ratio = the trip's time in traffic ÷ the same trip at 3am (Mapbox typical
 // traffic), read right after the drive — or, for older drives, estimated from

@@ -182,6 +182,12 @@ export async function discardRawCapture(driveStart, s = store()){
   } catch { /* the next upload pass takes them instead */ }
 }
 
+/** Forget everything waiting to upload: the account is being deleted. */
+export async function clearRawCapture(s = store()){
+  if (!s) return;
+  try { await Promise.all((await s.keys()).map(k => s.del(k))); } catch { /* best effort */ }
+}
+
 // ── Upload ───────────────────────────────────────────────────────────────────
 
 let uploading = false;

@@ -32,12 +32,12 @@ const SLIDES = [
   {
     art: `<div class="intro-mount"><span class="intro-mphone"></span><span class="intro-mbase"></span></div>`,
     h:   `Mount &amp; drive.`,
-    sub: `That's the whole setup. We score the rest.`,
+    sub: `That's the whole setup. Set it before you roll, keep your eyes on the road, and follow traffic laws.`,
   },
   {
     art: `<div class="intro-badge">&check;</div>`,
     h:   `Ready when <span class="hot">you</span> are.`,
-    sub: `We use location &amp; motion to score the drive. It stays on your phone unless you share it.`,
+    sub: `We use location &amp; motion to score the drive and back it up to your private history.`,
     cta: `Turn on &amp; drive`,
   },
 ];
