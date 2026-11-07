@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**433 tasks shipped** as of 2026-11-03.
+**434 tasks shipped** as of 2026-11-07.
 
 
 ## 2026-04
@@ -455,3 +455,4 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T431** · Tests: the clock no longer moves score or points  _( 2026-11-02 )_
 - **T432** · Car Wake: wait until you're in the seat, not just in Bluetooth range  _( 2026-11-03 )_
 - **T433** · TestFlight builds now say what changed  _( 2026-11-03 )_
+- **T434** · Recap notes say WHERE: 'Sharp turn onto Federal Boulevard' instead of '9:36 in' (OSM named roads, cached per drive, fails soft)  _( 2026-11-07 )_
