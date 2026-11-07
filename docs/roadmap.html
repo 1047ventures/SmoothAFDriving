@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 253</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 2:26 AM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 1:38 PM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -252,7 +252,7 @@
       </details>
       <details class="ent" id="trk-dashcam">
         <summary><span class="tag t-next tn">Q4</span><span class="ent-t">Dash cam: let video explain the hard moments</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Plan: a Viofo A229 Pro front + rear cam joins your phone&rsquo;s hotspot. After each drive the app pulls about 15 seconds around each flagged moment, and the cloud checks what happened. A car cutting in forgives that brake; video never adds points. About $3&ndash;6 a user a month to run. Judging live needs a small computer in the car, so that comes later.<br><br><b>First test (Nov 7, public footage):</b> on 5 minutes of I-270, the detector found the car ahead in every frame and ran faster than real time on a Mac. It flagged 4 &ldquo;cut-ins&rdquo;, but on a look most were us changing lanes. Lesson: the phone&rsquo;s own sensors have to say when <i>we</i> moved, and distance needs the real camera&rsquo;s lens, not a guess. <br><b>With lane finding added:</b> on the same clip it found all 3 of our lane changes (plus 2 extra flags) and both real cut-ins, an SUV sliding in at 11 m and at 5.5 m. It correctly called a new car ahead &ldquo;we changed lanes&rdquo; when we were the ones who moved. Rain is the weak spot: the lane was found only 40% of the time, and it took our own hood for a car. Code and results: <code>research/dashcam-poc/</code>. Full research: <code>reports/Dash cam driving context.md</code>.</div>
+        <div class="ent-body">Plan: a Viofo A229 Pro front + rear cam joins your phone&rsquo;s hotspot. After each drive the app pulls about 15 seconds around each flagged moment, and the cloud checks what happened. A car cutting in forgives that brake; video never adds points. About $3&ndash;6 a user a month to run. Judging live needs a small computer in the car, so that comes later.<br><br><b>First test (Nov 7, public footage):</b> on 5 minutes of I-270, the detector found the car ahead in every frame and ran faster than real time on a Mac. It flagged 4 &ldquo;cut-ins&rdquo;, but on a look most were us changing lanes. Lesson: the phone&rsquo;s own sensors have to say when <i>we</i> moved, and distance needs the real camera&rsquo;s lens, not a guess. <br><b>Now on a trained model (YOLOP, MIT, learned from 100k real dash cam videos):</b> on the same clip it got exactly our 3 lane changes, with no false flags and no false cut-ins. It also labelled every &ldquo;new car ahead&rdquo; as us moving over. Correction: the earlier hand-made version&rsquo;s 2 &ldquo;cut-ins&rdquo; were an SUV staying in the next lane, and I first called them real. In rain it now says &ldquo;can&rsquo;t judge&rdquo; instead of guessing, and it no longer mistakes our hood for a car. Swapped out the earlier detector because its AGPL license is risky for a paid app. Code and results: <code>research/dashcam-poc/</code>. Full research: <code>reports/Dash cam driving context.md</code>.</div>
       </details>
     </div>
   </details>

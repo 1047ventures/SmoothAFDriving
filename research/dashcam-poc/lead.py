@@ -13,7 +13,9 @@ not a cut-in.
 import argparse, json, math, os
 import cv2
 import numpy as np
-from ultralytics import YOLO
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from yolop_model import Yolop
 
 VEHICLES = {2: ('car', 1.8), 3: ('motorbike', 0.8), 5: ('bus', 2.5), 7: ('truck', 2.5)}
 
@@ -21,7 +23,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('clip'); ap.add_argument('out')
 ap.add_argument('--fov', type=float, default=50)
 ap.add_argument('--fps', type=float, default=10)
-ap.add_argument('--model', default='yolov8s.pt')
+ap.add_argument('--model', default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'yolop-640-640.onnx'))
 ap.add_argument('--horizon', type=float, default=0.5)
 ap.add_argument('--hood', type=float, default=0.92)
 ap.add_argument('--cam-x', type=float, default=0.5)
@@ -38,30 +40,52 @@ step = max(1, round(src_fps / a.fps))
 focal = (W / 2) / math.tan(math.radians(a.fov / 2))
 hy, by, x0 = H * a.horizon, H * a.hood, W * a.cam_x
 ROI_TOP = hy + (by - hy) * 0.25     # far paint is too thin to trust
-model = YOLO(a.model)
+model = Yolop(a.model)
+
+
+class Tracker:
+    """Follows boxes frame to frame by overlap. Enough for one camera at 10 fps."""
+    def __init__(self):
+        self.tracks, self.next_id = {}, 1
+    def update(self, t, boxes):
+        def iou(a, b):
+            ix = max(0, min(a[2], b[2]) - max(a[0], b[0])); iy = max(0, min(a[3], b[3]) - max(a[1], b[1]))
+            inter = ix * iy
+            return inter / ((a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter + 1e-6)
+        pairs = sorted(((iou(tr['box'], b), tid, bi) for tid, tr in self.tracks.items() for bi, b in enumerate(boxes)), reverse=True)
+        used_t, used_b, out = set(), set(), []
+        for v, tid, bi in pairs:
+            if v < 0.25 or tid in used_t or bi in used_b: continue
+            used_t.add(tid); used_b.add(bi)
+            self.tracks[tid] = {'box': boxes[bi], 'seen': t}
+            out.append((boxes[bi], tid))
+        for bi, b in enumerate(boxes):
+            if bi not in used_b:
+                self.tracks[self.next_id] = {'box': b, 'seen': t}; out.append((b, self.next_id)); self.next_id += 1
+        self.tracks = {k: v for k, v in self.tracks.items() if t - v['seen'] < 0.6}
+        return out
+
+
+tracker = Tracker()
 writer = cv2.VideoWriter(os.path.join(a.out, 'annotated.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), src_fps / step, (W, H))
 if a.start: cap.set(cv2.CAP_PROP_POS_MSEC, a.start * 1000)
 
 
 # ── Lanes ──────────────────────────────────────────────────────────────────
-def paint_segments(frame, vehicle_boxes):
-    """Line segments on painted lane markings in the road area, cars masked out."""
-    roi = frame[int(ROI_TOP):int(by)]
-    hls = cv2.cvtColor(roi, cv2.COLOR_BGR2HLS)
-    l, s = hls[:, :, 1], hls[:, :, 2]
-    # White: bright compared with the road around it. Yellow: hue band with some colour.
-    road = cv2.medianBlur(l, 31)
-    white = ((l.astype(int) - road) > 35) & (l > 140)
-    hch = hls[:, :, 0]
-    yellow = (hch > 12) & (hch < 35) & (s > 70) & (l > 90)
-    mask = ((white | yellow) * 255).astype(np.uint8)
-    for (x1, y1, x2, y2) in vehicle_boxes:
-        cv2.rectangle(mask, (int(x1), int(y1 - ROI_TOP)), (int(x2), int(y2 - ROI_TOP)), 0, -1)
-    edges = cv2.Canny(mask, 50, 150)
-    segs = cv2.HoughLinesP(edges, 1, np.pi / 180, 25, minLineLength=int(H * 0.04), maxLineGap=int(H * 0.06))
+def paint_segments(lane_mask):
+    """Straight pieces of the lane lines the model painted, in the road area."""
+    roi = (lane_mask[int(ROI_TOP):int(by)] * 255).astype(np.uint8)
+    segs = cv2.HoughLinesP(roi, 1, np.pi / 180, 25, minLineLength=int(H * 0.04), maxLineGap=int(H * 0.06))
     out = []
     if segs is None:
-        return out, mask
+        return out
+    for x1, y1, x2, y2 in segs.reshape(-1, 4).tolist():
+        y1 += ROI_TOP; y2 += ROI_TOP
+        if y1 == y2: continue
+        slope = (x2 - x1) / (y2 - y1)
+        if abs(slope) > 2.5: continue
+        out.append((x1, y1, x2, y2, slope))
+    return out
     for x1, y1, x2, y2 in segs.reshape(-1, 4).tolist():
         y1 += ROI_TOP; y2 += ROI_TOP
         if y1 == y2: continue
@@ -169,6 +193,7 @@ history, leads, events = {}, [], []
 stable_lead = None
 frame_i = 0
 lane_known_frames = 0
+lane_px_recent = []
 n_frames = 0
 start_frame = int(a.start * src_fps)
 while True:
@@ -179,11 +204,12 @@ while True:
     if frame_i % step:
         frame_i += 1; continue
     n_frames += 1
-    res = model.track(frame, persist=True, classes=list(VEHICLES), verbose=False, device='mps', tracker='bytetrack.yaml')[0]
-    boxes = []
-    if res.boxes.id is not None:
-        boxes = [(tuple(b), int(c), int(i)) for b, c, i in zip(res.boxes.xyxy.tolist(), res.boxes.cls.tolist(), res.boxes.id.tolist())]
-    segs, _ = paint_segments(frame, [b for b, _, _ in boxes])
+    dets, road, lane_mask = model(frame)
+    # Our own hood or dash can't be a car: skip boxes reaching the bottom edge that are wider than half the frame.
+    dets = [d[:4] for d in dets if not (d[3] > H * 0.97 and d[2] - d[0] > W * 0.5)]
+    boxes = [(b, 2, tid) for b, tid in tracker.update(t, dets)]
+    segs = paint_segments(lane_mask)
+    lane_px_recent.append((t, int(lane_mask[int(ROI_TOP):int(by)].sum())))
     lane.update(t, segs)
     dbg.append((round(t,1), sorted((int(L['xb'] - x0), round(t - L['born'],1)) for L in lane.lines.values())))
     if lane.known(t): lane_known_frames += 1
@@ -236,14 +262,25 @@ while True:
     frame_i += 1
 writer.release()
 
+# Can we judge? Only when the lane lines were clearly visible around the moment.
+# Rain, night, glare or worn paint drop the lane pixels, and then we say so
+# instead of guessing (the score stays as it was).
+px = sorted(v for _, v in lane_px_recent)
+good_px = px[int(len(px) * 0.75)] * 0.35 if px else 0
+def seen_well(t0):
+    win = [v for tt, v in lane_px_recent if t0 - 3 <= tt <= t0 + 1]
+    return bool(win) and sum(v >= max(good_px, 1500) for v in win) / len(win) >= 0.7
+for e in events + lane.changes:
+    e['can_judge'] = seen_well(e['t'])
 summary = {
     'clip': os.path.basename(a.clip), 'seconds': round(frame_i / src_fps, 1),
     'lane_found_pct': round(100 * lane_known_frames / max(1, n_frames), 1),
+    'clear_view_pct': round(100 * sum(seen_well(tt) for tt, _ in lane_px_recent[::10]) / max(1, len(lane_px_recent[::10])), 1),
     'frames_with_car_ahead_pct': round(100 * len(leads) / max(1, n_frames), 1),
     'median_gap_m': round(sorted(d for _, _, d in leads)[len(leads) // 2], 1) if leads else None,
     'our_lane_changes': lane.changes,
     'lead_changes': events,
 }
-json.dump(dbg, open(os.path.join(a.out, 'lines.json'), 'w'))
-json.dump(summary, open(os.path.join(a.out, 'result.json'), 'w'), indent=1)
-print(json.dumps(summary, indent=1))
+json.dump(dbg, open(os.path.join(a.out, 'lines.json'), 'w'), default=float)
+json.dump(summary, open(os.path.join(a.out, 'result.json'), 'w'), indent=1, default=float)
+print(json.dumps(summary, indent=1, default=float))
