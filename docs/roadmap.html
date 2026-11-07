@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 253</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 1:38 PM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 2:40 PM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -254,6 +254,10 @@
         <summary><span class="tag t-next tn">Q4</span><span class="ent-t">Dash cam: let video explain the hard moments</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Plan: a Viofo A229 Pro front + rear cam joins your phone&rsquo;s hotspot. After each drive the app pulls about 15 seconds around each flagged moment, and the cloud checks what happened. A car cutting in forgives that brake; video never adds points. About $3&ndash;6 a user a month to run. Judging live needs a small computer in the car, so that comes later.<br><br><b>First test (Nov 7, public footage):</b> on 5 minutes of I-270, the detector found the car ahead in every frame and ran faster than real time on a Mac. It flagged 4 &ldquo;cut-ins&rdquo;, but on a look most were us changing lanes. Lesson: the phone&rsquo;s own sensors have to say when <i>we</i> moved, and distance needs the real camera&rsquo;s lens, not a guess. <br><b>Now on a trained model (YOLOP, MIT, learned from 100k real dash cam videos):</b> on the same clip it got exactly our 3 lane changes, with no false flags and no false cut-ins. It also labelled every &ldquo;new car ahead&rdquo; as us moving over. Correction: the earlier hand-made version&rsquo;s 2 &ldquo;cut-ins&rdquo; were an SUV staying in the next lane, and I first called them real. In rain it now says &ldquo;can&rsquo;t judge&rdquo; instead of guessing, and it no longer mistakes our hood for a car. Swapped out the earlier detector because its AGPL license is risky for a paid app. Code and results: <code>research/dashcam-poc/</code>. Full research: <code>reports/Dash cam driving context.md</code>.</div>
       </details>
+      <details class="ent" id="trk-learn">
+        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Learn your car &mdash; then prove it on the next drive</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The owner&rsquo;s manual you&rsquo;ll actually read. <b>Tap any part</b> of your car on the x-ray (brakes, transmission, turbo, battery) for a 20-second explainer: what it does, what wears it out, how yours is doing right now. Every term (regen braking, DCT, engine braking) links to a <b>plain-English glossary</b>. <b>Skill videos for your car</b>: using your semi-auto like a manual, engine braking down a mountain, one-pedal EV driving, smooth DCT launches. <b>Tied to your driving</b>: ride the brakes downhill and it suggests the engine-braking video, then the next downhill drive shows whether you did it. Start by curating the best existing videos per transmission type and habit; only make our own where nothing good exists. Builds on the x-ray car (T409) and the Learn button on each finding.</div>
+      </details>
     </div>
   </details>
 
@@ -262,23 +266,23 @@
     <summary><h2>In the queue</h2><span class="count">after that</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
-        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q6</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Uploaded drive rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you see. Now also covers the traffic stretch (T403), which lands after the upload.</div>
       </details>
 
       <details class="ent" id="trk-always">
-        <summary><span class="tag t-next tn">Q6&ndash;7</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q6)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q7)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) is shipped.</div>
+        <summary><span class="tag t-next tn">Q7&ndash;8</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q7)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q8)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) is shipped.</div>
       </details>
 
       <details class="ent" id="trk-motiv">
-        <summary><span class="tag t-wait tn">Q8</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-wait tn">Q9</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Turning points into gas, car care or coaching &mdash; a partnership step, not just code. Waits until points (shipped T371) have run for a while.</div>
       </details>
 
       <details class="ent" id="trk-polish">
-        <summary><span class="tag t-wait tn">Q9&ndash;10</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q9)</span> and a better set of car icons <span class="tn">(Q10)</span>.</div>
+        <summary><span class="tag t-wait tn">Q10&ndash;11</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q11)</span> and a better set of car icons <span class="tn">(Q10)</span>.</div>
       </details>
     </div>
   </details>
