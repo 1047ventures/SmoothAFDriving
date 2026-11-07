@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 253</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 1:10 AM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 1:45 AM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -246,6 +246,14 @@
         <summary><span class="tag t-next tn">Q2</span><span class="ent-t">Coaching that remembers</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Tips that notice patterns (&ldquo;third drive in a row braking late &mdash; try this&rdquo;), pick a focus, and back off once you&rsquo;ve fixed it. Builds on the per-drive <a href="#trk-notes">engineer&rsquo;s notes</a> (T400).</div>
       </details>
+      <details class="ent" id="trk-context">
+        <summary><span class="tag t-next tn">Q3</span><span class="ent-t">Context without a camera</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Make the score fairer for everyone, no hardware needed: hills from the phone&rsquo;s barometer, weather on every drive (Apple WeatherKit, free at our size), stop signs, lights and curves from map data so &ldquo;braked for a light&rdquo; isn&rsquo;t a penalty, and later, how you compare with other drivers on the same stretch of road. The research found this fixes more unfair scores than a camera would.</div>
+      </details>
+      <details class="ent" id="trk-dashcam">
+        <summary><span class="tag t-next tn">Q4</span><span class="ent-t">Dash cam: let video explain the hard moments</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Plan: a Viofo A229 Pro front + rear cam joins your phone&rsquo;s hotspot. After each drive the app pulls about 15 seconds around each flagged moment, and the cloud checks what happened. A car cutting in forgives that brake; video never adds points. About $3&ndash;6 a user a month to run. Judging live needs a small computer in the car, so that comes later.<br><br><b>First test (Nov 7, public footage):</b> on 5 minutes of I-270, the detector found the car ahead in every frame and ran faster than real time on a Mac. It flagged 4 &ldquo;cut-ins&rdquo;, but on a look most were us changing lanes. Lesson: the phone&rsquo;s own sensors have to say when <i>we</i> moved, and distance needs the real camera&rsquo;s lens, not a guess. Full research: <code>reports/Dash cam driving context.md</code>.</div>
+      </details>
     </div>
   </details>
 
@@ -254,23 +262,23 @@
     <summary><h2>In the queue</h2><span class="count">after that</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
       <details class="ent">
-        <summary><span class="tag t-next tn">Q3</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-next tn">Q5</span><span class="ent-t">Put your <i>real</i> scores on the cloud leaderboard</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Uploaded drive rows still carry the <i>raw</i> score, not the local credits (throttle, forced-stop, rescore). Re-upload the adjusted score so the standings match what you see. Now also covers the traffic stretch (T403), which lands after the upload.</div>
       </details>
 
       <details class="ent" id="trk-always">
-        <summary><span class="tag t-next tn">Q4&ndash;5</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q4)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q5)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) is shipped.</div>
+        <summary><span class="tag t-next tn">Q6&ndash;7</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q6)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q7)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) is shipped.</div>
       </details>
 
       <details class="ent" id="trk-motiv">
-        <summary><span class="tag t-wait tn">Q6</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
+        <summary><span class="tag t-wait tn">Q8</span><span class="ent-t">Redeemable rewards</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">Turning points into gas, car care or coaching &mdash; a partnership step, not just code. Waits until points (shipped T371) have run for a while.</div>
       </details>
 
       <details class="ent" id="trk-polish">
-        <summary><span class="tag t-wait tn">Q7&ndash;8</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q7)</span> and a better set of car icons <span class="tn">(Q8)</span>.</div>
+        <summary><span class="tag t-wait tn">Q9&ndash;10</span><span class="ent-t">Polish &mdash; not urgent</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">Tidy-ups: home-screen cleanup <span class="tn">(Q9)</span> and a better set of car icons <span class="tn">(Q10)</span>.</div>
       </details>
     </div>
   </details>
