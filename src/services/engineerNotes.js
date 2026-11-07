@@ -10,6 +10,7 @@
 import { fmtDuration } from '../utils/math.js';
 import { classifyStop, headingBefore } from './signals.js';
 import { TRAFFIC_MIN_RATIO } from '../constants.js';
+import { eventKey } from './streets.js';
 
 const NAMES = {
   brake: ['Hard brake', 'Extreme brake'],
@@ -49,20 +50,36 @@ function advice(e, cause){
  * features: map features near the events ([{lat,lon,kind}]) or null if unknown
  * Returns [{ tone: 'fix'|'praise', title, body, lat, lon, t }] — at most 3.
  */
-export function engineerNotes(drive, analysis, features = null){
+/** The worst event of each kind (worst kinds first, at most two) — the ones the notes talk about. */
+export function noteEvents(drive){
+  const events = (drive.events || []).filter(e => NAMES[e.type]);
+  const byType = {};
+  for (const e of events) (byType[e.type] ||= []).push(e);
+  return Object.values(byType)
+    .map(list => ({ worst: list.reduce((a, b) => (b.severity || 0) > (a.severity || 0) ? b : a), count: list.length }))
+    .sort((a, b) => (b.worst.severity || 0) - (a.worst.severity || 0))
+    .slice(0, 2);
+}
+
+// "Sharp turn onto Federal Boulevard" beats "9:36 in" — you can picture the first.
+function placeTitle(e, place){
+  if (!place) return `${eventName(e)} · ${fmtDuration(e.t || 0)} in · ${e.speedMph || 0} mph`;
+  return `${eventName(e)} ${place.kind} ${place.street} · ${e.speedMph || 0} mph`;
+}
+
+/**
+ * drive:    the stored drive (events, samples, distanceMeters, traffic)
+ * analysis: analyzeDrive output (smoothStreakMi)
+ * features: map features near the events ([{lat,lon,kind}]) or null if unknown
+ * places:   street wording per event ({ [eventKey]: { street, kind } }) or null if unknown
+ * Returns [{ tone: 'fix'|'praise', title, body, lat, lon, t }] — at most 3.
+ */
+export function engineerNotes(drive, analysis, features = null, places = null){
   const notes = [];
   const events = (drive.events || []).filter(e => NAMES[e.type]);
   const heavy  = (drive.traffic?.ratio || 0) >= TRAFFIC_MIN_RATIO;
 
-  // Worst event of each kind, worst kinds first.
-  const byType = {};
-  for (const e of events) (byType[e.type] ||= []).push(e);
-  const worstPerType = Object.values(byType)
-    .map(list => ({ worst: list.reduce((a, b) => (b.severity || 0) > (a.severity || 0) ? b : a), count: list.length }))
-    .sort((a, b) => (b.worst.severity || 0) - (a.worst.severity || 0))
-    .slice(0, 2);
-
-  for (const { worst: e, count } of worstPerType){
+  for (const { worst: e, count } of noteEvents(drive)){
     const cause = (features && e.type === 'brake' && e.lat != null)
       ? classifyStop({ lat: e.lat, lon: e.lon }, headingAt(drive.samples, e.t), features)
       : null;
@@ -70,7 +87,7 @@ export function engineerNotes(drive, analysis, features = null){
     const more = count > 1 ? ` That was 1 of ${count} hard ${kind} this drive.` : '';
     notes.push({
       tone: 'fix',
-      title: `${eventName(e)} · ${fmtDuration(e.t || 0)} in · ${e.speedMph || 0} mph`,
+      title: placeTitle(e, places?.[eventKey(e)]),
       body: advice(e, cause) + more,
       lat: e.lat ?? null, lon: e.lon ?? null, t: e.t ?? null,
     });

@@ -45,3 +45,14 @@ describe('engineerNotes', () => {
     expect(eventName({ type: 'turn' })).toBe('Sharp turn');
   });
 });
+
+describe('engineerNotes with street names', () => {
+  const drive = { events: [{ type: 'turn', tier: 2, severity: 2, t: 576000, lat: 39.7, lon: -104.9, speedMph: 31 }], samples: [], distanceMeters: 5000 };
+  it('says where instead of how far in, when the street is known', () => {
+    const n = engineerNotes(drive, {}, null, { 'turn@576000': { street: 'Federal Boulevard', kind: 'onto' } })[0];
+    expect(n.title).toBe('Sharp turn onto Federal Boulevard · 31 mph');
+  });
+  it('keeps the time wording when no street is known', () => {
+    expect(engineerNotes(drive, {}, null, null)[0].title).toBe('Sharp turn · 9:36 in · 31 mph');
+  });
+});

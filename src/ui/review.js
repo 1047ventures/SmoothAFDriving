@@ -11,7 +11,8 @@ import { loadDrives, loadDriverName, updateStoredDrive, recomputeLifetimeScore }
 import { baseTiles } from '../utils/maptiles.js';
 import { countCauses, describeCauses, describeCause, fetchStopFeatures } from '../services/signals.js';
 import { showToast } from '../utils/toast.js';
-import { engineerNotes } from '../services/engineerNotes.js';
+import { engineerNotes, noteEvents } from '../services/engineerNotes.js';
+import { resolveEventStreets } from '../services/streets.js';
 import { fetchTrafficRatio } from '../services/routing.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
@@ -81,11 +82,11 @@ async function annotateStopCauses(drive, analysis){
  * Rendered first without map features, then again once the road around the
  * brakes is known (so "it was traffic" vs "a light was ahead" can be said).
  */
-function renderNotes(drive, analysis, features = null){
+function renderNotes(drive, analysis, features = null, places = null){
   const block = document.getElementById('rv-notes');
   const list  = document.getElementById('rv-notes-list');
   if (!block || !list) return;
-  const notes = engineerNotes(drive, analysis, features);
+  const notes = engineerNotes(drive, analysis, features, places);
   block.style.display = notes.length ? '' : 'none';
   list.innerHTML = notes.map((n, i) => {
     const located = n.lat != null && n.lon != null;
@@ -103,13 +104,18 @@ function renderNotes(drive, analysis, features = null){
 let _noteToken = 0;
 async function annotateNoteCauses(drive, analysis){
   const token = ++_noteToken;
+  if (!drive.samples?.length) return;
+  const id = drive.startTime ?? drive.id ?? drive.ts;
   // Only the worst brake is ever explained, so only its surroundings are fetched.
   const worst = (drive.events || []).filter(e => e.type === 'brake' && e.lat != null && e.lon != null)
     .sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
-  if (!worst || !drive.samples?.length) return;
-  const features = await fetchStopFeatures(`${drive.startTime ?? drive.id ?? drive.ts}:ev`, [{ lat: worst.lat, lon: worst.lon }]);
-  if (token !== _noteToken || features == null) return;   // a newer recap opened, or no data
-  renderNotes(drive, analysis, features);
+  // Two independent lookups (light/sign ahead of the brake; street names for the notes' events).
+  const [features, places] = await Promise.all([
+    worst ? fetchStopFeatures(`${id}:ev`, [{ lat: worst.lat, lon: worst.lon }]) : null,
+    resolveEventStreets(`${id}:st`, drive.samples, noteEvents(drive).map(n => n.worst)),
+  ]);
+  if (token !== _noteToken || (features == null && places == null)) return;   // a newer recap opened, or no data
+  renderNotes(drive, analysis, features, places);
 }
 
 // Traffic is read once, right after the drive (live traffic later would describe
