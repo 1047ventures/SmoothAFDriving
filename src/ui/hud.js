@@ -141,21 +141,10 @@ function paintScoreTrend(st, now){
   const el = $id('score-delta'); if (!el) return;
   const s = st.liveScore;
   if (s == null) return;
-  if (!st.liveSettled){
-    if (el.textContent !== 'SETTLING') el.textContent = 'SETTLING';
-    if (el.className !== 'hero-score-delta is-pending'){
-      el.className = 'hero-score-delta is-pending';
-      el.setAttribute('aria-label', 'Score settling');
-    }
-    const pending = $id('live-score');
-    if (pending){
-      pending.classList.add('is-pending');
-      if (pending.dataset.c){ pending.style.color = ''; delete pending.dataset.c; }
-    }
-    return;
-  }
+  // The score is live from the first second now — it opens at the driver's
+  // standing average and blends toward this drive's analysis — so there is no
+  // SETTLING placeholder and nothing to grey out.
   el.setAttribute('aria-label', 'Score change over the last minute');
-  $id('live-score')?.classList.remove('is-pending');
   if (s !== lastScore){ scoreHist.push({ t: now, s }); lastScore = s; scoreHist = scoreHist.slice(-60); }
   // The score's colour is its VALUE (same bands as the recap), not whether you happen to be
   // braking this second. It used to flash red on any gentle brake, which contradicted the

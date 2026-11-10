@@ -68,3 +68,61 @@ describe('live score unification', () => {
     expect(live).toBe(stored);
   });
 });
+
+// ── Opening score: the driver's average, handing over to this drive ──────────
+const { liveScoreBlend } = await import('../services/scoring.js');
+const { LIVE_SCORE_SETTLE_SEC } = await import('../constants.js');
+
+describe('liveScoreBlend', () => {
+  it('opens at the driver\'s standing average, not at the drive analysis', () => {
+    // A 93 driver sees 93 before any moving time, however the first few
+    // samples happen to score.
+    expect(liveScoreBlend(93, 40, 0)).toBe(93);
+    expect(liveScoreBlend(93, 100, 0)).toBe(93);
+  });
+
+  it('hands fully over to the live score once settled', () => {
+    expect(liveScoreBlend(93, 78, LIVE_SCORE_SETTLE_SEC)).toBe(78);
+    // and stays there well past the window
+    expect(liveScoreBlend(93, 78, LIVE_SCORE_SETTLE_SEC * 4)).toBe(78);
+  });
+
+  it('blends linearly in between', () => {
+    const mid = LIVE_SCORE_SETTLE_SEC / 2;
+    expect(liveScoreBlend(90, 70, mid)).toBe(80);
+  });
+
+  it('damps an early sharp move instead of letting it swing the number', () => {
+    // The case the old SETTLING placeholder existed for: one harsh input a
+    // minute in reads ~25 points low on the raw analysis.
+    const raw = 68, average = 93;
+    const shown = liveScoreBlend(average, raw, 60);
+    const rawDrop = average - raw;           // 25
+    const shownDrop = average - shown;
+    expect(shownDrop).toBeLessThan(rawDrop / 3);
+    expect(shown).toBeGreaterThan(85);
+  });
+
+  it('only counts moving time, so sitting at a light does not advance it', () => {
+    // movingSecondsSoFar feeds this; a stationary minute contributes 0.
+    expect(liveScoreBlend(93, 60, 0)).toBe(93);
+  });
+
+  it('falls back to the live score when there is no usable average', () => {
+    expect(liveScoreBlend(null, 77, 0)).toBe(77);
+    expect(liveScoreBlend(undefined, 77, 999)).toBe(77);
+  });
+
+  it('returns null when there is no live score to show', () => {
+    expect(liveScoreBlend(93, null, 10)).toBe(null);
+    expect(liveScoreBlend(93, undefined, 10)).toBe(null);
+  });
+
+  it('never reads outside the two inputs', () => {
+    for (const sec of [0, 1, 30, 150, 299, 300, 600]){
+      const v = liveScoreBlend(93, 70, sec);
+      expect(v).toBeGreaterThanOrEqual(70);
+      expect(v).toBeLessThanOrEqual(93);
+    }
+  });
+});

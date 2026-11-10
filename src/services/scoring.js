@@ -10,6 +10,7 @@ import {
   SCORE_MAX,
   PIT_SPEED_MPS,
   PIT_STOP_MS,
+  LIVE_SCORE_SETTLE_SEC,
   SMOOTH_LA_LO,
   SMOOTH_LA_HI,
   SMOOTH_JERK_LO,
@@ -335,6 +336,39 @@ export function analyzeDrive(drive){
     hardBrakeEntryMph,
     letterGrade,
   };
+}
+
+/**
+ * The live score to show mid-drive: the driver's standing average handing over
+ * to the analysis of the drive in progress as evidence accumulates.
+ *
+ * Scored on the drive so far, the raw analysis swings wildly early — one quick
+ * move reads ~25 points low at minute one, and about 1 point low by the end.
+ * The first answer to that was to hide the number behind a SETTLING placeholder
+ * for five minutes, which removed it for exactly the stretch a driver is most
+ * curious about, and made the drive start from nowhere.
+ *
+ * Starting from `startScore` (the lifetime average) fixes both. A driver who
+ * sits at 93 opens at 93, and a sharp turn in the first thirty seconds moves
+ * the number by a fraction of its raw effect, because the live analysis barely
+ * carries any weight yet. Same protection from early skew; the score is simply
+ * on screen the whole time.
+ *
+ * Weight ramps linearly over `settleSec` of MOVING time, so sitting at a light
+ * doesn't advance it.
+ */
+export function liveScoreBlend(startScore, liveScore, movingSec, settleSec = LIVE_SCORE_SETTLE_SEC){
+  // Number(null) and Number('') are both 0, not NaN, so a missing score would
+  // otherwise read as a real zero and drag the display down toward it.
+  const num = v => (v === null || v === undefined || v === '' ? NaN : Number(v));
+  const live = num(liveScore);
+  if (!Number.isFinite(live)) return null;
+  const start = num(startScore);
+  // No usable average (first ever drive) — nothing to blend from.
+  if (!Number.isFinite(start)) return Math.round(live);
+  if (!(settleSec > 0)) return Math.round(live);
+  const w = Math.max(0, Math.min(1, (Number(movingSec) || 0) / settleSec));
+  return Math.round(start * (1 - w) + live * w);
 }
 
 /** Seconds spent moving, for the live score's settling period. */

@@ -10,7 +10,7 @@ import { renderReview } from './review.js';
 import { renderRecAvatar } from './garage.js';
 import { finalizeAndReview, buildDriveFromState } from '../services/drive.js';
 import { clearActiveDrive, persistActiveDrive } from '../services/drive.js';
-import { analyzeDrive, computePitStopMs, movingSecondsSoFar } from '../services/scoring.js';
+import { analyzeDrive, computePitStopMs, movingSecondsSoFar, liveScoreBlend } from '../services/scoring.js';
 import { fetchRoute, isTrafficAware, etaBuffer } from '../services/routing.js';
 import { onGpsUpdate, processSample, detectEvent } from '../services/sensors/gps.js';
 import { calibrateAxes, createMotionHandler } from '../services/sensors/motion.js';
@@ -285,28 +285,30 @@ export function updateLiveUI(){
       state._lastLiveScoreT = nowMs;
       if (state.samples.length >= 3){
         const a = analyzeDrive(buildDriveFromState());
-        state.liveScore = a.score;
-        if (!state.liveSettled) state.liveSettled = movingSecondsSoFar(state.samples) >= LIVE_SCORE_SETTLE_SEC;
+        const movingSec = movingSecondsSoFar(state.samples);
+        // Open at the driver's standing average and hand weight to this drive's
+        // analysis as moving time builds, rather than hiding the number while it
+        // settles.
+        state.liveScore = liveScoreBlend(state.driveStartScore, a.score, movingSec) ?? a.score;
+        if (!state.liveSettled) state.liveSettled = movingSec >= LIVE_SCORE_SETTLE_SEC;
         // Same analysis feeds the Stops stat and the stop markers on the inputs ribbon.
         state.liveStops = a.fullStops;
         // analyzeDrive works on start-relative times; the ribbon draws on the wall clock.
         state.liveStopMarkers = a.stopMarkers.map(m => ({ ...m, t: m.t + state.startTime }));
       }
     }
-    if (scoreEl) scoreEl.textContent = state.liveSettled ? state.liveScore : '--';
+    if (scoreEl) scoreEl.textContent = state.liveScore;
   }
 
   // Push the live score + speed to the Lock Screen / Dynamic Island (throttled
   // inside the service; no-op off native iOS).
-  updateDriveActivity(state.liveSettled
-    ? { score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) }
-    : { score: 0, status: 'smooth', speedMph: Math.round(mpsToMph(speedMps)) });
+  updateDriveActivity({ score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) });
 
   // Arc gauge: fill dashoffset from score, color + glow from driving state
   const arcProgress = document.getElementById('arc-progress');
   const arcSvg      = document.getElementById('arc-svg');
   if (arcProgress && arcSvg && !arcProgress._eventLock){
-    arcProgress.style.strokeDashoffset = String(499.2 * (1 - (state.liveSettled ? state.liveScore : 0) / 100));
+    arcProgress.style.strokeDashoffset = String(499.2 * (1 - state.liveScore / 100));
     const arcColor = isBrake ? 'rgba(224,59,47,.92)' : isAccel ? 'rgba(63,196,106,.92)' : 'rgba(242,241,238,.9)';
     const glowCol  = isBrake ? 'rgba(224,59,47,.5)'  : isAccel ? 'rgba(63,196,106,.5)'  : 'rgba(242,241,238,.28)';
     arcProgress.setAttribute('stroke', arcColor);
@@ -414,6 +416,11 @@ export function startRecording(){
   // Fix 1: show an explicit "acquiring" state instead of a silent 0/--/ticking
   // clock until the first real GPS sample arrives (see markGpsAcquired above).
   $('#rec-source').textContent = 'Acquiring GPS…';
+  // The score opens at the driver's standing average rather than a dash, so
+  // paint it now — the first tick is up to 2.5 s away, and the markup ships a
+  // placeholder for the pre-drive screen.
+  const openingScore = document.getElementById('live-score');
+  if (openingScore) openingScore.textContent = state.liveScore;
   document.getElementById('gps-acquiring')?.classList.remove('hidden');
   showScreen('record');
   clearDebugBuffers();
