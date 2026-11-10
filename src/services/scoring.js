@@ -10,7 +10,7 @@ import {
   SCORE_MAX,
   PIT_SPEED_MPS,
   PIT_STOP_MS,
-  LIVE_SCORE_SETTLE_SEC,
+  LIVE_SCORE_BLEND_SEC,
   SMOOTH_LA_LO,
   SMOOTH_LA_HI,
   SMOOTH_JERK_LO,
@@ -356,8 +356,12 @@ export function analyzeDrive(drive){
  *
  * Weight ramps linearly over `settleSec` of MOVING time, so sitting at a light
  * doesn't advance it.
+ *
+ * A driver with no scored history has no average to open at, so `startScore` is
+ * null for them and they simply get the live analysis from the start. Opening a
+ * first-ever drive at a default 100 would flatter and then only ever drain.
  */
-export function liveScoreBlend(startScore, liveScore, movingSec, settleSec = LIVE_SCORE_SETTLE_SEC){
+export function liveScoreBlend(startScore, liveScore, movingSec, settleSec = LIVE_SCORE_BLEND_SEC){
   // Number(null) and Number('') are both 0, not NaN, so a missing score would
   // otherwise read as a real zero and drag the display down toward it.
   const num = v => (v === null || v === undefined || v === '' ? NaN : Number(v));
@@ -371,7 +375,7 @@ export function liveScoreBlend(startScore, liveScore, movingSec, settleSec = LIV
   return Math.round(start * (1 - w) + live * w);
 }
 
-/** Seconds spent moving, for the live score's settling period. */
+/** Seconds spent moving, which is what advances the live score's blend. */
 export function movingSecondsSoFar(samples){
   let ms = 0;
   for (let i = 1; i < samples.length; i++){

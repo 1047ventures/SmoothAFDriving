@@ -2,7 +2,7 @@ import { $, $$ } from '../utils/dom.js';
 import { setRecording as setCarWakeRecording } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, LIVE_ETA_REFRESH_MS, LIVE_SCORE_SETTLE_SEC, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
+import { CFG, LIVE_ETA_REFRESH_MS, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, fmtClock, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -285,12 +285,17 @@ export function updateLiveUI(){
       state._lastLiveScoreT = nowMs;
       if (state.samples.length >= 3){
         const a = analyzeDrive(buildDriveFromState());
-        const movingSec = movingSecondsSoFar(state.samples);
+        // This drive's own score, unblended. The HUD's trend arrow reads THIS,
+        // not the displayed number: the blend slides the display on its own as
+        // weight shifts, which would otherwise show a driver a steady ▼ they
+        // didn't earn.
+        state.liveScoreRaw = a.score;
         // Open at the driver's standing average and hand weight to this drive's
         // analysis as moving time builds, rather than hiding the number while it
-        // settles.
-        state.liveScore = liveScoreBlend(state.driveStartScore, a.score, movingSec) ?? a.score;
-        if (!state.liveSettled) state.liveSettled = movingSec >= LIVE_SCORE_SETTLE_SEC;
+        // settles. A null means the analysis had no usable score — keep the last
+        // good value rather than painting a blank or a NaN.
+        const blended = liveScoreBlend(state.driveStartScore, a.score, movingSecondsSoFar(state.samples));
+        if (blended != null) state.liveScore = blended;
         // Same analysis feeds the Stops stat and the stop markers on the inputs ribbon.
         state.liveStops = a.fullStops;
         // analyzeDrive works on start-relative times; the ribbon draws on the wall clock.
@@ -442,7 +447,7 @@ export function startRecording(){
   state.liveStops = 0; state.liveStopMarkers = [];
   hudStart();
   musicStart();
-  startDriveActivity({ score: 0, speedMph: 0 }); // Lock Screen / Dynamic Island (iOS 16.1+ native only)
+  startDriveActivity({ score: state.liveScore, speedMph: 0 }); // Lock Screen / Dynamic Island (iOS 16.1+ native only)
 
   if ('wakeLock' in navigator){
     navigator.wakeLock.request('screen')
@@ -585,7 +590,10 @@ export function stopRecording(opts){
   stopAutoEndWatch();
   hudStop();                 // persists a new personal-best streak
   musicStop();
-  endDriveActivity({ score: state.liveScore });
+  // The recap scores the drive itself, so the end card shows that — not the
+  // blended display value, which is still part standing-average on any drive
+  // that ended before the handover finished.
+  endDriveActivity({ score: state.liveScoreRaw ?? state.liveScore });
   clearActiveDrive();
   if (state.gpsWatchActive){
     stopLocationWatch();
@@ -630,7 +638,6 @@ export function startSimulatedDrive(){
   state.simulated = true;
   state.startTime = Date.now();
   $('#rec-source').textContent = 'Demo drive';
-  state.liveSettled = true;    // too short to settle, and it's there to show the score
   hudStart();
   document.getElementById('gps-acquiring')?.classList.add('hidden');
   showScreen('record');

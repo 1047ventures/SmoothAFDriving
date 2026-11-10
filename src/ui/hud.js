@@ -141,11 +141,17 @@ function paintScoreTrend(st, now){
   const el = $id('score-delta'); if (!el) return;
   const s = st.liveScore;
   if (s == null) return;
+  // The arrow answers "is my driving changing?", so it tracks this drive's own
+  // score. The displayed number is that blended with the driver's standing
+  // average, and the blend slides it ~(live-start)/2 over any 60 s window all by
+  // itself — enough to park a ▼ on screen for the whole handover while the
+  // driving never changed.
+  const trendScore = st.liveScoreRaw ?? s;
   // The score is live from the first second now — it opens at the driver's
   // standing average and blends toward this drive's analysis — so there is no
   // SETTLING placeholder and nothing to grey out.
   el.setAttribute('aria-label', 'Score change over the last minute');
-  if (s !== lastScore){ scoreHist.push({ t: now, s }); lastScore = s; scoreHist = scoreHist.slice(-60); }
+  if (trendScore !== lastScore){ scoreHist.push({ t: now, s: trendScore }); lastScore = trendScore; scoreHist = scoreHist.slice(-60); }
   // The score's colour is its VALUE (same bands as the recap), not whether you happen to be
   // braking this second. It used to flash red on any gentle brake, which contradicted the
   // "Smooth stop" message right beside it. Brake/accel state still shows in the edge glows.
@@ -153,7 +159,7 @@ function paintScoreTrend(st, now){
   if (big){ const col = scoreColor(s); if (big.dataset.c !== col){ big.style.color = col; big.dataset.c = col; } }
   // Change since about a minute ago (or the oldest we have, once there's ≥30 s of history).
   const ref = [...scoreHist].reverse().find(h => now - h.t >= SCORE_TREND_MS) || scoreHist.find(h => now - h.t >= 30_000);
-  const d = ref ? s - ref.s : 0;
+  const d = ref ? trendScore - ref.s : 0;
   const text = d >= 3 ? `▲ ${d}` : d <= -3 ? `▼ ${-d}` : '';
   const cls = 'hero-score-delta' + (d >= 3 ? ' up' : d <= -3 ? ' down' : '');
   if (el.textContent !== text) el.textContent = text;

@@ -153,10 +153,18 @@ export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
 // drive actually carried throttle data — GPS-only drives are untouched.
 export const SMOOTH_THR_LO   = 2;    // p85 |Δthrottle/dt| (%/s) scoring 100
 export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
-// The live score hides until the drive has this much moving time. Scored on the
-// drive so far, its first minutes swing wildly: one quick move reads 25 points low
-// at minute one and about 1 point low by the end.
-export const LIVE_SCORE_SETTLE_SEC = 300;
+// How much MOVING time it takes the live score to hand over from the driver's
+// standing average to this drive's own analysis. Scored on the drive so far, the
+// raw analysis swings wildly early: one quick move reads 25 points low at minute
+// one and about 1 point low by the end — so early weight is what damps it.
+//
+// Shorter than the 5 minutes this started as, for two reasons: a sharp turn in the
+// first 30 seconds is already damped to a quarter of its raw effect at this length,
+// and most real drives clear it, so the number the driver watches has converged on
+// this drive's score before the recap shows that same score. A longer window damps
+// harder but leaves the hero number and the recap disagreeing at the end of any
+// drive shorter than the window.
+export const LIVE_SCORE_BLEND_SEC = 120;
 export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
 // Road's-fault vs yours: a stop forced by a red light, its queue, or a stop sign
 // is far less avoidable than one with no signal nearby (a jam you didn't read, a

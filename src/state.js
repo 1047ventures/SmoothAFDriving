@@ -1,5 +1,10 @@
 import { DEFAULTS } from './constants.js';
-import { loadLifetimeScore } from './services/storage.js';
+import { loadLifetimeScore, loadDrives } from './services/storage.js';
+
+/** True once the driver has at least one scored drive to average. */
+function hasScoredHistory(){
+  try { return loadDrives().some(d => d && d.score != null); } catch { return false; }
+}
 
 export let calib = {
   active:    false,   // collecting pairs
@@ -56,7 +61,6 @@ export const state = {
   motionHandler: null,
   simTimer: null,
   liveScore: 100,
-  liveSettled: false,   // enough moving time for the live score to mean something
   tickInterval: null,
   wakeLock: null,
   driveStartScore: 100,
@@ -92,7 +96,6 @@ export function resetState(){
   state.lastMotionEventT = -Infinity;
   state.lastGpsPos = null;
   state.motionEvents = 0;
-  state.liveSettled = false;
   state.roughnessBuf = [];
   state.currentRoughness = 0;
   state.peakVertJolt = 0;
@@ -100,8 +103,11 @@ export function resetState(){
   state.currentSpeedLimitMps = null;
   state.rawAccel = { x: 0, y: 0, z: 0 };
   state.rawGyro  = { alpha: 0, beta: 0, gamma: 0 };
-  state.driveStartScore = loadLifetimeScore();
-  state.liveScore = state.driveStartScore;
+  // The score the drive opens at: where this driver already stands. null when
+  // they have no scored drives yet — loadLifetimeScore() answers 100 for them,
+  // which would open a first-ever drive on a full ring that can only drain.
+  state.driveStartScore = hasScoredHistory() ? loadLifetimeScore() : null;
+  state.liveScore = state.driveStartScore ?? 100;
   state._lastLiveScoreT = 0;
   state.destination = null;
   state.targetEtaSec = null;
