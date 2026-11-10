@@ -142,7 +142,18 @@ function setEdgeGlow(id, mag){
 function markGpsAcquired(){
   const srcEl = document.getElementById('rec-source');
   if (srcEl) srcEl.textContent = motionActive ? 'GPS + Motion' : 'GPS only';
-  document.getElementById('gps-acquiring')?.classList.add('hidden');
+}
+
+/**
+ * The score opens at the driver's standing average rather than a dash, so paint
+ * it the moment the record screen appears — the first tick is up to 2.5s away,
+ * and the markup's '--' draws through the gradient text-fill as two solid bars.
+ * Rounded here because this is the one render that doesn't come from
+ * liveScoreBlend: loadLifetimeScore() is a parseFloat and could carry decimals.
+ */
+function paintOpeningScore(){
+  const el = document.getElementById('live-score');
+  if (el) el.textContent = Math.round(state.liveScore);
 }
 
 function wireDebugPanel() {
@@ -302,7 +313,12 @@ export function updateLiveUI(){
         state.liveStopMarkers = a.stopMarkers.map(m => ({ ...m, t: m.t + state.startTime }));
       }
     }
-    if (scoreEl) scoreEl.textContent = state.liveScore;
+    // The score recomputes every 2.5s but this runs every 200ms, so most writes
+    // would be the same string. Guarded like paintScoreTrend's writes.
+    if (scoreEl){
+      const txt = String(state.liveScore);
+      if (scoreEl.textContent !== txt) scoreEl.textContent = txt;
+    }
   }
 
   // Push the live score + speed to the Lock Screen / Dynamic Island (throttled
@@ -424,9 +440,7 @@ export function startRecording(){
   // The score opens at the driver's standing average rather than a dash, so
   // paint it now — the first tick is up to 2.5 s away, and the markup ships a
   // placeholder for the pre-drive screen.
-  const openingScore = document.getElementById('live-score');
-  if (openingScore) openingScore.textContent = state.liveScore;
-  document.getElementById('gps-acquiring')?.classList.remove('hidden');
+  paintOpeningScore();
   showScreen('record');
   clearDebugBuffers();
   wireDebugPanel();
@@ -638,8 +652,8 @@ export function startSimulatedDrive(){
   state.simulated = true;
   state.startTime = Date.now();
   $('#rec-source').textContent = 'Demo drive';
+  paintOpeningScore();
   hudStart();
-  document.getElementById('gps-acquiring')?.classList.add('hidden');
   showScreen('record');
 
   state.tickInterval = setInterval(updateLiveUI, 200);
