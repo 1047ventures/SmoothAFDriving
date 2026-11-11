@@ -18,6 +18,7 @@ import { OBD_DEVICE_KEY } from '../constants.js';
 import { watchDongle, askForNudgesOnce, currentSeatThreshold, learnSeatRssi, syncSeatThreshold } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 import { createEngineStartMonitor } from '../services/engineStart.js';
+import { createStartStopLearner, carHasStartStop } from '../services/startStop.js';
 import { showCountdown, closeCountdown, countdownOpen } from './countdown.js';
 
 /**
@@ -223,12 +224,19 @@ function autoStartDrive(){
 const engineStart = createEngineStartMonitor();
 let engineTickAt = 0;
 let startCountdown = null;
+let learner = null;          // start-stop learning, one per drive
+let noStartStop = carHasStartStop() === false;
 function engineTick(){
   const now = Date.now();
   if (now - engineTickAt < 1000) return;
   engineTickAt = now;
-  const { rpm, rpmAt } = getLatest();
-  const go = engineStart.tick({ now, linked: isConnected(), rpm, rpmAt, recording: state.recording });
+  const { rpm, rpmAt, speed, speedAt } = getLatest();
+  if (state.recording){
+    learner ??= createStartStopLearner();
+    learner.observe({ now, rpm: fresh(rpmAt) ? rpm : null, speedKmh: fresh(speedAt, 3000) ? speed : null });
+  } else if (learner){ learner = null; noStartStop = carHasStartStop() === false; }
+  const go = engineStart.tick({ now, linked: isConnected(), rpm, rpmAt, recording: state.recording,
+    zeroMs: noStartStop ? 3000 : undefined });
   // The engine stalled or the reading dropped while we were counting down: put
   // the card away and let the next steady reading bring it back.
   if (startCountdown && !(fresh(rpmAt, 3000) && rpm > 0)){ startCountdown.close(); startCountdown = null; engineStart.rearm(); }

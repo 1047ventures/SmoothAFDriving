@@ -44,9 +44,11 @@ export function createEngineStartMonitor(cfg = ENGINE_START){
      *   rpm        latest RPM, or null
      *   rpmAt      ms timestamp of the last RPM answer
      *   recording  is a drive recording right now?
+     *   zeroMs     how long answering 0 must last to count as off (short for a
+     *              car known to have no start-stop)
      * Returns true the moment a drive should start (once per engine run).
      */
-    tick({ now, linked, rpm, rpmAt, recording }){
+    tick({ now, linked, rpm, rpmAt, recording, zeroMs = cfg.ZERO_MS }){
       const fresh = linked && rpmAt != null && (now - rpmAt) <= cfg.FRESH_MS;
       const running = fresh && rpm != null && rpm >= cfg.RUNNING_RPM;
 
@@ -59,7 +61,7 @@ export function createEngineStartMonitor(cfg = ENGINE_START){
         const answering = fresh && rpm != null;
         if (answering){ offSince = null; if (zeroSince == null) zeroSince = now; }
         else { zeroSince = null; if (offSince == null) offSince = now; }
-        if ((offSince != null && now - offSince >= cfg.OFF_MS) || (zeroSince != null && now - zeroSince >= cfg.ZERO_MS)) armed = true;
+        if ((offSince != null && now - offSince >= cfg.OFF_MS) || (zeroSince != null && now - zeroSince >= zeroMs)) armed = true;
         return false;
       }
       offSince = zeroSince = null;
