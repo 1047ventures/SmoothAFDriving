@@ -126,7 +126,7 @@ describe('summaries', () => {
   });
 });
 
-describe('fetchStopFeatures — fails soft and caches', () => {
+describe('fetchStopFeatures — our server first, fails soft, caches', () => {
   const stops = [{ lat: 39.7, lon: -104.9 }];
   const okResponse = { ok: true, json: async () => ({ elements: [
     { type: 'node', id: 1, lat: 39.7005, lon: -104.9, tags: { highway: 'traffic_signals' } },
@@ -134,32 +134,62 @@ describe('fetchStopFeatures — fails soft and caches', () => {
     { type: 'node', id: 2, lat: 39.701,  lon: -104.9, tags: { highway: 'stop' } },
     { type: 'node', id: 3, lat: 39.702,  lon: -104.9, tags: { highway: 'crossing' } },           // ignored
   ] }) };
+  const ours = (body) => ({ ok: true, json: async () => body });
+  const isOurs = url => String(url).includes('/api/road-features');
+  // Our server answers `server` (or rejects with it); Overpass mirrors answer `overpass`.
+  const route = (server, overpass = okResponse) => vi.fn(async (url) => {
+    if (isOurs(url)){ if (server instanceof Error) throw server; return server; }
+    if (overpass instanceof Error) throw overpass;
+    return overpass;
+  });
 
-  it('returns de-duplicated signals and stop signs', async () => {
-    const f = await fetchStopFeatures('drive-a', stops, { fetchImpl: vi.fn().mockResolvedValue(okResponse) });
+  it('answers from our own server and never touches the public map servers', async () => {
+    const fetchImpl = route(ours({ features: [{ lat: 39.7005, lon: -104.9, kind: 'signal' }], unavailable: [] }));
+    const f = await fetchStopFeatures('drive-o', stops, { fetchImpl });
+    expect(f).toEqual([{ lat: 39.7005, lon: -104.9, kind: 'signal' }]);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(isOurs(fetchImpl.mock.calls[0][0])).toBe(true);
+  });
+
+  it('sends our server map tiles, never the stop’s exact position', async () => {
+    const fetchImpl = route(ours({ features: [], unavailable: [] }));
+    await fetchStopFeatures('drive-t', stops, { fetchImpl });
+    const sent = fetchImpl.mock.calls[0][1].body;
+    expect(JSON.parse(sent).tiles.length).toBeGreaterThan(0);
+    expect(sent).not.toMatch(/39\.7|104\.9/);
+  });
+
+  it('falls back to the public servers when ours is down', async () => {
+    const f = await fetchStopFeatures('drive-a', stops, { fetchImpl: route(new Error('down')) });
     expect(f).toHaveLength(2);
     expect(f.map(x => x.kind).sort()).toEqual(['signal', 'stop']);
   });
 
+  it('falls back when our server could not fill a tile (a missing light would blame you)', async () => {
+    const fetchImpl = route(ours({ features: [], unavailable: ['794_-2098'] }));
+    expect(await fetchStopFeatures('drive-u', stops, { fetchImpl })).toHaveLength(2);
+  });
+
   it('serves the second request from cache without touching the network', async () => {
-    const fetchImpl = vi.fn().mockResolvedValue(okResponse);
+    const fetchImpl = route(ours({ features: [], unavailable: [] }));
     await fetchStopFeatures('drive-b', stops, { fetchImpl });
     await fetchStopFeatures('drive-b', stops, { fetchImpl });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
-  it('tries the next mirror when the first fails', async () => {
-    const fetchImpl = vi.fn().mockRejectedValueOnce(new Error('blocked')).mockResolvedValueOnce(okResponse);
-    const f = await fetchStopFeatures('drive-c', stops, { fetchImpl });
-    expect(f).toHaveLength(2);
-    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  it('tries the next public mirror when the first fails', async () => {
+    let n = 0;
+    const fetchImpl = vi.fn(async (url) => {
+      if (isOurs(url)) throw new Error('down');
+      if (n++ === 0) throw new Error('blocked');
+      return okResponse;
+    });
+    expect(await fetchStopFeatures('drive-c', stops, { fetchImpl })).toHaveLength(2);
   });
 
-  it('returns null (no labels) when every mirror fails, and does not cache the failure', async () => {
-    const fetchImpl = vi.fn().mockRejectedValue(new Error('offline'));
-    expect(await fetchStopFeatures('drive-d', stops, { fetchImpl })).toBeNull();
-    const good = vi.fn().mockResolvedValue(okResponse);
-    expect(await fetchStopFeatures('drive-d', stops, { fetchImpl: good })).toHaveLength(2);   // retried, not stuck on null
+  it('returns null (no labels) when everything fails, and does not cache the failure', async () => {
+    expect(await fetchStopFeatures('drive-d', stops, { fetchImpl: route(new Error('offline'), new Error('offline')) })).toBeNull();
+    expect(await fetchStopFeatures('drive-d', stops, { fetchImpl: route(new Error('down')) })).toHaveLength(2);   // retried, not stuck on null
   });
 
   it('does nothing for a drive with no stops', async () => {
@@ -168,3 +198,4 @@ describe('fetchStopFeatures — fails soft and caches', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 });
+

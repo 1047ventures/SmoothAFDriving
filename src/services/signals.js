@@ -17,6 +17,8 @@
  * only part that touches the network, and it fails soft — no data means no
  * labels, never an error in the recap.
  */
+import { apiUrl } from './supabase.js';
+import { tilesAround } from '../shared/roadTiles.mjs';
 
 const M_PER_DEG = 111111;
 
@@ -144,6 +146,9 @@ export function describeCause(k){
 }
 
 // ── Map lookup (the only part that touches the network) ─────────────────────
+// Asks our own server first (/api/road-features), which answers from our copy of
+// the map, by tile. The public Overpass servers are only a last resort here: they
+// have rejected or timed out on us, and every red light then counted as yours.
 
 const CACHE_KEY = 'smoothaf.stop_features';
 const CACHE_MAX = 25;
@@ -168,6 +173,23 @@ function writeCache(obj){
  * reopening a recap is instant and offline-safe. Resolves to null on any failure
  * (offline, rate-limited, blocked) — callers then simply show no cause labels.
  */
+async function fromOurServer(pts, fetchImpl){
+  const tiles = [...new Set(pts.flatMap(s => tilesAround(s.lat, s.lon, FETCH_RADIUS_M)))];
+  try {
+    const res = await fetchImpl(apiUrl('/api/road-features'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tiles }),
+      signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(15000) : undefined,
+    });
+    if (!res.ok) return null;
+    const j = await res.json();
+    // Some tile couldn't be filled: an answer missing lights would wrongly blame you.
+    if (!Array.isArray(j.features) || (j.unavailable && j.unavailable.length)) return null;
+    return j.features.map(f => ({ lat: f.lat, lon: f.lon, kind: f.kind }));
+  } catch { return null; }
+}
+
 export async function fetchStopFeatures(cacheId, stops, { fetchImpl = fetch } = {}){
   const id = String(cacheId);
   const cache = readCache();
@@ -175,6 +197,13 @@ export async function fetchStopFeatures(cacheId, stops, { fetchImpl = fetch } = 
 
   const pts = (stops || []).filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon)).slice(0, MAX_STOPS_QUERIED);
   if (!pts.length) return [];
+
+  const ours = await fromOurServer(pts, fetchImpl);
+  if (ours){
+    cache[id] = { at: Date.now(), features: ours };
+    writeCache(cache);
+    return ours;
+  }
   const around = pts.map(s =>
     `node["highway"="traffic_signals"](around:${FETCH_RADIUS_M},${s.lat.toFixed(5)},${s.lon.toFixed(5)});` +
     `node["highway"="stop"](around:${FETCH_RADIUS_M},${s.lat.toFixed(5)},${s.lon.toFixed(5)});`

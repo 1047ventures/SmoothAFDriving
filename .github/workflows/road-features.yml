@@ -1,0 +1,48 @@
+name: Road features (lights + stop signs)
+
+# Loads every traffic light and stop sign in a region into our own road_features
+# table, from OpenStreetMap's Geofabrik extracts, so "was that stop a red light?"
+# never depends on a public map server. Monthly refresh for the loaded regions;
+# run by hand to add one (region = Geofabrik path, bbox = south,west,north,east).
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'Geofabrik path, e.g. north-america/us/colorado'
+        default: 'north-america/us/colorado'
+      bbox:
+        description: 'south,west,north,east of that region'
+        default: '36.99,-109.06,41.01,-102.04'
+      dry_run:
+        description: 'Count only, write nothing'
+        type: boolean
+        default: false
+  schedule:
+    - cron: '17 9 3 * *'   # 3rd of each month
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      REGION: ${{ inputs.region || 'north-america/us/colorado' }}
+      BBOX: ${{ inputs.bbox || '36.99,-109.06,41.01,-102.04' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install osmium
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
+      - name: Download the region and keep only lights and stop signs
+        run: |
+          curl -fsSL -o region.osm.pbf "https://download.geofabrik.de/${REGION}-latest.osm.pbf"
+          ls -la region.osm.pbf
+          osmium tags-filter region.osm.pbf n/highway=traffic_signals,stop -o filtered.osm.pbf
+          osmium export filtered.osm.pbf -f geojsonseq -a id --geometry-types point -o features.geojsonseq
+          wc -l features.geojsonseq
+      - name: Load into the database
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: node scripts/load-road-features.mjs features.geojsonseq "$BBOX" ${{ inputs.dry_run && '--dry-run' || '' }}
