@@ -96,7 +96,7 @@ describe('saveDrives quota handling', () => {
 });
 
 describe('recomputeLifetimeScore', () => {
-  it('averages the 10 most recent scores after a restore', () => {
+  it('averages every score after a restore', () => {
     saveDrives([{ startTime: 3, score: 100 }, { startTime: 2, score: 80 }, { startTime: 1, score: 60 }]);
     recomputeLifetimeScore();
     expect(loadLifetimeScore()).toBe(80);

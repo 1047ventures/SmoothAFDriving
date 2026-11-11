@@ -153,10 +153,10 @@ export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
 // drive actually carried throttle data — GPS-only drives are untouched.
 export const SMOOTH_THR_LO   = 2;    // p85 |Δthrottle/dt| (%/s) scoring 100
 export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
-// The live score opens at the last drive's final score and eases into this one's
-// over this much moving time. Scored on the drive so far, its first minutes swing
-// wildly (one quick move reads 25 points low at minute one, about 1 low by the end),
-// so the early number leans on the last drive and the drive's own score takes over.
+// The live score opens at the lifetime score and eases into this drive's own over
+// this much moving time. Scored on the drive so far, its first minutes swing wildly
+// (one quick move reads 25 points low at minute one, about 1 low by the end), so the
+// early number leans on the lifetime score and the drive's own score takes over.
 export const LIVE_SCORE_BLEND_SEC = 300;
 export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
 // Road's-fault vs yours: a stop forced by a red light, its queue, or a stop sign

@@ -1,5 +1,5 @@
 import { DEFAULTS } from './constants.js';
-import { loadLifetimeScore, loadDrives } from './services/storage.js';
+import { loadLifetimeScore } from './services/storage.js';
 
 export let calib = {
   active:    false,   // collecting pairs
@@ -98,10 +98,9 @@ export function resetState(){
   state.currentSpeedLimitMps = null;
   state.rawAccel = { x: 0, y: 0, z: 0 };
   state.rawGyro  = { alpha: 0, beta: 0, gamma: 0 };
-  // The live score opens where the last drive finished, then eases toward this
-  // drive's own score (record.js). No last drive yet: the lifetime score.
-  const last = loadDrives().find(d => Number.isFinite(d?.score) && d.score > 0);
-  state.driveStartScore = last ? Math.round(last.score) : loadLifetimeScore();
+  // The live score opens at the lifetime score (average of every drive), then
+  // eases toward this drive's own score (record.js).
+  state.driveStartScore = loadLifetimeScore();
   state.liveScore = state.driveStartScore;
   state._lastLiveScoreT = 0;
   state.destination = null;

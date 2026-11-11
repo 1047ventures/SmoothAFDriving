@@ -92,11 +92,11 @@ describe('migrateLifetimeScore', () => {
     expect(score).toBeLessThanOrEqual(100);
   });
 
-  it('does NOT overwrite a valid non-zero stored score', () => {
+  it('re-derives an old 10-drive average as the average of every drive', () => {
     saveLifetimeScore(75);
-    saveDrive({ startTime: 1000, score: 50, distanceMeters: 1000 });
+    for (let i = 0; i < 12; i++) saveDrive({ startTime: 1000 + i, score: i < 2 ? 40 : 90, distanceMeters: 1000 });
     migrateLifetimeScore();
-    expect(loadLifetimeScore()).toBe(75);
+    expect(loadLifetimeScore()).toBe(82);   // (2×40 + 10×90) / 12 = 81.7
   });
 });
 

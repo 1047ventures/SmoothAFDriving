@@ -286,7 +286,7 @@ export function updateLiveUI(){
       state._lastLiveScoreT = nowMs;
       if (state.samples.length >= 3){
         const a = analyzeDrive(buildDriveFromState());
-        // Eased in from the last drive's score, so the early swings don't show.
+        // Eased in from the lifetime score, so the early swings don't show.
         // The saved score at the end is this drive's own, unblended.
         const w = state.simulated ? 1 : Math.min(1, movingSecondsSoFar(state.samples) / LIVE_SCORE_BLEND_SEC);
         state.liveScore = Math.round(state.driveStartScore + (a.score - state.driveStartScore) * w);

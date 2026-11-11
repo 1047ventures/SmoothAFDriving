@@ -53,32 +53,25 @@ export function saveDriverIdentity(first, last){
   } catch {}
 }
 
-// ── Migration ─────────────────────────────────────────────────────────────────
-// Run once if no lifetime score saved yet — derive it from stored drives.
-// Most-recent drive carries the most weight (exponential decay factor 0.65).
+// ── Lifetime score ────────────────────────────────────────────────────────────
+/**
+ * The lifetime score: the average of EVERY scored drive. It's what Home shows, and
+ * where each new drive's live score starts. Re-derived on launch so older installs,
+ * which kept a 10-drive average, catch up.
+ */
 export function migrateLifetimeScore(){
-  const stored = localStorage.getItem(LIFETIME_SCORE_KEY);
-  const drives = loadDrives().filter(d => d.score != null);
-  if (!drives.length){ if (stored === null) saveLifetimeScore(100); return; }
-  // Re-derive if never set, corrupted to 0, or implausibly low vs actual drives
-  const storedVal = Number(stored);
-  const recentAvg = drives.slice(0, 5).reduce((s, d) => s + d.score, 0) / Math.min(drives.length, 5);
-  const implausible = stored === null || storedVal === 0 || storedVal < recentAvg - 30;
-  if (!implausible) return;
-  const recent = drives.slice(0, 10);
-  saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
+  if (!loadDrives().some(d => d.score != null)){
+    if (localStorage.getItem(LIFETIME_SCORE_KEY) === null) saveLifetimeScore(100);
+    return;
+  }
+  recomputeLifetimeScore();
 }
 
-/**
- * Recompute the lifetime score from the 10 most recent drives — the same
- * rolling average finalizeAndReview uses. Called after a cloud restore, where
- * the newly merged history should be reflected immediately.
- */
+/** Recompute the lifetime score (average of all scored drives) after anything changes the history. */
 export function recomputeLifetimeScore(){
   const drives = loadDrives().filter(d => d.score != null);
   if (!drives.length) return;
-  const recent = drives.slice(0, 10);
-  saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
+  saveLifetimeScore(Math.round(drives.reduce((s, d) => s + d.score, 0) / drives.length));
 }
 
 // ── Drives ────────────────────────────────────────────────────────────────────

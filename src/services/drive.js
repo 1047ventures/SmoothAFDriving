@@ -3,7 +3,6 @@ import { ACTIVE_DRIVE_KEY, STORAGE_KEY, MAX_STORED_DRIVES, CFG, RESCORE_VERSION,
 import {
   loadDrives,
   saveDrive,
-  saveLifetimeScore,
   saveDrives,
   recomputeLifetimeScore,
   updateStoredDrive,
@@ -337,11 +336,7 @@ export function finalizeAndReview(callbacks = {}){
 
   // Lifetime score = rolling average of the 10 most recent drives
   // (includes this drive, which was just saved above)
-  const allDrives = loadDrives().filter(d => d.score != null);
-  if (allDrives.length > 0) {
-    const recent = allDrives.slice(0, 10);
-    saveLifetimeScore(Math.round(recent.reduce((s, d) => s + d.score, 0) / recent.length));
-  }
+  recomputeLifetimeScore();   // average of every drive; the next drive starts here
   // Leaderboard gets the real stored score, NOT the (now-defunct) live gauge value.
   const driverName = loadDriverName();
   if (driverName) syncToLeaderboard(driverName, drive.score).catch(() => {});
