@@ -225,6 +225,7 @@ const state = {
                map: null, baro: null, timingAdv: null, maf: null,
                fuelLevel: null, voltage: null, batteryV: null, batteryAt: 0,
                rpmAt: 0, speedAt: 0,   // when rpm / speed were last actually read (a NO DATA keeps the old value)
+               rpmMisses: 0,           // rpm requests in a row that got nothing (ignition off)
                at: 0 },
   supported: null,
   gearSupported: false,   // set once at connect by probing PID 0xA4
@@ -533,7 +534,8 @@ export async function readVoltage(){
 async function readOne(name, timeoutMs){
   if (!state.deviceId) return null;
   const v = decodePid(name, await send('01' + PIDS[name].pid, timeoutMs));
-  if (v != null){ state.latest[name] = v; state.latest[name + 'At'] = Date.now(); }
+  if (v != null){ state.latest[name] = v; state.latest[name + 'At'] = Date.now(); if (name === 'rpm') state.latest.rpmMisses = 0; }
+  else if (name === 'rpm') state.latest.rpmMisses++;
   return v;
 }
 export const readRpm   = (timeoutMs = 800) => readOne('rpm', timeoutMs);
@@ -590,6 +592,9 @@ export async function poll(){
     if (value != null){
       state.latest[name] = value;
       if (name === 'rpm' || name === 'speed') state.latest[name + 'At'] = Date.now();
+      if (name === 'rpm') state.latest.rpmMisses = 0;
+    } else if (name === 'rpm'){
+      state.latest.rpmMisses++;
     }
   }
   // Some cars report pedal position instead of throttle plate position.

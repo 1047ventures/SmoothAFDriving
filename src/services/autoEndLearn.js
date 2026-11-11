@@ -28,7 +28,7 @@ export const LEARN = {
   SHORTEN_FACTOR: 0.6,
   LENGTHEN_PER_MISS: 0.5,
   MAX_LENGTHEN: 3,      // never wait more than 3x the default
-  FLOOR_MS: { 'link-lost': 15_000, 'engine-off': 60_000 },
+  FLOOR_MS: { 'ecu-silent': 1_000, 'link-lost': 15_000, 'engine-off': 60_000 },
 };
 
 const WRONG = new Set(['keep', 'moved']);
@@ -68,10 +68,11 @@ export function tunedWaitMs(log, reason, baseMs){
   return baseMs;
 }
 
-/** An AUTO_END config with both waits tuned to this driver's answers. */
+/** An AUTO_END config with each wait tuned to this driver's answers. */
 export function tunedConfig(log, base = AUTO_END){
   return {
     ...base,
+    ECU_SILENT_PARKED_MS: tunedWaitMs(log, 'ecu-silent', base.ECU_SILENT_PARKED_MS),
     LINK_LOST_PARKED_MS: tunedWaitMs(log, 'link-lost',  base.LINK_LOST_PARKED_MS),
     RPM_ZERO_PARKED_MS:  tunedWaitMs(log, 'engine-off', base.RPM_ZERO_PARKED_MS),
   };

@@ -60,7 +60,13 @@
 .pdcta-skip:active{color:var(--cream-dim)}
 
 /* "End this drive?" — the quiet countdown under the buttons. */
-.ae-count{margin-top:12px; color:var(--muted); font:600 12.5px/1 var(--sans); letter-spacing:.02em; font-variant-numeric:tabular-nums}
+/* 3, 2, 1 before the app starts or ends a drive on its own (ui/countdown.js) */
+.cd-overlay{align-items:center}
+.cd-num{
+  font-family:var(--serif); font-weight:800; font-size:112px; line-height:1;
+  color:var(--tang); font-variant-numeric:tabular-nums; margin:8px 0 2px;
+}
+.cd-card .pdcta-sub{margin-top:4px}
 
 /* Name-prompt fields — first/last, stacked. */
 .pdcta-fields{ width:100%; display:flex; flex-direction:column; gap:10px; margin:4px 0 16px; }

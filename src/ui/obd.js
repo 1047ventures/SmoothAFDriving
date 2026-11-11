@@ -17,6 +17,8 @@ import { Capacitor } from '@capacitor/core';
 import { OBD_DEVICE_KEY } from '../constants.js';
 import { watchDongle, askForNudgesOnce, currentSeatThreshold, learnSeatRssi, syncSeatThreshold } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
+import { createEngineStartMonitor } from '../services/engineStart.js';
+import { showCountdown, closeCountdown, countdownOpen } from './countdown.js';
 
 /**
  * Remember the last adapter we connected to, so the next drive can reconnect on
@@ -214,6 +216,42 @@ function autoStartDrive(){
   setTimeout(() => { if (document.body.contains(bar)) dismiss(); }, 11000);
 }
 
+// ── Engine start → drive start ─────────────────────────────────────────────
+// RPM settling at idle means we're about to pull away: count down 3, 2, 1 and
+// start the drive. Cars that never answer RPM (some EVs) fall back to the seat
+// check below. The engine-off side lives in record.js / services/autoEnd.js.
+const engineStart = createEngineStartMonitor();
+let engineTickAt = 0;
+let startCountdown = null;
+function engineTick(){
+  const now = Date.now();
+  if (now - engineTickAt < 1000) return;
+  engineTickAt = now;
+  const { rpm, rpmAt } = getLatest();
+  const go = engineStart.tick({ now, linked: isConnected(), rpm, rpmAt, recording: state.recording });
+  // The engine stalled or the reading dropped while we were counting down: put
+  // the card away and let the next steady reading bring it back.
+  if (startCountdown && !(fresh(rpmAt, 3000) && rpm > 0)){ startCountdown.close(); startCountdown = null; engineStart.rearm(); }
+  if (!go) return;
+  if (state.recording || countdownOpen() || document.getElementById('obd-nudge')){ if (!state.recording) engineStart.rearm(); return; }
+  stopSeatWatch();
+  startCountdown = showCountdown({
+    title: 'Starting your drive',
+    sub: 'Engine&rsquo;s running.',
+    stayLabel: 'Cancel',
+    goLabel: 'Start now',
+    onDone: () => { startCountdown = null; beginDrive(); },
+    onGo:   () => { startCountdown = null; beginDrive(); },
+    onStay: () => { startCountdown = null; },
+  });
+}
+function beginDrive(){
+  if (state.recording) return;
+  document.getElementById('car-id-modal')?.remove();   // never leave a prompt over a live drive
+  lastAutoStartAt = Date.now();
+  document.getElementById('btn-start')?.click();
+}
+
 // In the seat = a strong signal for 4 reads in a row, or the car is moving.
 const SEAT_READ_MS = 2000, SEAT_READS_NEEDED = 4;
 let seatTimer = null;
@@ -225,6 +263,7 @@ function startWhenSeated(){
   let strong = 0;
   seatTimer = setInterval(async () => {
     if (!isConnected() || state.recording){ stopSeatWatch(); return; }
+    if (fresh(getLatest().rpmAt, 5000)){ stopSeatWatch(); return; }   // the engine-start countdown has it
     if (document.visibilityState !== 'visible'){ strong = 0; return; }   // the notification handles closed
     const rssi = await readLinkRssi();
     strong = rssi != null && rssi >= currentSeatThreshold() ? strong + 1 : 0;
@@ -429,6 +468,8 @@ function startPolling(){
       // The link dropped (car off, out of range). Say so in both places instead
       // of leaving "<name> · N PIDs" and a Disconnect button that would scan.
       setPill(false); setStatus('Not connected'); BTN.textContent = CONNECT_LABEL;
+      engineStart.linkLost();
+      if (startCountdown){ startCountdown.close(); startCountdown = null; }
       return stopPolling();
     }
     if (busy) return;
@@ -440,7 +481,7 @@ function startPolling(){
       if (bw) batteryRunningTick(before);
     }
     catch { /* a dropped frame is not worth interrupting a drive over */ }
-    finally { busy = false; }
+    finally { busy = false; engineTick(); }
   }, POLL_MS);
 }
 

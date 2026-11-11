@@ -1,9 +1,10 @@
 /**
  * Auto-end a drive when the engine goes off.
  *
- * With an OBD adapter connected, the car tells us when the engine stops: either
- * the adapter loses power (the link drops) or it keeps answering with RPM 0. A
- * drive that is still "recording" after that is just minutes of a parked car.
+ * With an OBD adapter connected, the car tells us when the engine stops in one of
+ * three ways: the engine computer stops answering (ignition off, the strongest
+ * signal), the adapter loses power (the link drops), or it keeps answering RPM 0.
+ * A drive that is still "recording" after that is just minutes of a parked car.
  *
  * Two ways to get this wrong, and the rules below are shaped around both:
  *   · Ending on ANY Bluetooth drop would cut a drive short on a mid-highway
@@ -11,7 +12,9 @@
  *     (GPS speed ≈ 0) for a while.
  *   · Ending on "RPM = 0" would end the drive at every red light in a car with
  *     automatic start-stop (engine off, dongle still alive). So RPM-zero needs a
- *     much longer parked window than a red light.
+ *     much longer parked window than a red light. A start-stop engine still
+ *     ANSWERS "0"; a car switched off stops answering at all. That silence is
+ *     what lets the drive end within seconds of turning the car off.
  *
  * It only arms once the engine was seen RUNNING this drive (RPM above idle), so a
  * drive with no dongle — or a dongle that never reads RPM — is never touched.
@@ -21,6 +24,9 @@
 
 export const AUTO_END = {
   RUNNING_RPM:        400,      // an engine turning over; below this it isn't "running"
+  ECU_SILENT_MS:        3_000,  // asked for RPM, no answer for this long = ignition off
+  ECU_SILENT_MISSES:    3,      // ...and at least this many unanswered asks in a row
+  ECU_SILENT_PARKED_MS: 1_000,  // ...and parked this long on top
   STATIONARY_MPS:     1.0,      // GPS speed below this = parked
   LINK_LOST_PARKED_MS: 30_000,  // dongle gone + parked this long = key off
   RPM_ZERO_PARKED_MS: 150_000,  // dongle alive, RPM 0, parked this long = engine off
@@ -35,6 +41,7 @@ export function createAutoEndMonitor(cfg = AUTO_END){
   let linkLostAt = null;
   let stationarySince = null;    // when the car last came to rest (GPS fix time)
   let rpmZeroSince = null;
+  let silentSince = null;        // when the engine computer went quiet
   let snoozed = false;           // driver said "keep recording" — quiet until the car moves again
 
   return {
@@ -53,12 +60,13 @@ export function createAutoEndMonitor(cfg = AUTO_END){
      *   linked       is the OBD adapter currently connected?
      *   rpm          latest RPM, or null
      *   obdAt        ms timestamp of that OBD reading
+     *   rpmMisses    RPM requests in a row that got no answer
      *   gpsSpeedMps  latest GPS speed, or null
      *   gpsAt        ms timestamp of that fix
-     * Returns null, or { reason: 'link-lost' | 'engine-off', restAt } when the
+     * Returns null, or { reason: 'ecu-silent' | 'link-lost' | 'engine-off', restAt } when the
      * drive should end; `restAt` is when the car came to rest (trim the tail to it).
      */
-    tick({ now, linked, rpm, obdAt, gpsSpeedMps, gpsAt }){
+    tick({ now, linked, rpm, obdAt, rpmMisses = 0, gpsSpeedMps, gpsAt }){
       const obdFresh = obdAt != null && (now - obdAt) <= cfg.OBD_FRESH_MS;
 
       // Arm: the engine was demonstrably running during this drive.
@@ -84,10 +92,20 @@ export function createAutoEndMonitor(cfg = AUTO_END){
         rpmZeroSince = null;
       }
 
+      // The engine computer has gone quiet: we keep asking and nothing comes back.
+      // Several unanswered asks in a row, not just time passing: a busy adapter
+      // that isn't asking (a VIN or trouble-code read) isn't silence.
+      const silent = linked && obdAt != null && rpmMisses >= cfg.ECU_SILENT_MISSES && (now - obdAt) >= cfg.ECU_SILENT_MS;
+      if (silent){ if (silentSince == null) silentSince = now; }
+      else silentSince = null;
+
       // Driving again ends the snooze, whatever the parked clocks say.
       if (stationarySince == null) snoozed = false;
       if (!armed || stationarySince == null || snoozed) return null;
 
+      if (silentSince != null && (now - Math.max(silentSince, stationarySince)) >= cfg.ECU_SILENT_PARKED_MS){
+        return { reason: 'ecu-silent', restAt: stationarySince };
+      }
       if (linkLostAt != null && (now - Math.max(linkLostAt, stationarySince)) >= cfg.LINK_LOST_PARKED_MS){
         return { reason: 'link-lost', restAt: stationarySince };
       }

@@ -18,14 +18,14 @@ import { beginRawCapture, finishRawCapture, discardRawCapture, uploadPendingRaw 
 import { nativeMotionAvailable, startNativeMotion, stopNativeMotion } from '../services/sensors/nativeMotion.js';
 import { startLocationWatch, stopLocationWatch, getCurrentPositionOnce } from '../services/sensors/location.js';
 import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
-import { loadLog, recordOutcome, tunedConfig, isTrusted } from '../services/autoEndLearn.js';
+import { loadLog, recordOutcome, tunedConfig } from '../services/autoEndLearn.js';
 import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
 import { hudStart, hudStop, hudTick } from './hud.js';
 
 const PACE_STRIP_ON = false;
 import { musicStart, musicStop } from './music.js';
 import { startDriveActivity, updateDriveActivity, endDriveActivity } from '../services/liveActivity.js';
-import { isConnected as isObdConnected } from '../services/obd.js';
+import { isConnected as isObdConnected, getLatest as getObdLatest } from '../services/obd.js';
 import { showCarPromptIfNeeded } from './modals.js';
 import { runPostDrivePrompts } from './postdrive.js';
 import { pushDebugSample, renderDebugChart, updateDebugLegend, clearDebugBuffers } from './debug.js';
@@ -496,7 +496,7 @@ export function startRecording(){
 // eventually earns the right to stop asking. The judgement lives in
 // services/autoEnd.js (when) and services/autoEndLearn.js (how it adapts); this
 // feeds the monitor once a second and runs the question.
-const ASK_TIMEOUT_MS = 45_000;       // no answer by then → the driver has walked away → end
+const ASK_TIMEOUT_MS = 3_000;        // "Ending your drive 3, 2, 1": no tap → end
 let autoEndMonitor = null;
 let autoEndTimer   = null;
 let asking         = null;           // { reason, since } while the prompt is up
@@ -530,19 +530,25 @@ function answerAutoEnd(end, answer){
 function checkAutoEnd(){
   if (!state.recording || state.simulated || !autoEndMonitor) return;
   const last = state.samples[state.samples.length - 1];
-  const obd  = state.obd;
+  // Straight from the adapter: when RPM last answered, and when it last didn't.
+  const obd  = getObdLatest();
   const end = autoEndMonitor.tick({
     now: Date.now(),
     linked: isObdConnected(),
-    rpm:   obd ? obd.rpm : null,
-    obdAt: obd ? obd.at  : null,
+    rpm:   obd.rpm ?? null,
+    obdAt: obd.rpmAt || null,
+    rpmMisses: obd.rpmMisses || 0,
     gpsSpeedMps: last ? last.speed : null,
     gpsAt:       last ? last.t     : null,
   });
 
   if (asking){
-    // The car drove off while we were asking: we were wrong, and the question is moot.
-    if (!autoEndMonitor.parked){
+    // The car drove off, or the engine computer answered again (start-stop at a
+    // light, a dropped read): we were wrong, and the question is moot.
+    const back = (asking.reason === 'ecu-silent' && obd.rpmAt > asking.openedAt)
+              || (asking.reason === 'engine-off' && obd.rpmAt > asking.openedAt && obd.rpm > 0)
+              || (asking.reason === 'link-lost' && isObdConnected());
+    if (!autoEndMonitor.parked || back){
       const a = asking; asking = null;
       closeAutoEndPrompt();
       answerAutoEnd(a, 'moved');
@@ -551,15 +557,9 @@ function checkAutoEnd(){
   }
   if (!end) return;
 
-  // A signal that has been right 8 times running no longer needs to ask.
-  if (isTrusted(loadLog(), end.reason)){
-    showToast('Engine off — drive ended');
-    recordOutcome({ reason: end.reason, answer: 'auto', parkedMs: Date.now() - end.restAt });
-    finishAutoEnd(end, 'auto');
-    return;
-  }
-
-  asking = end;
+  // Always the 3-second countdown, even for a signal that has earned trust: it
+  // costs nothing to wait 3 seconds, and it's the driver's one chance to say no.
+  asking = { ...end, openedAt: Date.now() };
   showAutoEndPrompt({
     reason: end.reason,
     timeoutMs: ASK_TIMEOUT_MS,

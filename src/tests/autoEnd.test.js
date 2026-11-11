@@ -164,3 +164,48 @@ describe('auto-end: the driver said "keep recording"', () => {
     expect(r2.elapsed).toBeGreaterThanOrEqual(60 + 60);
   });
 });
+
+describe('auto-end: car switched off (engine computer stops answering)', () => {
+  // obdAt = last RPM answer; rpmMisses = unanswered RPM asks in a row.
+  function runSilent(phases){
+    const m = createAutoEndMonitor(); let t = 1_000_000, lastAnswer = null, misses = 0;
+    for (const p of phases){
+      for (let i = 0; i < p.secs; i++, t += 1000){
+        if (p.answered){ lastAnswer = t; misses = 0; }
+        else if (p.asking !== false) misses++;
+        const r = m.tick({ now: t, linked: true, rpm: p.rpm ?? null, obdAt: lastAnswer,
+          rpmMisses: misses, gpsSpeedMps: p.speed, gpsAt: t });
+        if (r) return { ...r, elapsed: (t - 1_000_000) / 1000 };
+      }
+    }
+    return { ended: false };
+  }
+
+  it('ends within about 4 s of the car going quiet while parked', () => {
+    const r = runSilent([{ secs: 60, answered: true, rpm: 2000, speed: 12 }, { secs: 5, answered: true, rpm: 750, speed: 0 }, { secs: 20, answered: false, speed: 0 }]);
+    expect(r.reason).toBe('ecu-silent');
+    expect(r.elapsed).toBeGreaterThanOrEqual(65 + 3);
+    expect(r.elapsed).toBeLessThanOrEqual(65 + 5);
+  });
+
+  it('does not end at a red light with auto start-stop: the computer still answers 0', () => {
+    const r = runSilent([{ secs: 60, answered: true, rpm: 2000, speed: 12 }, { secs: 90, answered: true, rpm: 0, speed: 0 }]);
+    expect(r.ended).toBe(false);
+  });
+
+  it('does not end while moving, even if RPM goes quiet', () => {
+    const r = runSilent([{ secs: 60, answered: true, rpm: 2000, speed: 12 }, { secs: 30, answered: false, speed: 12 }]);
+    expect(r.ended).toBe(false);
+  });
+
+  it('one missed read and then a long VIN read is not silence', () => {
+    const r = runSilent([{ secs: 60, answered: true, rpm: 2000, speed: 12 }, { secs: 5, answered: true, rpm: 0, speed: 0 }, { secs: 1, answered: false, speed: 0 }, { secs: 30, answered: false, asking: false, speed: 0 }]);
+    expect(r.ended).toBe(false);
+  });
+
+  it('a busy adapter that is not asking (a long VIN read) is not silence', () => {
+    const r = runSilent([{ secs: 60, answered: true, rpm: 2000, speed: 12 }, { secs: 5, answered: true, rpm: 750, speed: 0 }, { secs: 30, answered: false, asking: false, speed: 0 }]);
+    expect(r.ended).toBe(false);
+  });
+});
+
