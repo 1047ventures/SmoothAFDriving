@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**434 tasks shipped** as of 2026-11-07.
+**444 tasks shipped** as of 2026-11-11.
 
 
 ## 2026-04
@@ -456,3 +456,13 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T432** · Car Wake: wait until you're in the seat, not just in Bluetooth range  _( 2026-11-03 )_
 - **T433** · TestFlight builds now say what changed  _( 2026-11-03 )_
 - **T434** · Recap notes say WHERE: 'Sharp turn onto Federal Boulevard' instead of '9:36 in' (OSM named roads, cached per drive, fails soft)  _( 2026-11-07 )_
+- **T435** · Research: dash cam and driving-context report with notes  _( 2026-11-07 )_
+- **T436** · Dash cam prototype: lane finding, our lane changes, cut-ins; results on roadmap Q4  _( 2026-11-07 )_
+- **T437** · Dash cam prototype on YOLOP (MIT, ONNX): exact lane changes on I-270, can't-judge in rain, hood skip; drop AGPL detector  _( 2026-11-07 )_
+- **T438** · Drives start and end themselves from the engine: 3, 2, 1 countdowns  _( 2026-11-11 )_
+- **T439** · Learn per car whether it has auto start-stop; no start-stop = drive ends 3 s after RPM 0  _( 2026-11-11 )_
+- **T440** · Live score: no more SETTLING; opens at your last drive's score and eases in  _( 2026-11-11 )_
+- **T441** · Lifetime score = average of every drive, and every drive starts from it  _( 2026-11-11 )_
+- **T442** · Scoring: ignore GPS jumps; gentler on firm city inputs and stops per mile  _( 2026-11-11 )_
+- **T443** · Red-light credit from our own map copy, not a public server that blocks us  _( 2026-11-11 )_
+- **T444** · road-features: page past the 1,000-row cap; keep the on-demand try short  _( 2026-11-11 )_

@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 253</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 7, 2026 · 2:40 PM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 11, 2026 · 2:38 PM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -192,11 +192,11 @@
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
-        <li data-at="2026-11-07T01:10"><a href="#ship-where"><span class="tag t-ship tn">T434</span><span class="bl-t">Recap says where: &ldquo;Sharp turn onto Federal Boulevard&rdquo;</span></a></li>
-        <li data-at="2026-11-03T15:09"><a href="#ship-notes"><span class="tag t-ship tn">T433</span><span class="bl-t">Every TestFlight build now says what changed</span></a></li>
-        <li data-at="2026-11-03T14:43"><a href="#bug-seat"><span class="tag t-ship tn">T432</span><span class="bl-t">Fix: the start prompt fired walking past the car</span></a></li>
-        <li data-at="2026-11-02T22:11"><a href="#ship-store"><span class="tag t-ship tn">T430</span><span class="bl-t">Security holes closed; App Store requirements built</span></a></li>
-              </ul>
+        <li data-at="2026-11-11T14:28"><a href="#fix-redlight"><span class="tag t-ship tn">T443</span><span class="bl-t">Red lights finally count less: our own map of lights and stop signs</span></a></li>
+        <li data-at="2026-11-11T14:25"><a href="#fix-fairer"><span class="tag t-ship tn">T442</span><span class="bl-t">Fairer scores: GPS hiccups ignored, city drives judged less harshly</span></a></li>
+        <li data-at="2026-11-11T13:46"><a href="#ship-livescore"><span class="tag t-ship tn">T441</span><span class="bl-t">No more &ldquo;Settling&rdquo;; every drive starts at your lifetime score</span></a></li>
+        <li data-at="2026-11-11T13:20"><a href="#ship-engine"><span class="tag t-ship tn">T438</span><span class="bl-t">Drives start and end themselves from the engine, with a 3-2-1</span></a></li>
+      </ul>
     </div>
     <div class="brief-row">
       <span class="brief-k">Next</span>
@@ -272,7 +272,7 @@
 
       <details class="ent" id="trk-always">
         <summary><span class="tag t-next tn">Q7&ndash;8</span><span class="ent-t">Hands-free recording &mdash; stop tapping start</span><span class="ent-chev">&#9654;</span></summary>
-        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q7)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q8)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) is shipped.</div>
+        <div class="ent-body">Now that background GPS is in, three pieces so a drive records itself:<br>&bull; keep recording when you switch over to Apple/Google Maps <span class="tn">(Q7)</span><br>&bull; a drive records with no tap at all: a native recorder that runs when the dongle wakes the app, scored next time you open it <span class="tn">(Q8)</span><br>The one-tap version (<a href="#trk-wake">T418</a>) and the engine-start countdown while the app is open (<a href="#ship-engine">T438</a>) are shipped.</div>
       </details>
 
       <details class="ent" id="trk-motiv">
@@ -311,6 +311,22 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="fix-redlight">
+        <summary><span class="tag t-ship tn">T443</span><span class="ent-t">Red lights finally count less: our own map of lights and stop signs</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">A stop at a light or stop sign is meant to count only a quarter against momentum, but the check relied on free public map servers that were refusing us, so <b>no stop had ever been credited</b>. Now we keep our own copy: all of Colorado (12,979 lights, 31,190 stop signs) loaded from OpenStreetMap&rsquo;s download files, refreshed monthly, served by our own server. The app sends only rough map squares, never your exact stop. Other states load in one run each. Your last 14 drives re-score to an average of <b>89</b> (was 81). T444 fixed a 1,000-row cutoff in downtown Denver.</div>
+      </details>
+      <details class="ent" id="fix-fairer">
+        <summary><span class="tag t-ship tn">T442</span><span class="ent-t">Fairer scores: GPS hiccups ignored, city drives judged less harshly</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">A GPS jump at the start of a drive read as up to 28&nbsp;g and could sink a smooth drive to the 50s; jumps are now ignored, live and when scoring. Two gentle calibration changes until more drivers come in: firm city pedal inputs cost less (0&nbsp;points now at 3.5&nbsp;m/s², was 2.5) and more stops per mile are tolerated (6, was 4.5). Stored drives re-score on the next launch.</div>
+      </details>
+      <details class="ent" id="ship-livescore">
+        <summary><span class="tag t-ship tn">T441</span><span class="ent-t">No more &ldquo;Settling&rdquo;; every drive starts at your lifetime score</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">The live score shows a number from the first second: your lifetime score, which is now the average of <b>all</b> your drives (it was the last 10), easing into this drive&rsquo;s own over 5 minutes of moving. The saved score is the drive&rsquo;s own. (T440 + T441.)</div>
+      </details>
+      <details class="ent" id="ship-engine">
+        <summary><span class="tag t-ship tn">T438</span><span class="ent-t">Drives start and end themselves from the engine, with a 3-2-1</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">With the reader plugged in: start the engine and &ldquo;Starting your drive 3, 2, 1&rdquo; (Cancel / Start now); switch it off and &ldquo;Ending your drive 3, 2, 1&rdquo; (Keep recording / End now). Switched off = the car stops answering, which a start-stop engine at a light never does. The app also learns whether your car has start-stop at all (T439); if it doesn&rsquo;t, RPM 0 for 3 seconds while parked ends the drive.</div>
+      </details>
       <details class="ent" id="ship-where">
         <summary><span class="tag t-ship tn">T434</span><span class="ent-t">Recap says where: &ldquo;Sharp turn onto Federal Boulevard&rdquo;</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">The engineer&rsquo;s notes used to say &ldquo;9:36 in.&rdquo; Now a turn reads <b>&ldquo;Sharp turn onto Federal Boulevard&rdquo;</b> and a brake reads <b>&ldquo;Hard brake on Colfax Avenue&rdquo;</b>, from the named roads on OpenStreetMap around the spot. Looked up once per drive, cached, and if it can&rsquo;t be found the old wording stays. Checked with synthetic roads only; the live map lookup is blocked from where I build, so the first real drive is the proof.</div>
