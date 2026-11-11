@@ -2,7 +2,7 @@ import { $, $$ } from '../utils/dom.js';
 import { setRecording as setCarWakeRecording } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
-import { CFG, LIVE_ETA_REFRESH_MS, LIVE_SCORE_SETTLE_SEC, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
+import { CFG, LIVE_ETA_REFRESH_MS, LIVE_SCORE_BLEND_SEC, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, fmtClock, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
 import { renderDriveList } from './home.js';
@@ -19,6 +19,7 @@ import { nativeMotionAvailable, startNativeMotion, stopNativeMotion } from '../s
 import { startLocationWatch, stopLocationWatch, getCurrentPositionOnce } from '../services/sensors/location.js';
 import { createAutoEndMonitor, trimDriveTail, AUTO_END } from '../services/autoEnd.js';
 import { loadLog, recordOutcome, tunedConfig } from '../services/autoEndLearn.js';
+import { carHasStartStop } from '../services/startStop.js';
 import { showAutoEndPrompt, closeAutoEndPrompt } from './autoEndPrompt.js';
 import { hudStart, hudStop, hudTick } from './hud.js';
 
@@ -285,28 +286,28 @@ export function updateLiveUI(){
       state._lastLiveScoreT = nowMs;
       if (state.samples.length >= 3){
         const a = analyzeDrive(buildDriveFromState());
-        state.liveScore = a.score;
-        if (!state.liveSettled) state.liveSettled = movingSecondsSoFar(state.samples) >= LIVE_SCORE_SETTLE_SEC;
+        // Eased in from the last drive's score, so the early swings don't show.
+        // The saved score at the end is this drive's own, unblended.
+        const w = state.simulated ? 1 : Math.min(1, movingSecondsSoFar(state.samples) / LIVE_SCORE_BLEND_SEC);
+        state.liveScore = Math.round(state.driveStartScore + (a.score - state.driveStartScore) * w);
         // Same analysis feeds the Stops stat and the stop markers on the inputs ribbon.
         state.liveStops = a.fullStops;
         // analyzeDrive works on start-relative times; the ribbon draws on the wall clock.
         state.liveStopMarkers = a.stopMarkers.map(m => ({ ...m, t: m.t + state.startTime }));
       }
     }
-    if (scoreEl) scoreEl.textContent = state.liveSettled ? state.liveScore : '--';
+    if (scoreEl) scoreEl.textContent = state.liveScore;
   }
 
   // Push the live score + speed to the Lock Screen / Dynamic Island (throttled
   // inside the service; no-op off native iOS).
-  updateDriveActivity(state.liveSettled
-    ? { score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) }
-    : { score: 0, status: 'smooth', speedMph: Math.round(mpsToMph(speedMps)) });
+  updateDriveActivity({ score: state.liveScore, speedMph: Math.round(mpsToMph(speedMps)) });
 
   // Arc gauge: fill dashoffset from score, color + glow from driving state
   const arcProgress = document.getElementById('arc-progress');
   const arcSvg      = document.getElementById('arc-svg');
   if (arcProgress && arcSvg && !arcProgress._eventLock){
-    arcProgress.style.strokeDashoffset = String(499.2 * (1 - (state.liveSettled ? state.liveScore : 0) / 100));
+    arcProgress.style.strokeDashoffset = String(499.2 * (1 - state.liveScore / 100));
     const arcColor = isBrake ? 'rgba(224,59,47,.92)' : isAccel ? 'rgba(63,196,106,.92)' : 'rgba(242,241,238,.9)';
     const glowCol  = isBrake ? 'rgba(224,59,47,.5)'  : isAccel ? 'rgba(63,196,106,.5)'  : 'rgba(242,241,238,.28)';
     arcProgress.setAttribute('stroke', arcColor);
@@ -503,8 +504,11 @@ let asking         = null;           // { reason, since } while the prompt is up
 
 function startAutoEndWatch(){
   stopAutoEndWatch();
-  // Waits tuned by this driver's earlier answers.
-  autoEndMonitor = createAutoEndMonitor(tunedConfig(loadLog()));
+  // Waits tuned by this driver's earlier answers. A car that has shown it has no
+  // start-stop only reads RPM 0 when it's really off, so 3 s is enough.
+  const cfg = tunedConfig(loadLog());
+  if (carHasStartStop() === false) cfg.RPM_ZERO_PARKED_MS = Math.min(cfg.RPM_ZERO_PARKED_MS, 3_000);
+  autoEndMonitor = createAutoEndMonitor(cfg);
   autoEndTimer = setInterval(checkAutoEnd, 1000);
 }
 function stopAutoEndWatch(){
@@ -623,7 +627,6 @@ export function startSimulatedDrive(){
   state.simulated = true;
   state.startTime = Date.now();
   $('#rec-source').textContent = 'Demo drive';
-  state.liveSettled = true;    // too short to settle, and it's there to show the score
   hudStart();
   document.getElementById('gps-acquiring')?.classList.add('hidden');
   showScreen('record');

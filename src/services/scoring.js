@@ -337,7 +337,7 @@ export function analyzeDrive(drive){
   };
 }
 
-/** Seconds spent moving, for the live score's settling period. */
+/** Seconds spent moving, for easing the live score in. */
 export function movingSecondsSoFar(samples){
   let ms = 0;
   for (let i = 1; i < samples.length; i++){

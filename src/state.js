@@ -1,5 +1,5 @@
 import { DEFAULTS } from './constants.js';
-import { loadLifetimeScore } from './services/storage.js';
+import { loadLifetimeScore, loadDrives } from './services/storage.js';
 
 export let calib = {
   active:    false,   // collecting pairs
@@ -56,7 +56,6 @@ export const state = {
   motionHandler: null,
   simTimer: null,
   liveScore: 100,
-  liveSettled: false,   // enough moving time for the live score to mean something
   tickInterval: null,
   wakeLock: null,
   driveStartScore: 100,
@@ -92,7 +91,6 @@ export function resetState(){
   state.lastMotionEventT = -Infinity;
   state.lastGpsPos = null;
   state.motionEvents = 0;
-  state.liveSettled = false;
   state.roughnessBuf = [];
   state.currentRoughness = 0;
   state.peakVertJolt = 0;
@@ -100,7 +98,10 @@ export function resetState(){
   state.currentSpeedLimitMps = null;
   state.rawAccel = { x: 0, y: 0, z: 0 };
   state.rawGyro  = { alpha: 0, beta: 0, gamma: 0 };
-  state.driveStartScore = loadLifetimeScore();
+  // The live score opens where the last drive finished, then eases toward this
+  // drive's own score (record.js). No last drive yet: the lifetime score.
+  const last = loadDrives().find(d => Number.isFinite(d?.score) && d.score > 0);
+  state.driveStartScore = last ? Math.round(last.score) : loadLifetimeScore();
   state.liveScore = state.driveStartScore;
   state._lastLiveScoreT = 0;
   state.destination = null;
