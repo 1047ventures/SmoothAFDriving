@@ -28,11 +28,26 @@ import {
   TRAFFIC_FULL_RATIO,
   TRAFFIC_SCORE_PIVOT,
   TRAFFIC_SCORE_AMP_MAX,
+  LONG_ACCEL_CAP,
 } from '../constants.js';
 import { clamp, linMap, pct, mpsToMph, metersToMiles, fmtDuration } from '../utils/math.js';
 
+/**
+ * A GPS jump recorded before the live filter existed (gps.js) reads as 7–28 g.
+ * Hold the last believable value instead, so one bad fix can't decide a drive.
+ */
+function withoutGpsJumps(samples){
+  if (!samples.some(s => Math.abs(s.la || 0) > LONG_ACCEL_CAP)) return samples;
+  let last = 0;
+  return samples.map(s => {
+    if (Math.abs(s.la || 0) > LONG_ACCEL_CAP) return { ...s, la: last };
+    last = s.la || 0;
+    return s;
+  });
+}
+
 export function analyzeDrive(drive){
-  const smp = drive.samples || [];
+  const smp = withoutGpsJumps(drive.samples || []);
   const n   = smp.length;
   if (n < 3){
     const dims = { smoothness:85, braking:85, momentum:85 };

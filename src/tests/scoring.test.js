@@ -443,3 +443,17 @@ describe('traffic amplifies the score both ways', () => {
     }
   });
 });
+
+describe('GPS jumps', () => {
+  it('one impossible reading at the start no longer wrecks a smooth drive', async () => {
+    const { analyzeDrive } = await import('../services/scoring.js');
+    const samples = [];
+    for (let i = 0; i < 600; i++){
+      samples.push({ t: i * 1000, speed: 15 + Math.sin(i / 30), la: 0.2 * Math.cos(i / 30), rr: 0.6, lat: 39.7 + i * 1e-4, lon: -104.9 });
+    }
+    const clean = analyzeDrive({ samples, events: [], durationMs: 600_000, distanceMeters: 9000 });
+    const glitched = samples.map((s, i) => i === 20 ? { ...s, la: -107 } : i === 21 ? { ...s, la: 275 } : s);
+    const withJump = analyzeDrive({ samples: glitched, events: [], durationMs: 600_000, distanceMeters: 9000 });
+    expect(withJump.score).toBe(clean.score);
+  });
+});

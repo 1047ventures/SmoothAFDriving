@@ -6,6 +6,8 @@ import {
   CALIB_DURATION_MS,
   TIER_THRESH,
   LAT_ACCEL_CAP,
+  LONG_ACCEL_CAP,
+  MIN_ACCEL_DT_MS,
 } from '../../constants.js';
 import { clamp, mpsToMph } from '../../utils/math.js';
 import { getOsmLimit, setOsmLimit } from '../storage.js';
@@ -145,8 +147,10 @@ export function processSample(s, prev){
   }
   const dt = Math.max(0.05, (s.t - prev.t) / 1000);
 
-  // Longitudinal accel from speed change (m/s per s = m/s²)
-  const rawLong = ((s.speed ?? 0) - (prev.speed ?? 0)) / dt;
+  // Longitudinal accel from speed change (m/s per s = m/s²). Two fixes a few ms
+  // apart, or a GPS jump past what any car can do, says nothing: hold the last value.
+  let rawLong = ((s.speed ?? 0) - (prev.speed ?? 0)) / dt;
+  if (s.t - prev.t < MIN_ACCEL_DT_MS || Math.abs(rawLong) > LONG_ACCEL_CAP) rawLong = state.emaLongAccel;
 
   // Lateral accel from heading change at current speed. Only reliable above 2 m/s.
   let latAccel = 0;

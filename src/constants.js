@@ -29,7 +29,7 @@ export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 // Bumped when the scoring engine changes enough to warrant rescoring stored
 // drives in place. rescoreStoredDrives() runs once per new value.
-export const RESCORE_VERSION     = 6;
+export const RESCORE_VERSION     = 7;
 export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
@@ -111,6 +111,13 @@ export const TIER_THRESH = { 1: 0.55, 2: 1.0,  3: 1.75, 4: 2.6 };
 // corner exceeds ~9 m/s² (~0.9 g), so we clamp to that and treat anything beyond
 // it as GPS noise rather than driving. (See gps.js processSample.)
 export const LAT_ACCEL_CAP = 9;
+// The same idea for forward/back. GPS can jump at the start of a drive or send two
+// fixes 10 ms apart, which reads as 7–28 g of "braking" (seen in real drives) and
+// used to wreck the whole drive's smoothness. No car brakes or launches past ~1 g,
+// so anything beyond is a glitch: ignored live, and skipped when scoring.
+export const LONG_ACCEL_CAP = 10;
+// Two GPS fixes closer together than this say nothing about acceleration.
+export const MIN_ACCEL_DT_MS = 200;
 
 // ── Three-Dimension Scoring display ──────────────────────────────────────────
 // Trimmed from seven to the three the phone's sensors actually resolve, weighted
@@ -143,7 +150,7 @@ export const DIM_DISPLAY = [
 // puts zero just past the harsh line; highway drives are unchanged (their p85 is
 // ~0.1) and a genuinely rough drive still scores low.
 export const SMOOTH_LA_LO    = 0.30; // p85 |longitudinal accel| (m/s²) scoring 100
-export const SMOOTH_LA_HI    = 2.5;  // p85 |longitudinal accel| scoring 0
+export const SMOOTH_LA_HI    = 3.5;  // p85 |longitudinal accel| scoring 0 (was 2.5 until Nov 2026: city drives read firmer than they felt)
 export const SMOOTH_JERK_LO  = 0.05; // mean |jerk| (m/s³) scoring 100
 export const SMOOTH_JERK_HI  = 0.6;  // mean |jerk| scoring 0
 // Throttle smoothness — the driver-input half the phone can't see. From the OBD
@@ -158,7 +165,7 @@ export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
 // (one quick move reads 25 points low at minute one, about 1 low by the end), so the
 // early number leans on the lifetime score and the drive's own score takes over.
 export const LIVE_SCORE_BLEND_SEC = 300;
-export const MOMENTUM_STOP_MAX = 4.5; // full stops per mile that score 0
+export const MOMENTUM_STOP_MAX = 6;   // full stops per mile that score 0 (was 4.5 until Nov 2026)
 // Road's-fault vs yours: a stop forced by a red light, its queue, or a stop sign
 // is far less avoidable than one with no signal nearby (a jam you didn't read, a
 // rolling situation you mishandled). When a drive carries classified stop causes
