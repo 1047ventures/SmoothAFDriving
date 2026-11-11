@@ -69,6 +69,16 @@ describe('/api/road-features', () => {
     expect((await r.json()).unavailable).toEqual(['794_-2091']);
   });
 
+  it('pages past the database’s 1,000-row limit', async () => {
+    const fetchImpl = vi.fn(async (url) => {
+      if (url.includes('/road_tiles?')) return res([{ tile: '794_-2100', fetched_at: new Date().toISOString() }]);
+      const offset = Number(/offset=(\d+)/.exec(url)[1]);
+      return res(Array.from({ length: offset === 0 ? 1000 : 234 }, () => ({ lat: 39.7, lon: -104.9, kind: 'stop' })));
+    });
+    const r = await onRequestPost({ request: req({ tiles: ['794_-2100'] }), env }, fetchImpl);
+    expect((await r.json()).features).toHaveLength(1234);
+  });
+
   it('ignores junk and caps the request', async () => {
     const fetchImpl = vi.fn(async () => res([]));
     const r = await onRequestPost({ request: req({ tiles: ['nope', "1_1');--"] }), env }, fetchImpl);

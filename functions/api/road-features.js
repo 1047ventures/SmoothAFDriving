@@ -3,8 +3,9 @@
 // Traffic lights and stop signs for a few map tiles, from our own table
 // (road_features). The app uses them to tell a red light from a stop you chose,
 // and asks only us, so a public map server being down or blocking us can't take
-// that away. A tile we don't hold yet is fetched from OpenStreetMap's Overpass
-// servers here, saved, and never fetched again for a year.
+// that away. Regions are bulk-loaded ahead of time (Road features workflow). A tile
+// outside them is tried once from OpenStreetMap's Overpass servers, briefly: they
+// often refuse us, so that's a bonus, and the answer then says the tile is unavailable.
 //
 // POST { tiles: ["794_-2091", ...] }  →  { features: [{ lat, lon, kind }], unavailable: [tiles] }
 // Tiles only (about 5 km squares, src/shared/roadTiles.mjs): never a driver's exact spot.
@@ -12,7 +13,9 @@ import { corsHeaders } from '../../src/shared/cors.mjs';
 import { isTile, tileBbox } from '../../src/shared/roadTiles.mjs';
 
 const MAX_TILES = 30;          // a long drive's stops span a handful; this is abuse protection
-const MAX_UPSTREAM = 6;        // new tiles fetched per request, so one call can't hammer Overpass
+const MAX_UPSTREAM = 2;        // new tiles fetched per request, so one call can't hammer Overpass
+const UPSTREAM_BUDGET_MS = 9000; // the app gives up at 15 s; answer before then whatever happens
+const PAGE = 1000;             // the database returns at most this many rows per request
 const FRESH_MS = 365 * 24 * 3600 * 1000;
 const OVERPASS = [
   'https://overpass-api.de/api/interpreter',
@@ -49,8 +52,9 @@ export async function onRequestPost(context, fetchImpl = fetch) {
     const missing = tiles.filter(t => !fresh.has(t));
 
     const unavailable = [];
+    const deadline = Date.now() + UPSTREAM_BUDGET_MS;
     for (const [i, tile] of missing.entries()) {
-      const got = i < MAX_UPSTREAM ? await fetchTile(tile, fetchImpl) : null;
+      const got = i < MAX_UPSTREAM && Date.now() < deadline ? await fetchTile(tile, fetchImpl, deadline) : null;
       if (!got) { unavailable.push(tile); continue; }
       if (got.length) {
         await sb('/rest/v1/road_features?on_conflict=osm_id', {
@@ -67,26 +71,32 @@ export async function onRequestPost(context, fetchImpl = fetch) {
     }
 
     const have = tiles.filter(t => !unavailable.includes(t));
-    const rows = have.length
-      ? await (await sb(`/rest/v1/road_features?tile=${inList(have)}&select=lat,lon,kind`)).json()
-      : [];
-    return json(200, { features: Array.isArray(rows) ? rows : [], unavailable });
+    const rows = [];
+    for (let offset = 0; have.length; offset += PAGE) {
+      const page = await (await sb(`/rest/v1/road_features?tile=${inList(have)}&select=lat,lon,kind&order=osm_id&limit=${PAGE}&offset=${offset}`)).json();
+      if (!Array.isArray(page)) break;
+      rows.push(...page);
+      if (page.length < PAGE) break;
+    }
+    return json(200, { features: rows, unavailable });
   } catch {
     return json(502, { error: 'lookup_failed' });
   }
 }
 
 /** One tile's lights and stop signs from Overpass, trying each mirror; null if none answered. */
-export async function fetchTile(tile, fetchImpl = fetch) {
+export async function fetchTile(tile, fetchImpl = fetch, deadline = Date.now() + 20000) {
   const [s, w, n, e] = tileBbox(tile);
   const q = `[out:json][timeout:25];(node["highway"="traffic_signals"](${s},${w},${n},${e});node["highway"="stop"](${s},${w},${n},${e}););out;`;
   for (const url of OVERPASS) {
+    const left = deadline - Date.now();
+    if (left < 1000) break;
     try {
       const res = await fetchImpl(url, {
         method: 'POST',
         body: 'data=' + encodeURIComponent(q),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': UA, Accept: 'application/json' },
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(Math.min(left, 6000)),
       });
       if (!res.ok) continue;
       const j = await res.json();
