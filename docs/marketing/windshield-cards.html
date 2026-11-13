@@ -1,0 +1,145 @@
+<title>Windshield Cards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  /* Layout: a bench of real-size cards on the app's own dark; #sheet-N / #bleed-N print modes. */
+  :root{
+    --ink:#0B0B0C; --ink2:#161618; --cream:#F2F1EE; --cream-dim:#B3B2AD;
+    --tang:#FF6A3D; --gold:#FFB23D; --line:rgba(242,241,238,.12);
+    --display:'Barlow Condensed','Arial Narrow',sans-serif;
+    --body:'DM Sans',-apple-system,'Helvetica Neue',Arial,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+    color-scheme:dark;
+  }
+  body{background:var(--ink);color:var(--cream);font-family:var(--body);
+       padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+  /* ── The card: 3.5 × 2 in ─────────────────────────────────────────────── */
+  .card{width:3.5in;height:2in;position:relative;overflow:hidden;background:var(--ink);
+        background-image:radial-gradient(120% 140% at 100% 0%,rgba(255,106,61,.22),transparent 55%);
+        display:grid;grid-template-columns:1fr .98in;gap:.14in;padding:.17in .17in .15in .19in;box-sizing:border-box;
+        color:var(--cream);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card .copy{display:flex;flex-direction:column;min-width:0}
+  .card .brand{font:800 7.5pt/1 var(--display);letter-spacing:.22em;color:var(--tang);text-transform:uppercase}
+  .card h3{font:800 17.5pt/.92 var(--display);text-transform:uppercase;letter-spacing:-.005em;margin:.07in 0 .06in;text-wrap:balance}
+  .card h3 em{font-style:normal;color:var(--tang)}
+  .card p{font:400 6.9pt/1.38 var(--body);color:var(--cream-dim);margin:0}
+  .card .sign{margin-top:auto;font:700 italic 9.5pt/1 var(--display);color:var(--gold);letter-spacing:.01em}
+  .card .side{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05in}
+  .card .qr{width:.92in;height:.92in;background:var(--cream);border-radius:.07in;padding:.055in;box-sizing:border-box}
+  .card .qr svg{display:block;width:100%;height:100%}
+  .card .scan{font:500 5.6pt/1 var(--mono);letter-spacing:.14em;color:var(--cream);text-transform:uppercase}
+  .card .url{font:500 5pt/1 var(--mono);color:var(--cream-dim)}
+  .card .rule{position:absolute;left:.19in;bottom:0;width:.55in;height:2.5px;background:var(--tang)}
+
+  /* ── Preview page ─────────────────────────────────────────────────────── */
+  .page{max-width:880px;margin:0 auto;padding-block:36px 64px}
+  .page header h1{font:800 clamp(30px,6vw,48px)/.95 var(--display);text-transform:uppercase;margin:0;letter-spacing:-.01em}
+  .page header h1 span{color:var(--tang)}
+  .page header p{color:var(--cream-dim);max-width:60ch;margin:12px 0 0;font-size:15px;line-height:1.55}
+  .bench{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,3.6in),1fr));gap:28px 22px;margin-top:30px}
+  .slot{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .slot .frame{overflow-x:auto}
+  .slot .card{box-shadow:0 18px 40px rgba(0,0,0,.55),0 0 0 1px var(--line);border-radius:6px}
+  .slot .lbl{font:600 15px/1.3 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--cream)}
+  .slot .lbl small{display:block;font:400 13px/1.45 var(--body);letter-spacing:0;text-transform:none;color:var(--cream-dim);margin-top:2px}
+  .notes{margin-top:40px;border-top:1px solid var(--line);padding-top:20px;display:grid;gap:10px;color:var(--cream-dim);font-size:14px;line-height:1.55;max-width:66ch}
+  .notes b{color:var(--cream)}
+  @media(max-width:420px){.slot .card{transform:scale(.92);transform-origin:left top}}
+
+  /* ── Print modes (rendered to PDF; not used in the viewer) ─────────────── */
+  body.sheet,body.bleed{padding:0;margin:0;background:#fff}
+  body.sheet .page,body.bleed .page{display:none}
+  .print{display:none}
+  body.sheet .print{display:block;width:8.5in;height:11in;position:relative}
+  body.sheet .grid{position:absolute;left:.75in;top:.5in;display:grid;grid-template-columns:3.5in 3.5in;grid-auto-rows:2in}
+  body.sheet .mark{position:absolute;background:#9a9a9a}
+  body.bleed .print{display:block}
+  body.bleed .card{width:3.75in;height:2.25in;padding:.295in .295in .275in .315in}
+  body.bleed .card .rule{left:.315in;bottom:.125in}
+</style>
+
+<div class="page">
+  <header>
+    <h1>Windshield <span>cards</span></h1>
+    <p>Four ways to say it, each 3.5 × 2 inches, a standard business card. Every card's code opens the free install page: no App Store, no account.</p>
+  </header>
+  <div class="bench" id="bench"></div>
+  <div class="notes">
+    <div><b>Printing at home:</b> the PDF puts 10 cards on a letter sheet with cut marks. Use heavy matte card stock and the printer's best setting. Dark cards use a lot of ink, and edges can show a sliver of white if the cut is off.</div>
+    <div><b>Print shop:</b> the per-card PDFs include the extra edge (bleed) shops ask for, so the dark runs cleanly to the cut.</div>
+  </div>
+</div>
+<div class="print" id="print"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const URL_TO = 'https://smoothafdriving.com/install?ref=card';
+const CARDS = [
+  { name: 'Hey Denver', why: 'Friendly and personal. Closest to your note.',
+    h: 'Hey <em>Denver.</em>',
+    p: "I'm building a driving app called Smooth AF. It scores how smooth you drive, so we can all get a little better at it. Let's make these roads nicer to be on.",
+    sign: 'Cheers. A fellow Denver driver' },
+  { name: 'Nice parking', why: 'Playful. Reads as a compliment, then a challenge.',
+    h: 'Nice parking <em>job.</em>',
+    p: 'Bet you drive smooth too. Smooth AF scores every drive out of 100 and shows you where it got rough. Free, no account, built right here in Denver.',
+    sign: 'Prove it.' },
+  { name: 'Less brake-slamming', why: 'Names the shared pain every Denver driver knows.',
+    h: 'Less brake-slamming. <em>More cruising.</em>',
+    p: "Smooth AF scores your drive and shows you where to smooth it out. A local project to make Denver's roads a little more enjoyable for all of us.",
+    sign: 'Cheers.' },
+  { name: 'Smooth is a flex', why: 'Short and confident. The app’s own line.',
+    h: 'Smooth is <em>a flex.</em>',
+    p: "A local's building a driving app. Score your next drive, see where you land, and get a little smoother every time. Denver, let's be smooth.",
+    sign: 'Cheers.' },
+];
+
+function qrSvg(text){
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  const n = q.getModuleCount(); let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c},${r}h1v1h-1z`;
+  return `<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" aria-label="QR code to the Smooth AF install page"><path fill="#0B0B0C" d="${d}"/></svg>`;
+}
+const QR = qrSvg(URL_TO);
+const cardHtml = c => `
+  <div class="card">
+    <div class="copy">
+      <div class="brand">Smooth AF</div>
+      <h3>${c.h}</h3>
+      <p>${c.p}</p>
+      <div class="sign">${c.sign}</div>
+    </div>
+    <div class="side">
+      <div class="qr">${QR}</div>
+      <div class="scan">Scan &middot; free</div>
+      <div class="url">smoothafdriving.com</div>
+    </div>
+    <div class="rule"></div>
+  </div>`;
+
+document.getElementById('bench').innerHTML = CARDS.map((c, i) => `
+  <div class="slot">
+    <div class="frame">${cardHtml(c)}</div>
+    <div class="lbl">${i + 1}. ${c.name}<small>${c.why}</small></div>
+  </div>`).join('');
+
+// #sheet-N: 10-up letter sheet of card N with cut marks. #bleed-N: one card with 1/8" bleed.
+const m = /^#(sheet|bleed)-(\d)$/.exec(location.hash);
+if (m && CARDS[m[2] - 1]){
+  document.body.classList.add(m[1]);
+  const pg = document.createElement('style');
+  pg.textContent = `@page{size:${m[1] === 'sheet' ? '8.5in 11in' : '3.75in 2.25in'};margin:0}`;
+  document.head.appendChild(pg);
+  const c = CARDS[m[2] - 1], out = document.getElementById('print');
+  if (m[1] === 'bleed') out.innerHTML = cardHtml(c);
+  else {
+    let marks = '';
+    const L = .75, T = .5, xs = [L, L + 3.5, L + 7], ys = [0, 1, 2, 3, 4, 5].map(i => T + i * 2);
+    for (const x of xs){ marks += `<div class="mark" style="left:${x}in;top:${T - .3}in;width:.5pt;height:.22in"></div><div class="mark" style="left:${x}in;top:${T + 10 + .08}in;width:.5pt;height:.22in"></div>`; }
+    for (const y of ys){ marks += `<div class="mark" style="top:${y}in;left:${L - .3}in;height:.5pt;width:.22in"></div><div class="mark" style="top:${y}in;left:${L + 7 + .08}in;height:.5pt;width:.22in"></div>`; }
+    out.innerHTML = `<div class="grid">${Array(10).fill(cardHtml(c)).join('')}</div>${marks}`;
+  }
+}
+</script>
