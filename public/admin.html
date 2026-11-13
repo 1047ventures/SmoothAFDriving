@@ -53,6 +53,8 @@
     .chip b { font-weight:700; }
     .badge-acct { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.05em;
                   color:#8fcaff; border:1px solid #2b4a66; background:#122232; border-radius:4px; padding:1px 5px; vertical-align:middle; }
+    .cards { display:flex; flex-wrap:wrap; gap:6px 18px; margin:2px 0 10px; font-size:13px; }
+    .cards b { font-variant-numeric:tabular-nums; }
     .chart-cap { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:4px 0 2px; }
     .dd-routes { margin:6px 0 10px; }
     .routes-btn { font:inherit; font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--line);
@@ -83,6 +85,8 @@
   <div id="dash" class="hidden">
     <div id="tiles" class="tiles"></div>
     <div id="purge-note" class="anon" style="margin:2px 0 8px"></div>
+    <div id="cards-cap" class="chart-cap"></div>
+    <div id="cards" class="cards"></div>
     <div id="installs-cap" class="chart-cap"></div>
     <svg id="installs" width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="xMinYMid meet"></svg>
     <table>
@@ -138,6 +142,20 @@
       ];
       $('tiles').innerHTML = tiles.map(([l, v]) =>
         `<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+    }
+
+    // Printed windshield cards: scans per card (each card's QR is /c/<code>).
+    const CARD_NAMES = {
+      outhere: "Let's get Smooth AF out here",
+      showme: 'Show me how smooth you are',
+      smoothest: "Who's the smoothest?",
+    };
+    function renderCardScans(list) {
+      list = list || [];
+      $('cards-cap').textContent = list.length ? 'Card scans' : '';
+      $('cards').innerHTML = list.map(c =>
+        `<span><b>${c.count}</b> · ${esc(CARD_NAMES[c.code] || c.code)} <span class="anon">last ${esc(fmtDate(Date.parse(c.last)))}</span></span>`
+      ).join('');
     }
 
     // Miles/day: one bar per UTC day, height ∝ total miles driven that day.
@@ -446,6 +464,7 @@
         $('dash').classList.remove('hidden');
         renderTiles(data.overview);
         renderMilesChart(data.overview.milesByDay);
+        renderCardScans(data.cardScans);
         allRows = data.users;
         renderRows();
         $('purge-note').textContent = data.purgedEmpty

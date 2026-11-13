@@ -49,6 +49,18 @@ async function snapToRoads(path) {
   }
 }
 
+/** Scans per printed card, most scanned first: [{ code, count, last }]. */
+export function countCardScans(scans) {
+  const by = new Map();
+  for (const s of Array.isArray(scans) ? scans : []) {
+    const c = by.get(s.code) || { code: s.code, count: 0, last: null };
+    c.count++;
+    if (!c.last || s.at > c.last) c.last = s.at;
+    by.set(s.code, c);
+  }
+  return [...by.values()].sort((a, b) => b.count - a.count);
+}
+
 async function sha256(s) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(s)));
   return new Uint8Array(buf);
@@ -275,10 +287,12 @@ export async function onRequestPost(context) {
 
     // Sweep out empty drives before reading, so the dashboard never counts them.
     const purgedEmpty = await purgeEmptyDrives();
-    const [users, drives, authById] = await Promise.all([
+    const [users, drives, authById, scans] = await Promise.all([
       sbGet('users?select=device_id,name,email,updated_at&limit=10000'),
       sbGet('drives?select=device_id,user_id,start_time,duration_ms,distance_meters,score,event_count,simulated&limit=10000'),
       fetchAuthUsers(),
+      // Printed cards' QR scans (/c/<code>). Optional: the dashboard renders without them.
+      sbGet('card_scans?select=code,at&order=at.desc&limit=50000').catch(() => []),
     ]);
     const nowMs = Date.now();
     return json(200, {
@@ -286,6 +300,7 @@ export async function onRequestPost(context) {
       purgedEmpty,
       overview: computeOverview(users, drives, nowMs, authById),
       users: computeUserRows(users, drives, authById),
+      cardScans: countCardScans(scans),
     });
   } catch (err) {
     console.error('admin-stats db error:', err.message);
