@@ -10,6 +10,7 @@
     #sheet-N   10 of card N on a US Letter sheet, with cut marks (home printing)
     #bleed-N   card N alone, 3.75 × 2.25 in: 1/8 in bleed all round (print shops)
     #preview   all three side by side
+  Each card has its own QR (smoothafdriving.pages.dev/c/<code>), so /admin counts scans per card.
   Card art is 336 × 192 px = 3.5 × 2 in at 96 px/in. Keep text 12 px (1/8 in) inside the edge.
 -->
 <style>
@@ -38,11 +39,11 @@
 <div id="out"></div>
 <script>
 const CARDS = [
-  { h2: `Let's get <span class="o">Smooth AF</span> out here.`,
+  { qr: 'qr-outhere.svg', h2: `Let's get <span class="o">Smooth AF</span> out here.`,
     body: "I'm building a new driving app. You should download it and tell me why it won't work." },
-  { h2: `Show me how <span class="o">smooth</span> you are.`,
+  { qr: 'qr-showme.svg', h2: `Show me how <span class="o">smooth</span> you are.`,
     body: "I'm building a driving app that scores every drive. Download it, try it, and tell me what sucks." },
-  { h2: `Who's the <span class="o">smoothest?</span>`,
+  { qr: 'qr-smoothest.svg', h2: `Who's the <span class="o">smoothest?</span>`,
     body: "I'm building a new driving app to find out. Download it, score a drive, and roast it. I can take it." },
 ];
 const card = c => `<div class="card">
@@ -50,7 +51,7 @@ const card = c => `<div class="card">
   <div class="h2">${c.h2}</div>
   <p class="body">${c.body}</p>
   <div class="cheers">Cheers.</div>
-  <div class="qr"><img src="qr.svg" alt=""></div>
+  <div class="qr"><img src="${c.qr}" alt=""></div>
   <div class="s3">Safety 3rd</div>
 </div>`;
 const out = document.getElementById('out');
