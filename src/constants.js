@@ -165,6 +165,11 @@ export const SMOOTH_THR_HI   = 15;   // p85 |Δthrottle/dt| scoring 0
 // (one quick move reads 25 points low at minute one, about 1 low by the end), so the
 // early number leans on the lifetime score and the drive's own score takes over.
 export const LIVE_SCORE_BLEND_SEC = 300;
+// Above this, tapping End Drive asks first. A stray tap at speed cuts the trip in
+// two and scores both halves on partial evidence, so the button is guarded while
+// moving — but ending a drive normally happens parked, which stays one tap.
+// ~10 mph: above a parking-lot crawl, below any real road speed.
+export const END_CONFIRM_MPS = 4.5;
 export const MOMENTUM_STOP_MAX = 6;   // full stops per mile that score 0 (was 4.5 until Nov 2026)
 // Road's-fault vs yours: a stop forced by a red light, its queue, or a stop sign
 // is far less avoidable than one with no signal nearby (a jam you didn't read, a

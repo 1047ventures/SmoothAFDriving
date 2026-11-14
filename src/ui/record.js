@@ -2,6 +2,7 @@ import { $, $$ } from '../utils/dom.js';
 import { setRecording as setCarWakeRecording } from '../services/carWake.js';
 import { showToast } from '../utils/toast.js';
 import { state, calib, resetState } from '../state.js';
+import { closeEndConfirm } from './confirmEnd.js';
 import { CFG, LIVE_ETA_REFRESH_MS, LIVE_SCORE_BLEND_SEC, PIT_SPEED_MPS, PIT_STOP_MS } from '../constants.js';
 import { mpsToMph, fmtDuration, fmtClock, clamp, haversine } from '../utils/math.js';
 import { showScreen } from './router.js';
@@ -251,13 +252,7 @@ export function updateLiveUI(){
     persistActiveDrive();
   }
 
-  // Prefer the car's own speed when the dongle is connected: OBD reads true
-  // wheel speed, where GPS is a lagging, smoothed derivative of position. Fall
-  // back to GPS the instant OBD has no fresh reading, so a dropped dongle mid-
-  // drive degrades to the old behaviour rather than freezing the number.
-  const last = state.samples[state.samples.length - 1];
-  const obdFresh = state.obd && state.obd.speedMps != null && (Date.now() - state.obd.at) < 2000;
-  const speedMps = obdFresh ? state.obd.speedMps : (last ? last.speed || 0 : 0);
+  const speedMps = currentSpeedMps();
   $('#live-speed').textContent = Math.round(mpsToMph(speedMps));
 
   // G-force value (shown as text in bottom-right stat)
@@ -392,6 +387,20 @@ export function updateLiveUI(){
     renderDebugChart(document.getElementById('debug-canvas'));
     updateDebugLegend(document.getElementById('debug-legend'));
   }
+}
+
+/**
+ * How fast the car is going right now, in m/s.
+ *
+ * Prefers the car's own speed when the dongle is connected: OBD reads true wheel
+ * speed, where GPS is a lagging, smoothed derivative of position. Falls back to
+ * GPS the instant OBD has no fresh reading, so a dropped dongle mid-drive
+ * degrades to the old behaviour rather than freezing the number.
+ */
+export function currentSpeedMps(){
+  const last = state.samples[state.samples.length - 1];
+  const obdFresh = state.obd && state.obd.speedMps != null && (Date.now() - state.obd.at) < 2000;
+  return obdFresh ? state.obd.speedMps : (last ? last.speed || 0 : 0);
 }
 
 export function startRecording(){
@@ -574,6 +583,8 @@ function checkAutoEnd(){
 }
 
 export function stopRecording(opts){
+  // The drive is ending — any open "End this drive?" card is moot.
+  closeEndConfirm();
   // Called with an {trimToMs} only by the engine-off auto-end; click handlers pass
   // an Event (or nothing), which has no such field and is ignored.
   const trimTo = opts && typeof opts.trimToMs === 'number' ? opts.trimToMs : null;

@@ -11,6 +11,7 @@ import { connect, connectTo, reconnectSaved, visibleAdapters, scanForAdapters, s
 import { createBatteryWatch, saveBatteryReading, saveLastRun, loadBattery, keepResting } from '../services/battery.js';
 import { buildReport, saveHealthReport } from '../services/carHealth.js';
 import { getActiveVehicle, findVehicleByVin, activateVehicle } from './garage.js';
+import { stopRecording } from './record.js';
 import { parseVinResponse, decodeVin, isDismissedVin, loadPendingCar, savePendingCar } from '../services/carIdentity.js';
 import { state } from '../state.js';
 import { Capacitor } from '@capacitor/core';
@@ -210,7 +211,10 @@ function autoStartDrive(){
   const dismiss = () => { bar.classList.remove('in'); setTimeout(() => bar.remove(), 260); };
   bar.querySelector('.obd-nudge-go').addEventListener('click', () => {
     dismiss();
-    document.getElementById('btn-stop')?.click();   // undo the auto-start
+    // Call stopRecording directly rather than clicking End Drive: that button is
+    // guarded by the moving-speed confirm, and this IS the explicit "that wasn't
+    // a drive" answer — asking again would be asking twice.
+    stopRecording();
   });
   bar.querySelector('.obd-nudge-x').addEventListener('click', dismiss);
   // Auto-retire so it never lingers into the drive.

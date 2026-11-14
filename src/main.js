@@ -14,7 +14,8 @@ import { renderDriveList } from './ui/home.js';
 import { renderCarDisplay, renderRecAvatar, saveRecPhoto, showGarageSheet, hideGarageSheet, processCarPhoto, wireGarageButtons } from './ui/garage.js';
 import { renderCorridorsList } from './ui/corridor.js';
 import { showScreen } from './ui/router.js';
-import { wireStartButton, stopRecording, startSimulatedDrive } from './ui/record.js';
+import { confirmEndDrive } from './ui/confirmEnd.js';
+import { wireStartButton, stopRecording, startSimulatedDrive, currentSpeedMps } from './ui/record.js';
 import { renderRewards } from './ui/rewards.js';
 import { openLeaderboard, openSignupModal } from './ui/leaderboard.js';
 import { enterMapFilter, clearMapFilter, renderReview, fitRouteToMap, reviewDrive, reviewAnalysis } from './ui/review.js';
@@ -117,7 +118,11 @@ function boot(){
   wireStartButton('#btn-new-drive');
   wireDestination();
 
-  document.querySelector('#btn-stop')?.addEventListener('click', () => stopRecording());
+  // End Drive is guarded while the car is moving — see ui/confirmEnd.js. Parked,
+  // which is how a drive normally ends, it stays a single tap.
+  document.querySelector('#btn-stop')?.addEventListener('click', () => {
+    confirmEndDrive(currentSpeedMps(), () => stopRecording());
+  });
 
   document.querySelector('#btn-back')?.addEventListener('click', () => {
     const mapBlock = document.querySelector('.review-map-block');
