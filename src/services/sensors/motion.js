@@ -34,8 +34,36 @@ export function calibrateAxes(){
  * Factory: returns the devicemotion handler function.
  * Accepts callbacks = { flashEvent } for UI feedback.
  */
+/**
+ * Mean of a short run of samples — a crude low-pass, applied before anything
+ * reaches the event thresholds.
+ *
+ * A driver input is slow and one-directional: a brake or a throttle push holds
+ * its force in the same sense for hundreds of milliseconds. The road is fast
+ * and symmetric — an expansion joint is one or two samples of very large
+ * acceleration, and coarse pavement or a rumble strip is a rapid alternation
+ * about zero. Peak-hold over raw samples cannot tell them apart; by design it
+ * keeps the single worst sample in the window, which on a highway is the road,
+ * every time.
+ *
+ * Averaging over ~117 ms separates them on the thing that actually differs,
+ * which is duration, not size. A sustained input passes essentially untouched
+ * because it is the same value across the whole run; an impulse is divided by
+ * the run length; and an alternation cancels against itself.
+ *
+ * A median was the first attempt and is wrong here. It rejects isolated
+ * outliers well, but a rumble strip is not an outlier — alternating ±13 m/s²
+ * makes the larger value the MAJORITY of the window, so the median returns it
+ * in full. Measured: 14 m/s² through a 5-median, against a 5.4 m/s² threshold.
+ */
+const SMOOTH_N = 7;   // ~117ms at 60Hz
+const meanOf = (buf) => buf.reduce((s, v) => s + v, 0) / buf.length;
+
 export function createMotionHandler(callbacks = {}){
   const { flashEvent } = callbacks;
+  // Per drive: the handler is rebuilt on each startRecording, so these reset with it.
+  const longRun = [];
+  const latRun  = [];
   return function motionHandler(ev){
     if (!state.recording) return;
     state.motionEvents++;
@@ -145,9 +173,24 @@ export function createMotionHandler(callbacks = {}){
       latRaw = dot3(calib.lat, [mx, my, mz]);
     }
 
-    // ── Peak-hold: track worst-case G in each axis this 500ms window ───────
-    if (Math.abs(longRaw) > Math.abs(state.peakLong)) state.peakLong = longRaw;
-    if (Math.abs(latRaw)  > Math.abs(state.peakLat))  state.peakLat  = latRaw;
+    // ── De-spike, then peak-hold ──────────────────────────────────────────
+    // Peak-hold answers "worst case this window", which is what event detection
+    // wants — but only once the signal is the driver's. Feeding it raw samples
+    // made it a road-impact detector: on a highway the flags fired continuously
+    // while the car went straight, because every expansion joint is a bigger
+    // instantaneous number than any throttle input.
+    longRun.push(longRaw); if (longRun.length > SMOOTH_N) longRun.shift();
+    latRun.push(latRaw);   if (latRun.length  > SMOOTH_N) latRun.shift();
+
+    // Only once the window is full. A partial run is barely an average at all —
+    // at one sample it IS the raw value, so peak-hold would capture the very
+    // first jolt of a drive unfiltered and sit on it. Costs ~117ms at the start.
+    if (longRun.length === SMOOTH_N){
+      const longSm = meanOf(longRun);
+      const latSm  = meanOf(latRun);
+      if (Math.abs(longSm) > Math.abs(state.peakLong)) state.peakLong = longSm;
+      if (Math.abs(latSm)  > Math.abs(state.peakLat))  state.peakLat  = latSm;
+    }
 
     // ── EMA kept for jerk/shift detection only (not used for thresholds) ───
     state.prevEmaLong   = state.emaLongMotion;
