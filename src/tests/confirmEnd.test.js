@@ -37,11 +37,14 @@ describe('End Drive guard', () => {
   });
 
   it('ends only on the explicit confirm, once', () => {
+    vi.useFakeTimers();
     const onEnd = vi.fn();
     confirmEndDrive(27, onEnd);
+    vi.advanceTimersByTime(500);          // past the anti-double-tap arm delay
     const go = document.getElementById('ec-end');
     go.click(); go.click();
     expect(onEnd).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
   });
 
   it('does nothing on its own — there is no timer racing the driver', () => {
@@ -68,5 +71,58 @@ describe('End Drive guard', () => {
     confirmEndDrive(27, vi.fn());
     confirmEndDrive(27, vi.fn());
     expect(document.querySelectorAll('#ec-overlay').length).toBe(1);
+  });
+
+  it('does not arm the destructive button immediately', () => {
+    // It opens under the finger that just tapped End Drive, so for a moment
+    // "End drive anyway" sits where that button was. A double-tap must not end
+    // the drive and hide the warning in one go.
+    vi.useFakeTimers();
+    const onEnd = vi.fn();
+    confirmEndDrive(27, onEnd);
+    const go = document.getElementById('ec-end');
+    expect(go.disabled).toBe(true);
+    go.click();
+    expect(onEnd).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(500);
+    expect(go.disabled).toBe(false);
+    go.click();
+    expect(onEnd).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it('backs out on Escape — doing nothing keeps recording, so ambiguity is safe', () => {
+    const onEnd = vi.fn();
+    confirmEndDrive(27, onEnd);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(onEnd).not.toHaveBeenCalled();
+    expect(document.getElementById('ec-overlay')).toBeNull();
+  });
+
+  it('backs out on a tap outside the card, not on a tap inside it', () => {
+    const onEnd = vi.fn();
+    confirmEndDrive(27, onEnd);
+    document.querySelector('#ec-overlay .pdcta-card').click();   // inside: no-op
+    expect(document.getElementById('ec-overlay')).not.toBeNull();
+    document.getElementById('ec-overlay').click();               // the scrim
+    expect(onEnd).not.toHaveBeenCalled();
+    expect(document.getElementById('ec-overlay')).toBeNull();
+  });
+
+  it('names the reason to a screen reader, not just the title', () => {
+    confirmEndDrive(27, vi.fn());
+    const ov = document.getElementById('ec-overlay');
+    expect(ov.getAttribute('aria-describedby')).toBe('ec-sub');
+    expect(ov.getAttribute('aria-modal')).toBe('true');
+    expect(document.getElementById('ec-sub')).not.toBeNull();
+  });
+
+  it('stops listening for Escape once it is gone', () => {
+    const onEnd = vi.fn();
+    confirmEndDrive(27, onEnd);
+    document.getElementById('ec-keep').click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(onEnd).not.toHaveBeenCalled();   // no stray handler left behind
   });
 });

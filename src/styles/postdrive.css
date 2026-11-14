@@ -62,6 +62,15 @@
 /* "End this drive?" — the quiet countdown under the buttons. */
 /* 3, 2, 1 before the app starts or ends a drive on its own (ui/countdown.js) */
 .cd-overlay{align-items:center}
+/* The end-drive confirm opens while End Drive is under the driver's finger, so
+   it centres instead of sitting bottom-anchored on top of that button — which
+   also stops the bright white pill peeking out beneath the card. */
+#ec-overlay{align-items:center}
+/* 44px floor. Scoped to this card so the shared .pdcta-skip is untouched; the
+   visual weight stays quiet (still 13px grey), only the hit area grows. */
+#ec-end{padding:16px 20px;min-height:44px}
+/* This sentence is the only place the consequence appears, and it's read at speed. */
+#ec-sub{font-size:16px}
 .cd-num{
   font-family:var(--serif); font-weight:800; font-size:112px; line-height:1;
   color:var(--tang); font-variant-numeric:tabular-nums; margin:8px 0 2px;

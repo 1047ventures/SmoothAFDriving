@@ -33,6 +33,11 @@ export function confirmEndDrive(speedMps, onEnd){
   overlay.className = 'pdcta-overlay';
   overlay.setAttribute('role', 'alertdialog');
   overlay.setAttribute('aria-label', 'End this drive?');
+  // With aria-label set, the sub-line is not the accessible description unless
+  // it's wired up — so the whole reason the card exists ("splits this trip in
+  // two") would go unspoken. aria-modal keeps the rotor inside the card.
+  overlay.setAttribute('aria-describedby', 'ec-sub');
+  overlay.setAttribute('aria-modal', 'true');
   overlay.innerHTML = `
     <div class="pdcta-card">
       <h2 class="pdcta-h">End this drive?</h2>
@@ -45,12 +50,30 @@ export function confirmEndDrive(speedMps, onEnd){
   let done = false;
   const finish = (cb) => { if (done) return; done = true; teardown(); cb && cb(); };
   function teardown(){
+    clearTimeout(armTimer);
+    document.removeEventListener('keydown', onKey, true);
     overlay.remove();
     if (current === controller) current = null;
   }
 
+  const endBtn = overlay.querySelector('#ec-end');
+  // The card opens under the finger that just tapped End Drive, so for a moment
+  // "End drive anyway" occupies the same spot. Without this, a double-tap ends
+  // the drive AND hides the warning — the exact failure this card exists to
+  // prevent, made worse because the driver never sees it. Armed late on purpose,
+  // including under reduced motion: this guards the finger, not the animation.
+  endBtn.disabled = true;
+  const armTimer = setTimeout(() => { endBtn.disabled = false; }, 450);
+
   overlay.querySelector('#ec-keep').addEventListener('click', () => finish(null));
-  overlay.querySelector('#ec-end').addEventListener('click', () => finish(onEnd));
+  endBtn.addEventListener('click', () => finish(onEnd));
+
+  // Doing nothing keeps recording, so every ambiguous gesture means the same:
+  // Escape and a tap on the scrim both back out rather than doing nothing.
+  const onKey = (e) => { if (e.key === 'Escape'){ e.stopPropagation(); finish(null); } };
+  document.addEventListener('keydown', onKey, true);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(null); });
+
   // The big button is the safe one, so it takes the focus a keyboard or
   // switch-control user lands on first.
   overlay.querySelector('#ec-keep').focus?.();
