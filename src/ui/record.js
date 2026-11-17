@@ -252,6 +252,13 @@ export function updateLiveUI(){
     persistActiveDrive();
   }
 
+  // The newest GPS sample. currentSpeedMps() reads it too, but several things
+  // below need the whole sample (position, harshness, accelerations), not just
+  // the speed — this declaration was deleted when the speed read was extracted,
+  // which left four uses of `last` undeclared and threw on every tick of a live
+  // drive. Nothing caught it: updateLiveUI only runs while actually recording.
+  const last = state.samples[state.samples.length - 1];
+
   const speedMps = currentSpeedMps();
   $('#live-speed').textContent = Math.round(mpsToMph(speedMps));
 
