@@ -308,8 +308,17 @@ export function analyzeDrive(drive){
     secAboveLimit = Math.round(secs);
   }
 
-  // Shift count
-  const shiftCount = drive.events.filter(e => e.type === 'shift').length;
+  // Shift count — only from the car's own gear channel (OBD). The phone's jerk-based
+  // 'shift' guess counts road bumps (400+ "shifts" on an 18-minute drive), so a
+  // drive without gear data shows no count rather than a made-up one.
+  let shiftCount = null, lastGear = null;
+  for (const s of smp) {
+    const g = s.g ?? s.gear;
+    if (g == null) continue;
+    if (lastGear != null && g !== lastGear) shiftCount = (shiftCount || 0) + 1;
+    else if (shiftCount == null) shiftCount = 0;
+    lastGear = g;
+  }
 
   // Hard-brake entry speed — avg speed when tier-2+ brake events occurred
   const hardBrakes = brakeEvs.filter(e => (e.tier||2) >= 2);
