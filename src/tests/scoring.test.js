@@ -457,3 +457,25 @@ describe('GPS jumps', () => {
     expect(withJump.score).toBe(clean.score);
   });
 });
+
+describe('Road shake', () => {
+  const drive = (rr) => {
+    const samples = [];
+    for (let i = 0; i < 600; i++){
+      samples.push({ t: i * 1000, speed: 15 + Math.sin(i / 30), la: 0.2 * Math.cos(i / 30), rr, lat: 39.7 + i * 1e-4, lon: -104.9 });
+    }
+    return { samples, events: [], durationMs: 600_000, distanceMeters: 9000 };
+  };
+  it('ordinary mount and road shake costs nothing; only bad shake takes points', async () => {
+    const { analyzeDrive } = await import('../services/scoring.js');
+    const calm = analyzeDrive(drive(0.6)), mount = analyzeDrive(drive(2.2)), rumble = analyzeDrive(drive(5.5));
+    expect(mount.dims.smoothness).toBe(calm.dims.smoothness);
+    expect(rumble.dims.smoothness).toBeLessThan(calm.dims.smoothness);
+  });
+  it('a calm cabin never lifts smoothness above the pedal score', async () => {
+    const { analyzeDrive } = await import('../services/scoring.js');
+    const calm = analyzeDrive(drive(0.6));
+    const noRide = analyzeDrive(drive(undefined));
+    expect(calm.dims.smoothness).toBeLessThanOrEqual(noRide.dims.smoothness);
+  });
+});

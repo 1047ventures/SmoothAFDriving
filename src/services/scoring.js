@@ -117,12 +117,17 @@ export function analyzeDrive(drive){
   // the phone was mounted) and throttle (when a dongle was connected) each take a
   // slice; whatever's absent hands its weight back to the two always-present
   // pedal signals, so a plain GPS drive scores exactly as it did before.
+  // Ride composure can only take points away, never add them: a calm cabin is
+  // the road's doing as much as the driver's, so it counts once the shake is bad
+  // (RIDE_RR_LO..HI) and is capped at the pedal score it sits beside.
   let smoothness;
-  if (hasRide && hasThrottle)
-    smoothness = Math.round(0.34 * smoothLong + 0.26 * smoothJerk + 0.26 * rideComposure + 0.14 * smoothThrottle);
-  else if (hasRide)
-    smoothness = Math.round(0.40 * smoothLong + 0.30 * smoothJerk + 0.30 * rideComposure);
-  else if (hasThrottle)
+  if (hasRide && hasThrottle){
+    const pedal = (0.34 * smoothLong + 0.26 * smoothJerk + 0.14 * smoothThrottle) / 0.74;
+    smoothness = Math.round(0.74 * pedal + 0.26 * Math.min(rideComposure, pedal));
+  } else if (hasRide){
+    const pedal = (0.40 * smoothLong + 0.30 * smoothJerk) / 0.70;
+    smoothness = Math.round(0.70 * pedal + 0.30 * Math.min(rideComposure, pedal));
+  } else if (hasThrottle)
     smoothness = Math.round(0.50 * smoothLong + 0.36 * smoothJerk + 0.14 * smoothThrottle);
   else
     smoothness = Math.round(0.60 * smoothLong + 0.40 * smoothJerk);

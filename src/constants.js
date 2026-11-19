@@ -29,7 +29,7 @@ export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 // Bumped when the scoring engine changes enough to warrant rescoring stored
 // drives in place. rescoreStoredDrives() runs once per new value.
-export const RESCORE_VERSION     = 7;
+export const RESCORE_VERSION     = 8;
 export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
@@ -194,8 +194,8 @@ export const SPEED_BONUS_MAX   = 5;   // max points added for a smooth, fast dri
 // a rougher ride than it could have been, whatever the cause. A smooth ride on a
 // glassy road scores high; the same inputs on a bus getting shoved around does
 // not. PROVISIONAL anchors — recalibrate once real mounted-phone drives land.
-export const RIDE_RR_LO = 0.4;  // vertical RMS (m/s²) that scores 100 (glassy calm)
-export const RIDE_RR_HI = 3.0;  // vertical RMS that scores 0 (rumble strips / heavy buffeting)
+export const RIDE_RR_LO = 2.5;  // vertical RMS (m/s²) at or below which shake costs nothing (was 0.4 until Nov 2026: phone-mount and road texture read 1–3 on calm drives)
+export const RIDE_RR_HI = 6.0;  // vertical RMS that scores 0 (rumble strips / heavy buffeting; was 3.0)
 
 // A perfect 100 is meant to be nearly impossible. Without a ride-quality
 // measurement (GPS-only drive, no mounted phone) we can't certify the cabin
