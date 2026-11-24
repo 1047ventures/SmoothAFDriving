@@ -1,0 +1,479 @@
+<title>Smooth AF Website Draft</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap">
+<!--
+  DRAFT marketing site for Smooth AF Driving. Not deployed.
+  Every statistic is sourced in the "Sources" list; data years are shown next to each figure.
+  App features follow docs/values.html + docs/roadmap.html (Nov 2026). "Coming" = not shipped.
+-->
+<style>
+/* Layout: one road-like column on phones; on desktop the hook stays left-heavy and the
+   number ledger runs as a 2-up grid. Brand matches the windshield cards. Single dark look by choice. */
+:root{
+  --ink:#0B0B0C;          /* page */
+  --ink-2:#141416;        /* raised band */
+  --ink-3:#1D1D20;        /* card / field */
+  --line:#2A2A2E;
+  --paper:#F2F1EE;        /* text */
+  --dim:#B8B7B2;          /* secondary text */
+  --faint:#A3A29C;
+  --tang:#FF6A3D;         /* tangerine accent */
+  --gold:#FFB23D;         /* gold accent */
+  --display:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  --body:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  --gutter-l:max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(16px, env(safe-area-inset-right, 0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--ink)}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--ink);color:var(--paper);font:400 17px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.narrow{max-width:680px}
+h1,h2,h3{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.005em;line-height:.92;margin:0;text-wrap:balance}
+p{margin:0}
+.o{color:var(--tang)}
+.g{color:var(--gold)}
+.eyebrow{font:700 13px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.lede{font-size:clamp(18px,2.2vw,21px);color:var(--dim);max-width:60ch}
+
+/* draft ribbon */
+.draft{background:var(--gold);color:var(--ink);font:700 12px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;text-align:center;padding-block:7px}
+.draft .wrap{display:block}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:rgba(11,11,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.brand{font:800 22px/1 var(--display);text-transform:uppercase;letter-spacing:.01em;text-decoration:none;white-space:nowrap}
+.top nav{display:flex;gap:18px;align-items:center}
+.top nav a.navlink{font:600 14px/1 var(--body);color:var(--dim);text-decoration:none}
+.top nav a.navlink:hover{color:var(--paper)}
+@media (max-width:720px){.top nav a.navlink{display:none}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:999px;font:800 20px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;text-decoration:none;border:0;cursor:pointer;transition:transform .15s ease, background .15s ease}
+.btn-main{background:var(--tang);color:var(--ink)}
+.btn-main:hover{background:#ff8058;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 2px var(--line)}
+.btn-ghost:hover{box-shadow:inset 0 0 0 2px var(--dim)}
+.btn-sm{min-height:40px;padding:0 16px;font-size:16px}
+
+/* HERO */
+.hero{padding-block:clamp(40px,8vw,96px) clamp(40px,7vw,80px);position:relative;overflow:hidden}
+.hero h1{font-size:clamp(52px,13.5vw,168px);line-height:.86}
+.hero h1 .strike{position:relative;white-space:nowrap}
+.hero .sub{margin-top:22px;font-size:clamp(19px,2.6vw,24px);line-height:1.4;max-width:34ch;color:var(--paper)}
+.hero .sub b{color:var(--gold);font-weight:700}
+.cta-row{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.avail{margin-top:14px;font-size:15px;color:var(--dim);max-width:52ch}
+.avail b{color:var(--paper);font-weight:600}
+/* lane lines: the one ornament on the page */
+.lanes{position:absolute;right:-40px;top:0;bottom:0;width:min(34vw,380px);pointer-events:none;opacity:.9}
+.lanes span{position:absolute;top:-10%;bottom:-10%;width:10px;background:repeating-linear-gradient(to bottom,var(--tang) 0 56px,transparent 56px 104px);transform:skewX(-14deg);animation:roll 1.6s linear infinite}
+.lanes span:nth-child(2){left:46%;background:repeating-linear-gradient(to bottom,var(--line) 0 56px,transparent 56px 104px)}
+.lanes span:nth-child(1){left:12%}
+@keyframes roll{to{background-position:0 104px}}
+@media (max-width:720px){.lanes{display:none}}
+
+/* MANIFESTO */
+.band{background:var(--ink-2);border-block:1px solid var(--line)}
+.manifesto{padding-block:clamp(56px,9vw,112px)}
+.manifesto h2{font-size:clamp(44px,7.5vw,92px);margin-top:14px}
+.manifesto .lede{margin-top:20px}
+.ledger{margin-top:clamp(36px,5vw,56px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line)}
+.stat{padding:26px 24px 26px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px;min-width:0}
+.stat:nth-child(odd){padding-right:32px;border-right:1px solid var(--line)}
+.stat:nth-child(even){padding-left:32px}
+.num{font:800 clamp(56px,8vw,96px)/.9 var(--display);color:var(--paper);font-variant-numeric:tabular-nums;letter-spacing:-.005em}
+.num small{font-size:.45em;color:var(--dim);letter-spacing:.02em}
+.stat.hot .num{color:var(--tang)}
+.what{font-size:17px;color:var(--paper);max-width:42ch}
+.src{font-size:13px;color:var(--faint)}
+.src{color:var(--dim)}
+.src a{color:var(--dim);text-underline-offset:2px;display:inline-block;padding:6px 2px}
+.src a:hover{color:var(--dim)}
+@media (max-width:720px){
+  .stat,.stat:nth-child(odd){padding:18px 14px 18px 0}
+  .stat:nth-child(even){padding:18px 0 18px 14px}
+  .num{font-size:44px}
+  .what{font-size:15px}
+  .src{font-size:12px}
+}
+.verdict{margin-top:clamp(40px,6vw,64px);display:grid;gap:18px;max-width:760px}
+.verdict p{font-size:clamp(20px,2.6vw,26px);line-height:1.4}
+.verdict p.big{font:800 clamp(34px,5vw,56px)/.98 var(--display);text-transform:uppercase}
+
+/* good-driver frustration */
+.you{margin-top:clamp(40px,6vw,64px);display:grid;gap:16px;max-width:760px;padding-top:clamp(32px,5vw,48px);border-top:1px solid var(--line)}
+.you p{font-size:clamp(18px,2.3vw,22px);line-height:1.45;color:var(--paper)}
+.you p.big{font:800 clamp(34px,5vw,56px)/.98 var(--display);text-transform:uppercase}
+/* fun beat */
+.fun{padding-block:clamp(56px,9vw,112px) 0}
+.fun h2{font-size:clamp(44px,7.5vw,92px);margin-top:14px}
+.fun .lede{margin-top:18px}
+.chase{list-style:none;margin:clamp(28px,4vw,44px) 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:760px){.chase{grid-template-columns:1fr;gap:14px}}
+.chase li{display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:3px solid var(--tang);min-width:0}
+.chase b{font:800 28px/1 var(--display);text-transform:uppercase}
+.chase span{color:var(--dim);font-size:16px}
+.fun-close{margin-top:28px;font:800 clamp(26px,3.4vw,36px)/1 var(--display);text-transform:uppercase;color:var(--gold)}
+/* APP */
+.app{padding-block:clamp(56px,9vw,112px)}
+.app h2{font-size:clamp(44px,7.5vw,92px);margin-top:14px}
+.app .lede{margin-top:18px}
+.app-grid{margin-top:clamp(32px,5vw,52px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.app-grid{grid-template-columns:1fr}}
+.lane{background:var(--ink-3);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:18px;min-width:0}
+.lane-tag{display:inline-flex;align-self:flex-start;font:800 14px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;padding:7px 11px;border-radius:999px;background:rgba(255,106,61,.14);color:var(--tang)}
+.lane.new .lane-tag{background:rgba(255,178,61,.14);color:var(--gold)}
+.lane h3{font-size:clamp(34px,4vw,46px)}
+.lane > p{color:var(--dim)}
+.feats{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.feats li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;align-items:start}
+.feats li::before{content:"";width:10px;height:10px;margin-top:8px;border-radius:2px;background:var(--tang);transform:rotate(45deg)}
+.lane.new .feats li::before{background:var(--gold)}
+.feats b{display:block;font-weight:700;color:var(--paper)}
+.feats span{color:var(--dim);font-size:16px}
+.feats .soon{color:var(--ink)}
+.soon{display:inline-block;margin-left:6px;font:700 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:5px;color:var(--ink);background:var(--dim);vertical-align:2px}
+
+.lane.one{margin-top:20px}
+.lane.one .feats{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 32px}
+@media (max-width:760px){.lane.one .feats{grid-template-columns:1fr}}
+@media (max-width:560px){.lane.one{background:none;border:0;padding:12px 0 0}}
+/* example recap card */
+.recap{margin-top:20px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:center;background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,3vw,32px)}
+@media (max-width:560px){.recap{grid-template-columns:1fr}}
+.dial{width:148px;height:148px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--tang) 0 86%, var(--line) 86% 100%);position:relative}
+.dial::after{content:"";position:absolute;inset:12px;border-radius:50%;background:var(--ink-2)}
+.dial div{position:relative;z-index:1;text-align:center}
+.dial strong{display:block;font:800 60px/.85 var(--display);font-variant-numeric:tabular-nums}
+.dial em{font:600 12px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-style:normal}
+.bars{display:grid;gap:12px;min-width:0}
+.bars .ex{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:15px}
+.bar i{grid-column:1/-1;height:8px;border-radius:99px;background:var(--line);overflow:hidden;display:block}
+.bar i::after{content:"";display:block;height:100%;width:var(--w);background:var(--gold);border-radius:99px}
+.bar span:last-of-type{color:var(--dim);font-variant-numeric:tabular-nums}
+.note{font-size:15px;color:var(--paper);border-left:3px solid var(--tang);padding-left:12px}
+.note small{display:block;color:var(--faint);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.free{margin-top:22px;color:var(--dim);font-size:15px}
+
+/* SCHOOL */
+.school{padding-block:clamp(56px,9vw,112px)}
+.school h2{font-size:clamp(44px,7.5vw,92px);margin-top:14px}
+.school .lede{margin-top:18px}
+.road{margin-top:clamp(36px,5vw,56px);list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;position:relative}
+.road::before{content:"";position:absolute;left:0;right:0;top:15px;height:4px;background:repeating-linear-gradient(to right,var(--gold) 0 26px,transparent 26px 44px)}
+.road li{position:relative;padding:44px 18px 0 0;min-width:0}
+.road li::before{content:"";position:absolute;top:6px;left:0;width:22px;height:22px;border-radius:50%;background:var(--ink-2);box-shadow:inset 0 0 0 4px var(--line)}
+.road li.now::before{background:var(--tang);box-shadow:none}
+.road li.part::before{background:var(--gold);box-shadow:none}
+.road li::before{z-index:1}
+.stage{font:800 14px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.road li.now .stage{color:var(--tang)}
+.road li.part .stage{color:var(--gold)}
+.road h3{font-size:clamp(26px,2.8vw,34px);margin-top:10px}
+.road p{margin-top:10px;color:var(--dim);font-size:16px}
+@media (max-width:860px){
+  .road{grid-template-columns:1fr;gap:28px;padding-left:38px}
+  .road::before{left:9px;right:auto;top:6px;bottom:6px;width:4px;height:auto;background:repeating-linear-gradient(to bottom,var(--gold) 0 22px,transparent 22px 38px)}
+  .road li{padding:0}
+  .road li::before{left:-38px;top:0}
+  .road h3{margin-top:8px}
+}
+.fine{margin-top:36px;padding:20px 22px;border:1px solid var(--line);border-radius:16px;color:var(--dim);font-size:15px;max-width:760px}
+.fine b{color:var(--paper)}
+.partners{margin-top:clamp(36px,5vw,56px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:860px){.partners{grid-template-columns:1fr}}
+.partners div{padding-top:16px;border-top:2px solid var(--line)}
+.partners h3{font-size:26px}
+.partners p{margin-top:8px;color:var(--dim);font-size:16px}
+
+/* JOIN */
+.join{padding-block:clamp(56px,9vw,112px)}
+.join h2{font-size:clamp(52px,9vw,120px)}
+.join-grid{margin-top:clamp(32px,5vw,52px);display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:20px}
+@media (max-width:960px){.join-grid{grid-template-columns:1fr}}
+.jcard{background:var(--ink-3);border:1px solid var(--line);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.jcard.main{background:var(--tang);color:var(--ink);border-color:var(--tang)}
+.jcard.main p{color:rgba(11,11,12,.78)}
+.jcard.main .btn{background:var(--ink);color:var(--paper);align-self:flex-start}
+@media (max-width:480px){.jcard.main .btn{align-self:stretch}}
+.jcard h3{font-size:34px}
+.jcard p{color:var(--dim);font-size:16px}
+.field{display:flex;gap:8px;flex-wrap:wrap}
+.field input{flex:1 1 180px;min-width:0;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--ink);color:var(--paper);font:400 16px var(--body);padding:0 14px}
+.field input::placeholder{color:var(--faint)}
+.formmsg{font-size:14px;color:var(--gold);min-height:1.2em}
+.pending{font-size:14px;color:var(--faint);padding:12px 14px;border:1px dashed var(--line);border-radius:12px}
+
+/* SOURCES + FOOT */
+.sources{padding-block:48px;border-top:1px solid var(--line)}
+.sources h2{font-size:28px}
+.sources ol{margin:18px 0 0;padding-left:22px;display:grid;gap:10px;color:var(--faint);font-size:14px;max-width:900px}
+.sources a{color:var(--dim);word-break:break-word}
+.foot{padding-block:28px 48px;color:var(--faint);font-size:14px;border-top:1px solid var(--line)}
+.foot .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+.foot b{font:800 18px/1 var(--display);text-transform:uppercase;color:var(--paper);letter-spacing:.02em}
+sup a{color:var(--gold);text-decoration:none;font-size:.7em;font-weight:700;padding-left:1px}
+</style>
+
+<div class="draft"><div class="wrap">Draft for review · not live · Nov 24, 2026</div></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">Smooth <span class="o">AF</span></a>
+    <nav aria-label="Sections">
+      <a class="navlink" href="#why">Why</a>
+      <a class="navlink" href="#app">The app</a>
+      <a class="navlink" href="#school">The school</a>
+      <a class="btn btn-main btn-sm" href="https://smoothafdriving.pages.dev/install">Get the app</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- 1. HOOK -->
+<section class="hero">
+  <div class="lanes" aria-hidden="true"><span></span><span></span></div>
+  <div class="wrap">
+    <h1>American driving is <span class="o">fucking broken.</span></h1>
+    <p class="sub">About <b>100 people a day</b> die on US roads, and nobody's fixing how we drive. So we built the app that does. Free. It scores every drive and shows you how to get better.</p>
+    <div class="cta-row">
+      <a class="btn btn-main" href="https://smoothafdriving.pages.dev/install">Get the app, free</a>
+      <a class="btn btn-ghost" href="#why">Why we're pissed off</a>
+    </div>
+    <p class="avail"><b>Works on any phone today</b>, right in the browser, no account needed. The iPhone app is in beta and heading to the App Store.</p>
+  </div>
+</section>
+
+<!-- 2. MANIFESTO -->
+<section class="band" id="why">
+  <div class="wrap manifesto">
+    <p class="eyebrow">The state of American driving</p>
+    <h2>Nobody's <span class="o">watching</span> how we drive.</h2>
+    <p class="lede">Most of us learned from a parent and a short test, then never got another lesson in our lives. Here's what that gets us. Real numbers, sourced at the bottom.</p>
+
+    <div class="ledger">
+      <div class="stat hot">
+        <div class="num">36,640</div>
+        <p class="what">people killed in US traffic crashes in 2025. That's about 100 a day.</p>
+        <p class="src">NHTSA early estimate, 2025<sup><a href="#s1">1</a></sup></p>
+      </div>
+      <div class="stat">
+        <div class="num">2.4<small>M</small></div>
+        <p class="what">people injured in crashes in a single year.</p>
+        <p class="src">NHTSA, 2023 data<sup><a href="#s2">2</a></sup></p>
+      </div>
+      <div class="stat">
+        <div class="num">3<small>×</small></div>
+        <p class="what">the road death rate of other rich countries. The US: 12.76 per 100,000 people. The median of 27 peers: 4.12.</p>
+        <p class="src">CDC, 2022 data<sup><a href="#s3">3</a></sup></p>
+      </div>
+      <div class="stat">
+        <div class="num">6.1<small>M</small></div>
+        <p class="what">police-reported crashes in one year. Roughly 16,800 every day.</p>
+        <p class="src">NHTSA, 2023 data<sup><a href="#s2">2</a></sup></p>
+      </div>
+      <div class="stat">
+        <div class="num">29<small>%</small></div>
+        <p class="what">of traffic deaths were in speeding-related crashes.</p>
+        <p class="src">NHTSA, 2023 data<sup><a href="#s4">4</a></sup></p>
+      </div>
+      <div class="stat">
+        <div class="num">3<small>×</small></div>
+        <p class="what">the fatal crash rate per mile for drivers aged 16 to 19, compared with drivers 20 and over.</p>
+        <p class="src">IIHS<sup><a href="#s5">5</a></sup></p>
+      </div>
+      <div class="stat hot">
+        <div class="num">78<small>%</small></div>
+        <p class="what">of US drivers say they drive more safely than other drivers.</p>
+        <p class="src">AAA Foundation, 2025 survey<sup><a href="#s6">6</a></sup></p>
+      </div>
+      <div class="stat">
+        <div class="num">$340<small>B</small></div>
+        <p class="what">the economic cost of US crashes in one year, before you count the lives.</p>
+        <p class="src">NHTSA, 2019 data<sup><a href="#s7">7</a></sup></p>
+      </div>
+    </div>
+
+    <div class="you">
+      <p class="eyebrow">And you know it</p>
+      <p class="big">You're the one who <span class="o">zippers the merge.</span></p>
+      <p>You're the one who's already in the right lane, watching ten cars ahead, while someone camps in the left lane doing 58. You're the one sitting behind a phone at a green light.</p>
+      <p>Driving well isn't a mystery. Read the road ahead. Know what's around you. See the whole flow of traffic instead of your own bumper. Most people were just never taught any of it, and it feels like it gets worse every damn year.</p>
+      <p class="big">Those of us who know better have to <span class="g">do something about it.</span></p>
+    </div>
+
+    <div class="verdict">
+      <p>And the training? In Michigan, turn 18 and you need no driver's ed at all to get a license.<sup><a href="#s8">8</a></sup> Plenty of states only require it if you're under 18. The people who study this call driver's ed "significantly under-funded and increasingly inaccessible."<sup><a href="#s9">9</a></sup></p>
+      <p>So we hand out licenses, never check in again, and act surprised by the numbers.</p>
+      <p class="big">That's some <span class="o">bullshit.</span> So we started building the fix.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FUN -->
+<section class="fun" aria-labelledby="funh">
+  <div class="wrap">
+    <p class="eyebrow">Here's the part nobody tells you</p>
+    <h2 id="funh">Driving should be <span class="o">fun.</span> Exciting, even.</h2>
+    <p class="lede">Being good at it is a skill worth chasing. So we built the thing that gives you something to chase.</p>
+    <ul class="chase">
+      <li><b>A score to beat</b><span>Every drive out of 100. Your last one is the number to top.</span></li>
+      <li><b>A leaderboard</b><span>See where you rank against other drivers.</span></li>
+      <li><b>Miles that count</b><span>Points for every smooth mile, badges all the way to 1,000.</span></li>
+    </ul>
+    <p class="fun-close">Be the best driver you can be. Then prove it.</p>
+  </div>
+</section>
+
+<!-- 3. THE APP -->
+<section id="app">
+  <div class="wrap app">
+    <p class="eyebrow">The app</p>
+    <h2>Every drive, <span class="o">scored.</span></h2>
+    <p class="lede">Put your phone in the mount and drive. Smooth AF reads your phone's GPS and motion sensors and gives every drive a score out of 100, then tells you in plain words what to work on.</p>
+
+    <div class="recap" aria-label="Example drive recap">
+      <div class="dial"><div><strong>86</strong><em>Drive score</em></div></div>
+      <div class="bars">
+        <p class="ex">Example recap</p>
+        <div class="bar"><span>Smoothness <span class="g">· half the score</span></span><span>50%</span><i style="--w:50%"></i></div>
+        <div class="bar"><span>Momentum, fewer full stops</span><span>30%</span><i style="--w:30%"></i></div>
+        <div class="bar"><span>Braking, how gently you stop</span><span>20%</span><i style="--w:20%"></i></div>
+        <p class="note"><small>Note on your map</small>Hard brake on Main St. Look further ahead and you can coast into it.</p>
+      </div>
+    </div>
+
+    <article class="lane one">
+      <h3>Whether you've been driving <span class="o">20 years</span> or <span class="g">20 days.</span></h3>
+      <p>One app that meets you where you are. A number to beat if you think you're already good, and a clear next step if you're just starting out.</p>
+      <ul class="feats">
+        <li><div><b>A real score, every drive</b><span>Smoothness, momentum and braking, out of 100, with the hard moments pinned on a map. New drivers see what to fix; car people get a number to beat.</span></div></li>
+        <li><div><b>Plain-words notes after every drive</b><span>Each recap points to the moments that cost you, with one thing to try next time.</span></div></li>
+        <li><div><b>Calm cues while you drive</b><span>The screen edge glows green, amber or red. One short line at most, so your eyes stay on the road.</span></div></li>
+        <li><div><b>See yourself improve</b><span>After a handful of drives, the app compares your last five with the ten before and tells you straight if you're getting better.</span></div></li>
+        <li><div><b>Plug into your car</b><span>Pair a Bluetooth OBD-II reader and the app reads throttle, RPM, gear and temperatures, and starts and ends drives on its own when the engine does.</span></div></li>
+        <li><div><b>Car health</b><span>Check-engine codes in plain English, a battery check and open recalls for your car. A new driver learns what the light means; a car person gets the codes and readings.</span></div></li>
+        <li><div><b>Leaderboard</b><span>Pick a driver name and see where you rank.</span></div></li>
+        <li><div><b>Points for smooth miles</b><span>10 points per smooth mile, more in heavy traffic, and badges from 10 to 1,000 miles.</span></div></li>
+        <li><div><b>Coaching that remembers you <span class="soon">Coming</span></b><span>It tracks your habits across drives and backs off once you've fixed one.</span></div></li>
+        <li><div><b>Modes for first-timers and teens <span class="soon">Coming</span></b><span>Coaching tuned to where you are as a driver.</span></div></li>
+      </ul>
+    </article>
+    <p class="free">Scoring, points, progress and a basic car-health scan are free. No account needed to start; sign in later to back up your drives.</p>
+  </div>
+</section>
+
+<!-- 4. THE SCHOOL -->
+<section class="band" id="school">
+  <div class="wrap school">
+    <p class="eyebrow">Where this goes</p>
+    <h2>The driving school America <span class="o">never had.</span></h2>
+    <p class="lede">Today's driving schools teach you to pass a test. We want to teach real skill: car control, reading the road, driving smooth because it's safer and it feels better. The app is step one. Here's the road from there.</p>
+
+    <ol class="road">
+      <li class="now">
+        <p class="stage">Live now</p>
+        <h3>The app</h3>
+        <p>Every drive scored and mapped, from GPS, motion sensors and the car itself.</p>
+      </li>
+      <li class="part">
+        <p class="stage">Live, growing</p>
+        <h3>Coaching in the app</h3>
+        <p>Plain-words notes on every drive today. Next it learns your habits and coaches you on the ones that stick.</p>
+      </li>
+      <li>
+        <p class="stage">Building</p>
+        <h3>Human coaches</h3>
+        <p>Real coaches who review your actual drives, starting with teens and their parents.</p>
+      </li>
+      <li>
+        <p class="stage">Building toward</p>
+        <h3>A national driving school</h3>
+        <p>Training built on what millions of real drives show, held to a higher bar than a "safe driver" checkbox.</p>
+      </li>
+    </ol>
+
+    <p class="fine"><b>Straight talk:</b> driving schools are licensed state by state. We're not one yet. We're building toward it, one state at a time, the right way.</p>
+
+    <div class="partners">
+      <div><h3>Instructors &amp; coaches</h3><p>Good teachers deserve better tools than a clipboard and a passenger brake. Help us build them.</p></div>
+      <div><h3>Partners</h3><p>Schools, shops and car communities that want better drivers on their roads.</p></div>
+      <div><h3>Press &amp; investors</h3><p>A small team going after a big, ignored problem. Ask us anything.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. JOIN -->
+<section id="join">
+  <div class="wrap join">
+    <h2>Get <span class="o">smooth.</span></h2>
+    <div class="join-grid">
+      <div class="jcard main">
+        <h3>Download</h3>
+        <p>Free. Score your first drive today, right in your phone's browser. iPhone app coming to the App Store.</p>
+        <a class="btn" href="https://smoothafdriving.pages.dev/install">Get the app</a>
+      </div>
+      <div class="jcard">
+        <h3>Stay posted</h3>
+        <p>New features and the App Store launch. A few emails, no spam.</p>
+        <form id="signup" class="field" novalidate>
+          <label for="email" class="sr" style="position:absolute;left:-9999px">Email</label>
+          <input id="email" type="email" placeholder="you@email.com" autocomplete="email">
+          <button class="btn btn-main btn-sm" type="submit">Join</button>
+        </form>
+        <p class="formmsg" id="formmsg" aria-live="polite"></p>
+      </div>
+      <div class="jcard">
+        <h3>Partners &amp; press</h3>
+        <p>Coaches, schools, partners, press and investors: we want to hear from you.</p>
+        <p class="pending">Contact address coming soon.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sources" aria-labelledby="srch">
+  <div class="wrap">
+    <h2 id="srch">Sources</h2>
+    <ol>
+      <li id="s1">NHTSA, Early Estimate of Motor Vehicle Traffic Fatalities for 2025 (DOT HS 813 800, Apr 2026): 36,640 killed, down from 39,254 in 2024. "About 100 a day" is 36,640 ÷ 365. <a href="https://crashstats.nhtsa.dot.gov/Api/Public/ViewPublication/813800">crashstats.nhtsa.dot.gov</a></li>
+      <li id="s2">NHTSA, Traffic Safety Facts 2023, General Statistics (DOT HS 813 720): 2,442,581 injured; 6,138,359 police-reported crashes. "About 16,800 a day" is 6,138,359 ÷ 365. <a href="https://crashstats.nhtsa.dot.gov/Api/Public/ViewPublication/813720">crashstats.nhtsa.dot.gov</a></li>
+      <li id="s3">CDC, MMWR 74(8), motor vehicle crash deaths in the US and 27 other high-income countries, 2013–2022: 12.76 vs a median 4.12 per 100,000. <a href="https://www.cdc.gov/mmwr/volumes/74/wr/mm7408a2.htm">cdc.gov</a></li>
+      <li id="s4">NHTSA, Speeding: 2023 Data (DOT HS 813 721): 11,775 deaths in speeding-related crashes, 29% of all traffic deaths. <a href="https://crashstats.nhtsa.dot.gov/Api/Public/Publication/813721">crashstats.nhtsa.dot.gov</a></li>
+      <li id="s5">IIHS, Fatality Facts: Teenagers. Fatal crash rate per mile for ages 16–19 is just over 3 times the rate for drivers 20 and over. <a href="https://www.iihs.org/topics/fatality-statistics/detail/teenagers">iihs.org</a></li>
+      <li id="s6">AAA Foundation for Traffic Safety, 2025 Traffic Safety Culture Index: 78% believed they drive more safely than others (2,699 licensed drivers, Jul–Aug 2025). <a href="https://aaafoundation.org/research/2025-traffic-safety-culture-index/">aaafoundation.org</a></li>
+      <li id="s7">NHTSA, The Economic and Societal Impact of Motor Vehicle Crashes, 2019 (Revised, DOT HS 813 403): $340 billion economic cost; nearly $1.4 trillion including quality of life. <a href="https://rosap.ntl.bts.gov/view/dot/78698">rosap.ntl.bts.gov</a></li>
+      <li id="s8">IIHS, Graduated driver licensing laws table (Michigan note: "Neither driver education nor an intermediate license is required for license applicants 18 and older"). Delaware, Massachusetts and Minnesota likewise require driver's ed only under 18. <a href="https://www.iihs.org/topics/teenagers/graduated-licensing-laws-table">iihs.org</a></li>
+      <li id="s9">GHSA, Policy: Driver Licensing and Education. <a href="https://www.ghsa.org/resource-hub/ghsa-policy-driver-licensing-education">ghsa.org</a></li>
+    </ol>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <b>Smooth <span class="o">AF</span> Driving</b>
+    <span>Making better drivers, one drive at a time.</span>
+  </div>
+</footer>
+
+<script>
+document.getElementById('signup').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var v = document.getElementById('email').value.trim();
+  var msg = document.getElementById('formmsg');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { msg.textContent = 'That email looks off. Check it and try again.'; return; }
+  msg.textContent = 'Draft only: the list isn’t connected yet, so nothing was saved.';
+});
+</script>
