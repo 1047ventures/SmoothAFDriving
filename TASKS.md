@@ -4,7 +4,7 @@ Every shipped task, numbered chronologically (T1 = first commit, 2026-04-30).
 Numbers are stable and never re-assigned; new tasks append at the next number.
 Derived from git history (no-merge, de-noised) — the roadmap is the glance; this is the full count. Regenerate with `python3 scripts/build-task-ledger.py`.
 
-**444 tasks shipped** as of 2026-11-11.
+**459 tasks shipped** as of 2026-11-28.
 
 
 ## 2026-04
@@ -466,3 +466,18 @@ Derived from git history (no-merge, de-noised) — the roadmap is the glance; th
 - **T442** · Scoring: ignore GPS jumps; gentler on firm city inputs and stops per mile  _( 2026-11-11 )_
 - **T443** · Red-light credit from our own map copy, not a public server that blocks us  _( 2026-11-11 )_
 - **T444** · road-features: page past the 1,000-row cap; keep the on-demand try short  _( 2026-11-11 )_
+- **T445** · Marketing: windshield cards (4 designs, QR to install page, home + print-shop PDFs)  _( 2026-11-13 )_
+- **T446** · Marketing: Denver drivers cards (3 designs) with home + print-shop PDFs  _( 2026-11-13 )_
+- **T447** · Card scan tracking: /c/<code> counts a scan and forwards to /install; counts on /admin  _( 2026-11-13 )_
+- **T448** · Cards: each Denver drivers card gets its own tracked QR (/c/outhere, /c/showme, /c/smoothest)  _( 2026-11-13 )_
+- **T449** · Cards: match canvas edits (Smooth AF Driving School tag, spacing); add 20-up mixed sheet  _( 2026-11-13 )_
+- **T450** · End Drive asks first when the car is moving  _( 2026-11-14 )_
+- **T451** · End-drive confirm: stop it opening under the finger that summoned it  _( 2026-11-14 )_
+- **T452** · Stop the road setting off the event flags  _( 2026-11-14 )_
+- **T453** · Fix the drive screen throwing on every tick  _( 2026-11-17 )_
+- **T454** · Recap: count shifts only from the car's gear channel  _( 2026-11-17 )_
+- **T455** · Scoring: road shake only costs points when it's bad, and never adds any  _( 2026-11-18 )_
+- **T456** · Marketing: draft of the new site (docs/marketing/site-draft.html, not deployed)  _( 2026-11-24 )_
+- **T457** · Marketing: Speeed partnership pitch draft (docs/marketing/speeed-pitch.html, private, not sent)  _( 2026-11-24 )_
+- **T458** · Marketing: Speeed pitch reframed as a founding partnership (docs/marketing/speeed-pitch.html)  _( 2026-11-24 )_
+- **T459** · Scoring: nothing scores 100 — above 95 each point counts half, hard cap 99; rescore (v9)  _( 2026-11-28 )_

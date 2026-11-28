@@ -167,7 +167,7 @@
     <div class="meta">
       <span class="lbl">Phone should be on</span> <b style="color:var(--cream)">v1.0 · build 262</b>
       <span class="sep">·</span>
-      <span class="lbl">Updated</span> <b>Nov 11, 2026 · 2:38 PM MST</b>
+      <span class="lbl">Updated</span> <b>Nov 27, 2026 · 8:15 PM MST</b>
       <span class="sep">·</span>
       <span class="lbl">Web</span> <b style="color:var(--good)">live ✓</b>
     </div>
@@ -192,11 +192,11 @@
     <div class="brief-row">
       <span class="brief-k">Last shipped</span>
       <ul class="brief-v brief-list">
+        <li data-at="2026-11-27T20:14"><a href="#fix-top"><span class="tag t-ship tn">T459</span><span class="bl-t">No more 100s: the top of the scale is squeezed</span></a></li>
         <li data-at="2026-11-11T14:28"><a href="#fix-redlight"><span class="tag t-ship tn">T443</span><span class="bl-t">Red lights finally count less: our own map of lights and stop signs</span></a></li>
         <li data-at="2026-11-11T14:25"><a href="#fix-fairer"><span class="tag t-ship tn">T442</span><span class="bl-t">Fairer scores: GPS hiccups ignored, city drives judged less harshly</span></a></li>
         <li data-at="2026-11-11T13:46"><a href="#ship-livescore"><span class="tag t-ship tn">T441</span><span class="bl-t">No more &ldquo;Settling&rdquo;; every drive starts at your lifetime score</span></a></li>
-        <li data-at="2026-11-11T13:20"><a href="#ship-engine"><span class="tag t-ship tn">T438</span><span class="bl-t">Drives start and end themselves from the engine, with a 3-2-1</span></a></li>
-      </ul>
+              </ul>
     </div>
     <div class="brief-row">
       <span class="brief-k">Next</span>
@@ -311,6 +311,10 @@
   <details class="sec" id="ms">
     <summary><h2>Major milestones</h2><span class="count">the story so far</span><span class="rule"></span><span class="chev">&#9654;</span></summary>
     <div class="sec-body">
+      <details class="ent" id="fix-top">
+        <summary><span class="tag t-ship tn">T459</span><span class="ent-t">No more 100s: the top of the scale is squeezed</span><span class="ent-chev">&#9654;</span></summary>
+        <div class="ent-body">A 26-mile freeway drive scored 100: no stops, tiny pedal changes at 64 mph, and the speed bonus on top. Now each point above 95 counts half and nothing reaches 100 (cap 99). Across your last 60 drives only 9 move (that one goes 100 &rarr; 98) and your average is unchanged. Honest limit: a smooth freeway cruise still lands in the high 90s, because the score reads pedal work and stops, and a freeway gives it little to fault. Stored drives rescore once on next open.</div>
+      </details>
       <details class="ent" id="fix-redlight">
         <summary><span class="tag t-ship tn">T443</span><span class="ent-t">Red lights finally count less: our own map of lights and stop signs</span><span class="ent-chev">&#9654;</span></summary>
         <div class="ent-body">A stop at a light or stop sign is meant to count only a quarter against momentum, but the check relied on free public map servers that were refusing us, so <b>no stop had ever been credited</b>. Now we keep our own copy: all of Colorado (12,979 lights, 31,190 stop signs) loaded from OpenStreetMap&rsquo;s download files, refreshed monthly, served by our own server. The app sends only rough map squares, never your exact stop. Other states load in one run each. Your last 14 drives re-score to an average of <b>89</b> (was 81). T444 fixed a 1,000-row cutoff in downtown Denver.</div>
