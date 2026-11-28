@@ -25,6 +25,16 @@ describe('analyzeDrive', () => {
     expect(result.score).toBeLessThanOrEqual(100);
   });
 
+  it('a flawless freeway cruise never reaches 100, and the top of the scale is squeezed', () => {
+    // 20 min at 70 mph, no stops, no pedal changes, calm cabin: every dimension maxed.
+    const samples = Array.from({ length: 1200 }, (_, i) => ({
+      t: i * 1000, lat: 39.7 + i * 0.0003, lon: -104.9, speed: 31, h: 0, la: 0, ra: 0, rr: 0.2,
+    }));
+    const r = analyzeDrive({ samples, events: [], durationMs: 1200000, distanceMeters: 37000, topSpeedMps: 31 });
+    expect(r.score).toBeLessThanOrEqual(99);
+    expect(r.score).toBeGreaterThan(90);
+  });
+
   it('detects full stops correctly', () => {
     const samples = [
       ...Array.from({ length: 10 }, (_, i) => ({ t: i * 1000, speed: 10, lat: 39.7, lon: -104.9, la: 0, ra: 0, h: 0 })),

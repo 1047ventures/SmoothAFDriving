@@ -24,6 +24,7 @@ import {
   RIDE_RR_LO,
   RIDE_RR_HI,
   NO_RIDE_DATA_CEILING,
+  SCORE_SOFT_TOP, SCORE_TOP_SLOPE, SCORE_CAP,
   TRAFFIC_MIN_RATIO,
   TRAFFIC_FULL_RATIO,
   TRAFFIC_SCORE_PIVOT,
@@ -243,7 +244,9 @@ export function analyzeDrive(drive){
   // for ride quality (GPS-only) can't be certified calm, so it's capped short of
   // the top; only a drive the sensors confirmed as smooth can approach 100.
   const ceiling = hasRide ? 100 : NO_RIDE_DATA_CEILING;
-  const score = Math.round(clamp(base + speedBonus + trafficBonus, 0, ceiling));
+  const raw = base + speedBonus + trafficBonus;
+  const squeezed = raw > SCORE_SOFT_TOP ? SCORE_SOFT_TOP + (raw - SCORE_SOFT_TOP) * SCORE_TOP_SLOPE : raw;
+  const score = Math.round(clamp(squeezed, 0, Math.min(ceiling, SCORE_CAP)));
 
   // Kept for the review "Transitions" info stat (jerk quality) — informational,
   // no longer a scored dimension.

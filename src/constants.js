@@ -29,7 +29,7 @@ export const VEHICLE_KEY        = 'smoothaf.vehicle_type';
 export const ACTIVE_DRIVE_KEY   = 'smoothaf.active_drive';
 // Bumped when the scoring engine changes enough to warrant rescoring stored
 // drives in place. rescoreStoredDrives() runs once per new value.
-export const RESCORE_VERSION     = 8;
+export const RESCORE_VERSION     = 9;
 export const RESCORE_DONE_KEY    = 'smoothaf.rescore_version';
 export const OSM_SPEED_CACHE    = 'smoothaf.osm_speed';
 export const SOCIAL_HANDLES_KEY = 'smoothaf.social_handles';
@@ -202,6 +202,13 @@ export const RIDE_RR_HI = 6.0;  // vertical RMS that scores 0 (rumble strips / h
 // stayed calm, so such a drive is capped here — the top of the range is reserved
 // for drives where the sensors actually confirmed a smooth ride.
 export const NO_RIDE_DATA_CEILING = 95;
+// The top of the scale is hard to reach by design, but a clean freeway cruise gets
+// there for free: no stops (momentum 100), tiny pedal changes at speed, plus the
+// speed bonus. A real drive (Nov 2026: 26 mi at 64 mph) scored 100 on base 95 + 4.7.
+// Above SCORE_SOFT_TOP each point counts SCORE_TOP_SLOPE, and nothing reaches 100 (SCORE_CAP).
+export const SCORE_SOFT_TOP  = 95;
+export const SCORE_TOP_SLOPE = 0.5;
+export const SCORE_CAP       = 99;
 
 
 
